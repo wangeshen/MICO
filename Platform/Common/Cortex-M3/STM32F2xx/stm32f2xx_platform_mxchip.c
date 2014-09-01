@@ -328,19 +328,6 @@ WEAK void init_clocks( void )
     /* Configure HCLK clock as SysTick clock source. */
     SysTick_CLKSourceConfig( SYSTICK_CLOCK_SOURCE );
 
-#ifndef MICO_DISABLE_STDIO
-    {
-		USART_ClockInitTypeDef usart_clock_init_structure;
-		STDIO_CLOCK_CMD( STDIO_PERIPH_CLOCK, ENABLE );
-
-		usart_clock_init_structure.USART_Clock   = USART_Clock_Disable;
-		usart_clock_init_structure.USART_CPOL    = USART_CPOL_Low;
-		usart_clock_init_structure.USART_CPHA    = USART_CPHA_2Edge;
-		usart_clock_init_structure.USART_LastBit = USART_LastBit_Disable;
-
-		USART_ClockInit( STDIO_USART, &usart_clock_init_structure );
-    }
-#endif /* ifdef MICO_DISABLE_STDIO */
 }
 
 WEAK void init_memory( void )
@@ -1736,123 +1723,6 @@ wiced_result_t wiced_adc_deinit( wiced_adc_t adc )
 }
 
 
-
-
-
-wiced_result_t wiced_pwm_init( wiced_pwm_t pwm_peripheral, uint32_t frequency, float duty_cycle )
-{
-    TIM_TimeBaseInitTypeDef tim_time_base_structure;
-    TIM_OCInitTypeDef       tim_oc_init_structure;
-    GPIO_InitTypeDef        gpio_init_structure;
-    RCC_ClocksTypeDef       rcc_clock_frequencies;
-    const platform_pwm_mapping_t* pwm                 = &pwm_mappings[pwm_peripheral];
-    uint16_t                      period              = 0;
-    float                         adjusted_duty_cycle = ( ( duty_cycle > 100.0f ) ? 100.0f : duty_cycle );
-
-    MCU_CLOCKS_NEEDED();
-
-    RCC_GetClocksFreq( &rcc_clock_frequencies );
-
-    if ( pwm->tim == TIM1 || pwm->tim == TIM8 || pwm->tim == TIM9 || pwm->tim == TIM10 || pwm->tim == TIM11 )
-    {
-        RCC_APB2PeriphClockCmd( pwm->tim_peripheral_clock, ENABLE );
-        period = (uint16_t)( rcc_clock_frequencies.PCLK2_Frequency / frequency - 1 ); /* Auto-reload value counts from 0; hence the minus 1 */
-    }
-    else
-    {
-        RCC_APB1PeriphClockCmd( pwm->tim_peripheral_clock, ENABLE );
-        period = (uint16_t)( rcc_clock_frequencies.PCLK1_Frequency / frequency - 1 ); /* Auto-reload value counts from 0; hence the minus 1 */
-    }
-
-    RCC_AHB1PeriphClockCmd( pwm->pin->peripheral_clock, ENABLE );
-
-    gpio_init_structure.GPIO_Pin   = (uint32_t) ( 1 << pwm->pin->number );
-    gpio_init_structure.GPIO_Mode  = GPIO_Mode_AF;
-    gpio_init_structure.GPIO_Speed = GPIO_Speed_100MHz;
-    gpio_init_structure.GPIO_OType = GPIO_OType_PP;
-    gpio_init_structure.GPIO_PuPd  = GPIO_PuPd_UP;
-    GPIO_Init( pwm->pin->bank, &gpio_init_structure );
-    GPIO_PinAFConfig( pwm->pin->bank, pwm->pin->number, pwm->gpio_af );
-
-    /* Time base configuration */
-    tim_time_base_structure.TIM_Period            = (uint32_t) period;
-    tim_time_base_structure.TIM_Prescaler         = (uint16_t) 1;  /* Divide clock by 1+1 to enable a count of high cycle + low cycle = 1 PWM cycle */
-    tim_time_base_structure.TIM_ClockDivision     = 0;
-    tim_time_base_structure.TIM_CounterMode       = TIM_CounterMode_Up;
-    tim_time_base_structure.TIM_RepetitionCounter = 0;
-    TIM_TimeBaseInit( pwm->tim, &tim_time_base_structure );
-
-    /* PWM1 Mode configuration */
-    tim_oc_init_structure.TIM_OCMode       = TIM_OCMode_PWM1;
-    tim_oc_init_structure.TIM_OutputState  = TIM_OutputState_Enable;
-    tim_oc_init_structure.TIM_OutputNState = TIM_OutputNState_Enable;
-    tim_oc_init_structure.TIM_Pulse        = (uint16_t) ( adjusted_duty_cycle * (float) period / 100.0f );
-    tim_oc_init_structure.TIM_OCPolarity   = TIM_OCPolarity_High;
-    tim_oc_init_structure.TIM_OCNPolarity  = TIM_OCNPolarity_High;
-    tim_oc_init_structure.TIM_OCIdleState  = TIM_OCIdleState_Reset;
-    tim_oc_init_structure.TIM_OCNIdleState = TIM_OCIdleState_Set;
-
-    switch ( pwm->channel )
-    {
-        case 1:
-        {
-            TIM_OC1Init( pwm->tim, &tim_oc_init_structure );
-            TIM_OC1PreloadConfig( pwm->tim, TIM_OCPreload_Enable );
-            break;
-        }
-        case 2:
-        {
-            TIM_OC2Init( pwm->tim, &tim_oc_init_structure );
-            TIM_OC2PreloadConfig( pwm->tim, TIM_OCPreload_Enable );
-            break;
-        }
-        case 3:
-        {
-            TIM_OC3Init( pwm->tim, &tim_oc_init_structure );
-            TIM_OC3PreloadConfig( pwm->tim, TIM_OCPreload_Enable );
-            break;
-        }
-        case 4:
-        {
-            TIM_OC4Init( pwm->tim, &tim_oc_init_structure );
-            TIM_OC4PreloadConfig( pwm->tim, TIM_OCPreload_Enable );
-            break;
-        }
-        default:
-        {
-            break;
-        }
-    }
-
-    MCU_CLOCKS_NOT_NEEDED();
-
-    return WICED_SUCCESS;
-}
-
-wiced_result_t wiced_pwm_start( wiced_pwm_t pwm )
-{
-    MCU_CLOCKS_NEEDED();
-
-    TIM_Cmd(pwm_mappings[pwm].tim, ENABLE);
-    TIM_CtrlPWMOutputs( pwm_mappings[pwm].tim, ENABLE );
-
-    MCU_CLOCKS_NOT_NEEDED();
-
-    return WICED_SUCCESS;
-}
-
-wiced_result_t wiced_pwm_stop( wiced_pwm_t pwm )
-{
-    MCU_CLOCKS_NEEDED();
-
-    TIM_CtrlPWMOutputs( pwm_mappings[pwm].tim, DISABLE );
-    TIM_Cmd(pwm_mappings[pwm].tim, DISABLE);
-
-    MCU_CLOCKS_NOT_NEEDED();
-
-    return WICED_SUCCESS;
-}
-
 wiced_result_t wiced_watchdog_kick( void )
 {
     return watchdog_kick();
@@ -2108,44 +1978,6 @@ WEAK void sdio_irq(void)
 }
 #endif
 
-#ifdef MXCHIP_APP
-extern void uart_send_no_dma(const void*data, uint32_t size);
-
-/* STDIO Read/Write functions for Newlib */
-void platform_stdio_write( const char* str, uint32_t len )
-{
-#ifndef MICO_DISABLE_STDIO
-    host_rtos_get_semaphore( &stdio_tx_mutex, WICED_NEVER_TIMEOUT, WICED_FALSE );
-    uart_send_no_dma(str, len);
-    while( ( uart_mapping[STDIO_UART].usart->SR & USART_SR_TC )== 0 );
-    host_rtos_set_semaphore( &stdio_tx_mutex, WICED_FALSE );
-#else
-    UNUSED_PARAMETER( str );
-    UNUSED_PARAMETER( len );
-#endif
-}
-#else
-/* STDIO Read/Write functions for Newlib */
-void platform_stdio_write( const char* str, uint32_t len )
-{
-#ifndef MICO_DISABLE_STDIO
-    MicoUartSend( STDIO_UART, (void*)str, len );
-#else
-    UNUSED_PARAMETER( str );
-    UNUSED_PARAMETER( len );
-#endif
-}
-#endif
-
-void platform_stdio_read( char* str, uint32_t len )
-{
-#ifndef MICO_DISABLE_STDIO
-    MicoUartRecv( STDIO_UART, (void*)str, len, MICO_NEVER_TIMEOUT );
-#else
-    UNUSED_PARAMETER( str );
-    UNUSED_PARAMETER( len );
-#endif
-}
 
 #define RTC_INTERRUPT_EXTI_LINE EXTI_Line22
 #define WUT_COUNTER_MAX  0xffff
@@ -2464,9 +2296,6 @@ static wiced_result_t select_wut_prescaler_calculate_wakeup_time( unsigned long*
     return WICED_SUCCESS;
 }
 
-
-
-
 void wake_up_interrupt_notify( void )
 {
     wake_up_interrupt_triggered = WICED_TRUE;
@@ -2570,16 +2399,6 @@ void RTC_WKUP_irq( void )
     EXTI_ClearITPendingBit( RTC_INTERRUPT_EXTI_LINE );
 }
 
-void wiced_platform_mcu_enable_powersave( void )
-{
-    MCU_CLOCKS_NOT_NEEDED();
-}
-
-void wiced_platform_mcu_disable_powersave( void )
-{
-    MCU_CLOCKS_NEEDED();
-}
-
 void platform_idle_hook( void )
 {
     __asm("wfi");
@@ -2593,6 +2412,7 @@ void host_platform_get_mac_address( wiced_mac_t* mac )
     UNUSED_PARAMETER( mac );
 #endif
 }
+
 int host_platform_rand( void *inBuffer, int inByteCount )
 {
     // PLATFORM_TO_DO
@@ -2637,3 +2457,15 @@ void MicoSystemStandBy(void)
   PWR_EnterSTANDBYMode();
 }
 
+
+//These functions need to be deprecated
+
+void wiced_platform_mcu_enable_powersave( void )
+{
+    MCU_CLOCKS_NOT_NEEDED();
+}
+
+void wiced_platform_mcu_disable_powersave( void )
+{
+    MCU_CLOCKS_NEEDED();
+}

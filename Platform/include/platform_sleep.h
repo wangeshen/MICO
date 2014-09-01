@@ -21,8 +21,8 @@ extern "C" {
  *                   Enumerations
  ******************************************************/
 
-#define WICED_WLAN_POWERSAVE_CLOCK_IS_PWM 0
-#define WICED_WLAN_POWERSAVE_CLOCK_IS_MCO 1
+#define MICO_WLAN_POWERSAVE_CLOCK_IS_PWM 0
+#define MICO_WLAN_POWERSAVE_CLOCK_IS_MCO 1
 
 /******************************************************
  *                 Type Definitions

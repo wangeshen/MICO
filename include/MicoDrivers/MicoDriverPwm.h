@@ -24,7 +24,6 @@
 
 #pragma once
 #include "Common.h"
-#include "RingBufferUtils.h"
 #include "platform.h"
 
 /******************************************************
@@ -59,7 +58,7 @@
  * @return    WICED_SUCCESS : on success.
  * @return    WICED_ERROR   : if an error occurred with any step
  */
-OSStatus wiced_pwm_init(wiced_pwm_t pwm, uint32_t frequency, float duty_cycle);
+OSStatus MicoPwmInitialize(mico_pwm_t pwm, uint32_t frequency, float duty_cycle);
 
 
 /** Starts PWM output on a PWM interface
@@ -71,7 +70,7 @@ OSStatus wiced_pwm_init(wiced_pwm_t pwm, uint32_t frequency, float duty_cycle);
  * @return    WICED_SUCCESS : on success.
  * @return    WICED_ERROR   : if an error occurred with any step
  */
-OSStatus wiced_pwm_start(wiced_pwm_t pwm);
+OSStatus MicoPwmStart(mico_pwm_t pwm);
 
 
 /** Stops output on a PWM pin
@@ -83,7 +82,7 @@ OSStatus wiced_pwm_start(wiced_pwm_t pwm);
  * @return    WICED_SUCCESS : on success.
  * @return    WICED_ERROR   : if an error occurred with any step
  */
-OSStatus wiced_pwm_stop(wiced_pwm_t pwm);
+OSStatus MicoPwmStop(mico_pwm_t pwm);
 
 /** @} */
 

@@ -19,9 +19,6 @@
 		},
 		{
 			"path": "../../../MICO"
-		},
-		{
-			"path": "../../../STM32F2xx_StdPeriph_Driver"
 		}
 	],
 	"settings":

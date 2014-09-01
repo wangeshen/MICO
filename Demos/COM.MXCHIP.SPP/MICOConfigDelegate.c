@@ -38,6 +38,7 @@
 #define SYS_LED_TRIGGER_INTERVAL 500 
 #define config_delegate_log(M, ...) custom_log("Config Delegate", M, ##__VA_ARGS__)
 #define config_delegate_log_trace() custom_log_trace("Config Delegate")
+  
 
 static mico_timer_t _Led_EL_timer;
 

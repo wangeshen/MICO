@@ -42,10 +42,11 @@ EMW3162 on EMB-380-S platform pin definitions ...
 |               |    |      | CAN2_TX     |              |                |
 |---------------+----+------+-------------+--------------+----------------|
 | MICO_GPIO_2   | 2  | B  7 | GPIO        |              |                |
+|               |    |      | I2C1_SCL    |              | MICO_I2C1_SDA  |
 |               |    |      | USART1_RX   |              |                |
 |               |    |      | TIM4_CH2    |              |                |
 |---------------+----+------+-------------+--------------+----------------|
-|               | 3  | A  13| GPIO        |              |                |
+|               | 3  | A  13| SWDIO       |              |                |
 |---------------+----+------+-------------+--------------+----------------|
 | MICO_GPIO_4   | 4  | C  7 | USART2_RX   |              | MICO_UART_2_RX |
 |               |    |      | GPIO        |              |                |
@@ -86,34 +87,34 @@ EMW3162 on EMB-380-S platform pin definitions ...
 |               |    |      | TIM3_CH2    |              |                |
 |---------------+----+------+-------------+--------------+----------------|
 | MICO_GPIO_10  | 10 | B  8 | GPIO        |              |                |
-|               |    |      | TIM4_CH3    |              |                |
+|               |    |      | TIM4_CH3    |              | MICO_PWM_1     |
 |               |    |      | TIM10_CH1   |              |                |
 |               |    |      | I2C1_SCL    |              |                |
 |               |    |      | CAN1_RX     |              |                |
 |---------------+----+------+-------------+--------------+----------------|
-| MICO_GPIO_11  | 11 | A  1 | GPIO        |              |                |
+| MICO_GPIO_11  | 11 | A  1 | GPIO        |EasyLink_BUTTON |              |
 |               |    |      | TIM5_CH2    |              |                |
 |               |    |      | TIM2_CH2    |              |                |
-|               |    |      | ADC123_IN1  |              | MICO_ADC_2     |
+|               |    |      | ADC123_IN1  |              |                |
 |---------------+----+------+-------------+--------------+----------------|
 | MICO_GPIO_12  | 12 | C  2 | GPIO        |              |                |
-|               |    |      | ADC123_ IN12|              | MICO_ADC_3     |
+|               |    |      | ADC123_ IN12|              | MICO_ADC_2     |
 |---------------+----+------+-------------+--------------+----------------|
 | MICO_GPIO_13  | 13 | B 14 | GPIO        |              |                |
 |               |    |      | TIM1_CH2N   |              |                |
-|               |    |      | TIM12_CH1   |              |                |
+|               |    |      | TIM12_CH1   |              | MICO_PWM_2     |
 |---------------+----+------+-------------+--------------+----------------|
 | MICO_GPIO_14  | 14 | C  6 | GPIO        |              |                |
 |               |    |      | TIM3_CH1    |              |                |
 |               |    |      | TIM8_CH1    |              |                |
-|               |    |      | USART6_TX   |              |                |
+|               |    |      | USART6_TX   |              | MICO_UART_2_TX |
 |---------------+----+------+-------------+--------------+----------------|
 |               | 15 | GND  |             |              |                |
 |---------------+----+------+-------------+--------------+----------------|
-| MICO_GPIO_16  | 16 | B 1  | GPIO        |  BOOT_SEL    |                |
+| MICO_GPIO_16  | 16 | B 1  | GPIO        |  RF_LED      |                |
 |               |    |      | TIM3_CH4    |              |                |
 |               |    |      | TIM8_CH3N   |              |                |
-|               |    |      | TIM1_CH34N  |              |                |
+|               |    |      | TIM1_CH4N   |              |                |
 |---------------+----+------+-------------+--------------+----------------|
 |               | 17 |nReset|             |              |                |
 |---------------+----+------+-------------+--------------+----------------|
@@ -121,7 +122,7 @@ EMW3162 on EMB-380-S platform pin definitions ...
 |               |    |      | JTDI        |              |                |
 +---------------+----+--------------------+--------------+----------------+
 | MICO_GPIO_19  | 19 | B 11 | GPIO        |              |                |
-|               |    |      | TIM2_CH4    |              |                |
+|               |    |      | TIM2_CH4    |              | MICO_PWM_3     |
 +---------------+----+--------------------+--------------+----------------+
 | MICO_GPIO_20  | 20 | A 12 | GPIO        |              |                |
 |               |    |      | USART1_RTS  |              |                |
@@ -140,7 +141,7 @@ EMW3162 on EMB-380-S platform pin definitions ...
 |               |    |      | TIM1_CH2    |              |                |
 +---------------+----+--------------------+--------------+----------------+
 | MICO_GPIO_23  | 23 | A 10 | GPIO        |              |                |
-|               |    |      | USART1_RX   |              |                |
+|               |    |      | USART1_RX   |STDIO_UART_RX |                |
 |               |    |      | TIM1_CH3    |              |                |
 |               |    |      | OTG_FS_ID   |              |                |
 +---------------+----+--------------------+--------------+----------------+
@@ -154,12 +155,12 @@ EMW3162 on EMB-380-S platform pin definitions ...
 +---------------+----+--------------------+--------------+----------------+
 |               | 28 | A 14 | JTCK-SWCLK  |              |                |
 +---------------+----+--------------------+--------------+----------------+
-| MICO_GPIO_29  | 29 | A  0 | GPIO        |              |                |
+| MICO_GPIO_29  | 29 | A  0 | GPIO        |StandBy/WakeUp|                |
 |               |    |      | TIM2_CH1_ETR|              |                |
 |               |    |      | TIM5_CH1    |              |                |
 |               |    |      | TIM8_ETR    |              |                |
 +---------------+----+--------------------+--------------+----------------+
-| MICO_GPIO_30  | 30 | B  9 | GPIO        |              |                |
+| MICO_GPIO_30  | 30 | B  9 | GPIO        | Status_Sel   |                |
 |               |    |      | TIM4_CH4    |              |                |
 |               |    |      | TIM11_CH1   |              |                |
 |               |    |      | I2C1_SDA    |              |                |
@@ -228,14 +229,8 @@ typedef enum
     MICO_PWM_1,
     MICO_PWM_2,
     MICO_PWM_3,
-    MICO_PWM_4,
-    MICO_PWM_5,
-    MICO_PWM_6,
-    MICO_PWM_7,
-    MICO_PWM_8,
-    MICO_PWM_9,
     MICO_PWM_MAX, /* Denotes the total number of PWM port aliases. Not a valid PWM alias */
-} wiced_pwm_t;
+} mico_pwm_t;
 
 typedef enum
 {
@@ -252,6 +247,13 @@ typedef enum
     MICO_UART_MAX, /* Denotes the total number of UART port aliases. Not a valid UART alias */
 } mico_uart_t;
 
+#define STM32_UART_1 MICO_UART_1
+#define STM32_UART_2 MICO_UART_MAX
+#define STM32_UART_3 MICO_UART_MAX
+#define STM32_UART_4 MICO_UART_MAX
+#define STM32_UART_5 MICO_UART_MAX
+#define STM32_UART_6 MICO_UART_2
+
 #define MICO_PLATFORM_INCLUDES_SPI_FLASH
 #define MICO_SPI_FLASH_CS  (MICO_GPIO_5)
 /*      MICO_SPI_FLASH_MOSI MICO_GPIO_8 */
@@ -260,7 +262,7 @@ typedef enum
 
 /* Components connected to external I/Os*/
 #define MICO_LED2           (MICO_GPIO_13)
-#define EasyLink_BUTTON1    (MICO_GPIO_11)
+#define EasyLink_BUTTON     (MICO_GPIO_11)
 #define MICO_BUTTON2        (MICO_GPIO_14)
 #define MICO_THERMISTOR     (MICO_GPIO_4)
 

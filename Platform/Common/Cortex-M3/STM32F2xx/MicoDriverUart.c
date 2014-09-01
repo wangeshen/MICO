@@ -493,13 +493,14 @@ void USART1_IRQHandler( void )
     USART1->SR = (uint16_t) (USART1->SR | 0xffff);
 
     // Update tail
-    uart_interfaces[0].rx_buffer->tail = uart_interfaces[0].rx_buffer->size - uart_mapping[0].rx_dma_stream->NDTR;
+    uart_interfaces[ STM32_UART_1 ].rx_buffer->tail = uart_interfaces[ STM32_UART_1 ].rx_buffer->size - uart_mapping[ STM32_UART_1 ].rx_dma_stream->NDTR;
 
     // Notify thread if sufficient data are available
-    if ( ( uart_interfaces[0].rx_size > 0 ) && ( ring_buffer_used_space( uart_interfaces[0].rx_buffer ) >= uart_interfaces[0].rx_size ) )
+    if ( ( uart_interfaces[ STM32_UART_1 ].rx_size > 0 ) &&
+         ( ring_buffer_used_space( uart_interfaces[ STM32_UART_1 ].rx_buffer ) >= uart_interfaces[0].rx_size ) )
     {
-        mico_rtos_set_semaphore( &uart_interfaces[0].rx_complete );
-        uart_interfaces[0].rx_size = 0;
+        mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_1 ].rx_complete );
+        uart_interfaces[ STM32_UART_1 ].rx_size = 0;
     }
 }
 
@@ -519,19 +520,20 @@ void usart2_irq( void )
     }
 }
 
-void usart6_irq( void )
+void USART6_IRQHandler( void )
 {
     // Clear all interrupts. It's safe to do so because only RXNE interrupt is enabled
     USART6->SR = (uint16_t) (USART6->SR | 0xffff);
 
     // Update tail
-    uart_interfaces[0].rx_buffer->tail = uart_interfaces[0].rx_buffer->size - uart_mapping[0].rx_dma_stream->NDTR;
+    uart_interfaces[ STM32_UART_6 ].rx_buffer->tail = uart_interfaces[ STM32_UART_6 ].rx_buffer->size - uart_mapping[ STM32_UART_6 ].rx_dma_stream->NDTR;
 
     // Notify thread if sufficient data are available
-    if ( ( uart_interfaces[0].rx_size > 0 ) && ( ring_buffer_used_space( uart_interfaces[0].rx_buffer ) >= uart_interfaces[0].rx_size ) )
+    if ( ( uart_interfaces[ STM32_UART_6 ].rx_size > 0 ) &&
+         ( ring_buffer_used_space( uart_interfaces[ STM32_UART_6 ].rx_buffer ) >= uart_interfaces[ STM32_UART_6 ].rx_size ) )
     {
-        mico_rtos_set_semaphore( &uart_interfaces[0].rx_complete );
-        uart_interfaces[0].rx_size = 0;
+        mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_6 ].rx_complete );
+        uart_interfaces[ STM32_UART_6 ].rx_size = 0;
     }
 }
 
@@ -544,7 +546,7 @@ void DMA2_Stream7_IRQHandler( void )
     {
         /* Clear interrupt */
         DMA2->HIFCR |= DMA_HISR_TCIF7;
-        uart_interfaces[ 0 ].tx_dma_result = kNoErr;
+        uart_interfaces[ STM32_UART_1 ].tx_dma_result = kNoErr;
         tx_complete = true;
     }
 
@@ -556,12 +558,12 @@ void DMA2_Stream7_IRQHandler( void )
 
         if ( tx_complete == false )
         {
-            uart_interfaces[ 0 ].tx_dma_result = kGeneralErr;
+            uart_interfaces[ STM32_UART_1 ].tx_dma_result = kGeneralErr;
         }
     }
 
     /* Set semaphore regardless of result to prevent waiting thread from locking up */
-    mico_rtos_set_semaphore( &uart_interfaces[ 0 ].tx_complete);
+    mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_1 ].tx_complete);
 }
 
 void usart2_tx_dma_irq( void )
@@ -590,14 +592,15 @@ void usart2_tx_dma_irq( void )
     mico_rtos_set_semaphore( &uart_interfaces[ 1 ].tx_complete );
 }
 
-void usart6_tx_dma_irq( void )
+//usart6_tx_dma_irq
+void DMA2_Stream6_IRQHandler( void )
 {
     bool tx_complete = false;
 
     if ( ( DMA2->HISR & DMA_HISR_TCIF6 ) != 0 )
     {
         DMA2->HIFCR |= DMA_HISR_TCIF6;
-        uart_interfaces[ 0 ].tx_dma_result = kNoErr;
+        uart_interfaces[ STM32_UART_6 ].tx_dma_result = kNoErr;
         tx_complete = true;
     }
 
@@ -609,19 +612,20 @@ void usart6_tx_dma_irq( void )
 
         if ( tx_complete == false )
         {
-            uart_interfaces[0].tx_dma_result = kGeneralErr;
+            uart_interfaces[ STM32_UART_6 ].tx_dma_result = kGeneralErr;
         }
     }
 
-    mico_rtos_set_semaphore( &uart_interfaces[0].tx_complete );
+    mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_6 ].tx_complete );
 }
 
+//usart1_rx_dma_irq
 void DMA2_Stream2_IRQHandler( void )
 {
     if ( ( DMA2->LISR & DMA_LISR_TCIF2 ) != 0 )
     {
         DMA2->LIFCR |= DMA_LISR_TCIF2;
-        uart_interfaces[ 0 ].rx_dma_result = kNoErr;
+        uart_interfaces[ STM32_UART_1 ].rx_dma_result = kNoErr;
     }
 
     /* RX DMA error */
@@ -629,10 +633,10 @@ void DMA2_Stream2_IRQHandler( void )
     {
         /* Clear interrupt */
         DMA2->LIFCR |= ( DMA_LISR_TEIF2 | DMA_LISR_DMEIF2 | DMA_LISR_FEIF2 );
-        uart_interfaces[ 0 ].rx_dma_result = kGeneralErr;
+        uart_interfaces[ STM32_UART_1 ].rx_dma_result = kGeneralErr;
     }
 
-    mico_rtos_set_semaphore( &uart_interfaces[ 0 ].rx_complete );
+    mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_1 ].rx_complete );
 }
 
 void usart2_rx_dma_irq( void )
@@ -654,12 +658,13 @@ void usart2_rx_dma_irq( void )
     mico_rtos_set_semaphore( &uart_interfaces[ 1 ].rx_complete );
 }
 
-void usart6_rx_dma_irq( void )
+//usart6_rx_dma_irq
+void DMA2_Stream1_IRQHandler( void )
 {
     if ( ( DMA2->LISR & DMA_LISR_TCIF1 ) != 0 )
     {
         DMA2->LIFCR |= DMA_LISR_TCIF1;
-        uart_interfaces[ 0 ].rx_dma_result = kNoErr;
+        uart_interfaces[ STM32_UART_6 ].rx_dma_result = kNoErr;
 
     }
 
@@ -668,10 +673,10 @@ void usart6_rx_dma_irq( void )
     {
         /* Clear interrupt */
         DMA2->LIFCR |= ( DMA_LISR_TEIF1 | DMA_LISR_DMEIF1 | DMA_LISR_FEIF1 );
-        uart_interfaces[ 0 ].rx_dma_result = kGeneralErr;
+        uart_interfaces[ STM32_UART_6 ].rx_dma_result = kGeneralErr;
     }
 
-    mico_rtos_set_semaphore( &uart_interfaces[0].rx_complete );
+    mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_6 ].rx_complete );
 }
 
 

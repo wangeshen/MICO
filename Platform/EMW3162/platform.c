@@ -110,15 +110,10 @@ const platform_adc_mapping_t adc_mapping[] =
 /* PWM mappings */
 const platform_pwm_mapping_t pwm_mappings[] =
 {
-    [MICO_PWM_1]  = {TIM4, 1, RCC_APB1Periph_TIM4, GPIO_AF_TIM4, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_11]},
-    [MICO_PWM_2]  = {TIM4, 2, RCC_APB1Periph_TIM4, GPIO_AF_TIM4, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_12]},
-    [MICO_PWM_3]  = {TIM2, 2, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_2]},  /* or TIM5/Ch2                       */
-    [MICO_PWM_4]  = {TIM2, 3, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_21]},  /* or TIM5/Ch3, TIM9/Ch1             */
-    [MICO_PWM_5]  = {TIM2, 4, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_4]},  /* or TIM5/Ch4, TIM9/Ch2             */
-    [MICO_PWM_6]  = {TIM2, 1, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_6]},  /* or TIM2_CH1_ETR, TIM8/Ch1N        */
-    [MICO_PWM_7]  = {TIM3, 1, RCC_APB1Periph_TIM3, GPIO_AF_TIM3, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_7]},  /* or TIM1_BKIN, TIM8_BKIN, TIM13/Ch1*/
-    [MICO_PWM_8]  = {TIM3, 2, RCC_APB1Periph_TIM3, GPIO_AF_TIM3, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_8]},  /* or TIM8/Ch1N, TIM14/Ch1           */
-    [MICO_PWM_9]  = {TIM5, 2, RCC_APB1Periph_TIM5, GPIO_AF_TIM5, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_20]},  /* or TIM2/Ch2                       */
+    [MICO_PWM_1]  = {TIM4, 3, RCC_APB1Periph_TIM4, GPIO_AF_TIM4, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_10]},    /* or TIM10/Ch1                       */
+    [MICO_PWM_2]  = {TIM12, 1, RCC_APB1Periph_TIM12, GPIO_AF_TIM12, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_13]}, /* or TIM1/Ch2N                       */
+    [MICO_PWM_3]  = {TIM2, 4, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_19]},    
+
 
     /* Extended PWM for internal use */
     [WICED_PWM_WLAN_POWERSAVE_CLOCK] = {TIM1, 4, RCC_APB2Periph_TIM1, GPIO_AF_TIM1, (platform_pin_mapping_t*)&gpio_mapping[WICED_GPIO_WLAN_POWERSAVE_CLOCK] }, /* or TIM2/Ch2                       */
@@ -154,8 +149,8 @@ const platform_uart_mapping_t uart_mapping[] =
         .gpio_af                      = GPIO_AF_USART1,
         .pin_tx                       = &gpio_mapping[MICO_GPIO_22],
         .pin_rx                       = &gpio_mapping[MICO_GPIO_23],
-        .pin_cts                      = NULL,
-        .pin_rts                      = NULL,
+        .pin_cts                      = &gpio_mapping[MICO_GPIO_21],
+        .pin_rts                      = &gpio_mapping[MICO_GPIO_20],
         .usart_peripheral_clock       = RCC_APB2Periph_USART1,
         .usart_peripheral_clock_func  = RCC_APB2PeriphClockCmd,
         .usart_irq                    = USART1_IRQn,
@@ -176,27 +171,27 @@ const platform_uart_mapping_t uart_mapping[] =
     },
     [MICO_UART_2] =
     {
-        .usart                        = USART2,
-        .gpio_af                      = GPIO_AF_USART2,
-        .pin_tx                       = &gpio_mapping[MICO_GPIO_5],
+        .usart                        = USART6,
+        .gpio_af                      = GPIO_AF_USART6,
+        .pin_tx                       = &gpio_mapping[MICO_GPIO_14],
         .pin_rx                       = &gpio_mapping[MICO_GPIO_4],
-        .pin_cts                      = &gpio_mapping[MICO_GPIO_1],
-        .pin_rts                      = &gpio_mapping[MICO_GPIO_2],
-        .usart_peripheral_clock       = RCC_APB1Periph_USART2,
-        .usart_peripheral_clock_func  = RCC_APB1PeriphClockCmd,
-        .usart_irq                    = USART2_IRQn,
-        .tx_dma                       = DMA1,
-        .tx_dma_stream                = DMA1_Stream6,
-        .tx_dma_channel               = DMA_Channel_4,
-        .tx_dma_peripheral_clock      = RCC_AHB1Periph_DMA1,
+        .pin_cts                      = NULL,
+        .pin_rts                      = NULL,
+        .usart_peripheral_clock       = RCC_APB2Periph_USART6,
+        .usart_peripheral_clock_func  = RCC_APB2PeriphClockCmd,
+        .usart_irq                    = USART6_IRQn,
+        .tx_dma                       = DMA2,
+        .tx_dma_stream                = DMA2_Stream6,
+        .tx_dma_channel               = DMA_Channel_5,
+        .tx_dma_peripheral_clock      = RCC_AHB1Periph_DMA2,
         .tx_dma_peripheral_clock_func = RCC_AHB1PeriphClockCmd,
-        .tx_dma_irq                   = DMA1_Stream6_IRQn,
-        .rx_dma                       = DMA1,
-        .rx_dma_stream                = DMA1_Stream5,
-        .rx_dma_channel               = DMA_Channel_4,
-        .rx_dma_peripheral_clock      = RCC_AHB1Periph_DMA1,
+        .tx_dma_irq                   = DMA2_Stream6_IRQn,
+        .rx_dma                       = DMA2,
+        .rx_dma_stream                = DMA2_Stream1,
+        .rx_dma_channel               = DMA_Channel_5,
+        .rx_dma_peripheral_clock      = RCC_AHB1Periph_DMA2,
         .rx_dma_peripheral_clock_func = RCC_AHB1PeriphClockCmd,
-        .rx_dma_irq                   = DMA1_Stream5_IRQn
+        .rx_dma_irq                   = DMA2_Stream1_IRQn
     },
 };
 
@@ -209,7 +204,7 @@ static void _button_EL_irq_handler( void* arg )
   (void)(arg);
   int interval = -1;
 
-  if ( MicoGpioInputGet( EasyLink_BUTTON1 ) == 0 ) {
+  if ( MicoGpioInputGet( EasyLink_BUTTON ) == 0 ) {
     _default_start_time = mico_get_time()+1;
     mico_start_timer(&_button_EL_timer);
   } else {
@@ -251,9 +246,9 @@ void init_platform( void )
     // wiced_gpio_output_low( WICED_LED2 );
 
     //  Initialise buttons to input by default 
-     MicoGpioInitialize( EasyLink_BUTTON1, INPUT_PULL_UP );
+     MicoGpioInitialize( EasyLink_BUTTON, INPUT_PULL_UP );
      mico_init_timer(&_button_EL_timer, RestoreDefault_TimeOut, _button_EL_Timeout_handler, NULL);
-     MicoGpioEnableIRQ( EasyLink_BUTTON1, IRQ_TRIGGER_BOTH_EDGES, _button_EL_irq_handler, 0 );
+     MicoGpioEnableIRQ( EasyLink_BUTTON, IRQ_TRIGGER_BOTH_EDGES, _button_EL_irq_handler, 0 );
 
     // wiced_gpio_init( WICED_BUTTON2, INPUT_PULL_UP );
 }

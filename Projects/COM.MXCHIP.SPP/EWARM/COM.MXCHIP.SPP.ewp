@@ -2949,7 +2949,13 @@
     <group>
       <name>platforms</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MICOPlatform\MICOPlatformUART.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverGpio.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverPwm.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverUart.h</name>
       </file>
     </group>
     <file>
@@ -3166,10 +3172,16 @@
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverGpio.c</name>
           </file>
           <file>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverPwm.c</name>
+          </file>
+          <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverUart.c</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\rtc.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\startup_stm32f2xx_IAR.s</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\stm32f2xx_platform_mxchip.c</name>
@@ -3221,12 +3233,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Platform\PlatformWDG.c</name>
-    </file>
-  </group>
-  <group>
-    <name>startup</name>
-    <file>
-      <name>$PROJ_DIR$\startup_stm32f2xx.s</name>
     </file>
   </group>
   <group>

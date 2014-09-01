@@ -25,7 +25,7 @@
 
 #pragma once
 
-
+#include "wwd_constants.h"
 
 /*
  * Copyright 2013, Broadcom Corporation
@@ -45,12 +45,11 @@
 #pragma once
 
 #include "RingBufferUtils.h"
-#include "wwd_constants.h"
 #include "platform.h" /* This file is unique for each platform */
 
 #include "MicoDrivers/MICODriverUART.h"
 #include "MicoDrivers/MICODriverGpio.h"
-//#include "MICOPlatform/MICOPlatformPWM.h"
+#include "MicoDrivers/MICODriverPwm.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -402,57 +401,7 @@ wiced_result_t wiced_adc_deinit( wiced_adc_t adc );
 
 /** @} */
 
-/*****************************************************************************/
-/** @addtogroup pwm       PWM
- *  @ingroup platform
- *
- * Pulse-Width Modulation (PWM) Functions
- *
- *
- *  @{
- */
-/*****************************************************************************/
 
-
-/** Initialises a PWM pin
- *
- * Prepares a Pulse-Width Modulation pin for use.
- * Does not start the PWM output (use @ref wiced_pwm_start).
- *
- * @param pwm        : the PWM interface which should be initialised
- * @param frequency  : Output signal frequency in Hertz
- * @param duty_cycle : Duty cycle of signal as a floating-point percentage (0.0 to 100.0)
- *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
- */
-wiced_result_t wiced_pwm_init(wiced_pwm_t pwm, uint32_t frequency, float duty_cycle);
-
-
-/** Starts PWM output on a PWM interface
- *
- * Starts Pulse-Width Modulation signal output on a PWM pin
- *
- * @param pwm        : the PWM interface which should be started
- *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
- */
-wiced_result_t wiced_pwm_start(wiced_pwm_t pwm);
-
-
-/** Stops output on a PWM pin
- *
- * Stops Pulse-Width Modulation signal output on a PWM pin
- *
- * @param pwm        : the PWM interface which should be stopped
- *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
- */
-wiced_result_t wiced_pwm_stop(wiced_pwm_t pwm);
-
-/** @} */
 /*****************************************************************************/
 /** @addtogroup watchdog       Watchdog
  *  @ingroup platform

@@ -10,7 +10,8 @@
 
 #include <stdlib.h>
 #include <yfuns.h>
-#include "MICOPlatform.h"
+#include "platform_common_config.h"
+#include "MicoPlatform.h"
 
 extern void platform_stdio_write( const char* str, uint32_t len );
 
@@ -22,7 +23,7 @@ size_t __write( int handle, const unsigned char * buffer, size_t size )
         return 0;
     }
 
-    platform_stdio_write( (const char*)buffer, size );
+	MicoUartSend( STDIO_UART, (const char*)buffer, size );
 
     return size;
 }

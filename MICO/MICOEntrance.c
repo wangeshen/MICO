@@ -229,6 +229,13 @@ int application_start(void)
   OSStatus err = kNoErr;
   IPStatusTypedef para;
   struct tm currentTime;
+  
+  MicoPwmInitialize( MICO_PWM_1, 2000, 20 );
+  MicoPwmStart( MICO_PWM_1 );
+  MicoPwmInitialize( MICO_PWM_2, 2000, 50 );
+  MicoPwmStart( MICO_PWM_2 );
+  MicoPwmInitialize( MICO_PWM_3, 2000, 50 );
+  MicoPwmStart( MICO_PWM_3 );
 
   /*Read current configurations*/
   context = ( mico_Context_t *)malloc(sizeof(mico_Context_t) );

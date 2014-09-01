@@ -17,6 +17,8 @@
 #include "wwd_assert.h"
 #include "gpio_irq.h"
 #include "watchdog.h"
+#include "platform.h"
+#include "platform_sleep.h"
 #include "platform_common_config.h"
 #include "platform_internal_gpio.h"
 #include "MICOPlatform.h"
@@ -141,13 +143,13 @@ wiced_bool_t host_platform_is_in_interrupt_context( void )
 
 OSStatus host_platform_init_wlan_powersave_clock( void )
 {
-#if ( WICED_WLAN_POWERSAVE_CLOCK_SOURCE == WICED_WLAN_POWERSAVE_CLOCK_IS_PWM )
+#if ( MICO_WLAN_POWERSAVE_CLOCK_SOURCE == MICO_WLAN_POWERSAVE_CLOCK_IS_PWM )
 
-    wiced_pwm_init( (wiced_pwm_t) WICED_PWM_WLAN_POWERSAVE_CLOCK, WLAN_POWERSAVE_CLOCK_FREQUENCY, WLAN_POWERSAVE_CLOCK_DUTY_CYCLE );
-    wiced_pwm_start( (wiced_pwm_t) WICED_PWM_WLAN_POWERSAVE_CLOCK );
+    MicoPwmInitialize( (mico_pwm_t) WICED_PWM_WLAN_POWERSAVE_CLOCK, WLAN_POWERSAVE_CLOCK_FREQUENCY, WLAN_POWERSAVE_CLOCK_DUTY_CYCLE );
+    MicoPwmStart( (mico_pwm_t) WICED_PWM_WLAN_POWERSAVE_CLOCK );
     return WICED_SUCCESS;
 
-#elif ( WICED_WLAN_POWERSAVE_CLOCK_SOURCE == WICED_WLAN_POWERSAVE_CLOCK_IS_MCO )
+#elif ( MICO_WLAN_POWERSAVE_CLOCK_SOURCE == MICO_WLAN_POWERSAVE_CLOCK_IS_MCO )
 
     GPIO_InitTypeDef gpio_init_structure;
 
@@ -179,9 +181,9 @@ OSStatus host_platform_init_wlan_powersave_clock( void )
 
 wiced_result_t host_platform_deinit_wlan_powersave_clock( void )
 {
-#if ( WICED_WLAN_POWERSAVE_CLOCK_SOURCE == WICED_WLAN_POWERSAVE_CLOCK_IS_PWM )
+#if ( MICO_WLAN_POWERSAVE_CLOCK_SOURCE == MICO_WLAN_POWERSAVE_CLOCK_IS_PWM )
 
-    wiced_pwm_stop( (wiced_pwm_t) WICED_PWM_WLAN_POWERSAVE_CLOCK );
+    MicoPwmStop( (mico_pwm_t) WICED_PWM_WLAN_POWERSAVE_CLOCK );
     platform_reset_wlan_powersave_clock( );
     return WICED_SUCCESS;
 

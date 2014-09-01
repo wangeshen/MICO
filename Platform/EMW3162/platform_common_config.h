@@ -10,7 +10,7 @@
 #pragma once
 
 #include "EMW3162/platform.h"
-//#include "platform_sleep.h"
+#include "platform_sleep.h"
 
 /******************************************************
  *                      Macros
@@ -111,7 +111,7 @@
 
 #endif
 
-#if ( WICED_WLAN_POWERSAVE_CLOCK_SOURCE == WICED_WLAN_POWERSAVE_CLOCK_IS_MCO )
+#if ( MICO_WLAN_POWERSAVE_CLOCK_SOURCE == MICO_WLAN_POWERSAVE_CLOCK_IS_MCO )
 
 #define WL_32K_OUT_BANK         GPIOA
 #define WL_32K_OUT_PIN          8
@@ -124,25 +124,6 @@
 #define WL_32K_OUT_BANK_CLK     RCC_AHB1Periph_GPIOA
 
 #endif
-
-
-#define STDIO_USART                    USART1
-#define STDIO_TX_PIN                   GPIO_Pin_9
-#define STDIO_RX_PIN                   GPIO_Pin_10
-#define STDIO_TX_PINSOURCE             GPIO_PinSource9
-#define STDIO_RX_PINSOURCE             GPIO_PinSource10
-#define STDIO_TX_BANK                  GPIOA
-#define STDIO_RX_BANK                  GPIOA
-#define STDIO_TX_BANK_CLK              RCC_AHB1Periph_GPIOA
-#define STDIO_RX_BANK_CLK              RCC_AHB1Periph_GPIOA
-#define STDIO_GPIO_ALTERNATE_FUNCTION  GPIO_AF_USART1
-#define STDIO_TX_GPIO_PERIPH_CLOCK     RCC_AHB1Periph_GPIOA
-#define STDIO_RX_GPIO_PERIPH_CLOCK     RCC_AHB1Periph_GPIOA
-#define STDIO_IRQ_CHANNEL              37
-#define STDIO_PERIPH_CLOCK             RCC_APB2Periph_USART1
-#define STDIO_CLOCK_CMD                RCC_APB2PeriphClockCmd
-#define STDIO_TX_CLK_CMD               RCC_AHB1PeriphClockCmd
-#define STDIO_RX_CLK_CMD               RCC_AHB1PeriphClockCmd
 
 /*  Bootloader LED D1 */
 #define BOOTLOADER_LED_GPIO     WICED_LED1

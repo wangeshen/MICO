@@ -4,9 +4,8 @@
 
 #include "EMW3162/platform.h"
 #include "EMW3162/platform_common_config.h"
-#include "stm32f2xxMapping.h"
+#include "stm32f2xx_platform.h"
 #include "stm32f2xx.h"
-#include "gpio_irq.h"
 
 /******************************************************
  *                    Constants
@@ -26,23 +25,19 @@
  *                    Structures
  ******************************************************/
 
-
-
 /******************************************************
  *               Variables Definitions
  ******************************************************/
 
-
 /******************************************************
  *               Function Declarations
  ******************************************************/
- 
 
 /******************************************************
  *               Function Definitions
  ******************************************************/
 
-OSStatus wiced_pwm_init( wiced_pwm_t pwm_peripheral, uint32_t frequency, float duty_cycle )
+OSStatus MicoPwmInitialize( mico_pwm_t pwm_peripheral, uint32_t frequency, float duty_cycle )
 {
     TIM_TimeBaseInitTypeDef tim_time_base_structure;
     TIM_OCInitTypeDef       tim_oc_init_structure;
@@ -52,7 +47,7 @@ OSStatus wiced_pwm_init( wiced_pwm_t pwm_peripheral, uint32_t frequency, float d
     uint16_t                      period              = 0;
     float                         adjusted_duty_cycle = ( ( duty_cycle > 100.0f ) ? 100.0f : duty_cycle );
 
-    wiced_platform_mcu_enable_powersave();
+    mico_mcu_powersave_config(false);
 
     RCC_GetClocksFreq( &rcc_clock_frequencies );
 
@@ -69,13 +64,14 @@ OSStatus wiced_pwm_init( wiced_pwm_t pwm_peripheral, uint32_t frequency, float d
 
     RCC_AHB1PeriphClockCmd( pwm->pin->peripheral_clock, ENABLE );
 
+    GPIO_PinAFConfig( pwm->pin->bank, pwm->pin->number, pwm->gpio_af );
     gpio_init_structure.GPIO_Pin   = (uint32_t) ( 1 << pwm->pin->number );
     gpio_init_structure.GPIO_Mode  = GPIO_Mode_AF;
     gpio_init_structure.GPIO_Speed = GPIO_Speed_100MHz;
     gpio_init_structure.GPIO_OType = GPIO_OType_PP;
     gpio_init_structure.GPIO_PuPd  = GPIO_PuPd_UP;
     GPIO_Init( pwm->pin->bank, &gpio_init_structure );
-    GPIO_PinAFConfig( pwm->pin->bank, pwm->pin->number, pwm->gpio_af );
+    
 
     /* Time base configuration */
     tim_time_base_structure.TIM_Period            = (uint32_t) period;
@@ -127,33 +123,35 @@ OSStatus wiced_pwm_init( wiced_pwm_t pwm_peripheral, uint32_t frequency, float d
         }
     }
 
-    wiced_platform_mcu_disable_powersave();
+    mico_mcu_powersave_config(true);
 
     return kNoErr;
 }
 
-OSStatus wiced_pwm_start( wiced_pwm_t pwm )
+OSStatus MicoPwmStart( mico_pwm_t pwm )
 {
-    wiced_platform_mcu_enable_powersave();
+    mico_mcu_powersave_config(false);
 
     TIM_Cmd(pwm_mappings[pwm].tim, ENABLE);
     TIM_CtrlPWMOutputs( pwm_mappings[pwm].tim, ENABLE );
 
-    wiced_platform_mcu_disable_powersave();
+    mico_mcu_powersave_config(true);
 
     return kNoErr;
 }
 
-OSStatus wiced_pwm_stop( wiced_pwm_t pwm )
+OSStatus MicoPwmStop( mico_pwm_t pwm )
 {
-    wiced_platform_mcu_enable_powersave();
+    mico_mcu_powersave_config(false);
 
     TIM_CtrlPWMOutputs( pwm_mappings[pwm].tim, DISABLE );
     TIM_Cmd(pwm_mappings[pwm].tim, DISABLE);
 
-    wiced_platform_mcu_disable_powersave();
+    mico_mcu_powersave_config(true);
 
     return kNoErr;
 }
+
+
 
 
