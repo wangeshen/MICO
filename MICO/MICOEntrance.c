@@ -19,7 +19,8 @@
   ******************************************************************************
   */ 
 
-#include "Platform.h"
+#include "PlatformFlash.h"
+#include "MicoPlatform.h"
 #include "PlatformRTC.h"
 #include "MICODefine.h"
 #include "MICOAppDefine.h"
@@ -185,7 +186,7 @@ void micoNotify_WlanFatalErrHandler(mico_Context_t * const inContext)
   mico_log_trace();
   (void)inContext;
   mico_log("Wlan Fatal Err!");
-  PlatformSoftReboot();
+  MicoSystemReboot();
 }
 
 void _ConnectToAP( mico_Context_t * const inContext)
@@ -229,7 +230,6 @@ int application_start(void)
   IPStatusTypedef para;
   struct tm currentTime;
 
-  Platform_Init();
   /*Read current configurations*/
   context = ( mico_Context_t *)malloc(sizeof(mico_Context_t) );
   require_action( context, exit, err = kNoMemoryErr );
@@ -252,8 +252,8 @@ int application_start(void)
   
   /*wlan driver and tcpip init*/
   micoInit();
-  PlatformRTCRead( &currentTime );
-  mico_log("Current Time: %s",asctime(&currentTime));
+  //PlatformRTCRead( &currentTime );
+  //mico_log("Current Time: %s",asctime(&currentTime));
 
   micoWlanGetIPStatus(&para, Station);
   formatMACAddr(context->micoStatus.mac, (char *)&para.mac);
@@ -262,13 +262,13 @@ int application_start(void)
   mico_log("%s mxchipWNet library version: %s", APP_INFO, micoGetVer());
 
   /*Start system monotor thread*/
- err = MICOStartSystemMonitor(context);
- require_noerr_action( err, exit, mico_log("ERROR: Unable to start the system monitor.") );
- 
- err = MICORegisterSystemMonitor(&mico_monitor, APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000);
- require_noerr( err, exit );
- mico_init_timer(&_watchdog_reload_timer,APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000-100, _watchdog_reload_timer_handler, NULL);
- mico_start_timer(&_watchdog_reload_timer);
+// err = MICOStartSystemMonitor(context);
+// require_noerr_action( err, exit, mico_log("ERROR: Unable to start the system monitor.") );
+// 
+// err = MICORegisterSystemMonitor(&mico_monitor, APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000);
+// require_noerr( err, exit );
+// mico_init_timer(&_watchdog_reload_timer,APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000-100, _watchdog_reload_timer_handler, NULL);
+// mico_start_timer(&_watchdog_reload_timer);
   
   if(context->flashContentInRam.micoSystemConfig.configured != allConfigured){
     mico_log("Empty configuration. Starting configuration mode...");
@@ -334,8 +334,8 @@ int application_start(void)
       require_noerr_action( err, exit, mico_log("ERROR: Unable to start the local server thread.") );
     }
 
-    err =  MICOStartNTPClient(context);
-    require_noerr_action( err, exit, mico_log("ERROR: Unable to start the NTP client thread.") );
+    //err =  MICOStartNTPClient(context);
+    //require_noerr_action( err, exit, mico_log("ERROR: Unable to start the NTP client thread.") );
 
     /*Start mico application*/
     err = MICOStartApplication( context );
@@ -353,7 +353,7 @@ int application_start(void)
       case eState_Software_Reset:
         sendNotifySYSWillPowerOff();
         mico_thread_msleep(500);
-        PlatformSoftReboot();
+        MicoSystemReboot();
         break;
       case eState_Wlan_Powerdown:
         sendNotifySYSWillPowerOff();
@@ -365,7 +365,7 @@ int application_start(void)
         sendNotifySYSWillPowerOff();
         mico_thread_msleep(200);
         micoWlanPowerOff();
-        Platform_Enter_STANDBY();
+        MicoSystemStandBy();
         break;
       default:
         break;

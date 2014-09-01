@@ -23,7 +23,7 @@
 #include "MICO.h"
 #include "MICONotificationCenter.h"
 
-#include "Platform.h"
+#include "MicoPlatform.h"
 #include "PlatformFlash.h"
 #include "StringUtils.h"
 #include "HTTPUtils.h"
@@ -139,7 +139,7 @@ exit:
   if(inContext->flashContentInRam.micoSystemConfig.configured != unConfigured){
     inContext->flashContentInRam.micoSystemConfig.configured = allConfigured;
     MICOUpdateConfiguration(inContext);
-    PlatformSoftReboot();
+    MicoSystemReboot();
   }
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   /*module should powd down in default setting*/ 
@@ -207,7 +207,7 @@ void EasyLinkNotify_EasyLinkGetExtraDataHandler(int datalen, char* data, mico_Co
 exit:
   easylink_log("ERROR, err: %d", err);
   ConfigWillStop(inContext);
-  PlatformSoftReboot();
+  MicoSystemReboot();
 }
 
 void EasyLinkNotify_SYSWillPoerOffHandler(mico_Context_t * const inContext)
@@ -506,7 +506,7 @@ threadexit:
   if(Context->flashContentInRam.micoSystemConfig.configured != unConfigured){
     Context->flashContentInRam.micoSystemConfig.configured = allConfigured;
     MICOUpdateConfiguration( Context );
-    PlatformSoftReboot();
+    MicoSystemReboot();
   }
   mico_rtos_unlock_mutex(&Context->flashContentInRam_mutex);
 
@@ -518,7 +518,7 @@ threadexit:
 /*SSID or Password is not correct, module cannot connect to wlan, so reboot and enter EasyLink again*/
 reboot:
   ConfigWillStop( Context );
-  PlatformSoftReboot();
+  MicoSystemReboot();
   return;
 }
 

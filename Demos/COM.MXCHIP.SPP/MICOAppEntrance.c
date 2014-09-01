@@ -25,11 +25,13 @@
 #include "StringUtils.h"
 #include "SppProtocol.h"
 
-#include "Platform.h"
-#include "PlatformUART.h"
+#include "MicoPlatform.h"
 
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
 #define app_log_trace() custom_log_trace("APP")
+
+static volatile ring_buffer_t rx_buffer;
+static volatile uint8_t       rx_data[1024];
 
 /* MICO system callback: Restore default configuration provided by application */
 void appRestoreDefault_callback(mico_Context_t *inContext)
@@ -46,25 +48,34 @@ void appRestoreDefault_callback(mico_Context_t *inContext)
 OSStatus MICOStartApplication( mico_Context_t * const inContext )
 {
   app_log_trace();
-
   OSStatus err = kNoErr;
   require_action(inContext, exit, err = kParamErr);
+  mico_uart_config_t uart_config;
 
-  sppProtocolInit(inContext);
-  PlatformUartInitialize(inContext);
+  sppProtocolInit( inContext );
 
   /*Bonjour for service searching*/
   if(inContext->flashContentInRam.micoSystemConfig.bonjourEnable == true)
     MICOStartBonjourService( Station, inContext );
-  
+
+  /*UART receive thread*/
+  uart_config.baud_rate    = inContext->flashContentInRam.appConfig.USART_BaudRate;
+  uart_config.data_width   = DATA_WIDTH_8BIT;
+  uart_config.parity       = NO_PARITY;
+  uart_config.stop_bits    = STOP_BITS_1;
+  uart_config.flow_control = FLOW_CONTROL_DISABLED;
+  ring_buffer_init  ( (ring_buffer_t *)&rx_buffer, (uint8_t *)rx_data, UART_BUFFER_LENGTH );
+  MicoUartInitialize( UART_FOR_APP, &uart_config, (ring_buffer_t *)&rx_buffer );
   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART Recv", uartRecv_thread, 0x200, (void*)inContext );
   require_noerr_action( err, exit, app_log("ERROR: Unable to start the uart recv thread.") );
 
+ /*Local TCP server thread*/
  if(inContext->flashContentInRam.appConfig.localServerEnable == true){
    err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "Local Server", localTcpServer_thread, 0x200, (void*)inContext );
    require_noerr_action( err, exit, app_log("ERROR: Unable to start the local server thread.") );
  }
 
+  /*Remote TCP client thread*/
  if(inContext->flashContentInRam.appConfig.remoteServerEnable == true){
    err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "Remote Client", remoteTcpClient_thread, 0x300, (void*)inContext );
    require_noerr_action( err, exit, app_log("ERROR: Unable to start the remote client thread.") );

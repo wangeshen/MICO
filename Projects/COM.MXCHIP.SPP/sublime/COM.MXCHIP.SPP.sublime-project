@@ -3,6 +3,9 @@
 	"folders":
 	[
 		{
+			"path": "../../../include"
+		},
+		{
 			"path": "../../../Platform"
 		},
 		{
@@ -41,7 +44,10 @@
 			"-DEMW3162",
 			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/",
 			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/",
+			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/include/",
+			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162",
 			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Library/inc/",
+			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/include/",
 			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/",
 			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/MICO/",
 			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/",

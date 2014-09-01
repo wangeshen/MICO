@@ -22,7 +22,7 @@
 #include "MICODefine.h"
 #include "MICO.h"
 #include "PlatformFlash.h"
-#include "Platform.h"
+#include "MicoPlatform.h"
 
 /* Update seed number every time*/
 static int32_t seedNum = 0;
@@ -77,7 +77,7 @@ OSStatus MICOReadConfiguration(mico_Context_t *inContext)
   if(inContext->flashContentInRam.appConfig.configDataVer != CONFIGURATION_VERSION){
     err = MICORestoreDefault(inContext);
     require_noerr(err, exit);
-    PlatformSoftReboot();
+    MicoSystemReboot();
   }
 
   if(inContext->flashContentInRam.micoSystemConfig.dhcpEnable == DHCP_Disable){

@@ -42,8 +42,6 @@
 #define APPLICATION_WATCHDOG_TIMEOUT_SECONDS  5 /**< Watch-dog enabled by MICO's main thread:
                                                      5 seconds to reload. */
 
-#define RestoreDefault_TimeOut          3000  /**< Restore default and start easylink after 
-                                                   press down EasyLink button for 3 seconds. */
 #define EasyLink_TimeOut                20000 /**< EasyLink timeout 20 seconds. */
 #define EasyLink_ConnectWlan_Timeout    20000 /**< Connect to wlan after configured y easylink.
                                                    Restart easylink after timeout: 20 seconds. */
