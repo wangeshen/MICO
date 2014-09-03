@@ -19,8 +19,8 @@
   ******************************************************************************
   */ 
 
-#ifndef __MICOPLATFORMUART_H__
-#define __MICOPLATFORMUART_H__
+#ifndef __MICODRIVERUART_H__
+#define __MICODRIVERUART_H__
 
 #pragma once
 #include "Common.h"

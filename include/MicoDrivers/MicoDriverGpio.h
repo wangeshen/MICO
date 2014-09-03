@@ -19,8 +19,8 @@
   ******************************************************************************
   */ 
 
-#ifndef __MICOPLATFORMGPIO_H__
-#define __MICOPLATFORMGPIO_H__
+#ifndef __MICODRIVERGPIO_H__
+#define __MICODRIVERGPIO_H__
 
 #pragma once
 #include "Common.h"

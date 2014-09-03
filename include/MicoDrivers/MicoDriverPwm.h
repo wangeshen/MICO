@@ -19,8 +19,8 @@
   ******************************************************************************
   */ 
 
-#ifndef __MICOPLATFORMPWM_H__
-#define __MICOPLATFORMPWM_H__
+#ifndef __MICODRIVERPWM_H__
+#define __MICODRIVERPWM_H__
 
 #pragma once
 #include "Common.h"

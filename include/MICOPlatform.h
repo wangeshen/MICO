@@ -50,6 +50,7 @@
 #include "MicoDrivers/MICODriverUART.h"
 #include "MicoDrivers/MICODriverGpio.h"
 #include "MicoDrivers/MICODriverPwm.h"
+#include "MicoDrivers/MICODriverSpi.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,19 +82,7 @@ extern "C" {
  *                   Enumerations
  ******************************************************/
 
-typedef enum
-{
-    I2C_ADDRESS_WIDTH_7BIT,
-    I2C_ADDRESS_WIDTH_10BIT,
-    I2C_ADDRESS_WIDTH_16BIT,
-} wiced_i2c_bus_address_width_t;
 
-typedef enum
-{
-    I2C_LOW_SPEED_MODE,         /* 10Khz devices */
-    I2C_STANDARD_SPEED_MODE,    /* 100Khz devices */
-    I2C_HIGH_SPEED_MODE         /* 400Khz devices */
-} wiced_i2c_speed_mode_t;
 
 /******************************************************
  *                 Type Definitions
@@ -105,41 +94,7 @@ typedef void (*wiced_gpio_irq_handler_t)( void* arg );
  *                    Structures
  ******************************************************/
 
-typedef struct
-{
-    wiced_spi_t  port;
-    mico_gpio_t chip_select;
-    uint32_t     speed;
-    uint8_t      mode;
-    uint8_t      bits;
-} wiced_spi_device_t;
 
-typedef struct
-{
-    const void* tx_buffer;
-    void*       rx_buffer;
-    uint32_t    length;
-} wiced_spi_message_segment_t;
-
-typedef struct
-{
-    wiced_i2c_t                   port;
-    uint16_t                      address;       /* the address of the device on the i2c bus */
-    wiced_i2c_bus_address_width_t address_width;
-    uint8_t                       flags;
-    wiced_i2c_speed_mode_t        speed_mode;    /* speed mode the device operates in */
-} wiced_i2c_device_t;
-
-typedef struct
-{
-    const void*  tx_buffer;  /* A pointer to the data to be transmitted. If NULL, the message is an RX message when 'combined' is FALSE */
-    void*        rx_buffer;  /* A pointer to the data to be transmitted. If NULL, the message is an TX message when 'combined' is FALSE */
-    uint16_t     tx_length;
-    uint16_t     rx_length;
-    uint16_t     retries;    /* Number of times to retry the message */
-    wiced_bool_t combined;
-    uint8_t      flags;      /* MESSAGE_DISABLE_DMA : if set, this flag disables use of DMA for the message */
-} wiced_i2c_message_t;
 
 typedef struct
 {
@@ -171,165 +126,6 @@ extern wiced_spi_device_t wiced_spi_flash;
  */
 /*****************************************************************************/
 
-
-/*****************************************************************************/
-/** @addtogroup spi       SPI
- *  @ingroup platform
- *
- * Serial Peripheral Interface (SPI) Functions
- *
- *
- *  @{
- */
-/*****************************************************************************/
-
-
-/** Initialises the SPI interface for a given SPI device
- *
- * Prepares a SPI hardware interface for communication as a master
- *
- * @param  spi : the SPI device to be initialised
- *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if the SPI device could not be initialised
- */
-wiced_result_t wiced_spi_init( const wiced_spi_device_t* spi );
-
-
-/** Transmits and/or receives data from a SPI device
- *
- * @param  spi      : the SPI device to be initialised
- * @param  segments : a pointer to an array of segments
- * @param  number_of_segments : the number of segments to transfer
- *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred
- */
-wiced_result_t wiced_spi_transfer( const wiced_spi_device_t* spi, wiced_spi_message_segment_t* segments, uint16_t number_of_segments );
-
-
-/** De-initialises a SPI interface
- *
- * Turns off a SPI hardware interface
- *
- * @param  spi : the SPI device to be de-initialised
- *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred
- */
-wiced_result_t wiced_spi_deinit( const wiced_spi_device_t* spi );
-
-
-/** @} */
-/*****************************************************************************/
-/** @addtogroup i2c       I2C
- *  @ingroup platform
- *
- * Inter-IC bus (I2C) Functions
- *
- *
- *  @{
- */
-/*****************************************************************************/
-
-
-/** Initialises an I2C interface
- *
- * Prepares an I2C hardware interface for communication as a master
- *
- * @param  device : the device for which the i2c port should be initialised
- *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred during initialisation
- */
-wiced_result_t wiced_i2c_init( wiced_i2c_device_t* device );
-
-
-/** Checks whether the device is available on a bus or not
- *
- *
- * @param  device : the i2c device to be probed
- * @param  retries    : the number of times to attempt to probe the device
- *
- * @return    WICED_TRUE : device is found.
- * @return    WICED_FALSE: device is not found
- */
-wiced_bool_t wiced_i2c_probe_device( wiced_i2c_device_t* device, int retries );
-
-
-/** Initialize the wiced_i2c_message_t structure for i2c tx transaction
- *
- * @param message : pointer to a message structure, this should be a valid pointer
- * @param tx_buffer : pointer to a tx buffer that is already allocated
- * @param tx_buffer_length : number of bytes to transmit
- * @param retries    : the number of times to attempt send a message in case it can't not be sent
- * @param disable_dma : if true, disables the dma for current tx transaction. You may find it useful to switch off dma for short tx messages.
- *                     if you set this flag to 0, then you should make sure that the device flags was configured with I2C_DEVICE_USE_DMA. If the
- *                     device doesnt support DMA, the message will be transmitted with no DMA.
- *
- * @return    WICED_SUCCESS : message structure was initialised properly.
- * @return    WICED_BADARG: one of the arguments is given incorrectly
- */
-wiced_result_t wiced_i2c_init_tx_message(wiced_i2c_message_t* message, const void* tx_buffer, uint16_t  tx_buffer_length, uint16_t retries , wiced_bool_t disable_dma);
-
-/** Initialize the wiced_i2c_message_t structure for i2c rx transaction
- *
- * @param message : pointer to a message structure, this should be a valid pointer
- * @param rx_buffer : pointer to an rx buffer that is already allocated
- * @param rx_buffer_length : number of bytes to receive
- * @param retries    : the number of times to attempt receive a message in case device doesnt respond
- * @param disable_dma : if true, disables the dma for current rx transaction. You may find it useful to switch off dma for short rx messages.
- *                     if you set this flag to 0, then you should make sure that the device flags was configured with I2C_DEVICE_USE_DMA. If the
- *                     device doesnt support DMA, the message will be received not using DMA.
- *
- * @return    WICED_SUCCESS : message structure was initialised properly.
- * @return    WICED_BADARG: one of the arguments is given incorrectly
- */
-wiced_result_t wiced_i2c_init_rx_message(wiced_i2c_message_t* message, void* rx_buffer, uint16_t rx_buffer_length, uint16_t retries , wiced_bool_t disable_dma);
-
-
-/** Initialize the wiced_i2c_message_t structure for i2c combined transaction
- *
- * @param  message : pointer to a message structure, this should be a valid pointer
- * @param tx_buffer: pointer to a tx buffer that is already allocated
- * @param rx_buffer: pointer to an rx buffer that is already allocated
- * @param tx_buffer_length: number of bytes to transmit
- * @param rx_buffer_length: number of bytes to receive
- * @param  retries    : the number of times to attempt receive a message in case device doesnt respond
- * @param disable_dma: if true, disables the dma for current rx transaction. You may find it useful to switch off dma for short rx messages.
- *                     if you set this flag to 0, then you should make sure that the device flags was configured with I2C_DEVICE_USE_DMA. If the
- *                     device doesnt support DMA, the message will be received not using DMA.
- *
- * @return    WICED_SUCCESS : message structure was initialised properly.
- * @return    WICED_BADARG: one of the arguments is given incorrectly
- */
-wiced_result_t wiced_i2c_init_combined_message(wiced_i2c_message_t* message, const void* tx_buffer, void* rx_buffer, uint16_t tx_buffer_length, uint16_t rx_buffer_length, uint16_t retries , wiced_bool_t disable_dma);
-
-
-/** Transmits and/or receives data over an I2C interface
- *
- * @param  device             : the i2c device to communicate with
- * @param  message            : a pointer to a message (or an array of messages) to be transmitted/received
- * @param  number_of_messages : the number of messages to transfer. [1 .. N] messages
- *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred during message transfer
- */
-wiced_result_t wiced_i2c_transfer( wiced_i2c_device_t* device, wiced_i2c_message_t* message, uint16_t number_of_messages );
-
-
-/** Deinitialises an I2C device
- *
- * @param  device : the device for which the i2c port should be deinitialised
- *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred during deinitialisation
- */
-wiced_result_t wiced_i2c_deinit( wiced_i2c_device_t* device );
-
-
-
-/** @} */
 /*****************************************************************************/
 /** @addtogroup adc       ADC
  *  @ingroup platform

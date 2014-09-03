@@ -208,7 +208,6 @@ typedef enum
     //MICO_GPIO_28,
     MICO_GPIO_29,
     MICO_GPIO_30,
-    MICO_SYS_LED,
 
     MICO_GPIO_MAX, /* Denotes the total number of GPIO port aliases. Not a valid GPIO alias */
 } mico_gpio_t;
@@ -217,12 +216,13 @@ typedef enum
 {
     MICO_SPI_1,
     MICO_SPI_MAX, /* Denotes the total number of SPI port aliases. Not a valid SPI alias */
-} wiced_spi_t;
+} mico_spi_t;
 
 typedef enum
 {
-    MICO_I2C_NONE = 0xFF
-} wiced_i2c_t;
+    MICO_I2C_1,
+    MICO_I2C_MAX, /* Denotes the total number of I2C port aliases. Not a valid I2C alias */
+} mico_i2c_t;
 
 typedef enum
 {
@@ -262,6 +262,7 @@ typedef enum
 
 /* Components connected to external I/Os*/
 #define MICO_LED2           (MICO_GPIO_13)
+#define MICO_RF_LED         (MICO_GPIO_16)
 #define EasyLink_BUTTON     (MICO_GPIO_11)
 #define MICO_BUTTON2        (MICO_GPIO_14)
 #define MICO_THERMISTOR     (MICO_GPIO_4)
@@ -294,6 +295,8 @@ typedef enum
 #define MXCHIP_GPIO_WPS       MICO_GPIO_16
 
 #define MXCHIP_UART           MICO_UART_1
+
+#define MICO_I2C_CP           MICO_I2C_1
 
 
 #ifdef __cplusplus

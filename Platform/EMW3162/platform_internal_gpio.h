@@ -29,7 +29,8 @@
 /* These are internal module connections only */
 typedef enum
 {
-    WICED_GPIO_WLAN_POWERSAVE_CLOCK = MICO_GPIO_MAX
+    WICED_GPIO_WLAN_POWERSAVE_CLOCK = MICO_GPIO_MAX,
+    MICO_SYS_LED,
 } wiced_extended_gpio_t;
 
 typedef enum

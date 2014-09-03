@@ -24,6 +24,7 @@
 #include "debug.h"
 #include "MicoPlatform.h"
 #include "Platform.h"
+#include "Platform_internal_gpio.h"
 
 #include "PlatformUart.h"
 #include "EasyLink/EasyLink.h"

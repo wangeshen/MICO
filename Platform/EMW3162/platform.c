@@ -87,11 +87,10 @@ const platform_pin_mapping_t gpio_mapping[] =
     [MICO_GPIO_23] = {GPIOA, 10,  RCC_AHB1Periph_GPIOA},
     [MICO_GPIO_29] = {GPIOA,  0,  RCC_AHB1Periph_GPIOA},
     [MICO_GPIO_30] = {GPIOB,  9,  RCC_AHB1Periph_GPIOB},
-    [MICO_SYS_LED] = {GPIOB,  0,  RCC_AHB1Periph_GPIOB},
-
-
+    
     /* Extended GPIOs for internal use */
-    [WICED_GPIO_WLAN_POWERSAVE_CLOCK] = {WL_32K_OUT_BANK, WL_32K_OUT_PIN, WL_32K_OUT_BANK_CLK},
+    [WICED_GPIO_WLAN_POWERSAVE_CLOCK]   = {WL_32K_OUT_BANK, WL_32K_OUT_PIN, WL_32K_OUT_BANK_CLK},
+    [MICO_SYS_LED]                      = {GPIOB,  0,  RCC_AHB1Periph_GPIOB},
 };
 
 /*
@@ -114,10 +113,10 @@ const platform_pwm_mapping_t pwm_mappings[] =
     [MICO_PWM_2]  = {TIM12, 1, RCC_APB1Periph_TIM12, GPIO_AF_TIM12, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_13]}, /* or TIM1/Ch2N                       */
     [MICO_PWM_3]  = {TIM2, 4, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_19]},    
 
-
+#if ( MICO_WLAN_POWERSAVE_CLOCK_SOURCE == MICO_WLAN_POWERSAVE_CLOCK_IS_PWM )
     /* Extended PWM for internal use */
     [WICED_PWM_WLAN_POWERSAVE_CLOCK] = {TIM1, 4, RCC_APB2Periph_TIM1, GPIO_AF_TIM1, (platform_pin_mapping_t*)&gpio_mapping[WICED_GPIO_WLAN_POWERSAVE_CLOCK] }, /* or TIM2/Ch2                       */
-
+#endif
     /* TODO: fill in the other options here ... */
 };
 
@@ -192,6 +191,26 @@ const platform_uart_mapping_t uart_mapping[] =
         .rx_dma_peripheral_clock      = RCC_AHB1Periph_DMA2,
         .rx_dma_peripheral_clock_func = RCC_AHB1PeriphClockCmd,
         .rx_dma_irq                   = DMA2_Stream1_IRQn
+    },
+};
+
+const platform_i2c_mapping_t i2c_mapping[] =
+{
+    [MICO_I2C_1] =
+    {
+        .i2c = I2C1,
+        .pin_scl                 = &gpio_mapping[MICO_GPIO_1],
+        .pin_sda                 = &gpio_mapping[MICO_GPIO_2],
+        .peripheral_clock_reg    = RCC_APB1Periph_I2C1,
+        .tx_dma                  = DMA1,
+        .tx_dma_peripheral_clock = RCC_AHB1Periph_DMA1,
+        .tx_dma_stream           = DMA1_Stream7,
+        .rx_dma_stream           = DMA1_Stream5,
+        .tx_dma_stream_id        = 7,
+        .rx_dma_stream_id        = 5,
+        .tx_dma_channel          = DMA_Channel_1,
+        .rx_dma_channel          = DMA_Channel_1,
+        .gpio_af                 = GPIO_AF_I2C1
     },
 };
 
