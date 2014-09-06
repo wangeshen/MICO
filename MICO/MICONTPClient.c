@@ -24,8 +24,7 @@
 #include "SocketUtils.h"
 #include "MICONotificationCenter.h"
 #include "time.h"
-#include "PlatformRTC.h"
-//#include "rtc.h"
+#include "MicoPlatform.h"
 
 #define ntp_log(M, ...) custom_log("NTP client", M, ##__VA_ARGS__)
 #define ntp_log_trace() custom_log_trace("NTP client")
@@ -96,6 +95,8 @@ void NTPClient_thread(void *inContext)
   char ipstr[16];
   unsigned int trans_sec, current;
   struct NtpPacket outpacket ,inpacket;
+  struct tm *currentTime;
+  mico_rtc_time_t time;
   
   /* Regisist notifications */
   err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)ntpNotify_WifiStatusHandler );
@@ -156,7 +157,18 @@ void NTPClient_thread(void *inContext)
       trans_sec = ntohl(trans_sec);
       current = trans_sec - UNIX_OFFSET;
       ntp_log("Time Synchronoused, %s",asctime(localtime(&current)));
-      PlatformRTCWrite( localtime(&current) );
+
+      currentTime = localtime(&current);
+      time.sec = currentTime->tm_sec;
+      time.min = currentTime->tm_min ;
+      time.hr = currentTime->tm_hour;
+
+      time.date = currentTime->tm_mday;
+      time.weekday = currentTime->tm_wday;
+      time.month = currentTime->tm_mon + 1;
+      time.year = (currentTime->tm_year + 1900)%100;
+
+      MicoRtcSetTime( &time );
       goto exit;
     }
   }

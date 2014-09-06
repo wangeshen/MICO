@@ -11,7 +11,16 @@
  *                    Constants
  ******************************************************/
 
+#define I2C_FLAG_CHECK_TIMEOUT      ( 1000 )
+#define I2C_FLAG_CHECK_LONG_TIMEOUT ( 1000 )
 
+
+#define I2C_MESSAGE_DMA_MASK_POSN 0
+#define I2C_MESSAGE_NO_DMA    (0 << I2C_MESSAGE_DMA_MASK_POSN) /* No DMA is set to 0 because DMA should be enabled by */
+#define I2C_MESSAGE_USE_DMA   (1 << I2C_MESSAGE_DMA_MASK_POSN) /* default, and turned off as an exception */
+
+#define DMA_FLAG_TC(stream_id) dma_flag_tc(stream_id)
+#define DMA_TIMEOUT_LOOPS      (10000000)
 
 /******************************************************
  *                   Enumerations
@@ -29,6 +38,7 @@
  *               Variables Definitions
  ******************************************************/
 
+static DMA_InitTypeDef  i2c_dma_init; /* Should investigate why this is global */
 /******************************************************
  *               Function Declarations
  ******************************************************/
@@ -38,14 +48,12 @@
  *               Function Definitions
  ******************************************************/
 
-wiced_result_t wiced_i2c_init( wiced_i2c_device_t* device  )
+OSStatus MicoI2cInitialize( mico_i2c_device_t* device  )
 {
     GPIO_InitTypeDef GPIO_InitStructure;
     I2C_InitTypeDef  I2C_InitStructure;
 
-    wiced_assert( "bad argument", device != NULL );
-
-    MCU_CLOCKS_NEEDED();
+    mico_mcu_powersave_config(false);
 
     // Init I2C GPIO clocks
     RCC_APB1PeriphClockCmd( i2c_mapping[device->port].peripheral_clock_reg, ENABLE );
@@ -135,25 +143,24 @@ wiced_result_t wiced_i2c_init( wiced_i2c_device_t* device  )
         I2C_DMACmd( i2c_mapping[device->port].i2c, ENABLE );
     }
 
-    MCU_CLOCKS_NOT_NEEDED();
+    mico_mcu_powersave_config(true);
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-static wiced_result_t i2c_wait_for_event( I2C_TypeDef* i2c, uint32_t event_id, uint32_t number_of_waits )
+static OSStatus i2c_wait_for_event( I2C_TypeDef* i2c, uint32_t event_id, uint32_t number_of_waits )
 {
-    wiced_assert( "bad argument", i2c != NULL );
-
+    msleep(2);
     while ( I2C_CheckEvent( i2c, event_id ) != SUCCESS )
     {
         number_of_waits--;
         if ( number_of_waits == 0 )
         {
-            return WICED_TIMEOUT;
+            return kTimeoutErr;
         }
     }
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
 static uint32_t dma_flag_tc( int stream_id )
@@ -174,14 +181,12 @@ static uint32_t dma_flag_tc( int stream_id )
     return transfer_complete_flags[stream_id];
 }
 
-wiced_bool_t wiced_i2c_probe_device( wiced_i2c_device_t* device, int retries )
+bool MicoI2cProbeDevice( mico_i2c_device_t* device, int retries )
 {
     int            i;
-    wiced_result_t result;
+    OSStatus       result;
 
-    wiced_assert("Bad args", device != NULL);
-
-    MCU_CLOCKS_NEEDED();
+    mico_mcu_powersave_config(false);
 
     for ( i = 0; i < retries; i++ )
     {
@@ -190,10 +195,10 @@ wiced_bool_t wiced_i2c_probe_device( wiced_i2c_device_t* device, int retries )
 
         /* wait till start condition is generated and the bus becomes free */
         result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_MODE_SELECT, I2C_FLAG_CHECK_TIMEOUT );
-        if ( result != WICED_SUCCESS )
+        if ( result != kNoErr )
         {
-            MCU_CLOCKS_NOT_NEEDED();
-            return WICED_FALSE;
+            mico_mcu_powersave_config(true);
+            return false;
         }
 
         if ( device->address_width == I2C_ADDRESS_WIDTH_7BIT )
@@ -203,7 +208,7 @@ wiced_bool_t wiced_i2c_probe_device( wiced_i2c_device_t* device, int retries )
 
             /* wait till address gets sent and the direction bit is sent and */
             result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED, I2C_FLAG_CHECK_LONG_TIMEOUT );
-            if ( result != WICED_SUCCESS )
+            if ( result != kNoErr )
             {
                 /* keep on pinging */
                 continue;
@@ -226,25 +231,22 @@ wiced_bool_t wiced_i2c_probe_device( wiced_i2c_device_t* device, int retries )
     /* Check if the device didn't respond */
     if ( i == retries )
     {
-        MCU_CLOCKS_NOT_NEEDED();
-        return WICED_FALSE;
+        mico_mcu_powersave_config(true);
+        return false;
     }
     else
     {
-        MCU_CLOCKS_NEEDED();
-        return WICED_TRUE;
+        mico_mcu_powersave_config(false);
+        return true;
     }
 }
 
-static wiced_result_t i2c_dma_config_and_execute( wiced_i2c_device_t* device, wiced_i2c_message_t* message, wiced_bool_t tx_dma  )
+static OSStatus i2c_dma_config_and_execute( mico_i2c_device_t* device, mico_i2c_message_t* message, bool tx_dma  )
 {
     uint32_t counter;
-
-    wiced_assert( "bad argument", device != NULL );
-    wiced_assert( "bad argument", message != NULL );
-
+    
     /* Initialize the DMA with the new parameters */
-    if ( tx_dma == WICED_TRUE )
+    if ( tx_dma == true )
     {
         /* Enable DMA channel for I2C */
         I2C_DMACmd( i2c_mapping[device->port].i2c, ENABLE );
@@ -269,7 +271,7 @@ static wiced_result_t i2c_dma_config_and_execute( wiced_i2c_device_t* device, wi
             --counter;
             if ( counter == 0 )
             {
-                return WICED_ERROR;
+                return kGeneralErr;
             }
         }
 
@@ -301,7 +303,7 @@ static wiced_result_t i2c_dma_config_and_execute( wiced_i2c_device_t* device, wi
             --counter;
             if ( counter == 0 )
             {
-                return WICED_ERROR;
+                return kGeneralErr;
             }
         }
 
@@ -310,16 +312,16 @@ static wiced_result_t i2c_dma_config_and_execute( wiced_i2c_device_t* device, wi
         DMA_Cmd( i2c_mapping[device->port].rx_dma_stream, DISABLE );
     }
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_message_t* message )
+static OSStatus i2c_dma_transfer( mico_i2c_device_t* device, mico_i2c_message_t* message )
 {
-    wiced_result_t result;
+    OSStatus       result;
     uint32_t       counter;
     int            i = 0;
 
-    if ( message->combined == WICED_TRUE )
+    if ( message->combined == true )
     {
         /* combined transaction case, please refer to Philips I2C document to have an understanding of a combined fragment */
 
@@ -331,9 +333,9 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
 
             /* wait till start condition is generated and the bus becomes free */
             result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_MODE_SELECT, I2C_FLAG_CHECK_TIMEOUT );
-            if ( result != WICED_SUCCESS )
+            if ( result != kNoErr )
             {
-                return WICED_TIMEOUT;
+                return kTimeoutErr;
             }
 
             if ( device->address_width == I2C_ADDRESS_WIDTH_7BIT )
@@ -343,7 +345,7 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
 
                 /* wait till address gets sent and the direction bit is sent and */
                 result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED, I2C_FLAG_CHECK_LONG_TIMEOUT );
-                if ( result == WICED_SUCCESS )
+                if ( result == kNoErr )
                 {
                     break;
                 }
@@ -357,11 +359,11 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
 
         if ( i == message->retries )
         {
-            return WICED_TIMEOUT;
+            return kTimeoutErr;
         }
 
         /* configure dma tx channel for i2c */
-        i2c_dma_config_and_execute( device, message, WICED_TRUE );
+        i2c_dma_config_and_execute( device, message, true );
 
         /* wait till the byte is actually sent from the i2c peripheral */
         counter = 1000;
@@ -370,7 +372,7 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
             --counter;
             if ( counter == 0 )
             {
-                return WICED_ERROR;
+                return kGeneralErr;
             }
         }
 
@@ -383,9 +385,9 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
 
             /* wait till start condition is generated and the bus becomes free */
             result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_MODE_SELECT, I2C_FLAG_CHECK_TIMEOUT );
-            if ( result != WICED_SUCCESS )
+            if ( result != kNoErr )
             {
-                return WICED_TIMEOUT;
+                return kTimeoutErr;
             }
 
             if ( device->address_width == I2C_ADDRESS_WIDTH_7BIT )
@@ -395,7 +397,7 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
 
                 /* wait till address gets sent and the direction bit is sent and */
                 result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED, I2C_FLAG_CHECK_LONG_TIMEOUT );
-                if ( result == WICED_SUCCESS )
+                if ( result == kNoErr )
                 {
                     break;
                 }
@@ -409,7 +411,7 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
 
         if ( i == message->retries )
         {
-            return WICED_TIMEOUT;
+            return kTimeoutErr;
         }
 
         /* receive data from the slave device */
@@ -425,7 +427,7 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
         }
 
         /* start dma which will read bytes */
-        i2c_dma_config_and_execute( device, message, WICED_FALSE );
+        i2c_dma_config_and_execute( device, message, false );
         /* maybe we will have to wait on the BTF flag!!! */
     }
     else
@@ -441,9 +443,9 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
 
             /* wait till start condition is generated and the bus becomes free */
             result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_MODE_SELECT, I2C_FLAG_CHECK_TIMEOUT );
-            if ( result != WICED_SUCCESS )
+            if ( result != kNoErr )
             {
-                return WICED_TIMEOUT;
+                return kTimeoutErr;
             }
 
             if ( device->address_width == I2C_ADDRESS_WIDTH_7BIT )
@@ -461,7 +463,7 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
                     result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED, I2C_FLAG_CHECK_LONG_TIMEOUT );
                 }
 
-                if ( result == WICED_SUCCESS )
+                if ( result == kNoErr )
                 {
                     break;
                 }
@@ -474,14 +476,14 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
         }
         if ( i == message->retries )
         {
-            return WICED_TIMEOUT;
+            return kTimeoutErr;
         }
 
         if ( message->tx_buffer )
         {
             /* write transaction */
             /* configure dma tx channel for i2c */
-            i2c_dma_config_and_execute( device, message, WICED_TRUE );
+            i2c_dma_config_and_execute( device, message, true );
 
             /* wait till the byte is actually sent from the i2c peripheral */
             counter = 1000;
@@ -490,7 +492,7 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
                 --counter;
                 if ( counter == 0 )
                 {
-                    return WICED_ERROR;
+                    return kGeneralErr;
                 }
             }
         }
@@ -509,7 +511,7 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
             }
 
             /* start dma which will read bytes */
-            i2c_dma_config_and_execute( device, message, WICED_FALSE );
+            i2c_dma_config_and_execute( device, message, false );
 
             /* wait til the last byte is received */
             counter = 1000;
@@ -518,7 +520,7 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
                 --counter;
                 if ( counter == 0 )
                 {
-                    return WICED_ERROR;
+                    return kGeneralErr;
                 }
             }
         }
@@ -526,15 +528,15 @@ static wiced_result_t i2c_dma_transfer( wiced_i2c_device_t* device, wiced_i2c_me
 
     /* generate a stop condition */
     I2C_GenerateSTOP( i2c_mapping[device->port].i2c, ENABLE );
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, wiced_i2c_message_t* message )
+static OSStatus i2c_transfer_message_no_dma( mico_i2c_device_t* device, mico_i2c_message_t* message )
 {
-    wiced_result_t result;
+    OSStatus       result;
     int            i = 0;
 
-    if ( message->combined == WICED_TRUE )
+    if ( message->combined == true )
     {
         const char* tmp_ptr;
         uint8_t*    tmp_rd_ptr;
@@ -549,9 +551,9 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
 
             /* wait till start condition is generated and the bus becomes free */
             result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_MODE_SELECT, I2C_FLAG_CHECK_TIMEOUT );
-            if ( result != WICED_SUCCESS )
+            if ( result != kNoErr )
             {
-                return WICED_TIMEOUT;
+                return kTimeoutErr;
             }
 
             if ( device->address_width == I2C_ADDRESS_WIDTH_7BIT )
@@ -561,7 +563,7 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
 
                 /* wait till address gets sent and the direction bit is sent and */
                 result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED, I2C_FLAG_CHECK_LONG_TIMEOUT );
-                if ( result == WICED_SUCCESS )
+                if ( result == kNoErr )
                 {
                     break;
                 }
@@ -575,7 +577,7 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
 
         if ( i == message->retries )
         {
-            return WICED_TIMEOUT;
+            return kTimeoutErr;
         }
 
         tmp_ptr = (const char*) message->tx_buffer;
@@ -587,7 +589,7 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
 
             /* wait till it actually gets transferred and acknowledged */
             result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_BYTE_TRANSMITTED, I2C_FLAG_CHECK_TIMEOUT );
-            if ( result != WICED_SUCCESS )
+            if ( result != kNoErr )
             {
                 return result;
             }
@@ -602,9 +604,9 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
 
             /* wait till start condition is generated and the bus becomes free */
             result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_MODE_SELECT, I2C_FLAG_CHECK_TIMEOUT );
-            if ( result != WICED_SUCCESS )
+            if ( result != kNoErr )
             {
-                return WICED_TIMEOUT;
+                return kTimeoutErr;
             }
             if ( device->address_width == I2C_ADDRESS_WIDTH_7BIT )
             {
@@ -613,7 +615,7 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
 
                 /* wait till address gets sent and the direction bit is sent and */
                 result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED, I2C_FLAG_CHECK_LONG_TIMEOUT );
-                if ( result != WICED_SUCCESS )
+                if ( result != kNoErr )
                 {
                     /* keep on pinging, if a device doesnt respond */
                     continue;
@@ -631,7 +633,7 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
         }
         if ( i == message->retries )
         {
-            return WICED_TIMEOUT;
+            return kTimeoutErr;
         }
 
         /* receive data from the slave device */
@@ -651,7 +653,7 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
         {
             /* wait till something is in the i2c data register */
             result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_BYTE_RECEIVED, I2C_FLAG_CHECK_TIMEOUT );
-            if ( result != WICED_SUCCESS )
+            if ( result != kNoErr )
             {
                 return result;
             }
@@ -683,9 +685,9 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
 
             /* wait till start condition is generated and the bus becomes free */
             result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_MODE_SELECT, I2C_FLAG_CHECK_TIMEOUT );
-            if ( result != WICED_SUCCESS )
+            if ( result != kNoErr )
             {
-                return WICED_TIMEOUT;
+                return kTimeoutErr;
             }
             if ( device->address_width == I2C_ADDRESS_WIDTH_7BIT )
             {
@@ -701,7 +703,7 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
                 {
                     result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED, I2C_FLAG_CHECK_LONG_TIMEOUT );
                 }
-                if ( result != WICED_SUCCESS )
+                if ( result != kNoErr )
                 {
                     continue;
                 }
@@ -718,7 +720,7 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
         }
         if ( i == message->retries )
         {
-            return WICED_TIMEOUT;
+            return kTimeoutErr;
         }
 
         if ( message->tx_buffer )
@@ -733,7 +735,7 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
 
                 /* wait till it actually gets transferred and acknowledged */
                 result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_BYTE_TRANSMITTED, I2C_FLAG_CHECK_TIMEOUT );
-                if ( result != WICED_SUCCESS )
+                if ( result != kNoErr )
                 {
                     return result;
                 }
@@ -759,7 +761,7 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
             {
                 /* wait till something is in the i2c data register */
                 result = i2c_wait_for_event( i2c_mapping[device->port].i2c, I2C_EVENT_MASTER_BYTE_RECEIVED, I2C_FLAG_CHECK_TIMEOUT );
-                if ( result != WICED_SUCCESS )
+                if ( result != kNoErr )
                 {
                     return result;
                 }
@@ -782,19 +784,19 @@ static wiced_result_t i2c_transfer_message_no_dma( wiced_i2c_device_t* device, w
 
     /* generate a stop condition */
     I2C_GenerateSTOP( i2c_mapping[device->port].i2c, ENABLE );
-    return WICED_SUCCESS;
+    return kNoErr;
 
 }
 
-wiced_result_t wiced_i2c_init_tx_message(wiced_i2c_message_t* message, const void* tx_buffer, uint16_t  tx_buffer_length, uint16_t retries , wiced_bool_t disable_dma)
+OSStatus MicoI2cBuildTxMessage(mico_i2c_message_t* message, const void* tx_buffer, uint16_t  tx_buffer_length, uint16_t retries , bool disable_dma)
 {
     if( ( message == 0 ) || ( tx_buffer == 0 ) || ( tx_buffer_length == 0 ) )
     {
-        return WICED_BADARG;
+        return kParamErr;
     }
-    memset(message, 0x00, sizeof(wiced_i2c_message_t));
+    memset(message, 0x00, sizeof(mico_i2c_message_t));
     message->tx_buffer = tx_buffer;
-    message->combined = WICED_FALSE;
+    message->combined = false;
     message->retries = retries;
     message->tx_length = tx_buffer_length;
     if( disable_dma )
@@ -805,18 +807,18 @@ wiced_result_t wiced_i2c_init_tx_message(wiced_i2c_message_t* message, const voi
     {
         message->flags = I2C_MESSAGE_USE_DMA;
     }
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-wiced_result_t wiced_i2c_init_rx_message(wiced_i2c_message_t* message, void* rx_buffer, uint16_t  rx_buffer_length, uint16_t retries , wiced_bool_t disable_dma)
+OSStatus MicoI2cBuildRxMessage(mico_i2c_message_t* message, void* rx_buffer, uint16_t  rx_buffer_length, uint16_t retries , bool disable_dma)
 {
     if( ( message == 0 ) || ( rx_buffer == 0 ) || ( rx_buffer_length == 0 ) )
     {
-        return WICED_BADARG;
+        return kParamErr;
     }
-    memset(message, 0x00, sizeof(wiced_i2c_message_t));
+    memset(message, 0x00, sizeof(mico_i2c_message_t));
     message->rx_buffer = rx_buffer;
-    message->combined = WICED_FALSE;
+    message->combined = false;
     message->retries = retries;
     message->rx_length = rx_buffer_length;
     if( disable_dma )
@@ -827,19 +829,19 @@ wiced_result_t wiced_i2c_init_rx_message(wiced_i2c_message_t* message, void* rx_
     {
         message->flags = I2C_MESSAGE_USE_DMA;
     }
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-wiced_result_t wiced_i2c_init_combined_message(wiced_i2c_message_t* message, const void* tx_buffer, void* rx_buffer, uint16_t tx_buffer_length, uint16_t rx_buffer_length, uint16_t retries , wiced_bool_t disable_dma)
+OSStatus MicoI2cBuildCombinedMessage(mico_i2c_message_t* message, const void* tx_buffer, void* rx_buffer, uint16_t tx_buffer_length, uint16_t rx_buffer_length, uint16_t retries , bool disable_dma)
 {
     if( ( message == 0 ) || ( rx_buffer == 0 ) || ( tx_buffer == 0 ) || ( tx_buffer_length == 0 ) || ( rx_buffer_length == 0 ) )
     {
-        return WICED_BADARG;
+        return kParamErr;
     }
-    memset(message, 0x00, sizeof(wiced_i2c_message_t));
+    memset(message, 0x00, sizeof(mico_i2c_message_t));
     message->rx_buffer = rx_buffer;
     message->tx_buffer = tx_buffer;
-    message->combined = WICED_TRUE;
+    message->combined = true;
     message->retries = retries;
     message->tx_length = tx_buffer_length;
     message->rx_length = rx_buffer_length;
@@ -851,47 +853,45 @@ wiced_result_t wiced_i2c_init_combined_message(wiced_i2c_message_t* message, con
     {
         message->flags = I2C_MESSAGE_USE_DMA;
     }
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-wiced_result_t wiced_i2c_transfer( wiced_i2c_device_t* device, wiced_i2c_message_t* messages, uint16_t number_of_messages )
+OSStatus MicoI2cTransfer( mico_i2c_device_t* device, mico_i2c_message_t* messages, uint16_t number_of_messages )
 {
-    wiced_result_t result;
+    OSStatus result;
     int i = 0;
 
-    wiced_assert( "bad argument", (device != NULL) && (messages != NULL) );
-
-    MCU_CLOCKS_NEEDED();
+    mico_mcu_powersave_config(false);
 
     for( i=0; i < number_of_messages; i++ )
     {
         if( ( device->flags & I2C_DEVICE_USE_DMA ) && ( ( messages[i].flags & I2C_MESSAGE_USE_DMA ) == 1 ) )
         {
             result = i2c_dma_transfer(device, &messages[i]);
-            if( result != WICED_SUCCESS )
+            if( result != kNoErr )
             {
-                MCU_CLOCKS_NOT_NEEDED();
-                return WICED_ERROR;
+                mico_mcu_powersave_config(true);
+                return kGeneralErr;
             }
         }
         else
         {
             result = i2c_transfer_message_no_dma( device, &messages[i] );
-            if( result != WICED_SUCCESS )
+            if( result != kNoErr )
             {
-                MCU_CLOCKS_NOT_NEEDED();
-                return WICED_ERROR;
+                mico_mcu_powersave_config(true);
+                return kGeneralErr;
             }
         }
     }
 
-    MCU_CLOCKS_NOT_NEEDED();
-    return WICED_SUCCESS;
+    mico_mcu_powersave_config(true);
+    return kNoErr;
 }
 
-wiced_result_t wiced_i2c_deinit( wiced_i2c_device_t* device )
+OSStatus MicoI2cFinalize( mico_i2c_device_t* device )
 {
-    MCU_CLOCKS_NEEDED();
+    mico_mcu_powersave_config(false);
 
     /* Disable I2C peripheral clocks */
     RCC_APB1PeriphClockCmd( i2c_mapping[device->port].peripheral_clock_reg, DISABLE );
@@ -907,9 +907,9 @@ wiced_result_t wiced_i2c_deinit( wiced_i2c_device_t* device )
         RCC_AHB1PeriphClockCmd( i2c_mapping[device->port].tx_dma_peripheral_clock, DISABLE );
     }
 
-    MCU_CLOCKS_NOT_NEEDED();
+    mico_mcu_powersave_config(true);
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
 

@@ -3,8 +3,8 @@
 #include "MICORTOS.h"
 #include "gpio_irq.h"
 
-#include "EMW3162/platform.h"
-#include "EMW3162/platform_common_config.h"
+#include "platform.h"
+#include "platform_common_config.h"
 #include "stm32f2xx_platform.h"
 #include "stm32f2xx.h"
 
@@ -104,11 +104,11 @@ OSStatus MicoGpioOutputTrigger( mico_gpio_t gpio )
 
 bool MicoGpioInputGet( mico_gpio_t gpio )
 {
-    wiced_bool_t result;
+    bool result;
 
     mico_mcu_powersave_config(false);
 
-    result =  ( GPIO_ReadInputDataBit( gpio_mapping[gpio].bank, (uint16_t) ( 1 << gpio_mapping[gpio].number ) ) == 0 )? WICED_FALSE : WICED_TRUE;
+    result =  ( GPIO_ReadInputDataBit( gpio_mapping[gpio].bank, (uint16_t) ( 1 << gpio_mapping[gpio].number ) ) == 0 )? false : true;
 
     mico_mcu_powersave_config(true);
 

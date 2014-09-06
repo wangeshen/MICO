@@ -35,7 +35,7 @@ static OSStatus _PlatformFlashByteWrite(__IO uint32_t* FlashAddress, uint8_t* Da
 
 OSStatus PlatformFlashInitialize( void )
 { 
-  plat_log_trace();
+  platform_log_trace();
   FLASH_Unlock(); 
   /* Clear pending flags (if any) */  
   FLASH_ClearFlag(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | 
@@ -45,7 +45,7 @@ OSStatus PlatformFlashInitialize( void )
 
 OSStatus PlatformFlashErase(uint32_t StartAddress, uint32_t EndAddress)
 {
-  plat_log_trace();
+  platform_log_trace();
   OSStatus err = kNoErr;
   uint32_t StartSector, EndSector, i = 0;
 
@@ -66,7 +66,7 @@ exit:
 
 OSStatus PlatformFlashWrite(__IO uint32_t* FlashAddress, uint32_t* Data ,uint32_t DataLength)
 {
-  plat_log_trace();
+  platform_log_trace();
   OSStatus err = kNoErr;
   uint32_t i = 0;
   uint32_t dataInRam;

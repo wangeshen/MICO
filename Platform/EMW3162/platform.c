@@ -11,26 +11,21 @@
 /** @file
  *
  */
-#include "EMW3162/platform.h"
+#include "platform.h"
 #include "MICOPlatform.h"
 #include "debug.h"
 #include "gpio_irq.h"
 #include "MICODefine.h"
-//#include "watchdog.h"
 #include "stdio.h"
 #include "string.h"
-//#include "wwd_assert.h"
 #include "stm32f2xx_platform.h"
 #include "platform_common_config.h"
 #include "platform_internal_gpio.h"
-//#include "Platform/wwd_platform_interface.h"
+#include "PlatformLogging.h"
 
 /******************************************************
  *                      Macros
  ******************************************************/
-
-#define EMW3162_Platform_log(M, ...) custom_log("Platform", M, ##__VA_ARGS__)
-#define EMW3162_Platform_log_trace() custom_log_trace("Platform")
 
 /******************************************************
  *                    Constants
@@ -51,6 +46,9 @@
 /******************************************************
  *               Function Declarations
  ******************************************************/
+ extern void PlatformEasyLinkButtonClickedCallback(void);
+ extern void PlatformStandbyButtonClickedCallback(void);
+ extern void PlatformEasyLinkButtonLongPressedCallback(void);
 
 /******************************************************
  *               Variables Definitions
@@ -89,7 +87,7 @@ const platform_pin_mapping_t gpio_mapping[] =
     [MICO_GPIO_30] = {GPIOB,  9,  RCC_AHB1Periph_GPIOB},
     
     /* Extended GPIOs for internal use */
-    [WICED_GPIO_WLAN_POWERSAVE_CLOCK]   = {WL_32K_OUT_BANK, WL_32K_OUT_PIN, WL_32K_OUT_BANK_CLK},
+    [MICO_GPIO_WLAN_POWERSAVE_CLOCK]    = {WL_32K_OUT_BANK, WL_32K_OUT_PIN, WL_32K_OUT_BANK_CLK},
     [MICO_SYS_LED]                      = {GPIOB,  0,  RCC_AHB1Periph_GPIOB},
 };
 
@@ -237,6 +235,12 @@ static void _button_EL_irq_handler( void* arg )
   }
 }
 
+static void _button_STANDBY_irq_handler( void* arg )
+{
+  (void)(arg);
+  PlatformStandbyButtonClickedCallback();
+}
+
 static void _button_EL_Timeout_handler( void* arg )
 {
   (void)(arg);
@@ -244,13 +248,25 @@ static void _button_EL_Timeout_handler( void* arg )
   PlatformEasyLinkButtonLongPressedCallback();
 }
 
+bool watchdog_check_last_reset( void )
+{
+    if ( RCC->CSR & RCC_CSR_WDGRSTF )
+    {
+        /* Clear the flag and return */
+        RCC->CSR |= RCC_CSR_RMVF;
+        return true;
+    }
+
+    return false;
+}
+
 OSStatus wiced_platform_init( void )
 {
-    EMW3162_Platform_log( "Platform initialised" );
+    platform_log( "Platform initialised" );
 
     if ( true == watchdog_check_last_reset() )
     {
-        EMW3162_Platform_log( "WARNING: Watchdog reset occured previously. Please see watchdog.c for debugging instructions." );
+        platform_log( "WARNING: Watchdog reset occured previously. Please see watchdog.c for debugging instructions." );
     }
 
     return kNoErr;
@@ -258,23 +274,32 @@ OSStatus wiced_platform_init( void )
 
 void init_platform( void )
 {
-    // /* Initialise LEDs and turn off by default */
-    MicoGpioInitialize( MICO_SYS_LED, OUTPUT_PUSH_PULL );
-    // wiced_gpio_init( WICED_LED2, OUTPUT_PUSH_PULL );
-    MicoGpioOutputLow( MICO_SYS_LED );
-    // wiced_gpio_output_low( WICED_LED2 );
+    /*STM32 wakeup by watchdog in standby mode, re-enter standby mode in this situation*/
+    PlatformWDGReload();
+    if ( (PWR_GetFlagStatus(PWR_FLAG_SB) != RESET) && RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET){
+        RCC_ClearFlag();
+        MicoSystemStandBy();
+    }
+    PWR_ClearFlag(PWR_FLAG_SB);
 
-    //  Initialise buttons to input by default 
+    MicoGpioInitialize( (mico_gpio_t)MICO_SYS_LED, OUTPUT_PUSH_PULL );
+    MicoGpioOutputLow( (mico_gpio_t)MICO_SYS_LED );
+    MicoGpioInitialize( (mico_gpio_t)MICO_RF_LED, OUTPUT_OPEN_DRAIN_NO_PULL );
+    MicoGpioOutputHigh( (mico_gpio_t)MICO_RF_LED );
+
+    //  Initialise EasyLink buttons
      MicoGpioInitialize( EasyLink_BUTTON, INPUT_PULL_UP );
      mico_init_timer(&_button_EL_timer, RestoreDefault_TimeOut, _button_EL_Timeout_handler, NULL);
-     MicoGpioEnableIRQ( EasyLink_BUTTON, IRQ_TRIGGER_BOTH_EDGES, _button_EL_irq_handler, 0 );
+     MicoGpioEnableIRQ( EasyLink_BUTTON, IRQ_TRIGGER_BOTH_EDGES, _button_EL_irq_handler, NULL );
 
-    // wiced_gpio_init( WICED_BUTTON2, INPUT_PULL_UP );
+    //  Initialise Standby/wakeup switcher
+    MicoGpioInitialize( Standby_SEL, INPUT_PULL_UP );
+    MicoGpioEnableIRQ( Standby_SEL , IRQ_TRIGGER_FALLING_EDGE, _button_STANDBY_irq_handler, NULL);
 }
 
-void host_platform_reset_wifi( wiced_bool_t reset_asserted )
+void host_platform_reset_wifi( bool reset_asserted )
 {
-    if ( reset_asserted == WICED_TRUE )
+    if ( reset_asserted == true )
     {
         GPIO_ResetBits( WL_RESET_BANK, WL_RESET_PIN );
     }
@@ -284,9 +309,9 @@ void host_platform_reset_wifi( wiced_bool_t reset_asserted )
     }
 }
 
-void host_platform_power_wifi( wiced_bool_t power_enabled )
+void host_platform_power_wifi( bool power_enabled )
 {
-    if ( power_enabled == WICED_TRUE )
+    if ( power_enabled == true )
     {
         GPIO_ResetBits( WL_REG_ON_BANK, WL_REG_ON_PIN );
     }

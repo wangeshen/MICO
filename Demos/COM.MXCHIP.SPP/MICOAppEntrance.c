@@ -30,8 +30,8 @@
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
 #define app_log_trace() custom_log_trace("APP")
 
-static volatile ring_buffer_t rx_buffer;
-static volatile uint8_t       rx_data[1024];
+volatile ring_buffer_t  rx_buffer;
+volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
 
 /* MICO system callback: Restore default configuration provided by application */
 void appRestoreDefault_callback(mico_Context_t *inContext)
@@ -49,9 +49,10 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
 {
   app_log_trace();
   OSStatus err = kNoErr;
-  require_action(inContext, exit, err = kParamErr);
   mico_uart_config_t uart_config;
-
+  
+  require_action(inContext, exit, err = kParamErr);
+  
   sppProtocolInit( inContext );
 
   /*Bonjour for service searching*/

@@ -20,8 +20,8 @@
   ******************************************************************************
   */ 
 #include "MICO.h"
-#include "MICOSystemMonitor.h"
-#include "PlatformWDG.h"
+#include "MicoSystemMonitor.h"
+#include "MicoPlatform.h"
 
 
 #ifdef APPLICATION_WATCHDOG_TIMEOUT_SECONDS
@@ -48,7 +48,7 @@ OSStatus MICOStartSystemMonitor (mico_Context_t * const inContext)
 void mico_system_monitor_thread_main( void* arg )
 {
     (void)arg;
-    PlatformWDGInitialize(2*DEFAULT_SYSTEM_MONITOR_PERIOD);
+    MicoWdgInitialize(DEFAULT_SYSTEM_MONITOR_PERIOD + 500);
 
     memset(system_monitors, 0, sizeof(system_monitors));
 
@@ -69,7 +69,7 @@ void mico_system_monitor_thread_main( void* arg )
             }
         }
 
-        PlatformWDGReload();
+        MicoWdgReload();
         msleep(DEFAULT_SYSTEM_MONITOR_PERIOD);
     }
 

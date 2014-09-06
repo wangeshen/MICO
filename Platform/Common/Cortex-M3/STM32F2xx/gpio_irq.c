@@ -57,7 +57,7 @@ static uint8_t gpio_irq_management_initted = 0;
  *               Function Definitions
  ******************************************************/
 
-wiced_result_t gpio_irq_enable( gpio_port_t* gpio_port, gpio_pin_number_t gpio_pin_number, gpio_irq_trigger_t trigger, gpio_irq_handler_t handler, void* arg )
+OSStatus gpio_irq_enable( gpio_port_t* gpio_port, gpio_pin_number_t gpio_pin_number, gpio_irq_trigger_t trigger, gpio_irq_handler_t handler, void* arg )
 {
     uint32_t interrupt_line = (uint32_t) ( 1 << gpio_pin_number );
 
@@ -144,13 +144,13 @@ wiced_result_t gpio_irq_enable( gpio_port_t* gpio_port, gpio_pin_number_t gpio_p
         gpio_irq_data[gpio_pin_number].owner_port = gpio_port;
         gpio_irq_data[gpio_pin_number].handler    = handler;
         gpio_irq_data[gpio_pin_number].arg        = arg;
-        return WICED_SUCCESS;
+        return kNoErr;
     }
 
-    return WICED_ERROR;
+    return kGeneralErr;
 }
 
-wiced_result_t gpio_irq_disable( gpio_port_t* gpio_port, gpio_pin_number_t gpio_pin_number )
+OSStatus gpio_irq_disable( gpio_port_t* gpio_port, gpio_pin_number_t gpio_pin_number )
 {
     uint32_t interrupt_line     = (uint32_t) ( 1 << gpio_pin_number );
     uint8_t interrupt_line_used = 0;
@@ -197,10 +197,10 @@ wiced_result_t gpio_irq_disable( gpio_port_t* gpio_port, gpio_pin_number_t gpio_
         gpio_irq_data[gpio_pin_number].owner_port = 0;
         gpio_irq_data[gpio_pin_number].handler    = 0;
         gpio_irq_data[gpio_pin_number].arg        = 0;
-        return WICED_SUCCESS;
+        return kNoErr;
     }
 
-    return WICED_ERROR;
+    return kGeneralErr;
 }
 
 void gpio_irq( void )

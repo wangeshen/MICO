@@ -9,8 +9,8 @@
  */
 #include "stm32f2xx_platform.h"
 #include "MICOPlatform.h"
-#include "wwd_assert.h"
 #include "rtc.h"
+#include "debug.h"
 
 /******************************************************
  *                   Enumerations
@@ -29,8 +29,8 @@ typedef enum
 
 #if defined(WICED_ENABLE_MCU_RTC) && !defined(WICED_DISABLE_MCU_POWERSAVE)
 static wiced_result_t     stm32f2_rtc_change_clock( rtc_clock_state_t* current, rtc_clock_state_t target );
-static void               add_second_to_time( wiced_rtc_time_t* time );
-static void               subtract_second_from_time( wiced_rtc_time_t* time );
+static void               add_second_to_time( mico_rtc_time_t* time );
+static void               subtract_second_from_time( mico_rtc_time_t* time );
 static int                add_1p25ms_contribution( uint32_t ms, uint32_t* seconds_contribution );
 static wiced_result_t     compensate_time_error( uint32_t sec, wiced_bool_t subtract );
 static void               reset_rtc_values( void );
@@ -68,7 +68,7 @@ const char leap_days[]=
 /******************************************************
  *               Variables Definitions
  ******************************************************/
-wiced_rtc_time_t    saved_rtc_time;
+mico_rtc_time_t    saved_rtc_time;
 rtc_clock_state_t   current_clock_state = CLOCKING_EVERY_SEC;
 uint16_t            current_ms_left_over=0;
 static int rtc_reset_fail = 0;
@@ -98,7 +98,7 @@ static uint32_t convert_rtc_calendar_values_to_units_passed( void )
     }
 
     current_year = rtc_read_date.RTC_Year;
-    wiced_assert("Inappropriate month value in RTC", (rtc_read_date.RTC_Month != 0) );
+    check(rtc_read_date.RTC_Month != 0);
     if( rtc_read_date.RTC_Month != 0 )
     {
         /* Calculate number of days passed in the current year and add them to previous days value */
@@ -111,7 +111,7 @@ static uint32_t convert_rtc_calendar_values_to_units_passed( void )
     /* Convert passed hours, seconds and minutes to seconds */
     temp1 = rtc_read_time.RTC_Seconds + rtc_read_time.RTC_Minutes*NUM_SECONDS_IN_MINUTE + rtc_read_time.RTC_Hours*NUM_SECONDS_IN_HOUR;
 
-    wiced_assert("Inappropriate date value in RTC", ( rtc_read_date.RTC_Date != 0 ) );
+    check_string(rtc_read_date.RTC_Date != 0, "Inappropriate date value in RTC" );
 
     /* Convert passed days to seconds */
     if( rtc_read_date.RTC_Date != 0 )
@@ -127,20 +127,23 @@ static uint32_t convert_rtc_calendar_values_to_units_passed( void )
 
 static void reset_rtc_values( void )
 {
-    ErrorStatus status;
+    ErrorStatus status = ERROR;
+    int retry = 0;
 
     rtc_reset_fail = 0;
     /* Disable write protection of rtc registers */
-    RTC_WriteProtectionCmd(DISABLE);
-    status = RTC_EnterInitMode();
-    REFERENCE_DEBUG_ONLY_VARIABLE(status);
-    wiced_assert( "Rtc can not enter intialisation mode", status==SUCCESS )
-
+    while(status == ERROR || retry < 20){
+        RTC_WriteProtectionCmd(DISABLE);
+        status = RTC_EnterInitMode();
+        retry ++;
+    }
+    
+    check_string( status==SUCCESS, "Rtc can not enter intialisation mode");
     /* Reset calendar date registers */
     RTC->TR = 0;
     RTC_ExitInitMode();
     status = RTC_WaitForSynchro();
-    wiced_assert( "Rtc can not synchronize", status==SUCCESS )
+    check_string( status==SUCCESS, "Rtc can not synchronize");
 
     /* Enable write protection of rtc registers */
     RTC_WriteProtectionCmd(ENABLE);
@@ -148,15 +151,15 @@ static void reset_rtc_values( void )
     /* Disable write protection of the rtc registers */
     RTC_WriteProtectionCmd(DISABLE);
     status = RTC_EnterInitMode();
-    wiced_assert( "Rtc can not enter intialisation mode", status==SUCCESS )
+    check_string( status==SUCCESS, "Rtc can not enter intialisation mode");
 
     /* 2000 year 01/01 */
     RTC->TR = 0;
-    RTC->DR= 0;
-    RTC->DR= ( 1<<13 ) | ( 1<<8 ) | ( 1<<0 );
+    RTC->DR = 0;
+    RTC->DR = ( 1<<13 ) | ( 1<<8 ) | ( 1<<0 );
     RTC_ExitInitMode();
     status = RTC_WaitForSynchro();
-    wiced_assert( "Rtc can not synchronize", status==SUCCESS );
+    check_string( status==SUCCESS, "Rtc can not synchronize" );
 
     /* Enable write protection of rtc registers */
     RTC_WriteProtectionCmd(ENABLE);
@@ -164,7 +167,7 @@ static void reset_rtc_values( void )
         rtc_reset_fail = 1;
 }
 
-static wiced_result_t stm32f2_rtc_change_clock( rtc_clock_state_t* current, rtc_clock_state_t target )
+static OSStatus stm32f2_rtc_change_clock( rtc_clock_state_t* current, rtc_clock_state_t target )
 {
     uint8_t sync_div;
     uint8_t async_div;
@@ -185,7 +188,7 @@ static wiced_result_t stm32f2_rtc_change_clock( rtc_clock_state_t* current, rtc_
             /* Enable initialisation mode */
             status = RTC_EnterInitMode();
             REFERENCE_DEBUG_ONLY_VARIABLE(status);
-            wiced_assert( "Rtc can not enter intialisation mode", status==SUCCESS )
+            check_string( status==SUCCESS, "Rtc can not enter intialisation mode" );
 
             /* Update RTC prescaler */
             RTC->PRER = (uint32_t)( sync_div );
@@ -195,11 +198,11 @@ static wiced_result_t stm32f2_rtc_change_clock( rtc_clock_state_t* current, rtc_
             /* Enable write proteciton of rtc registers back */
             RTC_WriteProtectionCmd(ENABLE);
             *current = CLOCKING_EVERY_1p25MSEC;
-            return WICED_SUCCESS;
+            return kNoErr;
         }
         else
         {
-            return WICED_SUCCESS;
+            return kNoErr;
         }
     }
     else if( *current == CLOCKING_EVERY_1p25MSEC )
@@ -216,7 +219,7 @@ static wiced_result_t stm32f2_rtc_change_clock( rtc_clock_state_t* current, rtc_
 
             /* Enable initialisation mode */
             status = RTC_EnterInitMode();
-            wiced_assert( "Rtc can not enter intialisation mode", status==SUCCESS )
+            check_string( status==SUCCESS, "Rtc can not enter intialisation mode" );
 
             /* Update RTC prescaler */
             RTC->PRER = (uint32_t)( sync_div );
@@ -227,24 +230,24 @@ static wiced_result_t stm32f2_rtc_change_clock( rtc_clock_state_t* current, rtc_
             /* Enable write proteciton of rtc registers back */
             RTC_WriteProtectionCmd(ENABLE);
             *current = CLOCKING_EVERY_SEC;
-            return WICED_SUCCESS;
+            return kNoErr;
         }
         else
         {
-            return WICED_SUCCESS;
+            return kNoErr;
         }
     }
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-static wiced_result_t platform_get_rtc_time(wiced_rtc_time_t* time)
+static OSStatus platform_get_rtc_time(mico_rtc_time_t* time)
 {
     RTC_TimeTypeDef rtc_read_time;
     RTC_DateTypeDef rtc_read_date;
 
     if( time == NULL )
     {
-        return WICED_BADARG;
+        return kParamErr;
     }
 
     /* save current rtc time */
@@ -260,13 +263,13 @@ static wiced_result_t platform_get_rtc_time(wiced_rtc_time_t* time)
     time->month= rtc_read_date.RTC_Month;
     time->year = rtc_read_date.RTC_Year;
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
 
 #ifdef WICED_ENABLE_MCU_RTC /* link this function only when powersave is enabled and RTC is enabled at the same time */
 
-static void add_second_to_time( wiced_rtc_time_t* time )
+static void add_second_to_time( mico_rtc_time_t* time )
 {
     if ( time->sec == 59 )
     {
@@ -350,7 +353,7 @@ static void add_second_to_time( wiced_rtc_time_t* time )
     }
 }
 
-static void subtract_second_from_time( wiced_rtc_time_t* time )
+static void subtract_second_from_time( mico_rtc_time_t* time )
 {
     if ( time->sec == 0 )
     {
@@ -476,7 +479,7 @@ static int add_1p25ms_contribution( uint32_t units_1p25ms, uint32_t* seconds_con
 #endif /* #ifdef WICED_ENABLE_MCU_RTC */
 
 
-wiced_result_t rtc_sleep_entry ( void )
+OSStatus rtc_sleep_entry ( void )
 {
 
 //#ifdef RTC_ENABLED /* !!If we dont read the time and store it. get an error while trying to enter STM RTC initialisation mode */
@@ -490,11 +493,11 @@ wiced_result_t rtc_sleep_entry ( void )
     /* Change the clocking state of the RTC, so it ticks every 1.25ms while cpu is sleeping - 800Hz clock */
     stm32f2_rtc_change_clock( &current_clock_state, CLOCKING_EVERY_1p25MSEC );
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
 
-wiced_result_t rtc_sleep_abort( void )
+OSStatus rtc_sleep_abort( void )
 {
     /* Change the clocking state of the RTC, so its tick is back to normal */
     stm32f2_rtc_change_clock( &current_clock_state, CLOCKING_EVERY_SEC );
@@ -504,11 +507,11 @@ wiced_result_t rtc_sleep_abort( void )
     /* restore time saved before */
     platform_set_rtc_time( &saved_rtc_time );
 //#endif /* #ifdef RTC_ENABLED */
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
 
-wiced_result_t rtc_sleep_exit( unsigned long requested_sleep_time, unsigned long *cpu_sleep_time )
+OSStatus rtc_sleep_exit( unsigned long requested_sleep_time, unsigned long *cpu_sleep_time )
 {
 
     uint32_t    time_units_passed_since_powersave_enter; /* time unit is 1.25ms when we are sleeping */
@@ -561,22 +564,22 @@ wiced_result_t rtc_sleep_exit( unsigned long requested_sleep_time, unsigned long
         *cpu_sleep_time = 1;
     }
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
 #endif /* #ifndef WICED_DISABLE_MCU_POWERSAVE */
 
 
-wiced_result_t platform_set_rtc_time( wiced_rtc_time_t* time )
+OSStatus platform_set_rtc_time( mico_rtc_time_t* time )
 {
     RTC_TimeTypeDef rtc_write_time;
     RTC_DateTypeDef rtc_write_date;
-    wiced_bool_t    valid = WICED_FALSE;
+    bool    valid = false;
 
-    WICED_VERIFY_TIME(time, valid);
-    if( valid == WICED_FALSE )
+    MICO_VERIFY_TIME(time, valid);
+    if( valid == false )
     {
-        return WICED_BADARG;
+        return kParamErr;
     }
     rtc_write_time.RTC_Seconds = time->sec;
     rtc_write_time.RTC_Minutes = time->min;
@@ -589,7 +592,7 @@ wiced_result_t platform_set_rtc_time( wiced_rtc_time_t* time )
 
     RTC_SetTime( RTC_Format_BIN, &rtc_write_time );
     RTC_SetDate( RTC_Format_BIN, &rtc_write_date );
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
 

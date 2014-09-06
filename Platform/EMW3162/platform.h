@@ -238,7 +238,7 @@ typedef enum
     MICO_ADC_2,
     MICO_ADC_3,
     MICO_ADC_MAX, /* Denotes the total number of ADC port aliases. Not a valid ADC alias */
-} wiced_adc_t;
+} mico_adc_t;
 
 typedef enum
 {
@@ -264,6 +264,7 @@ typedef enum
 #define MICO_LED2           (MICO_GPIO_13)
 #define MICO_RF_LED         (MICO_GPIO_16)
 #define EasyLink_BUTTON     (MICO_GPIO_11)
+#define Standby_SEL         (MICO_GPIO_29)
 #define MICO_BUTTON2        (MICO_GPIO_14)
 #define MICO_THERMISTOR     (MICO_GPIO_4)
 

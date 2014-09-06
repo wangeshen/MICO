@@ -6,11 +6,13 @@
 #include "EMW3162/platform_common_config.h"
 #include "stm32f2xx_platform.h"
 #include "stm32f2xx.h"
+#include "debug.h"
 
 /******************************************************
  *                    Constants
  ******************************************************/
-
+#define MAX_NUM_SPI_PRESCALERS     (8)
+#define SPI_DMA_TIMEOUT_LOOPS      (10000)
 
 
 /******************************************************
@@ -24,18 +26,51 @@
 /******************************************************
  *                    Structures
  ******************************************************/
+typedef struct
+{
+    uint16_t factor;
+    uint16_t prescaler_value;
+} spi_baudrate_division_mapping_t;
+
+
 
 /******************************************************
  *               Variables Definitions
  ******************************************************/
+static const uint32_t spi_transfer_complete_flags[]=
+{
+    /* for every stream get a transfer complete flag */
+    [0] =  DMA_FLAG_TCIF0,
+    [1] =  DMA_FLAG_TCIF1,
+    [2] =  DMA_FLAG_TCIF2,
+    [3] =  DMA_FLAG_TCIF3,
+    [4] =  DMA_FLAG_TCIF4,
+    [5] =  DMA_FLAG_TCIF5,
+    [6] =  DMA_FLAG_TCIF6,
+    [7] =  DMA_FLAG_TCIF7,
+};
+
+static const spi_baudrate_division_mapping_t spi_baudrate_prescalers[MAX_NUM_SPI_PRESCALERS] =
+{
+    { 2,   SPI_BaudRatePrescaler_2   },
+    { 4,   SPI_BaudRatePrescaler_4   },
+    { 8,   SPI_BaudRatePrescaler_8   },
+    { 16,  SPI_BaudRatePrescaler_16  },
+    { 32,  SPI_BaudRatePrescaler_32  },
+    { 64,  SPI_BaudRatePrescaler_64  },
+    { 128, SPI_BaudRatePrescaler_128 },
+    { 256, SPI_BaudRatePrescaler_256 },
+};
+
+static mico_spi_device_t* current_spi_device = NULL;
 
 /******************************************************
  *               Function Declarations
  ******************************************************/
 
-static wiced_result_t wiced_spi_configure_baudrate( uint32_t speed, uint16_t* prescaler );
-static wiced_result_t spi_dma_transfer            ( const wiced_spi_device_t* spi );
-static void           spi_dma_config              ( const wiced_spi_device_t* spi, wiced_spi_message_segment_t* message );
+static OSStatus wiced_spi_configure_baudrate( uint32_t speed, uint16_t* prescaler );
+static OSStatus spi_dma_transfer            ( const mico_spi_device_t* spi );
+static void           spi_dma_config              ( const mico_spi_device_t* spi, mico_spi_message_segment_t* message );
 
 /******************************************************
  *               Function Definitions
@@ -45,21 +80,21 @@ static OSStatus wiced_spi_configure_baudrate( uint32_t speed, uint16_t* prescale
 {
     uint8_t i;
 
-    wiced_assert("Bad args", prescaler != NULL);
+    check_string( prescaler != NULL, "Bad args");
 
     for( i = 0 ; i < MAX_NUM_SPI_PRESCALERS ; i++ )
     {
         if( ( 60000000 / spi_baudrate_prescalers[i].factor ) <= speed )
         {
             *prescaler = spi_baudrate_prescalers[i].prescaler_value;
-            return WICED_SUCCESS;
+            return kNoErr;
         }
     }
 
-    return WICED_ERROR;
+    return kGeneralErr;
 }
 
-static OSStatus spi_dma_transfer( const wiced_spi_device_t* spi )
+static OSStatus spi_dma_transfer( const mico_spi_device_t* spi )
 {
     uint32_t loop_count;
 
@@ -77,20 +112,20 @@ static OSStatus spi_dma_transfer( const wiced_spi_device_t* spi )
         if ( loop_count >= (uint32_t) SPI_DMA_TIMEOUT_LOOPS )
         {
             MicoGpioOutputHigh(spi->chip_select);
-            return WICED_TIMEOUT;
+            return kTimeoutErr;
         }
     }
 
     MicoGpioOutputHigh(spi->chip_select);
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-static void spi_dma_config( const wiced_spi_device_t* spi, wiced_spi_message_segment_t* message )
+static void spi_dma_config( const mico_spi_device_t* spi, mico_spi_message_segment_t* message )
 {
     DMA_InitTypeDef dma_init;
     uint8_t         dummy = 0xFF;
 
-    wiced_assert("Bad args", (spi != NULL) && (message != NULL))
+    check_string( (spi != NULL) && (message != NULL), "Bad args");
 
     /* Setup DMA for SPI TX if it is enabled */
     DMA_DeInit( spi_mapping[spi->port].tx_dma_stream );
@@ -161,15 +196,15 @@ static void spi_dma_config( const wiced_spi_device_t* spi, wiced_spi_message_seg
     /* TODO: Init RX DMA finish semaphore */
 }
 
-wiced_result_t wiced_spi_init( const wiced_spi_device_t* spi )
+OSStatus wiced_spi_init( const mico_spi_device_t* spi )
 {
     GPIO_InitTypeDef gpio_init_structure;
-    wiced_result_t   result;
+    OSStatus   result;
     SPI_InitTypeDef  spi_init;
 
-    wiced_assert("Bad args", spi != NULL);
+    check_string( spi != NULL, "Bad args");
 
-    MCU_CLOCKS_NEEDED();
+    mico_mcu_powersave_config(false);
 
     /* Init SPI GPIOs */
     gpio_init_structure.GPIO_Mode  = GPIO_Mode_AF;
@@ -190,7 +225,7 @@ wiced_result_t wiced_spi_init( const wiced_spi_device_t* spi )
 
     /* Configure baudrate */
     result = wiced_spi_configure_baudrate( spi->speed, &spi_init.SPI_BaudRatePrescaler );
-    if ( result != WICED_SUCCESS )
+    if ( result != kNoErr )
     {
         return result;
     }
@@ -205,14 +240,14 @@ wiced_result_t wiced_spi_init( const wiced_spi_device_t* spi )
         if ( spi->mode & SPI_USE_DMA )
         {
             /* 16 bit mode is not supported for a DMA */
-            return WICED_ERROR;
+            return kGeneralErr;
         }
         spi_init.SPI_DataSize = SPI_DataSize_16b;
     }
     else
     {
         /* Requested mode is not supported */
-        return WICED_BADOPTION;
+        return kOptionErr;
     }
 
     /* Configure MSB or LSB */
@@ -256,22 +291,22 @@ wiced_result_t wiced_spi_init( const wiced_spi_device_t* spi )
     SPI_Init( spi_mapping[spi->port].spi_regs, &spi_init );
     SPI_Cmd ( spi_mapping[spi->port].spi_regs, ENABLE );
 
-    MCU_CLOCKS_NOT_NEEDED();
+    mico_mcu_powersave_config(true);
 
-    current_spi_device = (wiced_spi_device_t*)spi;
+    current_spi_device = (mico_spi_device_t*)spi;
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-wiced_result_t wiced_spi_transfer( const wiced_spi_device_t* spi, wiced_spi_message_segment_t* segments, uint16_t number_of_segments )
+OSStatus wiced_spi_transfer( const mico_spi_device_t* spi, mico_spi_message_segment_t* segments, uint16_t number_of_segments )
 {
-    wiced_result_t result = WICED_SUCCESS;
+    OSStatus       result = kNoErr;
     uint16_t       i;
     uint32_t       count = 0;
 
-    wiced_assert("Bad args", (spi != NULL) && (segments != NULL) && (number_of_segments != 0));
+    check_string( (spi != NULL) && (segments != NULL) && (number_of_segments != 0), "Bad args");
 
-    MCU_CLOCKS_NEEDED();
+    mico_mcu_powersave_config(false);
 
     /* If the given SPI device is not the current SPI device, initialise */
     if ( spi != current_spi_device )
@@ -289,7 +324,7 @@ wiced_result_t wiced_spi_transfer( const wiced_spi_device_t* spi, wiced_spi_mess
         {
             spi_dma_config( spi, &segments[i] );
             result = spi_dma_transfer( spi );
-            if ( result != WICED_SUCCESS )
+            if ( result != kNoErr )
             {
                 goto cleanup_transfer;
             }
@@ -343,7 +378,7 @@ wiced_result_t wiced_spi_transfer( const wiced_spi_device_t* spi, wiced_spi_mess
                 /* Check that the message length is a multiple of 2 */
                 if ( ( count % 2 ) == 0 )
                 {
-                    result = WICED_ERROR;
+                    result = kGeneralErr;
                     goto cleanup_transfer;
                 }
 
@@ -382,16 +417,16 @@ wiced_result_t wiced_spi_transfer( const wiced_spi_device_t* spi, wiced_spi_mess
 cleanup_transfer:
     MicoGpioOutputHigh(spi->chip_select);
 
-    MCU_CLOCKS_NOT_NEEDED();
+    mico_mcu_powersave_config(true);
 
     return result;
 }
 
-wiced_result_t wiced_spi_deinit( const wiced_spi_device_t* spi )
+OSStatus wiced_spi_deinit( const mico_spi_device_t* spi )
 {
     GPIO_InitTypeDef gpio_init_structure;
 
-    MCU_CLOCKS_NEEDED();
+    mico_mcu_powersave_config(false);
 
     /* De-init and disable SPI */
     SPI_Cmd( spi_mapping[ spi->port ].spi_regs, DISABLE );
@@ -419,9 +454,9 @@ wiced_result_t wiced_spi_deinit( const wiced_spi_device_t* spi )
         current_spi_device = NULL;
     }
 
-    MCU_CLOCKS_NOT_NEEDED();
+    mico_mcu_powersave_config(true);
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
 

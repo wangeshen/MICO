@@ -8,17 +8,13 @@
  * written permission of Broadcom Corporation.
  */
 
-#include "wwd_bus_protocol.h"
-#include "Platform/wwd_sdio_interface.h"
-#include "Platform/wwd_bus_interface.h"
-#include "stm32f2xx.h"
-#include "stm32f2xx_syscfg.h"
+#include "MicoRtos.h"
 #include "misc.h"
-#include "wwd_assert.h"
-#include "RTOS/wwd_rtos_interface.h"
+#include "wwd_bus.h"
 #include "string.h" /* For memcpy */
 #include "gpio_irq.h"
 #include "platform_common_config.h"
+#include "Debug.h"
 
 /* Powersave functionality */
 #ifndef WICED_DISABLE_MCU_POWERSAVE
@@ -85,9 +81,9 @@ static uint32_t  user_data_size;
 static uint8_t*  dma_data_source;
 static uint32_t  dma_transfer_size;
 
-static host_semaphore_type_t sdio_transfer_finished_semaphore;
+static mico_semaphore_t sdio_transfer_finished_semaphore;
 
-static wiced_bool_t             sdio_transfer_failed;
+static bool             sdio_transfer_failed;
 static bus_transfer_direction_t current_transfer_direction;
 static uint32_t                 current_command;
 
@@ -100,6 +96,8 @@ static sdio_block_size_t find_optimal_block_size    ( uint32_t data_size );
 static void              sdio_prepare_data_transfer ( bus_transfer_direction_t direction, sdio_block_size_t block_size, /*@unique@*/ uint8_t* data, uint16_t data_size ) /*@modifies dma_data_source, user_data, user_data_size, dma_transfer_size@*/;
 
 void dma_irq ( void );
+OSStatus host_platform_sdio_transfer( bus_transfer_direction_t direction, sdio_command_t command, sdio_transfer_mode_t mode, sdio_block_size_t block_size, uint32_t argument, /*@null@*/ uint32_t* data, uint16_t data_size, sdio_response_needed_t response_expected, /*@out@*/ /*@null@*/ uint32_t* response );
+extern void wiced_platform_notify_irq( void );
 
 /******************************************************
  *             Function definitions
@@ -118,10 +116,9 @@ void sdio_irq( void )
 
     if ( ( intstatus & ( SDIO_STA_CCRCFAIL | SDIO_STA_DCRCFAIL | SDIO_STA_TXUNDERR | SDIO_STA_RXOVERR  | SDIO_STA_STBITERR )) != 0 )
     {
-        //wiced_assert("sdio error flagged",0);
-        sdio_transfer_failed = WICED_TRUE;
+        sdio_transfer_failed = true;
         SDIO->ICR = (uint32_t) 0xffffffff;
-        host_rtos_set_semaphore( &sdio_transfer_finished_semaphore, WICED_TRUE );
+        mico_rtos_set_semaphore( &sdio_transfer_finished_semaphore );
     }
     else
     {
@@ -129,8 +126,8 @@ void sdio_irq( void )
         {
             if ( ( SDIO->RESP1 & 0x800 ) != 0 )
             {
-                sdio_transfer_failed = WICED_TRUE;
-                host_rtos_set_semaphore( &sdio_transfer_finished_semaphore, WICED_TRUE );
+                sdio_transfer_failed = true;
+                mico_rtos_set_semaphore( &sdio_transfer_finished_semaphore );
             }
             else if (current_command == SDIO_CMD_53)
             {
@@ -169,15 +166,15 @@ void sdio_irq( void )
 /*@-exportheader@*/ /* Function picked up by linker script */
 void dma_irq( void )
 {
-    wiced_result_t result;
+    OSStatus result;
 
     /* Clear interrupt */
     DMA2->LIFCR = (uint32_t) (0x3F << 22);
 
-    result = host_rtos_set_semaphore( &sdio_transfer_finished_semaphore, WICED_TRUE );
+    result = mico_rtos_set_semaphore( &sdio_transfer_finished_semaphore );
 
     /* check result if in debug mode */
-    wiced_assert( "failed to set dma semaphore", result == WICED_SUCCESS );
+    check_string(result == kNoErr, "failed to set dma semaphore" );
 
     /*@-noeffect@*/
     (void) result; /* ignore result if in release mode */
@@ -195,7 +192,7 @@ static void sdio_disable_bus_irq( void )
     SDIO->MASK = 0;
 }
 
-wiced_result_t host_enable_oob_interrupt( void )
+OSStatus host_enable_oob_interrupt( void )
 {
     GPIO_InitTypeDef gpio_init_structure;
 
@@ -212,7 +209,7 @@ wiced_result_t host_enable_oob_interrupt( void )
     GPIO_Init( WL_GPIO1_BANK, &gpio_init_structure );
 
     gpio_irq_enable( SDIO_OOB_IRQ_BANK, SDIO_OOB_IRQ_PIN, IRQ_TRIGGER_RISING_EDGE, sdio_oob_irq_handler, 0 );
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
 uint8_t host_platform_get_oob_interrupt_pin( void )
@@ -229,16 +226,16 @@ uint8_t host_platform_get_oob_interrupt_pin( void )
     }
 }
 
-wiced_result_t host_platform_bus_init( void )
+OSStatus host_platform_bus_init( void )
 {
     SDIO_InitTypeDef sdio_init_structure;
     NVIC_InitTypeDef nvic_init_structure;
-    wiced_result_t result;
+    OSStatus result;
 
     MCU_CLOCKS_NEEDED();
 
-    result = host_rtos_init_semaphore( &sdio_transfer_finished_semaphore );
-    if ( result != WICED_SUCCESS )
+    result = mico_rtos_init_semaphore( &sdio_transfer_finished_semaphore, 1 );
+    if ( result != kNoErr )
     {
         return result;
     }
@@ -318,12 +315,12 @@ wiced_result_t host_platform_bus_init( void )
 
     MCU_CLOCKS_NOT_NEEDED();
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-wiced_result_t host_platform_sdio_enumerate( void )
+OSStatus host_platform_sdio_enumerate( void )
 {
-    wiced_result_t result;
+    OSStatus       result;
     uint32_t       loop_count;
     uint32_t       data = 0;
 
@@ -341,23 +338,23 @@ wiced_result_t host_platform_sdio_enumerate( void )
         loop_count++;
         if ( loop_count >= (uint32_t) SDIO_ENUMERATION_TIMEOUT_MS )
         {
-            return WICED_TIMEOUT;
+            return kTimeoutErr;
         }
-    } while ( ( result != WICED_SUCCESS ) && ( host_rtos_delay_milliseconds( (uint32_t) 1 ), ( 1 == 1 ) ) );
+    } while ( ( result != kNoErr ) && ( mico_thread_msleep( (uint32_t) 1 ), ( 1 == 1 ) ) );
     /* If you're stuck here, check the platform matches your hardware */
 
     /* Send CMD7 with the returned RCA to select the card */
     host_platform_sdio_transfer( BUS_WRITE, SDIO_CMD_7, SDIO_BYTE_MODE, SDIO_1B_BLOCK, data, 0, 0, RESPONSE_NEEDED, NULL );
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-wiced_result_t host_platform_bus_deinit( void )
+OSStatus host_platform_bus_deinit( void )
 {
     NVIC_InitTypeDef nvic_init_structure;
-    wiced_result_t   result;
+    OSStatus   result;
 
-    result = host_rtos_deinit_semaphore( &sdio_transfer_finished_semaphore );
+    result = mico_rtos_deinit_semaphore( &sdio_transfer_finished_semaphore );
 
     MCU_CLOCKS_NEEDED();
 
@@ -399,13 +396,13 @@ wiced_result_t host_platform_bus_deinit( void )
     return result;
 }
 
-wiced_result_t host_platform_sdio_transfer( bus_transfer_direction_t direction, sdio_command_t command, sdio_transfer_mode_t mode, sdio_block_size_t block_size, uint32_t argument, /*@null@*/ uint32_t* data, uint16_t data_size, sdio_response_needed_t response_expected, /*@out@*/ /*@null@*/ uint32_t* response )
+OSStatus host_platform_sdio_transfer( bus_transfer_direction_t direction, sdio_command_t command, sdio_transfer_mode_t mode, sdio_block_size_t block_size, uint32_t argument, /*@null@*/ uint32_t* data, uint16_t data_size, sdio_response_needed_t response_expected, /*@out@*/ /*@null@*/ uint32_t* response )
 {
     uint32_t loop_count = 0;
-    wiced_result_t result;
+    OSStatus result;
     uint16_t attempts = 0;
 
-    wiced_assert("Bad args", !((command == SDIO_CMD_53) && (data == NULL)));
+    check_string(!((command == SDIO_CMD_53) && (data == NULL)), "Bad args" );
 
     if ( response != NULL )
     {
@@ -419,13 +416,13 @@ wiced_result_t host_platform_sdio_transfer( bus_transfer_direction_t direction, 
 
 restart:
     SDIO->ICR = (uint32_t) 0xFFFFFFFF;
-    sdio_transfer_failed = WICED_FALSE;
+    sdio_transfer_failed = false;
     ++attempts;
 
     /* Check if we've tried too many times */
     if (attempts >= (uint16_t) BUS_LEVEL_MAX_RETRIES)
     {
-        result = WICED_ERROR;
+        result = kGeneralErr;
         goto exit;
     }
 
@@ -458,27 +455,20 @@ restart:
         SDIO->CMD = (uint32_t) ( command | SDIO_Response_Short | SDIO_Wait_No | SDIO_CPSM_Enable );
 
         /* Wait for the whole transfer to complete */
-        result = host_rtos_get_semaphore( &sdio_transfer_finished_semaphore, (uint32_t) 50, WICED_TRUE );
-        if ( result != WICED_SUCCESS )
+        result = mico_rtos_get_semaphore( &sdio_transfer_finished_semaphore, (uint32_t) 50 );
+        if ( result != kNoErr )
         {
             goto exit;
         }
 
-        if ( sdio_transfer_failed == WICED_TRUE )
+        if ( sdio_transfer_failed == true )
         {
             goto restart;
         }
 
         /* Check if there were any SDIO errors */
-        if ( ( SDIO->STA & ( SDIO_STA_DTIMEOUT | SDIO_STA_CTIMEOUT ) ) != 0 )
-        {
-            goto restart;
-        }
-        else if ( ( ( SDIO->STA & ( SDIO_STA_CCRCFAIL | SDIO_STA_DCRCFAIL | SDIO_STA_TXUNDERR | SDIO_STA_RXOVERR ) ) != 0 ) )
-        {
-            wiced_assert( "SDIO communication failure", 0 );
-            goto restart;
-        }
+        require(( SDIO->STA & ( SDIO_STA_DTIMEOUT | SDIO_STA_CTIMEOUT ) ) == 0, restart);
+        require_string(( SDIO->STA & ( SDIO_STA_CCRCFAIL | SDIO_STA_DCRCFAIL | SDIO_STA_TXUNDERR | SDIO_STA_RXOVERR ) ) == 0, restart, "SDIO communication failure");
 
         /* Wait till complete */
         loop_count = (uint32_t) SDIO_TX_RX_COMPLETE_TIMEOUT_LOOPS;
@@ -520,7 +510,7 @@ restart:
     {
         *response = SDIO->RESP1;
     }
-    result = WICED_SUCCESS;
+    result = kNoErr;
 
 exit:
     MCU_CLOCKS_NOT_NEEDED();

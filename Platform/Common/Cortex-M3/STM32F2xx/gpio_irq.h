@@ -10,7 +10,6 @@
 #pragma once
 
 #include <stdint.h>
-#include "wwd_constants.h"
 #include "stm32f2xx.h"
 #include "MICOPlatform.h"
 
@@ -51,5 +50,5 @@ typedef mico_gpio_irq_handler_t gpio_irq_handler_t;
 void gpio_irq( void );
 
 /* GPIO Interrupt API */
-wiced_result_t gpio_irq_enable ( gpio_port_t* gpio_port, gpio_pin_number_t gpio_pin_number, gpio_irq_trigger_t trigger, gpio_irq_handler_t handler, void* arg );
-wiced_result_t gpio_irq_disable( gpio_port_t* gpio_port, gpio_pin_number_t gpio_pin_number );
+OSStatus gpio_irq_enable ( gpio_port_t* gpio_port, gpio_pin_number_t gpio_pin_number, gpio_irq_trigger_t trigger, gpio_irq_handler_t handler, void* arg );
+OSStatus gpio_irq_disable( gpio_port_t* gpio_port, gpio_pin_number_t gpio_pin_number );

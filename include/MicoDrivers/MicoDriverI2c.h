@@ -32,6 +32,10 @@
 
 #define MicoGpioInputGet wiced_gpio_input_get
 
+#define I2C_DEVICE_DMA_MASK_POSN 0
+#define I2C_DEVICE_NO_DMA    (0 << I2C_DEVICE_DMA_MASK_POSN)
+#define I2C_DEVICE_USE_DMA   (1 << I2C_DEVICE_DMA_MASK_POSN)
+
 /******************************************************
  *                   Enumerations
  ******************************************************/
@@ -56,7 +60,7 @@ typedef enum
 
 typedef struct
 {
-    wiced_i2c_t                   port;
+    mico_i2c_t                   port;
     uint16_t                      address;       /* the address of the device on the i2c bus */
     mico_i2c_bus_address_width_t address_width;
     uint8_t                       flags;
@@ -99,7 +103,7 @@ typedef struct
  * @return    WICED_SUCCESS : on success.
  * @return    WICED_ERROR   : if an error occurred during initialisation
  */
-OSStatus wiced_i2c_init( mico_i2c_device_t* device );
+OSStatus MicoI2cInitialize( mico_i2c_device_t* device );
 
 
 /** Checks whether the device is available on a bus or not
@@ -111,7 +115,7 @@ OSStatus wiced_i2c_init( mico_i2c_device_t* device );
  * @return    WICED_TRUE : device is found.
  * @return    WICED_FALSE: device is not found
  */
-OSStatus wiced_i2c_probe_device( mico_i2c_device_t* device, int retries );
+bool MicoI2cProbeDevice( mico_i2c_device_t* device, int retries );
 
 
 /** Initialize the wiced_i2c_message_t structure for i2c tx transaction
@@ -127,7 +131,7 @@ OSStatus wiced_i2c_probe_device( mico_i2c_device_t* device, int retries );
  * @return    WICED_SUCCESS : message structure was initialised properly.
  * @return    WICED_BADARG: one of the arguments is given incorrectly
  */
-OSStatus wiced_i2c_init_tx_message(mico_i2c_message_t* message, const void* tx_buffer, uint16_t  tx_buffer_length, uint16_t retries , bool disable_dma);
+OSStatus MicoI2cBuildTxMessage(mico_i2c_message_t* message, const void* tx_buffer, uint16_t  tx_buffer_length, uint16_t retries , bool disable_dma);
 
 /** Initialize the wiced_i2c_message_t structure for i2c rx transaction
  *
@@ -142,7 +146,7 @@ OSStatus wiced_i2c_init_tx_message(mico_i2c_message_t* message, const void* tx_b
  * @return    WICED_SUCCESS : message structure was initialised properly.
  * @return    WICED_BADARG: one of the arguments is given incorrectly
  */
-OSStatus wiced_i2c_init_rx_message(mico_i2c_message_t* message, void* rx_buffer, uint16_t rx_buffer_length, uint16_t retries , bool disable_dma);
+OSStatus MicoI2cBuildRxMessage(mico_i2c_message_t* message, void* rx_buffer, uint16_t rx_buffer_length, uint16_t retries , bool disable_dma);
 
 
 /** Initialize the wiced_i2c_message_t structure for i2c combined transaction
@@ -160,7 +164,7 @@ OSStatus wiced_i2c_init_rx_message(mico_i2c_message_t* message, void* rx_buffer,
  * @return    WICED_SUCCESS : message structure was initialised properly.
  * @return    WICED_BADARG: one of the arguments is given incorrectly
  */
-OSStatus wiced_i2c_init_combined_message(mico_i2c_message_t* message, const void* tx_buffer, void* rx_buffer, uint16_t tx_buffer_length, uint16_t rx_buffer_length, uint16_t retries , bool disable_dma);
+OSStatus MicoI2cBuildCombinedMessage(mico_i2c_message_t* message, const void* tx_buffer, void* rx_buffer, uint16_t tx_buffer_length, uint16_t rx_buffer_length, uint16_t retries , bool disable_dma);
 
 
 /** Transmits and/or receives data over an I2C interface
@@ -172,7 +176,7 @@ OSStatus wiced_i2c_init_combined_message(mico_i2c_message_t* message, const void
  * @return    WICED_SUCCESS : on success.
  * @return    WICED_ERROR   : if an error occurred during message transfer
  */
-OSStatus wiced_i2c_transfer( mico_i2c_device_t* device, mico_i2c_message_t* message, uint16_t number_of_messages );
+OSStatus MicoI2cTransfer( mico_i2c_device_t* device, mico_i2c_message_t* message, uint16_t number_of_messages );
 
 
 /** Deinitialises an I2C device
@@ -182,7 +186,7 @@ OSStatus wiced_i2c_transfer( mico_i2c_device_t* device, mico_i2c_message_t* mess
  * @return    WICED_SUCCESS : on success.
  * @return    WICED_ERROR   : if an error occurred during deinitialisation
  */
-OSStatus wiced_i2c_deinit( mico_i2c_device_t* device );
+OSStatus MicoI2cFinalize( mico_i2c_device_t* device );
 
 
 

@@ -40,9 +40,9 @@ extern "C" {
  *               Function Declarations
  ******************************************************/
 
-extern unsigned long platform_power_down_hook ( unsigned long delay_ms );
+unsigned long platform_power_down_hook ( unsigned long delay_ms );
 
-extern void          platform_idle_hook       ( void );
+void          platform_idle_hook       ( void );
 
 
 #ifdef __cplusplus

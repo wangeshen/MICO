@@ -184,12 +184,7 @@
           <state>configUSE_MUTEXES</state>
           <state>configUSE_RECURSIVE_MUTEXES</state>
           <state>PLATFORM_STM32_VOLTAGE_2V7_TO_3V6</state>
-          <state>MXCHIP_3162</state>
-          <state>WICED_DISABLE_WATCHDOG</state>
-          <state>WICED_DISABLE_BOOTLOADER</state>
           <state>CPU_CLOCK_HZ=120000000</state>
-          <state>MXCHIP_LIBRARY</state>
-          <state>MXCHIP</state>
           <state>USE_FLASH_WIFI_IMAGE</state>
         </option>
         <option>
@@ -330,19 +325,9 @@
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc</state>
           <state>$PROJ_DIR$\..\..\..\include</state>
           <state>$PROJ_DIR$\..\..\..\External\JSON-C</state>
-          <state>$PROJ_DIR$\..\..\..\WWD</state>
-          <state>$PROJ_DIR$\..\..\..\WWD\SDIO</state>
-          <state>$PROJ_DIR$\..\..\..\WWD\Network</state>
-          <state>$PROJ_DIR$\..\..\..\Network\LwIP\wwd</state>
-          <state>$PROJ_DIR$\..\..\..\RTOS\FreeRTOS\wwd</state>
-          <state>$PROJ_DIR$\..\..\..\RTOS\FreeRTOS\ver7.1.0\Source\include</state>
           <state>$PROJ_DIR$\..\..\..\Platform\include</state>
-          <state>$PROJ_DIR$\..\..\..\RTOS\FreeRTOS\wwd\ARM_CM3</state>
-          <state>$PROJ_DIR$\..\..\..\RTOS\FreeRTOS\ver7.1.0\Source\portable\IAR\ARM_CM3</state>
-          <state>$PROJ_DIR$\..\..\..\WWD\include</state>
-          <state>$PROJ_DIR$\..\..\..\WWD\internal</state>
-          <state>$PROJ_DIR$\..\..\..\WWD\internal\chips\43362a2</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3</state>
+          <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2949,47 +2934,68 @@
     <group>
       <name>platforms</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverAdc.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverGpio.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverI2c.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverPwm.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverRng.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverRtc.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverSpi.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverUart.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverWdg.h</name>
       </file>
     </group>
     <file>
-      <name>$PROJ_DIR$\..\..\..\include\MICOPlatform.h</name>
+      <name>$PROJ_DIR$\..\..\..\include\MICO.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\include\MICORTOS.h</name>
+      <name>$PROJ_DIR$\..\..\..\include\MicoAES.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\include\MicoAlgorithm.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\include\MicoDefaults.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\include\MicoPlatform.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\include\MicoRTOS.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\include\MicoSocket.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\include\MicoSRPServer.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\include\MicoWlan.h</name>
     </file>
   </group>
   <group>
     <name>Library</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MICO_CM3.a</name>
-      <excluded>
-        <configuration>EMW3162_Debug</configuration>
-      </excluded>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\Library\MICOConfig.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\haibo\IAR_LIB\mico_cm3\Exe\mxchip.a</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\mxchipWNet_3161.a</name>
-      <excluded>
-        <configuration>EMW3162_Debug</configuration>
-      </excluded>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm3.a</name>
-      <excluded>
-        <configuration>EMW3162_Debug</configuration>
-      </excluded>
+      <name>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm3_sdio.a</name>
     </file>
   </group>
   <group>
@@ -3013,6 +3019,12 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\MICO\WAC\WAC.c</name>
+      </file>
+    </group>
+    <group>
+      <name>WPS</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\MICO\WPS\WPS.c</name>
       </file>
     </group>
     <file>
@@ -3059,6 +3071,12 @@
           </group>
           <group>
             <name>SPI</name>
+            <file>
+              <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\SPI\wwd_bus.c</name>
+              <excluded>
+                <configuration>EMW3162_Debug</configuration>
+              </excluded>
+            </file>
           </group>
           <group>
             <name>STM32F2xx_Drv</name>
@@ -3164,6 +3182,9 @@
             <file>
               <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\stm32f2xx_conf.h</name>
             </file>
+            <file>
+              <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\system_stm32f2xx.c</name>
+            </file>
           </group>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\gpio_irq.c</name>
@@ -3172,13 +3193,31 @@
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\gpio_irq.h</name>
           </file>
           <file>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverAdc.c</name>
+          </file>
+          <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverGpio.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverI2c.c</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverPwm.c</name>
           </file>
           <file>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverRng.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverRtc.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverSpi.c</name>
+          </file>
+          <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverUart.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverWdg.c</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\rtc.c</name>
@@ -3187,13 +3226,7 @@
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\startup_stm32f2xx_IAR.s</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\stm32f2xx_platform_mxchip.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\stm32f2xxMapping.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\watchdog.c</name>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\stm32f2xx_platform.c</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\wwd_platform.c</name>
@@ -3231,15 +3264,6 @@
     <file>
       <name>$PROJ_DIR$\..\..\..\Platform\PlatformFlash.c</name>
     </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\PlatformRandomNumber.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\PlatformRTC.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\PlatformWDG.c</name>
-    </file>
   </group>
   <group>
     <name>Support</name>
@@ -3276,15 +3300,6 @@
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\URLUtils.c</name>
     </file>
-  </group>
-  <group>
-    <name>WiFiDriver</name>
-    <group>
-      <name>SDIO</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\WWD\SDIO\wwd_bus_protocol.c</name>
-      </file>
-    </group>
   </group>
 </project>
 

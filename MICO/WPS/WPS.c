@@ -23,7 +23,7 @@
 #include "MICO.h"
 #include "MICONotificationCenter.h"
 
-#include "Platform.h"
+#include "MicoPlatform.h"
 #include "PlatformFlash.h"
 #include "StringUtils.h"
 #include "HTTPUtils.h"
@@ -63,7 +63,7 @@ void WPSNotify_WPSCompleteHandler(network_InitTypeDef_st *nwkpara, mico_Context_
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   wps_log("Get SSID: %s, Key: %s", inContext->flashContentInRam.micoSystemConfig.ssid, inContext->flashContentInRam.micoSystemConfig.user_key);
   ConfigWillStop(inContext);
-  PlatformSoftReboot();
+  MicoSystemReboot();
   return;
 
 /*EasyLink is not start*/    
@@ -78,7 +78,7 @@ exit:
   if(inContext->flashContentInRam.micoSystemConfig.configured != unConfigured){
     inContext->flashContentInRam.micoSystemConfig.configured = allConfigured;
     MICOUpdateConfiguration(inContext);
-    PlatformSoftReboot();
+    MicoSystemReboot();
   }
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   /*module should powd down in default setting*/ 

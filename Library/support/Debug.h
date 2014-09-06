@@ -24,8 +24,7 @@
 #define __Debug_h__
 
 #include "MICORTOS.h"
-
-
+#include "platform_assert.h"
 
 // ==== LOGGING ====
 #define SHORT_FILE strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__
@@ -120,6 +119,34 @@ extern mico_mutex_t stdio_tx_mutex;
         #define check( X )
     #endif
 #endif
+              
+//---------------------------------------------------------------------------------------------------------------------------
+/*! @defined    check_string
+    @abstract   Check that an expression is true (non-zero) with an explanation.
+    @discussion
+    
+    If expression evalulates to false, this prints debugging information (actual expression string, file, line number, 
+    function name, etc.) using the default debugging output method.
+    
+    Code inside check() statements is not compiled into production builds.
+*/
+
+#if( !defined( check_string ) )
+    #if( DEBUG )
+        #define check_string( X, STR )                                                                                  \
+            do                                                                                              \
+            {                                                                                               \
+                if( unlikely( !(X) ) )                                                                      \
+                {                                                                                           \
+                    debug_print_assert( 0, #X, STR, __FILE__, __LINE__, __PRETTY_FUNCTION__ );              \
+                    MICO_ASSERTION_FAIL_ACTION();                                                           \
+                }                                                                                           \
+                                                                                                            \
+            }   while( 1==0 )
+    #else
+        #define check_string( X, STR )
+    #endif
+#endif              
 
 //---------------------------------------------------------------------------------------------------------------------------
 /*! @defined    require

@@ -324,14 +324,14 @@ OSStatus startMFiWAC( mico_Context_t * const inContext, WACPlatformParameters_t 
   WAC_NetConfig.dhcpMode = DHCP_Server;
   StartNetwork(&WAC_NetConfig);
   
-//  err = wiced_wifi_manage_custom_ie( WICED_AP_INTERFACE, 
-//                                      WICED_ADD_CUSTOM_IE, 
-//                                      (uint8_t *)oui, 
-//                                      sub_type, 
-//                                      (void *)Elements, 
-//                                      ElementsLength, 
-//                                      VENDOR_IE_BEACON|VENDOR_IE_PROBE_RESPONSE);
-//  require_noerr(err, exit);
+  err = wiced_wifi_manage_custom_ie( WICED_AP_INTERFACE, 
+                                      WICED_ADD_CUSTOM_IE, 
+                                      (uint8_t *)oui, 
+                                      sub_type, 
+                                      (void *)Elements, 
+                                      ElementsLength, 
+                                      VENDOR_IE_BEACON|VENDOR_IE_PROBE_RESPONSE);
+  require_noerr(err, exit);
 
 
   ret =  PlatformMFiAuthInitialize();

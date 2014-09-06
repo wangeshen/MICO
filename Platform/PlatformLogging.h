@@ -25,8 +25,8 @@
 #include "Common.h"
 #include "Debug.h"
 
-#define plat_log(M, ...) custom_log("Platform", M, ##__VA_ARGS__)
-#define plat_log_trace() custom_log_trace("Platform")
+#define platform_log(M, ...) custom_log("Platform", M, ##__VA_ARGS__)
+#define platform_log_trace() custom_log_trace("Platform")
 
 #endif // __PlatformLogging_h__
 

@@ -55,7 +55,7 @@
 #include "AESUtils.h"
 #include "External/Curve25519/curve25519-donna.h"
 #include "Debug.h"
-#include "PlatformRandomNumber.h"
+#include "MicoPlatform.h"
 #include "PlatformMFiAuth.h"
 #include "SHAUtils.h"
 #include "TimeUtils.h"

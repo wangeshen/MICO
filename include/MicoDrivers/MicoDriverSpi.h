@@ -27,6 +27,20 @@
 #include "platform.h"
 
 /******************************************************
+ *                    Constants
+ ******************************************************/
+/* SPI mode constants */
+#define SPI_CLOCK_RISING_EDGE  ( 1 << 0 )
+#define SPI_CLOCK_FALLING_EDGE ( 0 << 0 )
+#define SPI_CLOCK_IDLE_HIGH    ( 1 << 1 )
+#define SPI_CLOCK_IDLE_LOW     ( 0 << 1 )
+#define SPI_USE_DMA            ( 1 << 2 )
+#define SPI_NO_DMA             ( 0 << 2 )
+#define SPI_MSB_FIRST          ( 1 << 3 )
+#define SPI_LSB_FIRST          ( 0 << 3 )
+
+
+/******************************************************
  *                   Enumerations
  ******************************************************/
 
@@ -51,6 +65,14 @@ typedef struct
     void*       rx_buffer;
     uint32_t    length;
 } mico_spi_message_segment_t;
+
+/******************************************************
+ *                     Variables
+ ******************************************************/
+
+#ifdef WICED_PLATFORM_INCLUDES_SPI_FLASH
+extern wiced_spi_device_t wiced_spi_flash;
+#endif
 
 /*****************************************************************************/
 /** @addtogroup spi       SPI

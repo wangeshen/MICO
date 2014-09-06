@@ -18,10 +18,9 @@
   * <h2><center>&copy; COPYRIGHT 2014 MXCHIP Inc.</center></h2>
   ******************************************************************************
   */ 
-
+#include "time.h"
 #include "PlatformFlash.h"
 #include "MicoPlatform.h"
-#include "PlatformRTC.h"
 #include "MICODefine.h"
 #include "MICOAppDefine.h"
 
@@ -35,8 +34,6 @@
 #if defined (CONFIG_MODE_EASYLINK) || defined (CONFIG_MODE_EASYLINK_WITH_SOFTAP)
 #include "EasyLink/EasyLink.h"
 #endif
-
-
 
 static mico_Context_t *context;
 static mico_timer_t _watchdog_reload_timer;
@@ -228,14 +225,8 @@ int application_start(void)
   OSStatus err = kNoErr;
   IPStatusTypedef para;
   struct tm currentTime;
-  
-  MicoPwmInitialize( MICO_PWM_1, 2000, 20 );
-  MicoPwmStart( MICO_PWM_1 );
-  MicoPwmInitialize( MICO_PWM_2, 2000, 50 );
-  MicoPwmStart( MICO_PWM_2 );
-  MicoPwmInitialize( MICO_PWM_3, 2000, 50 );
-  MicoPwmStart( MICO_PWM_3 );
-
+  mico_rtc_time_t time;
+ 
   /*Read current configurations*/
   context = ( mico_Context_t *)malloc(sizeof(mico_Context_t) );
   require_action( context, exit, err = kNoMemoryErr );
@@ -258,8 +249,17 @@ int application_start(void)
   
   /*wlan driver and tcpip init*/
   micoInit();
-  //PlatformRTCRead( &currentTime );
-  //mico_log("Current Time: %s",asctime(&currentTime));
+  
+  /*Read current time from RTC.*/
+  MicoRtcGetTime(&time);
+  currentTime.tm_sec = time.sec;
+  currentTime.tm_min = time.min;
+  currentTime.tm_hour = time.hr;
+  currentTime.tm_mday = time.date;
+  currentTime.tm_wday = time.weekday;
+  currentTime.tm_mon = time.month - 1;
+  currentTime.tm_year = time.year + 100;
+  mico_log("Current Time: %s",asctime(&currentTime));
 
   micoWlanGetIPStatus(&para, Station);
   formatMACAddr(context->micoStatus.mac, (char *)&para.mac);
@@ -268,13 +268,13 @@ int application_start(void)
   mico_log("%s mxchipWNet library version: %s", APP_INFO, micoGetVer());
 
   /*Start system monotor thread*/
-// err = MICOStartSystemMonitor(context);
-// require_noerr_action( err, exit, mico_log("ERROR: Unable to start the system monitor.") );
-// 
-// err = MICORegisterSystemMonitor(&mico_monitor, APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000);
-// require_noerr( err, exit );
-// mico_init_timer(&_watchdog_reload_timer,APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000-100, _watchdog_reload_timer_handler, NULL);
-// mico_start_timer(&_watchdog_reload_timer);
+  err = MICOStartSystemMonitor(context);
+  require_noerr_action( err, exit, mico_log("ERROR: Unable to start the system monitor.") );
+ 
+  err = MICORegisterSystemMonitor(&mico_monitor, APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000);
+  require_noerr( err, exit );
+  mico_init_timer(&_watchdog_reload_timer,APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000-100, _watchdog_reload_timer_handler, NULL);
+  mico_start_timer(&_watchdog_reload_timer);
   
   if(context->flashContentInRam.micoSystemConfig.configured != allConfigured){
     mico_log("Empty configuration. Starting configuration mode...");
@@ -345,8 +345,8 @@ int application_start(void)
       require_noerr_action( err, exit, mico_log("ERROR: Unable to start the local server thread.") );
     }
 
-    //err =  MICOStartNTPClient(context);
-    //require_noerr_action( err, exit, mico_log("ERROR: Unable to start the NTP client thread.") );
+    err =  MICOStartNTPClient(context);
+    require_noerr_action( err, exit, mico_log("ERROR: Unable to start the NTP client thread.") );
 
     /*Start mico application*/
     err = MICOStartApplication( context );

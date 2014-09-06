@@ -33,18 +33,19 @@
 #include "stm32f2xx_dma.h"
 #include "stm32f2xx_exti.h"
 #include "stm32f2xx_flash.h"
-#include "stm32f2xx_fsmc.h"
+/*#include "stm32f2xx_fsmc.h"*/
 #include "stm32f2xx_gpio.h"
-/*#include "stm32f2xx_i2c.h"*/
-/* #include "stm32f2xx_iwdg.h" */
-/* #include "stm32f2xx_pwr.h" */
+#include "stm32f2xx_i2c.h"
+#include "stm32f2xx_iwdg.h"
+#include "stm32f2xx_pwr.h"
 #include "stm32f2xx_rcc.h"
-/* #include "stm32f2xx_rtc.h" */
+#include "stm32f2xx_rtc.h"
 #include "stm32f2xx_sdio.h"
 #include "stm32f2xx_spi.h"
-/* #include "stm32f2xx_tim.h" */
+#include "stm32f2xx_tim.h"
 #include "stm32f2xx_usart.h"
 #include "stm32f2xx_syscfg.h"
+#include "stm32f2xx_rng.h"
 /* #include "stm32f2xx_wwdg.h" */
 #include "misc.h" /* High level functions for NVIC and SysTick (add-on to CMSIS functions) */
 

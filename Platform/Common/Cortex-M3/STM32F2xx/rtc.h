@@ -9,22 +9,22 @@
  */
 #pragma once
 
-#define WICED_VERIFY_TIME(time, valid) \
+#define MICO_VERIFY_TIME(time, valid) \
     if( (time->sec > 60) || ( time->min > 60 ) || (time->hr > 24) || ( time->date > 31 ) || ( time->month > 12 )) \
     { \
-        valid= WICED_FALSE; \
+        valid= false; \
     } \
     else \
     { \
-        valid= WICED_TRUE; \
+        valid= true; \
     }
 
 
 
 #ifndef WICED_DISABLE_MCU_POWERSAVE
-wiced_result_t rtc_sleep_entry( void );
-wiced_result_t rtc_sleep_abort( void );
-wiced_result_t rtc_sleep_exit( unsigned long requested_sleep_time, unsigned long *cpu_sleep_time );
+OSStatus rtc_sleep_entry( void );
+OSStatus rtc_sleep_abort( void );
+OSStatus rtc_sleep_exit( unsigned long requested_sleep_time, unsigned long *cpu_sleep_time );
 #endif /* #ifndef WICED_DISABLE_MCU_POWERSAVE */
 
-wiced_result_t platform_set_rtc_time(wiced_rtc_time_t* time);
+OSStatus platform_set_rtc_time(mico_rtc_time_t* time);

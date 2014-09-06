@@ -13,16 +13,12 @@
  */
 #include <stdint.h>
 #include "stm32f2xx.h"
-#include "wwd_constants.h"
-#include "wwd_assert.h"
 #include "gpio_irq.h"
-#include "watchdog.h"
 #include "platform.h"
 #include "platform_sleep.h"
 #include "platform_common_config.h"
 #include "platform_internal_gpio.h"
 #include "MICOPlatform.h"
-#include "Platform/wwd_platform_interface.h"
 
 #ifndef WL_RESET_BANK
 #error Missing WL_RESET_BANK definition
@@ -60,7 +56,11 @@
  *               Function Declarations
  ******************************************************/
 
-static wiced_result_t platform_reset_wlan_powersave_clock( void );
+static OSStatus platform_reset_wlan_powersave_clock( void );
+
+extern void host_platform_reset_wifi( bool reset_asserted );
+
+extern void host_platform_power_wifi( bool power_enabled );
 
 /******************************************************
  *               Variables Definitions
@@ -70,7 +70,7 @@ static wiced_result_t platform_reset_wlan_powersave_clock( void );
  *               Function Definitions
  ******************************************************/
 
-wiced_result_t host_platform_init( void )
+OSStatus host_platform_init( void )
 {
     GPIO_InitTypeDef gpio_init_structure;
 
@@ -86,16 +86,16 @@ wiced_result_t host_platform_init( void )
     gpio_init_structure.GPIO_PuPd = GPIO_PuPd_NOPULL;
     gpio_init_structure.GPIO_Pin = WL_RESET_PIN;
     GPIO_Init( WL_RESET_BANK, &gpio_init_structure );
-    host_platform_reset_wifi( WICED_TRUE ); /* Start wifi chip in reset */
+    host_platform_reset_wifi( true ); /* Start wifi chip in reset */
 
     gpio_init_structure.GPIO_Pin = WL_REG_ON_PIN;
     GPIO_Init( WL_REG_ON_BANK, &gpio_init_structure );
-    host_platform_power_wifi( WICED_FALSE ); /* Start wifi chip with regulators off */
+    host_platform_power_wifi( false ); /* Start wifi chip with regulators off */
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-wiced_result_t host_platform_deinit( void )
+OSStatus host_platform_deinit( void )
 {
     GPIO_InitTypeDef gpio_init_structure;
 
@@ -106,15 +106,15 @@ wiced_result_t host_platform_deinit( void )
     gpio_init_structure.GPIO_PuPd = GPIO_PuPd_NOPULL;
     gpio_init_structure.GPIO_Pin = WL_RESET_PIN;
     GPIO_Init( WL_RESET_BANK, &gpio_init_structure );
-    host_platform_reset_wifi( WICED_TRUE ); /* Start wifi chip in reset */
+    host_platform_reset_wifi( true ); /* Start wifi chip in reset */
 
     gpio_init_structure.GPIO_Pin = WL_REG_ON_PIN;
     GPIO_Init( WL_REG_ON_BANK, &gpio_init_structure );
-    host_platform_power_wifi( WICED_FALSE ); /* Start wifi chip with regulators off */
+    host_platform_power_wifi( false ); /* Start wifi chip with regulators off */
 
     platform_reset_wlan_powersave_clock( );
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
 uint32_t host_platform_get_cycle_count(void)
@@ -124,7 +124,7 @@ uint32_t host_platform_get_cycle_count(void)
     return *((volatile uint32_t*)0xE0001004);
 }
 
-wiced_bool_t host_platform_is_in_interrupt_context( void )
+bool host_platform_is_in_interrupt_context( void )
 {
     /* From the ARM Cortex-M3 Techinical Reference Manual
      * 0xE000ED04   ICSR    RW [a]  Privileged  0x00000000  Interrupt Control and State Register */
@@ -132,11 +132,11 @@ wiced_bool_t host_platform_is_in_interrupt_context( void )
 
     if ( active_interrupt_vector != 0 )
     {
-        return WICED_TRUE;
+        return true;
     }
     else
     {
-        return WICED_FALSE;
+        return false;
     }
 }
 
@@ -170,7 +170,7 @@ OSStatus host_platform_init_wlan_powersave_clock( void )
     /* enable LSE output on MCO1 */
     RCC_MCO1Config( RCC_MCO1Source_LSE, RCC_MCO1Div_1 );
 
-    return WICED_SUCCESS;
+    return kNoErr;
 
 #else
 
@@ -179,13 +179,13 @@ OSStatus host_platform_init_wlan_powersave_clock( void )
 #endif
 }
 
-wiced_result_t host_platform_deinit_wlan_powersave_clock( void )
+OSStatus host_platform_deinit_wlan_powersave_clock( void )
 {
 #if ( MICO_WLAN_POWERSAVE_CLOCK_SOURCE == MICO_WLAN_POWERSAVE_CLOCK_IS_PWM )
 
     MicoPwmStop( (mico_pwm_t) WICED_PWM_WLAN_POWERSAVE_CLOCK );
     platform_reset_wlan_powersave_clock( );
-    return WICED_SUCCESS;
+    return kNoErr;
 
 #else
 
@@ -194,10 +194,10 @@ wiced_result_t host_platform_deinit_wlan_powersave_clock( void )
 #endif
 }
 
-static wiced_result_t platform_reset_wlan_powersave_clock( void )
+static OSStatus platform_reset_wlan_powersave_clock( void )
 {
     /* Tie the pin to ground */
-    MicoGpioInitialize( (mico_gpio_t) WICED_GPIO_WLAN_POWERSAVE_CLOCK, OUTPUT_PUSH_PULL );
-    MicoGpioOutputLow( (mico_gpio_t) WICED_GPIO_WLAN_POWERSAVE_CLOCK );
-    return WICED_SUCCESS;
+    MicoGpioInitialize( (mico_gpio_t) MICO_GPIO_WLAN_POWERSAVE_CLOCK, OUTPUT_PUSH_PULL );
+    MicoGpioOutputLow( (mico_gpio_t) MICO_GPIO_WLAN_POWERSAVE_CLOCK );
+    return kNoErr;
 }

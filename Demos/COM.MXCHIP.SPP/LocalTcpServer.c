@@ -26,7 +26,6 @@
 
 #include "SppProtocol.h"
 #include "SocketUtils.h"
-#include "PlatformUart.h"
 
 #define server_log(M, ...) custom_log("TCP SERVER", M, ##__VA_ARGS__)
 #define server_log_trace() custom_log_trace("TCP SERVER")

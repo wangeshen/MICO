@@ -11,7 +11,7 @@
 #include "debug.h"
 #include "MICO.h"
 #include "MICODefine.h"
-#include "Platform.h"
+#include "MicoPlatform.h"
 #include "MFi-SAP.h"
 #include "HTTPUtils.h"
 #include "WACLogging.h"

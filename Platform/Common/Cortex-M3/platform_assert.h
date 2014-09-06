@@ -18,9 +18,9 @@
  ******************************************************/
 
 #ifdef __GNUC__
-#define WICED_ASSERTION_FAIL_ACTION() __asm__("bkpt")
+#define MICO_ASSERTION_FAIL_ACTION() __asm__("bkpt")
 #elif defined ( __IAR_SYSTEMS_ICC__ )
-#define WICED_ASSERTION_FAIL_ACTION() __asm("bkpt 0")
+#define MICO_ASSERTION_FAIL_ACTION() __asm("bkpt 0")
 #endif
 
 /******************************************************
