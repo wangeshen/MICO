@@ -19,12 +19,12 @@
   ******************************************************************************
   */ 
 
-#include "MICODefine.h"
+#include "MicoDefine.h"
+#include "platform.h"
 #include "MICONotificationCenter.h"
 
 #include "MDNSUtils.h"
 #include "StringUtils.h"
-#include "MDNSUtils.h"
 
 static int _bonjourStarted = false;
 

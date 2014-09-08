@@ -13,10 +13,10 @@
  *                    Constants
  ******************************************************/
 
-#ifndef WICED_DISABLE_MCU_POWERSAVE
+#ifndef MICO_DISABLE_MCU_POWERSAVE
 #define RTC_Wakeup_init        MicoRtcInitialize            
 #else
-#ifdef WICED_ENABLE_MCU_RTC
+#ifdef MICO_ENABLE_MCU_RTC
 #define platform_rtc_init      MicoRtcInitialize            
 #else /* #ifdef WICED_ENABLE_MCU_RTC */
 #define platform_rtc_noinit     MicoRtcInitialize()
@@ -68,7 +68,7 @@ void platform_rtc_noinit(void)
 {
 }
 
-#if defined(WICED_DISABLE_MCU_POWERSAVE) && defined(WICED_ENABLE_MCU_RTC)
+#if defined(MICO_DISABLE_MCU_POWERSAVE) && defined(MICO_ENABLE_MCU_RTC)
 /*  */
 void platform_rtc_init(void)
 {
@@ -114,7 +114,7 @@ void platform_rtc_init(void)
 #endif
 
 
-#ifndef WICED_DISABLE_MCU_POWERSAVE
+#ifndef MICO_DISABLE_MCU_POWERSAVE
 void RTC_Wakeup_init(void)
 {
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -200,7 +200,7 @@ void RTC_Wakeup_init(void)
 #endif
 
 }
-#endif /* #ifndef WICED_DISABLE_MCU_POWERSAVE */
+#endif /* #ifndef MICO_DISABLE_MCU_POWERSAVE */
 
 /**
  * This function will return the value of time read from the on board CPU real time clock. Time value must be given in the format of
@@ -254,6 +254,8 @@ OSStatus MicoRtcSetTime(mico_rtc_time_t* time)
     RTC_DateTypeDef rtc_write_date;
     bool    valid = false;
 
+    mico_mcu_powersave_config(false);
+    
     MICO_VERIFY_TIME(time, valid);
     if( valid == false )
     {
@@ -271,6 +273,7 @@ OSStatus MicoRtcSetTime(mico_rtc_time_t* time)
     RTC_SetTime( RTC_Format_BIN, &rtc_write_time );
     RTC_SetDate( RTC_Format_BIN, &rtc_write_date );
 
+    mico_mcu_powersave_config(true);
     return kNoErr;
 #else /* #ifdef WICED_ENABLE_MCU_RTC */
     UNUSED_PARAMETER(time);

@@ -12,17 +12,13 @@
 *
 */
 #include "stm32f2xx_platform.h"
-#include "stm32f2xx_flash.h"
 #include "platform.h"
 #include "platform_common_config.h"
-#include "MICOPlatform.h"
-//#include "platform_dct.h"
+#include "MicoPlatform.h"
 #include <string.h> // For memcmp
-//#include "wwd_platform_interface.h"
 #include "crt0.h"
 #include "platform_sleep.h"
-#include "rtc.h"
-#include "MICORTOS.h"
+#include "MicoRTOS.h"
 
 #ifdef __GNUC__
 #include "../../GCC/stdio_newlib.h"
@@ -34,10 +30,6 @@
 #define WEAK __weak
 #endif /* ifdef __GNUC__ */
 
-#ifndef WICED_DISABLE_BOOTLOADER
-//#include "bootloader_app.h"
-#endif
-
 /******************************************************
 *                      Macros
 ******************************************************/
@@ -45,83 +37,27 @@
 #define BOOTLOADER_MAGIC_NUMBER 0x4d435242
 #endif
 
-#ifndef WICED_DISABLE_MCU_POWERSAVE
+#ifndef MICO_DISABLE_MCU_POWERSAVE
 #define MCU_CLOCKS_NEEDED()       stm32f2xx_clocks_needed()
 #define MCU_CLOCKS_NOT_NEEDED()   stm32f2xx_clocks_not_needed()
 #else
 #define MCU_CLOCKS_NEEDED()
 #define MCU_CLOCKS_NOT_NEEDED()
-#endif /* ifndef WICED_DISABLE_MCU_POWERSAVE */
+#endif /* ifndef MICO_DISABLE_MCU_POWERSAVE */
 
+#define NUMBER_OF_LSE_TICKS_PER_MILLISECOND(scale_factor) ( 32768 / 1000 / scale_factor )
+#define CONVERT_FROM_TICKS_TO_MS(n,s) ( n / NUMBER_OF_LSE_TICKS_PER_MILLISECOND(s) )
 
 /******************************************************
 *                    Constants
 ******************************************************/
 
-#define MAX_NUM_SPI_PRESCALERS     (8)
-#define SPI_DMA_TIMEOUT_LOOPS      (10000)
-
-#if defined( PLATFORM_STM32_VOLTAGE_1V8_TO_2V1 )
-#define ERASE_VOLTAGE_RANGE ( VoltageRange_1 )
-#define FLASH_WRITE_FUNC    ( FLASH_ProgramByte )
-#define FLASH_WRITE_SIZE    ( 1 )
-typedef uint8_t flash_write_t;
-#elif defined( PLATFORM_STM32_VOLTAGE_2V1_TO_2V7 )
-#define ERASE_VOLTAGE_RANGE ( VoltageRange_2 )
-#define FLASH_WRITE_FUNC    ( FLASH_ProgramHalfWord )
-#define FLASH_WRITE_SIZE    ( 2 )
-typedef uint16_t flash_write_t;
-#elif defined( PLATFORM_STM32_VOLTAGE_2V7_TO_3V6 )
-#define ERASE_VOLTAGE_RANGE ( VoltageRange_3 )
-#define FLASH_WRITE_FUNC    ( FLASH_ProgramWord )
-#define FLASH_WRITE_SIZE    ( 4 )
-typedef uint32_t flash_write_t;
-#elif defined( PLATFORM_STM32_VOLTAGE_2V7_TO_3V6_EXTERNAL_VPP )
-#define ERASE_VOLTAGE_RANGE ( VoltageRange_4 )
-#define FLASH_WRITE_FUNC    ( FLASH_ProgramDoubleWord )
-#define FLASH_WRITE_SIZE    ( 8 )
-typedef uint64_t flash_write_t;
-#else
-/* No Voltage range defined for platform */
-/* You need to define one of:
-*   PLATFORM_STM32_VOLTAGE_1V8_TO_2V1
-*   PLATFORM_STM32_VOLTAGE_2V1_TO_2V7
-*   PLATFORM_STM32_VOLTAGE_2V7_TO_3V6
-*   PLATFORM_STM32_VOLTAGE_2V7_TO_3V6_EXTERNAL_VPP
-*/
-#error Platform Voltage Range not defined
-#endif
-
-#define APP_HDR_START_ADDR   ((uint32_t)&app_hdr_start_addr_loc)
-#define DCT1_START_ADDR  ((uint32_t)&dct1_start_addr_loc)
-#define DCT1_SIZE        ((uint32_t)&dct1_size_loc)
-#define DCT2_START_ADDR  ((uint32_t)&dct2_start_addr_loc)
-#define DCT2_SIZE        ((uint32_t)&dct2_size_loc)
-#define SRAM_START_ADDR  ((uint32_t)&sram_start_addr_loc)
-#define SRAM_SIZE        ((uint32_t)&sram_size_loc)
-
-#define PLATFORM_DCT_COPY1_START_SECTOR      ( FLASH_Sector_1  )
-#define PLATFORM_DCT_COPY1_START_ADDRESS     ( DCT1_START_ADDR )
-#define PLATFORM_DCT_COPY1_END_SECTOR        ( FLASH_Sector_1 )
-#define PLATFORM_DCT_COPY1_END_ADDRESS       ( DCT1_START_ADDR + DCT1_SIZE )
-#define PLATFORM_DCT_COPY2_START_SECTOR      ( FLASH_Sector_2  )
-#define PLATFORM_DCT_COPY2_START_ADDRESS     ( DCT2_START_ADDR )
-#define PLATFORM_DCT_COPY2_END_SECTOR        ( FLASH_Sector_2 )
-#define PLATFORM_DCT_COPY2_END_ADDRESS       ( DCT1_START_ADDR + DCT1_SIZE )
-
-#define ERASE_DCT_1()              platform_erase_flash(PLATFORM_DCT_COPY1_START_SECTOR, PLATFORM_DCT_COPY1_END_SECTOR)
-#define ERASE_DCT_2()              platform_erase_flash(PLATFORM_DCT_COPY2_START_SECTOR, PLATFORM_DCT_COPY2_END_SECTOR)
-
 #ifndef STDIO_BUFFER_SIZE
 #define STDIO_BUFFER_SIZE   64
 #endif
 
-
 #define RTC_INTERRUPT_EXTI_LINE EXTI_Line22
 
-
-#define NUMBER_OF_LSE_TICKS_PER_MILLISECOND(scale_factor) ( 32768 / 1000 / scale_factor )
-#define CONVERT_FROM_TICKS_TO_MS(n,s) ( n / NUMBER_OF_LSE_TICKS_PER_MILLISECOND(s) )
 #define CK_SPRE_CLOCK_SOURCE_SELECTED 0xFFFF
 
 /******************************************************
@@ -136,24 +72,16 @@ typedef uint64_t flash_write_t;
 *                    Structures
 ******************************************************/
 
-
-
 /******************************************************
 *               Function Declarations
 ******************************************************/
 
-#ifndef WICED_DISABLE_MCU_POWERSAVE
+#ifndef MICO_DISABLE_MCU_POWERSAVE
 void stm32f2xx_clocks_needed    ( void );
 void stm32f2xx_clocks_not_needed( void );
 #endif
 
-#if defined(WICED_ENABLE_MCU_RTC) && defined(WICED_DISABLE_MCU_POWERSAVE)
-void platform_rtc_init( void );
-#endif /* #if defined(WICED_ENABLE_MCU_RTC) && defined(WICED_DISABLE_MCU_POWERSAVE) */
 void wake_up_interrupt_notify( void );
-
-/* Interrupt service functions - called from interrupt vector table */
-void RTC_WKUP_irq     ( void );
 
 extern OSStatus host_platform_init( void );
 
@@ -179,24 +107,19 @@ mico_mutex_t        stdio_rx_mutex;
 mico_mutex_t        stdio_tx_mutex;
 #endif /* #ifndef MICO_DISABLE_STDIO */
 
-static volatile uint8_t uart_break;
-
-//static wiced_spi_device_t* current_spi_device = NULL;
-
-
-#ifndef WICED_DISABLE_MCU_POWERSAVE
+#ifndef MICO_DISABLE_MCU_POWERSAVE
 static bool wake_up_interrupt_triggered  = false;
 static unsigned long rtc_timeout_start_time           = 0;
-#endif /* #ifndef WICED_DISABLE_MCU_POWERSAVE */
+#endif /* #ifndef MICO_DISABLE_MCU_POWERSAVE */
 
 /******************************************************
 *               Function Definitions
 ******************************************************/
 
 /* STM32F2 common clock initialisation function
-* This brings up enough clocks to allow the processor to run quickly while initialising memory.
-* Other platform specific clock init can be done in init_platform() or init_architecture()
-*/
+ * This brings up enough clocks to allow the processor to run quickly while initialising memory.
+ * Other platform specific clock init can be done in init_platform() or init_architecture()
+ */
 WEAK void init_clocks( void )
 {
   //RCC_DeInit( ); /* if not commented then the LSE PA8 output will be disabled and never comes up again */
@@ -278,21 +201,11 @@ void init_architecture( void )
   stm32_platform_inited = 1;
 }
 
-
-
-
 /******************************************************
 *            Interrupt Service Routines
 ******************************************************/
 
-
-#define WUT_COUNTER_MAX  0xffff
-
-#define ENABLE_INTERRUPTS   __asm("CPSIE i")
-#define DISABLE_INTERRUPTS  __asm("CPSID i")
-
-
-#ifndef WICED_DISABLE_MCU_POWERSAVE
+#ifndef MICO_DISABLE_MCU_POWERSAVE
 
 static int stm32f2_clock_needed_counter = 0;
 
@@ -320,9 +233,7 @@ void stm32f2xx_clocks_not_needed( void )
   ENABLE_INTERRUPTS;
 }
 
-
-
-
+#define WUT_COUNTER_MAX  0xFFFF
 
 static OSStatus select_wut_prescaler_calculate_wakeup_time( unsigned long* wakeup_time, unsigned long delay_ms, unsigned long* scale_factor )
 {
@@ -396,13 +307,23 @@ static unsigned long stop_mode_power_down_hook( unsigned long delay_ms )
   UNUSED_PARAMETER(rtc_timeout_start_time);
   UNUSED_PARAMETER(scale_factor);
   
-  /* pick up the appropriate prescaler for a requested delay */
-  select_wut_prescaler_calculate_wakeup_time(&rtc_timeout_start_time, delay_ms, &scale_factor );
+  DISABLE_INTERRUPTS;
+
+  if ( ( ( SCB->SCR & (unsigned long)SCB_SCR_SLEEPDEEP_Msk) != 0) && delay_ms < 5 ){
+    SCB->SCR &= (~((unsigned long)SCB_SCR_SLEEPDEEP_Msk));
+    __asm("wfi");
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+    /* Note: We return 0 ticks passed because system tick is still going when wfi instruction gets executed */
+    ENABLE_INTERRUPTS;
+    return 0;
+  }
   
-  if ( ( ( SCB->SCR & (unsigned long)SCB_SCR_SLEEPDEEP_Msk) ) != 0 )
+  
+  if ( ( ( SCB->SCR & (unsigned long)SCB_SCR_SLEEPDEEP_Msk) != 0) )
   {
-    DISABLE_INTERRUPTS;
-    
+    /* pick up the appropriate prescaler for a requested delay */
+    select_wut_prescaler_calculate_wakeup_time(&rtc_timeout_start_time, delay_ms, &scale_factor );
+
     SysTick->CTRL &= (~(SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk)); /* systick IRQ off */
     RTC_ITConfig(RTC_IT_WUT, ENABLE);
     
@@ -412,7 +333,6 @@ static unsigned long stop_mode_power_down_hook( unsigned long delay_ms )
     
     RTC_SetWakeUpCounter( rtc_timeout_start_time );
     RTC_WakeUpCmd( ENABLE );
-    rtc_sleep_entry();
     
     DBGMCU->CR |= 0x03; /* Enable debug in stop mode */
     
@@ -425,22 +345,27 @@ static unsigned long stop_mode_power_down_hook( unsigned long delay_ms )
     /* So, if the interrupt has been triggered just before the wfi instruction */
     /* it remains pending and wfi instruction will be treated as a nop  */
     __asm("wfi");
-    
-    /* After CPU exits powerdown mode, the processer will not execute the interrupt handler(PRIMASK is set to 1) */
-    /* Disable rtc for now */
-    RTC_WakeUpCmd( DISABLE );
     RTC_ITConfig(RTC_IT_WUT, DISABLE);
-    
+
     /* Initialise the clocks again */
     init_clocks( );
     
     /* Enable CPU ticks */
     SysTick->CTRL |= (SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk);
     
+    /* After CPU exits powerdown mode, the processer will not execute the interrupt handler(PRIMASK is set to 1) */
+    /* Disable rtc for now */
+    RTC_WakeUpCmd( DISABLE );
+    
     /* Get the time of how long the sleep lasted */
-    wut_ticks_passed = rtc_timeout_start_time - RTC_GetWakeUpCounter();
-    UNUSED_VARIABLE(wut_ticks_passed);
-    rtc_sleep_exit( delay_ms, &retval );
+    if(RTC->ISR & RTC_ISR_WUTF)
+      wut_ticks_passed = 2 * rtc_timeout_start_time - RTC_GetWakeUpCounter();
+    else{
+      wut_ticks_passed = rtc_timeout_start_time - RTC_GetWakeUpCounter();
+    }
+
+    retval = wut_ticks_passed/NUMBER_OF_LSE_TICKS_PER_MILLISECOND( scale_factor );
+    
     /* as soon as interrupts are enabled, we will go and execute the interrupt handler */
     /* which triggered a wake up event */
     ENABLE_INTERRUPTS;
@@ -450,16 +375,14 @@ static unsigned long stop_mode_power_down_hook( unsigned long delay_ms )
   else
   {
     UNUSED_PARAMETER(wut_ticks_passed);
-    ENABLE_INTERRUPTS;
     __asm("wfi");
-    
+    ENABLE_INTERRUPTS;
     /* Note: We return 0 ticks passed because system tick is still going when wfi instruction gets executed */
     return 0;
   }
 }
 
-#else /* WICED_DISABLE_MCU_POWERSAVE */
-
+#else /* MICO_DISABLE_MCU_POWERSAVE */
 static unsigned long idle_power_down_hook( unsigned long delay_ms  )
 {
   UNUSED_PARAMETER( delay_ms );
@@ -468,12 +391,12 @@ static unsigned long idle_power_down_hook( unsigned long delay_ms  )
   return 0;
 }
 
-#endif /* WICED_DISABLE_MCU_POWERSAVE */
+#endif /* MICO_DISABLE_MCU_POWERSAVE */
 
 
 unsigned long platform_power_down_hook( unsigned long delay_ms )
 {
-#ifndef WICED_DISABLE_MCU_POWERSAVE
+#ifndef MICO_DISABLE_MCU_POWERSAVE
   return stop_mode_power_down_hook( delay_ms );
 #else
   return idle_power_down_hook( delay_ms );

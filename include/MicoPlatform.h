@@ -61,6 +61,8 @@
 extern "C" {
 #endif
 
+#define ENABLE_INTERRUPTS   __asm("CPSIE i")
+#define DISABLE_INTERRUPTS  __asm("CPSID i")
 
 /*****************************************************************************/
 /** @defgroup platform       Platform functions

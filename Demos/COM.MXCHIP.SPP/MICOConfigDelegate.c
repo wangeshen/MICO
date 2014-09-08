@@ -66,7 +66,7 @@ void ConfigWillStop( mico_Context_t * const inContext )
   config_delegate_log_trace();
   mico_stop_timer(&_Led_EL_timer);
   mico_deinit_timer( &_Led_EL_timer );
-  //Platform_LED_SYS_Set_Status(OFF);
+  MicoGpioOutputLow((mico_gpio_t)MICO_SYS_LED);
   return;
 }
 

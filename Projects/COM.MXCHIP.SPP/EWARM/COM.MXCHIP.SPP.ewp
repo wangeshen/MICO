@@ -173,19 +173,7 @@
         <option>
           <name>CCDefines</name>
           <state>USE_STDPERIPH_DRIVER</state>
-          <state>EMW3162</state>
           <state>DEBUG</state>
-          <state>ADD_LWIP_EAPOL_SUPPORT</state>
-          <state>NXD_EXTENDED_BSD_SOCKET_SUPPORT</state>
-          <state>USE_STDPERIPH_DRIVER</state>
-          <state>_STM32F215RGT6_</state>
-          <state>_STM3x_</state>
-          <state>_STM32x_</state>
-          <state>configUSE_MUTEXES</state>
-          <state>configUSE_RECURSIVE_MUTEXES</state>
-          <state>PLATFORM_STM32_VOLTAGE_2V7_TO_3V6</state>
-          <state>CPU_CLOCK_HZ=120000000</state>
-          <state>USE_FLASH_WIFI_IMAGE</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -314,7 +302,6 @@
         </option>
         <option>
           <name>CCIncludePath2</name>
-          <state>$PROJ_DIR$\..\..\..\Library\inc</state>
           <state>$PROJ_DIR$\..\..\..\Platform</state>
           <state>$PROJ_DIR$\..\..\..\Library\support</state>
           <state>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP</state>
@@ -3218,9 +3205,6 @@
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverWdg.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\rtc.c</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\startup_stm32f2xx_IAR.s</name>

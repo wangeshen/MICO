@@ -354,8 +354,11 @@ int application_start(void)
     
     _ConnectToAP( context );
   }
-  mico_log("Memory remains %d", micoGetMemoryInfo()->free_memory);
-
+  
+  //DISABLE_INTERRUPTS;
+  //mico_log("Memory remains %d", micoGetMemoryInfo()->free_memory);
+  //ENABLE_INTERRUPTS;
+  
   /*System status changed*/
   while(mico_rtos_get_semaphore(&context->micoStatus.sys_state_change_sem, MICO_WAIT_FOREVER)==kNoErr){
     switch(context->micoStatus.sys_state){

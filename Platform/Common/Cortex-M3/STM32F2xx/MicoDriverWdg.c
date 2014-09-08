@@ -1,6 +1,8 @@
 
 #include "MICOPlatform.h"
 #include "MICORTOS.h"
+#include "common.h"
+#include "debug.h"
 
 #include "platform.h"
 #include "platform_common_config.h"
@@ -45,11 +47,15 @@ OSStatus MicoWdgInitialize( uint32_t timeout_ms )
 {
   OSStatus err = kNoErr;
 // PLATFORM_TO_DO
-
+  
 #ifndef MICO_DISABLE_WATCHDOG
+  uint16_t reloadTick;
   /* Get the LSI frequency:  TIM5 is used to measure the LSI frequency */
   LsiFreq = GetLSIFrequency();
-   
+  
+  reloadTick = LsiFreq*timeout_ms/128000;
+  require_action( reloadTick <= 0xFFF, exit, err = kParamErr );
+
   IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
 
   /* IWDG counter clock: LSI/32 */
@@ -62,7 +68,7 @@ OSStatus MicoWdgInitialize( uint32_t timeout_ms )
                           = LsiFreq/(32 * 4)
                           = LsiFreq/128
    */
-  IWDG_SetReload((uint16_t)(LsiFreq*timeout_ms/128000));
+  IWDG_SetReload(reloadTick);
 
   /* Reload IWDG counter */
   IWDG_ReloadCounter();
@@ -70,6 +76,7 @@ OSStatus MicoWdgInitialize( uint32_t timeout_ms )
   /* Enable IWDG (the LSI oscillator will be enabled by hardware) */
   IWDG_Enable();
 
+exit:
   return err;
 #else
   UNUSED_PARAMETER( timeout_ms );

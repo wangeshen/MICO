@@ -25,7 +25,7 @@
 
 
 #ifdef APPLICATION_WATCHDOG_TIMEOUT_SECONDS
-#define DEFAULT_SYSTEM_MONITOR_PERIOD   (APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000 - 100)
+#define DEFAULT_SYSTEM_MONITOR_PERIOD   (APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000)
 #else
 #ifndef DEFAULT_SYSTEM_MONITOR_PERIOD
 #define DEFAULT_SYSTEM_MONITOR_PERIOD   (5000)
@@ -42,13 +42,13 @@ void mico_system_monitor_thread_main( void* arg );
 
 OSStatus MICOStartSystemMonitor (mico_Context_t * const inContext)
 {
-   return mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "SYS MONITOR", mico_system_monitor_thread_main, 0x500, (void*)inContext );
+   return mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "SYS MONITOR", mico_system_monitor_thread_main, 0x100, (void*)inContext );
 }
 
 void mico_system_monitor_thread_main( void* arg )
 {
     (void)arg;
-    MicoWdgInitialize(DEFAULT_SYSTEM_MONITOR_PERIOD + 500);
+    require_noerr(MicoWdgInitialize( DEFAULT_SYSTEM_MONITOR_PERIOD + 3000), exit);
 
     memset(system_monitors, 0, sizeof(system_monitors));
 
@@ -70,9 +70,10 @@ void mico_system_monitor_thread_main( void* arg )
         }
 
         MicoWdgReload();
-        msleep(DEFAULT_SYSTEM_MONITOR_PERIOD);
+       mico_thread_msleep(DEFAULT_SYSTEM_MONITOR_PERIOD);
     }
-
+    
+exit:
     mico_rtos_delete_thread(NULL);
 }
 

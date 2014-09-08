@@ -40,7 +40,7 @@
 #define NTP_Root_Delay           0x8000
 #define NTP_Root_Dispersion      0xa00b0000
 
-static bool _wifiConnected = false;
+static volatile bool _wifiConnected = false;
 static mico_semaphore_t  _wifiConnected_sem = NULL;
 
 
@@ -111,11 +111,9 @@ void NTPClient_thread(void *inContext)
   outpacket.precision = NTP_Precision;
   outpacket.root_delay = NTP_Root_Delay;
   outpacket.root_dispersion = NTP_Root_Dispersion;
-  
-  if(_wifiConnected == false){
+
+  if(_wifiConnected == false)
     mico_rtos_get_semaphore(&_wifiConnected_sem, MICO_WAIT_FOREVER);
-    mico_thread_msleep(50);
-  }
   
   Ntp_fd = socket(AF_INET, SOCK_DGRM, IPPROTO_UDP);
   require_action(IsValidSocket( Ntp_fd ), exit, err = kNoResourcesErr );
