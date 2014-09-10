@@ -6,6 +6,7 @@
 #include "EMW3162/platform_common_config.h"
 #include "stm32f2xx_platform.h"
 #include "stm32f2xx.h"
+#include "gpio_irq.h"
 
 /******************************************************
  *                    Constants
@@ -31,6 +32,7 @@ typedef struct
     ring_buffer_t*      rx_buffer;
     mico_semaphore_t    rx_complete;
     mico_semaphore_t    tx_complete;
+    mico_semaphore_t    sem_wakeup;
     OSStatus            tx_dma_result;
     OSStatus            rx_dma_result;
 } uart_interface_t;
@@ -40,6 +42,7 @@ typedef struct
  ******************************************************/
 
 static uart_interface_t uart_interfaces[NUMBER_OF_UART_INTERFACES];
+static mico_uart_t current_uart;
 
 /******************************************************
  *               Function Declarations
@@ -48,7 +51,12 @@ static uart_interface_t uart_interfaces[NUMBER_OF_UART_INTERFACES];
 static OSStatus internal_uart_init ( mico_uart_t uart, const mico_uart_config_t* config, ring_buffer_t* optional_rx_buffer );
 static OSStatus platform_uart_receive_bytes( mico_uart_t uart, void* data, uint32_t size, uint32_t timeout );
 
+static void thread_wakeup(void *arg);
+
+
 /* Interrupt service functions - called from interrupt vector table */
+static void RX_PIN_WAKEUP_handler(void *arg);
+
 void usart2_rx_dma_irq( void );
 void usart1_rx_dma_irq( void );
 void usart6_rx_dma_irq( void );
@@ -92,7 +100,7 @@ OSStatus internal_uart_init( mico_uart_t uart, const mico_uart_config_t* config,
     mico_rtos_init_semaphore(&uart_interfaces[uart].tx_complete, 1);
     mico_rtos_init_semaphore(&uart_interfaces[uart].rx_complete, 1);
 
-    mico_mcu_powersave_config(false);
+    MicoMcuPowerSaveConfig(false);
 
     /* Enable GPIO peripheral clocks for TX and RX pins */
     RCC_AHB1PeriphClockCmd( uart_mapping[uart].pin_rx->peripheral_clock |
@@ -114,6 +122,12 @@ OSStatus internal_uart_init( mico_uart_t uart, const mico_uart_config_t* config,
     gpio_init_structure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
     GPIO_Init( uart_mapping[uart].pin_rx->bank, &gpio_init_structure );
     GPIO_PinAFConfig( uart_mapping[uart].pin_rx->bank, uart_mapping[uart].pin_rx->number, uart_mapping[uart].gpio_af );
+
+    if(config->flags & UART_WAKEUP_ENABLE){
+        current_uart = uart;
+        mico_rtos_init_semaphore( &uart_interfaces[uart].sem_wakeup, 1 );
+        mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART_WAKEUP", thread_wakeup, 0x100, &current_uart);
+    }
 
     /* Check if any of the flow control is enabled */
     if ( uart_mapping[uart].pin_cts && (config->flow_control == FLOW_CONTROL_CTS || config->flow_control == FLOW_CONTROL_CTS_RTS) )
@@ -202,6 +216,7 @@ OSStatus internal_uart_init( mico_uart_t uart, const mico_uart_config_t* config,
      **************************************************************************/
     /* Enable DMA peripheral clock */
     uart_mapping[uart].tx_dma_peripheral_clock_func( uart_mapping[uart].tx_dma_peripheral_clock, ENABLE );
+    uart_mapping[uart].rx_dma_peripheral_clock_func( uart_mapping[uart].rx_dma_peripheral_clock, ENABLE );
 
     /* Fill init structure with common DMA settings */
     dma_init_structure.DMA_PeripheralInc   = DMA_PeripheralInc_Disable;
@@ -300,7 +315,7 @@ OSStatus internal_uart_init( mico_uart_t uart, const mico_uart_config_t* config,
         DMA_ITConfig( uart_mapping[uart].rx_dma_stream, DMA_IT_TC | DMA_IT_TE | DMA_IT_DME | DMA_IT_FE, ENABLE );
     }
 
-    mico_mcu_powersave_config(true);
+    MicoMcuPowerSaveConfig(true);
 
     return kNoErr;
 }
@@ -309,7 +324,7 @@ OSStatus MicoUartFinalize( mico_uart_t uart )
 {
     NVIC_InitTypeDef nvic_init_structure;
 
-    mico_mcu_powersave_config(false);
+    MicoMcuPowerSaveConfig(false);
 
     /* Disable USART */
     USART_Cmd( uart_mapping[uart].usart, DISABLE );
@@ -358,7 +373,7 @@ OSStatus MicoUartFinalize( mico_uart_t uart )
     mico_rtos_deinit_semaphore(&uart_interfaces[uart].rx_complete);
     mico_rtos_deinit_semaphore(&uart_interfaces[uart].tx_complete);
 
-    mico_mcu_powersave_config(true);
+    MicoMcuPowerSaveConfig(true);
 
     return kNoErr;
 }
@@ -368,7 +383,7 @@ OSStatus MicoUartSend( mico_uart_t uart, const void* data, uint32_t size )
     /* Reset DMA transmission result. The result is assigned in interrupt handler */
     uart_interfaces[uart].tx_dma_result = kGeneralErr;
 
-    mico_mcu_powersave_config(false);
+    MicoMcuPowerSaveConfig(false);
 
     uart_mapping[uart].tx_dma_stream->CR  &= ~(uint32_t) DMA_SxCR_CIRC;
     uart_mapping[uart].tx_dma_stream->NDTR = size;
@@ -387,7 +402,7 @@ OSStatus MicoUartSend( mico_uart_t uart, const void* data, uint32_t size )
     DMA_Cmd( uart_mapping[uart].tx_dma_stream, DISABLE );
     USART_DMACmd( uart_mapping[uart].usart, USART_DMAReq_Tx, DISABLE );
 
-    mico_mcu_powersave_config(true);
+    MicoMcuPowerSaveConfig(true);
 
     return uart_interfaces[uart].tx_dma_result;
 }
@@ -483,9 +498,37 @@ uint32_t MicoUartGetLengthInBuffer( mico_uart_t uart )
     return ring_buffer_used_space( uart_interfaces[uart].rx_buffer );
 }
 
+static void thread_wakeup(void *arg)
+{
+  mico_uart_t uart = *(mico_uart_t *)arg;
+
+  while(1){
+    if(mico_rtos_get_semaphore(&uart_interfaces[ uart ].sem_wakeup, 1000) != kNoErr){
+      gpio_irq_enable(uart_mapping[uart].pin_rx->bank, uart_mapping[uart].pin_rx->number, IRQ_TRIGGER_FALLING_EDGE, RX_PIN_WAKEUP_handler, &uart);
+      MicoMcuPowerSaveConfig(true);
+    }
+  }
+}
+
 /******************************************************
  *            Interrupt Service Routines
  ******************************************************/
+
+void RX_PIN_WAKEUP_handler(void *arg)
+{
+  (void)arg;
+  mico_uart_t uart = *(mico_uart_t *)arg;
+
+  RCC_AHB1PeriphClockCmd(uart_mapping[ uart ].pin_rx->peripheral_clock, ENABLE);
+  uart_mapping[ uart ].usart_peripheral_clock_func ( uart_mapping[uart].usart_peripheral_clock,  ENABLE );
+  uart_mapping[uart].rx_dma_peripheral_clock_func  ( uart_mapping[uart].rx_dma_peripheral_clock, ENABLE );
+  
+  gpio_irq_disable(uart_mapping[uart].pin_rx->bank, uart_mapping[uart].pin_rx->number);
+  MicoMcuPowerSaveConfig(false);
+  mico_rtos_set_semaphore(&uart_interfaces[uart].sem_wakeup);
+}
+
+
 
 void USART1_IRQHandler( void )
 {
@@ -502,22 +545,9 @@ void USART1_IRQHandler( void )
         mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_1 ].rx_complete );
         uart_interfaces[ STM32_UART_1 ].rx_size = 0;
     }
-}
 
-void usart2_irq( void )
-{
-    // Clear all interrupts. It's safe to do so because only RXNE interrupt is enabled
-    USART2->SR = (uint16_t) (USART2->SR | 0xffff);
-
-    // Update tail
-    uart_interfaces[1].rx_buffer->tail = uart_interfaces[1].rx_buffer->size - uart_mapping[1].rx_dma_stream->NDTR;
-
-    // Notify thread if sufficient data are available
-    if ( ( uart_interfaces[1].rx_size > 0 ) && ( ring_buffer_used_space( uart_interfaces[1].rx_buffer ) >= uart_interfaces[1].rx_size ) )
-    {
-        mico_rtos_set_semaphore( &uart_interfaces[1].rx_complete);
-        uart_interfaces[1].rx_size = 0;
-    }
+    if(uart_interfaces[ STM32_UART_1 ].sem_wakeup)
+      mico_rtos_set_semaphore(&uart_interfaces[ STM32_UART_1 ].sem_wakeup);
 }
 
 void USART6_IRQHandler( void )
@@ -535,6 +565,9 @@ void USART6_IRQHandler( void )
         mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_6 ].rx_complete );
         uart_interfaces[ STM32_UART_6 ].rx_size = 0;
     }
+
+    if(uart_interfaces[ STM32_UART_6 ].sem_wakeup)
+      mico_rtos_set_semaphore(&uart_interfaces[ STM32_UART_6 ].sem_wakeup);
 }
 
 //usart1_tx_dma_irq
@@ -564,32 +597,6 @@ void DMA2_Stream7_IRQHandler( void )
 
     /* Set semaphore regardless of result to prevent waiting thread from locking up */
     mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_1 ].tx_complete);
-}
-
-void usart2_tx_dma_irq( void )
-{
-    bool tx_complete = false;
-
-    if ( ( DMA1->HISR & DMA_HISR_TCIF6 ) != 0 )
-    {
-        DMA1->HIFCR |= DMA_HISR_TCIF6;
-        uart_interfaces[ 1 ].tx_dma_result = kNoErr;
-        tx_complete = true;
-    }
-
-    /* TX DMA error */
-    if ( ( DMA1->HISR & ( DMA_HISR_TEIF6 | DMA_HISR_DMEIF6 | DMA_HISR_FEIF6 ) ) != 0 )
-    {
-        /* Clear interrupt */
-        DMA1->HIFCR |= ( DMA_HISR_TEIF6 | DMA_HISR_DMEIF6 | DMA_HISR_FEIF6 );
-
-        if ( tx_complete == false )
-        {
-            uart_interfaces[1].tx_dma_result = kGeneralErr;
-        }
-    }
-
-    mico_rtos_set_semaphore( &uart_interfaces[ 1 ].tx_complete );
 }
 
 //usart6_tx_dma_irq
@@ -639,25 +646,6 @@ void DMA2_Stream2_IRQHandler( void )
     mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_1 ].rx_complete );
 }
 
-void usart2_rx_dma_irq( void )
-{
-    if ( ( DMA1->HISR & DMA_HISR_TCIF5 ) != 0 )
-    {
-        DMA1->HIFCR |= DMA_HISR_TCIF5;
-        uart_interfaces[ 1 ].rx_dma_result = kNoErr;
-    }
-
-    /* RX DMA error */
-    if ( ( DMA1->HISR & ( DMA_HISR_TEIF5 | DMA_HISR_DMEIF5 | DMA_HISR_FEIF5 ) ) != 0 )
-    {
-        /* Clear interrupt */
-        DMA1->HIFCR |= ( DMA_HISR_TEIF5 | DMA_HISR_DMEIF5 | DMA_HISR_FEIF5 );
-        uart_interfaces[ 1 ].rx_dma_result = kGeneralErr;
-    }
-
-    mico_rtos_set_semaphore( &uart_interfaces[ 1 ].rx_complete );
-}
-
 //usart6_rx_dma_irq
 void DMA2_Stream1_IRQHandler( void )
 {
@@ -678,5 +666,7 @@ void DMA2_Stream1_IRQHandler( void )
 
     mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_6 ].rx_complete );
 }
+
+
 
 

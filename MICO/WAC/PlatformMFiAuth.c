@@ -41,7 +41,6 @@ static const mico_i2c_device_t MFi_CP =
     .address = CP_ADDRESS>>1,
     .address_width = I2C_ADDRESS_WIDTH_7BIT,
     .speed_mode = I2C_HIGH_SPEED_MODE,
-    .flags = I2C_DEVICE_USE_DMA,
 };
 
 #define AH_DEVICE_VERSION                         0x00  // Length 1   R
@@ -222,7 +221,7 @@ static OSStatus CP_BufferWrite(uint8_t* pBuffer, uint8_t WriteAddr, uint16_t Num
   memcpy(txData, &WriteAddr, 1);
   memcpy(txData+1, pBuffer, NumByteToWrite);
   
-  err = MicoI2cBuildTxMessage(&message, txData, NumByteToWrite+1, 100 , true);
+  err = MicoI2cBuildTxMessage(&message, txData, NumByteToWrite+1, 100);
   require_noerr( err , exit ) ;
   err = MicoI2cTransfer( (mico_i2c_device_t *)&MFi_CP, &message, 1 );
   require_noerr( err , exit ) ;
@@ -237,7 +236,7 @@ OSStatus CP_ReadBuffer(uint8_t* pBuffer, uint8_t ReadAddr, uint16_t NumByteToRea
   OSStatus err = kNoErr;
   mico_i2c_message_t message;
 
-  err = MicoI2cBuildCombinedMessage(&message, &ReadAddr, pBuffer, 1, NumByteToRead, 100 , true);
+  err = MicoI2cBuildCombinedMessage(&message, &ReadAddr, pBuffer, 1, NumByteToRead, 100);
   require_noerr( err , exit ) ;
   err = MicoI2cTransfer( (mico_i2c_device_t *)&MFi_CP, &message, 1 );
   require_noerr( err , exit ) ;

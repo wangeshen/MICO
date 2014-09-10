@@ -123,19 +123,19 @@ void NTPClient_thread(void *inContext)
   err = kNoErr;
   require_noerr(err, exit);
 
-  while(1) {
-    err = gethostbyname(NTP_Server, (uint8_t *)ipstr, 16);
-    require_noerr(err, ReConnWithDelay);
-    ntp_log("NTP server address: %s",ipstr);
-    break;
+   while(1) {
+     err = gethostbyname(NTP_Server, (uint8_t *)ipstr, 16);
+     require_noerr(err, ReConnWithDelay);
+     ntp_log("NTP server address: %s",ipstr);
+     break;
 
-  ReConnWithDelay:
-    mico_thread_sleep(5);
-  }
+   ReConnWithDelay:
+     mico_thread_sleep(5);
+   }
 
   addr.s_ip = inet_addr(ipstr);
   addr.s_port = NTP_Port;
-  
+
   t.tv_sec = 5;
   t.tv_usec = 0;
   
@@ -144,7 +144,7 @@ void NTPClient_thread(void *inContext)
 
     FD_ZERO(&readfds);
     FD_SET(Ntp_fd, &readfds);
-    
+
     select(1, &readfds, NULL, NULL, &t);
     
     if(FD_ISSET(Ntp_fd, &readfds))

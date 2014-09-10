@@ -60,6 +60,7 @@
         EXTERN  vPortSVCHandler
         EXTERN  xPortPendSVHandler
         EXTERN  hard_fault_handler_c
+        EXTERN  xPortSysTickHandler
         EXTERN  RTC_WKUP_irq
         PUBLIC  __vector_table
 
@@ -77,11 +78,11 @@ __vector_table
         DCD     0                         ; Reserved
         DCD     0                         ; Reserved
         DCD     0                         ; Reserved
-        DCD     vPortSVCHandler               ; SVCall Handler
+        DCD     vPortSVCHandler           ; SVCall Handler
         DCD     DebugMon_Handler          ; Debug Monitor Handler
         DCD     0                         ; Reserved
-        DCD     xPortPendSVHandler            ; PendSV Handler
-        DCD     SysTick_Handler           ; SysTick Handler
+        DCD     xPortPendSVHandler        ; PendSV Handler
+        DCD     xPortSysTickHandler       ; SysTick Handler
 
          ; External Interrupts
         DCD     WWDG_IRQHandler                   ; Window WatchDog                                        

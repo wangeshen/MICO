@@ -65,6 +65,10 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
   uart_config.parity       = NO_PARITY;
   uart_config.stop_bits    = STOP_BITS_1;
   uart_config.flow_control = FLOW_CONTROL_DISABLED;
+  if(inContext->flashContentInRam.micoSystemConfig.mcuPowerSaveEnable == true)
+    uart_config.flags = UART_WAKEUP_ENABLE;
+  else
+    uart_config.flags = UART_WAKEUP_DISABLE;
   ring_buffer_init  ( (ring_buffer_t *)&rx_buffer, (uint8_t *)rx_data, UART_BUFFER_LENGTH );
   MicoUartInitialize( UART_FOR_APP, &uart_config, (ring_buffer_t *)&rx_buffer );
   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART Recv", uartRecv_thread, 0x200, (void*)inContext );

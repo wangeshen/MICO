@@ -170,6 +170,14 @@ void init_architecture( void )
   SCB->VTOR = 0x20000000; /* Change the vector table to point to start of SRAM */
 #endif /* ifdef INTERRUPT_VECTORS_IN_RAM */
   
+    /*STM32 wakeup by watchdog in standby mode, re-enter standby mode in this situation*/
+  PlatformWDGReload();
+  if ( (PWR_GetFlagStatus(PWR_FLAG_SB) != RESET) && RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET){
+      RCC_ClearFlag();
+      MicoSystemStandBy();
+  }
+  PWR_ClearFlag(PWR_FLAG_SB);
+  
   if ( stm32_platform_inited == 1 )
     return;
   
@@ -426,12 +434,11 @@ void MicoSystemStandBy(void)
 
 //These functions need to be deprecated
 
-void wiced_platform_mcu_enable_powersave( void )
+void MicoMcuPowerSaveConfig( int enable )
 {
-  MCU_CLOCKS_NOT_NEEDED();
+    if (enable == 1)
+        MCU_CLOCKS_NOT_NEEDED();
+    else
+        MCU_CLOCKS_NEEDED();
 }
 
-void wiced_platform_mcu_disable_powersave( void )
-{
-  MCU_CLOCKS_NEEDED();
-}

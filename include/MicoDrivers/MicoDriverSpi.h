@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    MICORTOS.h 
+  * @file    MicoDriverSpi.h 
   * @author  William Xu
   * @version V1.0.0
   * @date    05-May-2014
-  * @brief   This file provides all the headers of UART operation functions.
+  * @brief   This file provides all the headers of SPI operation functions.
   ******************************************************************************
   * @attention
   *
@@ -70,20 +70,18 @@ typedef struct
  *                     Variables
  ******************************************************/
 
-#ifdef WICED_PLATFORM_INCLUDES_SPI_FLASH
-extern wiced_spi_device_t wiced_spi_flash;
+#ifdef MICO_PLATFORM_INCLUDES_SPI_FLASH
+extern mico_spi_device_t mico_spi_flash;
 #endif
 
-/*****************************************************************************/
-/** @addtogroup spi       SPI
- *  @ingroup platform
- *
- * Serial Peripheral Interface (SPI) Functions
- *
- *
- *  @{
- */
-/*****************************************************************************/
+/******************************************************
+ *                 Function Declarations
+ ******************************************************/
+
+/** @defgroup MICO_SPI MICO SPI Driver
+* @brief  Serial Peripheral Interface (SPI) Functions
+* @{
+*/
 
 /** Initialises the SPI interface for a given SPI device
  *
@@ -91,10 +89,10 @@ extern wiced_spi_device_t wiced_spi_flash;
  *
  * @param  spi : the SPI device to be initialised
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if the SPI device could not be initialised
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if the SPI device could not be initialised
  */
-OSStatus wiced_spi_init( const mico_spi_device_t* spi );
+OSStatus MicoSpiInitialize( const mico_spi_device_t* spi );
 
 
 /** Transmits and/or receives data from a SPI device
@@ -103,10 +101,10 @@ OSStatus wiced_spi_init( const mico_spi_device_t* spi );
  * @param  segments : a pointer to an array of segments
  * @param  number_of_segments : the number of segments to transfer
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred
  */
-OSStatus wiced_spi_transfer( const mico_spi_device_t* spi, mico_spi_message_segment_t* segments, uint16_t number_of_segments );
+OSStatus MicoSpiTransfer( const mico_spi_device_t* spi, mico_spi_message_segment_t* segments, uint16_t number_of_segments );
 
 
 /** De-initialises a SPI interface
@@ -115,12 +113,12 @@ OSStatus wiced_spi_transfer( const mico_spi_device_t* spi, mico_spi_message_segm
  *
  * @param  spi : the SPI device to be de-initialised
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred
  */
-OSStatus wiced_spi_deinit( const mico_spi_device_t* spi );
+OSStatus MicoSpiFinalize( const mico_spi_device_t* spi );
 
-
+/** @} */
 /** @} */
 
 #endif

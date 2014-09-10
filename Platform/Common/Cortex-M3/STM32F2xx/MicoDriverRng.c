@@ -31,10 +31,10 @@
  ******************************************************/
 
 /******************************************************
- * @endcond           Function Declarations
+ *               Function Declarations
  ******************************************************/
 
-int MicoRandomNumberRead( void *inBuffer, int inByteCount )
+OSStatus MicoRandomNumberRead( void *inBuffer, int inByteCount )
 {
     // PLATFORM_TO_DO
     int idx;
@@ -64,5 +64,5 @@ int MicoRandomNumberRead( void *inBuffer, int inByteCount )
     }
     
     RNG_DeInit();
-    return 0;
+    return kNoErr;
 }

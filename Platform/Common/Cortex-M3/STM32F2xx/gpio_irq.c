@@ -285,5 +285,40 @@ static uint8_t convert_port_to_port_number( gpio_port_t* port )
         default:
             return 0;
     }
+}
 
+/*EXTI ISR*/
+void EXTI0_IRQHandler(void)
+{
+    gpio_irq();//SDIO OOB interrupt
+}
+
+void EXTI1_IRQHandler(void)
+{
+    gpio_irq();
+}
+
+void EXTI2_IRQHandler(void)
+{
+    gpio_irq();
+}
+
+void EXTI3_IRQHandler(void)
+{
+    gpio_irq();//User defined external interrupt, EMW3162 button 1: PA3
+}
+
+void EXTI4_IRQHandler(void)
+{
+    gpio_irq();
+}
+
+void EXTI9_5_IRQHandler(void)
+{
+    gpio_irq(); //User defined external interrupt, EMW3161 button 1: PH9
+}
+
+void EXTI15_10_IRQHandler(void)
+{
+    gpio_irq();
 }

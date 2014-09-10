@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    MICOPlatform.h 
+  * @file    MicoPlatform.h 
   * @author  William Xu
   * @version V1.0.0
   * @date    05-May-2014
@@ -27,23 +27,6 @@
 
 #include "common.h"
 
-/*
- * Copyright 2013, Broadcom Corporation
- * All Rights Reserved.
- *
- * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Broadcom Corporation;
- * the contents of this file may not be disclosed to third parties, copied
- * or duplicated in any form, in whole or in part, without the prior
- * written permission of Broadcom Corporation.
- */
-
-/** @file
- *  Defines functions that access platform specific peripherals
- *
- */
-
-#pragma once
-
 #include "RingBufferUtils.h"
 #include "platform.h" /* This file is unique for each platform */
 
@@ -61,21 +44,62 @@
 extern "C" {
 #endif
 
-#define ENABLE_INTERRUPTS   __asm("CPSIE i")
-#define DISABLE_INTERRUPTS  __asm("CPSID i")
+#define mico_mcu_powersave_config MicoMcuPowerSaveConfig
 
-/*****************************************************************************/
-/** @defgroup platform       Platform functions
- *
- *  MICO hardware platform functions
+/** @defgroup MICO_PLATFORM  MICO Hardware Abstract Layer APIs
+* @brief Control hardware peripherals on different platfroms using standard HAL API functions
+* 
+*/
+
+/** @addtogroup MICO_PLATFORM
+  * @{
+  */
+
+/** \defgroup platform_misc Task switching, Reboot, and Power save modes
+  @{
  */
-/*****************************************************************************/
 
+#define ENABLE_INTERRUPTS   __asm("CPSIE i")  /**< Enable interrupts to start task switching in MICO RTOS. */
+#define DISABLE_INTERRUPTS  __asm("CPSID i")  /**< Disable interrupts to stop task switching in MICO RTOS. */
+
+
+/** @brief    Software reboot the MICO hardware
+  *
+  * @param    none
+  * @return   none
+  */
 void MicoSystemReboot(void);
 
+/** @brief    Software reboot the MICO hardware
+  *
+  * @param    none
+  * @return   none
+  */
 void MicoSystemStandBy(void);
 
+/** @brief    Enables the MCU to enter deep sleep mode when all threads are suspended.
+  *
+  * @note:    When all threads are suspended, mcu can shut down some peripherals to 
+  *           save power. For example, STM32 enters STOP mode in this condition, 
+  *           its peripherals are not working and needs to be wake up by an external
+  *           interrupt or MICO core's internal timer. So if you are using a peripherals,  
+  *           you should disable this function temporarily.
+  *           To make this function works, you should not disable the macro in MicoDefault.h: 
+  *           MICO_DISABLE_MCU_POWERSAVE
+  *
+  * @param    enable : 1 = enable MCU powersave, 0 = disable MCU powersave
+  * @return   none
+  */
+void MicoMcuPowerSaveConfig( int enable );
 
+/**
+  * @}
+  */
+
+
+/**
+  * @}
+  */
 #ifdef __cplusplus
 } /*extern "C" */
 #endif

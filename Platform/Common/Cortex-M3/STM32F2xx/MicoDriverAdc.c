@@ -50,14 +50,14 @@ static const uint16_t adc_sampling_cycle[] =
 
 
 
-OSStatus wiced_adc_init( mico_adc_t adc, uint32_t sample_cycle )
+OSStatus MicoAdcInitialize( mico_adc_t adc, uint32_t sample_cycle )
 {
     GPIO_InitTypeDef      gpio_init_structure;
     ADC_InitTypeDef       adc_init_structure;
     ADC_CommonInitTypeDef adc_common_init_structure;
     uint8_t a;
 
-    mico_mcu_powersave_config(false);
+    MicoMcuPowerSaveConfig(false);
 
     /* Initialize the associated GPIO */
     gpio_init_structure.GPIO_Pin   = (uint16_t) ( 1 << adc_mapping[adc].pin->number );
@@ -98,14 +98,14 @@ OSStatus wiced_adc_init( mico_adc_t adc, uint32_t sample_cycle )
     /* Initialize the ADC channel */
     ADC_RegularChannelConfig( adc_mapping[adc].adc, adc_mapping[adc].channel, adc_mapping[adc].rank, a );
 
-    mico_mcu_powersave_config(true);
+    MicoMcuPowerSaveConfig(true);
 
     return kNoErr;
 }
 
-OSStatus wiced_adc_take_sample( mico_adc_t adc, uint16_t* output )
+OSStatus MicoAdcTakeSample( mico_adc_t adc, uint16_t* output )
 {
-    mico_mcu_powersave_config(false);
+    MicoMcuPowerSaveConfig(false);
 
     /* Start conversion */
     ADC_SoftwareStartConv( adc_mapping[adc].adc );
@@ -118,12 +118,12 @@ OSStatus wiced_adc_take_sample( mico_adc_t adc, uint16_t* output )
     /* Read ADC conversion result */
     *output = ADC_GetConversionValue( adc_mapping[adc].adc );
 
-    mico_mcu_powersave_config(true);
+    MicoMcuPowerSaveConfig(true);
 
     return kNoErr;
 }
 
-OSStatus wiced_adc_take_sample_stream( mico_adc_t adc, void* buffer, uint16_t buffer_length )
+OSStatus MicoAdcTakeSampleStreram( mico_adc_t adc, void* buffer, uint16_t buffer_length )
 {
     UNUSED_PARAMETER(adc);
     UNUSED_PARAMETER(buffer);
@@ -132,7 +132,7 @@ OSStatus wiced_adc_take_sample_stream( mico_adc_t adc, void* buffer, uint16_t bu
     return kNotPreparedErr;
 }
 
-OSStatus wiced_adc_deinit( mico_adc_t adc )
+OSStatus MicoAdcFinalize( mico_adc_t adc )
 {
     UNUSED_PARAMETER(adc);
     platform_log("unimplemented");

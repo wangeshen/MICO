@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"pi",
+				"pin_rx	const platform_pin_mapping_t *"
+			],
+			[
+				"MicoGpio",
+				"MicoGpioEnableIRQ(mico_gpio_t gpio, mico_gpio_irq_trigger_t trigger, mico_gpio_irq_handler_t handler, void *arg)	OSStatus"
+			],
+			[
+				"MicoGP",
+				"MicoGpioEnableIRQ(mico_gpio_t gpio, mico_gpio_irq_trigger_t trigger, mico_gpio_irq_handler_t handler, void *arg)	OSStatus"
+			],
+			[
 				"OUTPUT_OD",
 				"OUTPUT_OPEN_DRAIN_NO_PULL	mico_gpio_config_t"
 			],
@@ -34,10 +46,6 @@
 			[
 				"s",
 				"security	SECURITY_TYPE_E"
-			],
-			[
-				"MicoGpio",
-				"MicoGpioOutputTrigger(mico_gpio_t gpio)	OSStatus"
 			],
 			[
 				"MicoGpioO",
@@ -506,39 +514,89 @@
 			[
 				"H",
 				"HIGH	enum _DL_GPIO_STATE_"
-			],
-			[
-				"GPIO_Mode_",
-				"GPIO_Mode_IN	GPIOMode_TypeDef"
-			],
-			[
-				"DL_PULL_",
-				"DL_PULL_DOWN	enum _DL_GPIO_PULL_"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"contents": "/*\n * Copyright 2013, Broadcom Corporation\n * All Rights Reserved.\n *\n * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Broadcom Corporation;\n * the contents of this file may not be disclosed to third parties, copied\n * or duplicated in any form, in whole or in part, without the prior\n * written permission of Broadcom Corporation.\n */\n\n#include \"internal/Bus_protocols/wwd_bus_protocol_interface.h\"\n#include \"internal/wwd_internal.h\"\n#include \"internal/wifi_image/wwd_wifi_image_interface.h\"\n#include \"internal/bcmendian.h\"\n#include \"Platform/wwd_platform_interface.h\"\n#include \"Platform/wwd_spi_interface.h\"\n#include \"Network/wwd_network_constants.h\"\n#include \"Network/wwd_buffer_interface.h\"\n#include \"RTOS/wwd_rtos_interface.h\"\n#include \"wwd_bus_protocol.h\"\n#include \"wwd_assert.h\"\n#include <string.h>  /* For memcpy */\n#include \"chip_constants.h\"\n#include \"internal/SDPCM.h\"\n\n/******************************************************\n *             Constants\n ******************************************************/\n\n#define F2_READY_TIMEOUT_MS    (1000)\n#define F2_READY_TIMEOUT_LOOPS (1000)\n#define F1_READY_TIMEOUT_LOOPS (1000)\n#define FEADBEAD_TIMEOUT_MS    (5000)\n#define ALP_AVAIL_TIMEOUT_MS   (100)\n#define HT_AVAIL_TIMEOUT_MS    (1000)\n/* Taken from FALCON_5_90_195_26 dhd/sys/dhd_sdio.c. For 43362, MUST be >= 8 and word-aligned otherwise dongle fw crashes */\n#define SPI_F2_WATERMARK       (32)\n\n#define GSPI_PACKET_AVAILABLE  (1 << 8)\n#define GSPI_UNDERFLOW         (1 << 1)\n\n#define VERIFY_RESULT( x )     { wiced_result_t verify_result; verify_result = ( x ); if ( verify_result != WICED_SUCCESS ) return verify_result; }\n\n#define SWAP32_16BIT_PARTS(val) ((uint32_t)(( ((uint32_t)(val)) >> 16) + ((((uint32_t)(val)) & 0xffff)<<16)))\n\n#ifdef GSPI_USING_DSTATUS\n#define WICED_PACKET_OVERHEAD    ( sizeof( wiced_buffer_header_t ) + sizeof( uint32 ) )\n#else\n#define WICED_PACKET_OVERHEAD    ( sizeof( wiced_buffer_header_t ) )\n#endif\n\n#define MAX_GSPI_TRANSFER_LEN  2048\n\n#define H32TO16LE(x)           ( ( uint32_t ) ( ( ( ( uint32_t ) ( x ) & ( uint32_t ) 0x000000ffU ) << 8 ) | \\\n                                                ( ( ( uint32_t ) ( x ) & ( uint32_t ) 0x0000ff00U ) >> 8 ) | \\\n                                                ( ( ( uint32_t ) ( x ) & ( uint32_t ) 0x00ff0000U ) << 8 ) | \\\n                                                ( ( ( uint32_t ) ( x ) & ( uint32_t ) 0xff000000U ) >> 8 ) ) )\n\ntypedef enum\n{\n   GSPI_INCREMENT_ADDRESS = 1,\n   GSPI_FIXED_ADDRESS     = 0\n} gspi_transfer_access_t;\n\n/******************************************************\n *             Structures\n ******************************************************/\n\n#pragma pack(1)\n\ntypedef struct\n{\n    gspi_header_t      header;\n    uint8_t            response_delay[4];\n} gspi_backplane_f1_read_header_t;\n\n#pragma pack()\n\ntypedef struct\n{\n    gspi_backplane_f1_read_header_t  gspi_header;\n    uint32_t                         data[1];\n} gspi_backplane_f1_read_packet_t;\n\n/******************************************************\n *             Static variables\n ******************************************************/\n\nstatic wiced_bool_t  wiced_gspi_32bit = WICED_FALSE;\nstatic const uint8_t gspi_command_mapping[] =\n{\n    0,\n    1\n};\n\nstatic wiced_bool_t wiced_bus_flow_controlled = WICED_FALSE;\n\n\n/******************************************************\n *             Function declarations\n ******************************************************/\n\nstatic wiced_result_t wiced_download_firmware   ( void );\nstatic wiced_result_t wiced_read_register_value ( bus_function_t function, uint32_t address, uint8_t value_length, /*@out@*/ uint8_t* value );\n\n/******************************************************\n *             SPI Logging\n * Enable this section for logging of SPI transfers\n * by changing \"if 0\" to \"if 1\"\n ******************************************************/\n#if 0\n\n#define GSPI_LOG_SIZE        (110)\n#define SDIO_LOG_HEADER_SIZE (0)   /*(0x30) */\n\ntypedef enum\n{\n    UNUSED,\n    LOG_TX,\n    LOG_RX\n}gspi_log_direction_t;\n\ntypedef struct gSPI_log_entry_struct\n{\n    gspi_log_direction_t direction;\n    bus_function_t       function;\n    uint32_t             address;\n    unsigned long        time;\n    unsigned long        length;\n#if ( SDIO_LOG_HEADER_SIZE != 0 )\n    unsigned char        header[GSPI_LOG_HEADER_SIZE];\n#endif /* if ( SDIO_LOG_HEADER_SIZE != 0 ) */\n}gspi_log_entry_t;\n\nstatic int               next_gspi_log_pos = 0;\nstatic gspi_log_entry_t  gspi_log_data[GSPI_LOG_SIZE];\n\nstatic void add_log_entry( gspi_log_direction_t dir, bus_function_t function, uint32_t address, unsigned long length, char* gspi_data )\n{\n    gspi_log_data[next_gspi_log_pos].direction = dir;\n    gspi_log_data[next_gspi_log_pos].function = function;\n    gspi_log_data[next_gspi_log_pos].address = address;\n    gspi_log_data[next_gspi_log_pos].time = host_rtos_get_time();\n    gspi_log_data[next_gspi_log_pos].length = length;\n#if ( SDIO_LOG_HEADER_SIZE != 0 )\n    memcpy( gspi_log_data[next_gspi_log_pos].header, gspi_data, (length>=GSPI_LOG_HEADER_SIZE)?GSPI_LOG_HEADER_SIZE:length );\n#endif /* if ( SDIO_LOG_HEADER_SIZE != 0 ) */\n    next_gspi_log_pos++;\n    if (next_gspi_log_pos >= GSPI_LOG_SIZE)\n    {\n        next_gspi_log_pos = 0;\n    }\n}\n#else\n#define add_log_entry( dir, function, address, length, gspi_data )\n#endif\n\n/******************************************************\n *             Global Function definitions\n ******************************************************/\n\n/*\n * Perform a transfer on the gSPI bus\n * Prerequisites: length < MAX_GSPI_TRANSFER_LEN\n */\nwiced_result_t wiced_bus_transfer_buffer( bus_transfer_direction_t direction, bus_function_t function, uint32_t address, wiced_buffer_t buffer )\n{\n    uint32_t* temp;\n    wiced_result_t result;\n    uint16_t newsize;\n    wiced_buffer_header_t* header = (wiced_buffer_header_t*) host_buffer_get_current_piece_data_pointer( buffer );\n    wiced_transfer_bytes_packet_t* gspipacket = (wiced_transfer_bytes_packet_t*) &header->bus_header;\n\n    uint16_t size = (uint16_t) ( host_buffer_get_current_piece_size( buffer ) - sizeof( wiced_buffer_header_t ) );\n\n#ifdef SUPPORT_BUFFER_CHAINING\n#error BUFFER CHAINING NOT IMPLEMENTED IN GSPI YET\n#endif /* ifdef SUPPORT_BUFFER_CHAINING */\n    /* Form the gSPI header */\n    gspipacket->bus_header.gspi_header = (gspi_header_t) ( (uint32_t) ( ( gspi_command_mapping[(int)direction] & 0x1     ) << 31 ) |\n                                                           (uint32_t) ( ( GSPI_INCREMENT_ADDRESS               & 0x1     ) << 30 ) |\n                                                           (uint32_t) ( ( function                             & 0x3     ) << 28 ) |\n                                                           (uint32_t) ( ( address                              & 0x1FFFF ) << 11 ) |\n                                                           (uint32_t) ( ( size                                 & 0x7FF   ) << 0 ) );\n\n    /* Reshuffle the bits if we're not in 32 bit mode */\n    if ( wiced_gspi_32bit == WICED_FALSE )\n    {\n        /* Note: This typecast should always be valid if the buffer containing the GSpi packet has been correctly declared as 32-bit aligned */\n        temp = (uint32_t*) &gspipacket->bus_header.gspi_header;\n        *temp = H32TO16LE(*temp);\n    }\n\n    /* Round size up to 32-bit alignment */\n    newsize = (uint16_t) ROUND_UP(size, 4);\n\n    /* Send the data */\n    if ( direction == BUS_WRITE )\n    {\n        /* Wait for FIFO to be ready to accept data */\n        if ( function == WLAN_FUNCTION )\n        {\n            uint32_t wiced_gspi_status;\n            uint32_t loop_count = 0;\n            while ( ( ( result = wiced_read_register_value( BUS_FUNCTION, SPI_STATUS_REGISTER, (uint8_t) 4, (uint8_t*) &wiced_gspi_status ) ) == WICED_SUCCESS ) &&\n                    ( ( wiced_gspi_status & ( 1 << 5 ) ) == 0 ) &&\n                    ( loop_count < (uint32_t) F2_READY_TIMEOUT_LOOPS ) )\n            {\n                loop_count++;\n            }\n            if ( result != WICED_SUCCESS )\n            {\n                return result;\n            }\n            if ( loop_count >= (uint32_t) F2_READY_TIMEOUT_LOOPS )\n            {\n                WPRINT_WWD_ERROR((\"Timeout waiting for data FIFO to be ready\\r\\n\"));\n                return WICED_TIMEOUT;\n            }\n        }\n\n        add_log_entry( LOG_TX, function, address, size, (char*)&gspipacket->data );\n    }\n    result = host_platform_spi_transfer( direction, (uint8_t*) gspipacket, (uint16_t) ( newsize + sizeof(gspi_header_t) ) );\n    if ( direction == BUS_READ )\n    {\n        add_log_entry( LOG_RX, function, address, size, (char*)&gspipacket->data );\n    }\n\n    return result;\n}\n\nwiced_result_t wiced_bus_poke_wlan( void )\n{\n    return WICED_SUCCESS;\n}\n\nwiced_result_t wiced_bus_set_flow_control( uint8_t value )\n{\n    if ( value != 0 )\n    {\n        wiced_bus_flow_controlled = WICED_TRUE;\n    }\n    else\n    {\n        wiced_bus_flow_controlled = WICED_FALSE;\n    }    \n	return WICED_SUCCESS;\n}\n\nwiced_bool_t wiced_bus_is_flow_controlled( void )\n{\n    return wiced_bus_flow_controlled;\n}\n\nwiced_result_t wiced_bus_ack_interrupt(uint32_t intstatus)\n{\n    return wiced_write_register_value( BUS_FUNCTION, SPI_INTERRUPT_REGISTER, (uint8_t) 2, intstatus );\n}\n\nuint32_t wiced_bus_process_interrupt(void)\n{\n    uint16_t interrupt_register;\n\n    /* Read the interrupt register */\n    if (wiced_read_register_value( BUS_FUNCTION, SPI_INTERRUPT_REGISTER, (uint8_t) 2, (uint8_t*) &interrupt_register ) != WICED_SUCCESS)\n    {\n        goto return_with_error;\n    }\n\n    if ( ( interrupt_register & 0x0086 ) != 0 ) /* This should be 0x87, but occasional \"data not available\" errors are flagged seemingly for no reason */\n    {\n        /* Error condition detected */\n        WPRINT_WWD_DEBUG((\"Bus error condition detected\\r\\n\"));\n    }\n\n    /* Clear interrupt register */\n    if ( interrupt_register != 0 )\n    {\n        if (wiced_write_register_value( BUS_FUNCTION, SPI_INTERRUPT_REGISTER, (uint8_t) 2, interrupt_register ) != WICED_SUCCESS)\n        {\n            goto return_with_error;\n        }\n    }\n\n    return (uint32_t)interrupt_register;\n\nreturn_with_error:\n    wiced_assert(\"Error accessing backplane\", 0 != 0);\n    return 0;\n}\n\n/*@only@*/ /*@null@*/ wiced_result_t wiced_read_frame( wiced_buffer_t* buffer )\n{\n    uint32_t wiced_gspi_status;\n    wiced_result_t result;\n    uint32_t wiced_gspi_bytes_pending;\n\n    result = wiced_read_register_value( BUS_FUNCTION, SPI_STATUS_REGISTER, (uint8_t) 4, (uint8_t*) &wiced_gspi_status );\n    if ( result != WICED_SUCCESS )\n    {\n        return WICED_ERROR;\n    }\n\n#ifdef DEBUG\n    if ((wiced_gspi_status & GSPI_PACKET_AVAILABLE)&&(( (wiced_gspi_status >> 9) & 0x7FF )== 0 )) { WPRINT_WWD_DEBUG((\"gSPI packet of size zero available\\r\\n\")); }\n\n    if ((wiced_gspi_status & GSPI_PACKET_AVAILABLE)&&(( (wiced_gspi_status >> 9) & 0x7FF ) > WICED_LINK_MTU - WICED_PACKET_OVERHEAD )) { WPRINT_WWD_DEBUG((\"gSPI packet size available is too big for buffers\\r\\n\")); }\n\n    if ((wiced_gspi_status & GSPI_PACKET_AVAILABLE)&&( wiced_gspi_status & GSPI_UNDERFLOW) ) { WPRINT_WWD_ERROR((\"gSPI underflow - packet size will be wrong\\r\\n\")); }\n#endif /* ifdef DEBUG */\n\n    wiced_gspi_bytes_pending = 0;\n\n    if ( ( wiced_gspi_status & GSPI_PACKET_AVAILABLE ) != 0 )\n    {\n        wiced_gspi_bytes_pending = ( ( wiced_gspi_status >> 9 ) & 0x7FF );\n    }\n\n    if ( wiced_gspi_bytes_pending == 0 )\n    {\n        return WICED_ERROR;\n    }\n\n    /* Allocate a suitable buffer */\n    result = host_buffer_get( buffer, WICED_NETWORK_RX, (unsigned short)( wiced_gspi_bytes_pending + WICED_PACKET_OVERHEAD), WICED_FALSE );\n\n    if ( result != WICED_SUCCESS )\n    {\n        /* Read out the first 12 bytes to get the bus credit information */\n        uint8_t temp_buffer[12 + sizeof(wiced_bus_header_t)];\n        wiced_bus_transfer_bytes( BUS_READ, WLAN_FUNCTION, 0, 12, (wiced_transfer_bytes_packet_t*) temp_buffer );\n\n        /* Abort the transfer to force the packet to be dropped */\n        if ( wiced_gspi_bytes_pending > 12 )\n        {\n            wiced_write_register_value( BACKPLANE_FUNCTION, SPI_FRAME_CONTROL, 1, ( 1 << 0 ) );\n        }\n\n        /* Process bus data credit information */\n        wiced_process_bus_credit_update( (uint8_t*) ( temp_buffer + sizeof(wiced_bus_header_t) ) );\n        return WICED_ERROR;\n    }\n\n    if ( wiced_bus_transfer_buffer( BUS_READ, WLAN_FUNCTION, 0, *buffer ) != WICED_SUCCESS)\n    {\n        host_buffer_release( *buffer, WICED_NETWORK_RX );\n        return WICED_ERROR;\n    }\n\n    return WICED_SUCCESS;\n}\n\nwiced_result_t wiced_bus_init( void )\n{\n    uint32_t data = 0;\n    uint32_t wiced_gspi_status;\n    uint16_t data16 = 0;\n    uint32_t loop_count;\n    wiced_result_t result;\n    uint8_t init_data[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };\n    wiced_gspi_32bit = WICED_FALSE;\n\n    host_platform_power_wifi( WICED_TRUE );\n    host_platform_reset_wifi( WICED_TRUE );\n    host_rtos_delay_milliseconds( (uint32_t) 1 );\n    host_platform_reset_wifi( WICED_FALSE );\n\n    /* Due to an chip issue, the first transfer will be corrupted.\n     * This means a repeated safe read of a known value register is required until\n     * the correct value is returned - signalling the bus is running.\n     * This known value register must be accessed using fixed (non-incrementing) address\n     * mode, hence a custom packet header must be constructed\n     * Due to the chip issue, the data received could be left shifted by one bit.\n     */\n    loop_count = 0;\n    do\n    {\n        gspi_header_t* gspi_header = (gspi_header_t*) init_data;\n\n        *gspi_header = (gspi_header_t) SWAP32_16BIT_PARTS( BCMSWAP32( (uint32_t)( ( gspi_command_mapping[(int)BUS_READ] & 0x1      ) << 31) |\n                                                                      (uint32_t)( ( GSPI_FIXED_ADDRESS                  & 0x1      ) << 30) |\n                                                                      (uint32_t)( ( BUS_FUNCTION                        & 0x3      ) << 28) |\n                                                                      (uint32_t)( ( SPI_READ_TEST_REGISTER              & 0x1FFFFu ) << 11) |\n                                                                      (uint32_t)( ( 4u /*size*/                         & 0x7FFu   ) <<  0 ) ) );\n        VERIFY_RESULT( host_platform_spi_transfer(BUS_READ, init_data, (uint16_t) 12 ) );\n        loop_count++;\n    } while ( ( NULL == memchr( &init_data[4], SPI_READ_TEST_REG_LSB,      (size_t) 8 ) ) &&\n              ( NULL == memchr( &init_data[4], SPI_READ_TEST_REG_LSB_SFT1, (size_t) 8 ) ) &&\n              ( NULL == memchr( &init_data[4], SPI_READ_TEST_REG_LSB_SFT2, (size_t) 8 ) ) &&\n              ( NULL == memchr( &init_data[4], SPI_READ_TEST_REG_LSB_SFT3, (size_t) 8 ) ) &&\n              ( loop_count < (uint32_t) FEADBEAD_TIMEOUT_MS ) &&\n              ( host_rtos_delay_milliseconds( (uint32_t) 1 ), ( 1 == 1 ) ) );\n\n    /* Keep/reset defaults for registers 0x0-0x4 except for, 0x0: Change word length to 32bit, set endianness, enable wakeup. 0x2: enable interrupt with status. */\n#if defined(IL_BIGENDIAN)\n    VERIFY_RESULT( wiced_write_register_value(BUS_FUNCTION, SPI_BUS_CONTROL, (uint8_t) 4, (uint32_t) ( WORD_LENGTH_32 | (0 & ENDIAN_BIG) | INTR_POLARITY_HIGH | WAKE_UP | (0x4 << (8*SPI_RESPONSE_DELAY)) | ((0 & STATUS_ENABLE) << (8*SPI_STATUS_ENABLE)) | ( INTR_WITH_STATUS << (8*SPI_STATUS_ENABLE)) ) ) );\n#else\n    VERIFY_RESULT( wiced_write_register_value(BUS_FUNCTION, SPI_BUS_CONTROL, (uint8_t) 4, (uint32_t) ( WORD_LENGTH_32 | ENDIAN_BIG       | INTR_POLARITY_HIGH | WAKE_UP | (0x4 << (8*SPI_RESPONSE_DELAY)) | ((0 & STATUS_ENABLE) << (8*SPI_STATUS_ENABLE)) | ( INTR_WITH_STATUS << (8*SPI_STATUS_ENABLE)) ) ) );\n#endif\n    wiced_gspi_32bit = WICED_TRUE;\n    VERIFY_RESULT( wiced_read_register_value(BUS_FUNCTION, SPI_BUS_CONTROL, (uint8_t) 4, (uint8_t*)&data ) );\n\n    /* Check feedbead can be read - i.e. the device is alive */\n    data = 0;\n    VERIFY_RESULT( wiced_read_register_value( BUS_FUNCTION, SPI_READ_TEST_REGISTER, (uint8_t) 4, (uint8_t*) &data ) );\n\n    if ( data != SPI_READ_TEST_REGISTER_VALUE )\n    {\n        WPRINT_WWD_ERROR((\"Read %x, instead of 0xFEEDBEAD from the WLAN chip\\r\\n\", (unsigned int)data ));\n        return WICED_ERROR;\n    }\n\n    /* Make sure error interrupt bits are clear */\n    VERIFY_RESULT( wiced_write_register_value(BUS_FUNCTION, SPI_INTERRUPT_REGISTER, (uint8_t) 1, (uint32_t) ( DATA_UNAVAILABLE | COMMAND_ERROR | DATA_ERROR | F1_OVERFLOW ) ) );\n\n    /* Enable a selection of interrupts */\n    VERIFY_RESULT( wiced_write_register_value(BUS_FUNCTION, SPI_INTERRUPT_ENABLE_REGISTER, (uint8_t) 2, (uint32_t) ( F2_F3_FIFO_RD_UNDERFLOW | F2_F3_FIFO_WR_OVERFLOW | COMMAND_ERROR | DATA_ERROR | F2_PACKET_AVAILABLE | F1_OVERFLOW ) ) );\n\n    /* Request ALP */\n    VERIFY_RESULT( wiced_write_register_value(BACKPLANE_FUNCTION, SDIO_CHIP_CLOCK_CSR, (uint8_t) 1, SBSDIO_ALP_AVAIL_REQ ) );\n\n    /* Wait until ALP is available */\n    loop_count = 0;\n    while ( ( ( result = wiced_read_register_value( BACKPLANE_FUNCTION, SDIO_CHIP_CLOCK_CSR, (uint8_t) 2, (uint8_t*) &data16 ) ) == WICED_SUCCESS ) &&\n            ( ( data16 & SBSDIO_ALP_AVAIL ) == 0 ) &&\n            ( loop_count < (uint32_t) ALP_AVAIL_TIMEOUT_MS ) )\n    {\n        host_rtos_delay_milliseconds( (uint32_t) 1 );\n        loop_count++;\n    }\n    if ( loop_count >= (uint32_t) ALP_AVAIL_TIMEOUT_MS )\n    {\n        return WICED_TIMEOUT;\n    }\n    if ( result != WICED_SUCCESS )\n    {\n        return result;\n    }\n\n    /* Clear request for ALP */\n    VERIFY_RESULT( wiced_write_register_value(BACKPLANE_FUNCTION, SDIO_CHIP_CLOCK_CSR, (uint8_t) 1, (uint32_t) 0) );\n\n    /* Download the firmware */\n    result = wiced_download_firmware( );\n    if ( result != WICED_SUCCESS )\n    {\n        WPRINT_WWD_ERROR((\"Could not download firmware\\r\\n\"));\n        return result;\n    }\n\n    /* Wait for F2 to be ready */\n    loop_count = 0;\n    while ( ( ( result = wiced_read_register_value( BUS_FUNCTION, SPI_STATUS_REGISTER, (uint8_t) 4, (uint8_t*) &wiced_gspi_status ) ) == WICED_SUCCESS ) &&\n            ( ( wiced_gspi_status & ( 1 << 5 ) ) == 0 ) &&\n            ( loop_count < (uint32_t) F2_READY_TIMEOUT_MS ) )\n    {\n        host_rtos_delay_milliseconds( (uint32_t) 1 );\n        loop_count++;\n    }\n    if ( loop_count >= (uint32_t) F2_READY_TIMEOUT_MS )\n    {\n        /* If your system fails here, it could be due to incorrect NVRAM variables.\n         * Check which 'wifi_nvram_image.h' file your platform is using, and\n         * check that it matches the WLAN device on your platform, including the\n         * crystal frequency.\n         */\n        WPRINT_WWD_ERROR((\"Timeout while waiting for function 2 to be ready\\r\\n\"));\n        return WICED_TIMEOUT;\n    }\n\n    return result;\n}\n\nwiced_result_t wiced_bus_deinit( void )\n{\n    /* put device in reset. */\n    host_platform_reset_wifi( WICED_TRUE );\n\n    return WICED_SUCCESS;\n}\n\n/******************************************************\n *     Function definitions for Protocol Common\n ******************************************************/\n\n/*\n * Write a value to a register NOT on the backplane\n * Prerequisites: value_length <= 4\n */\nwiced_result_t wiced_write_register_value( bus_function_t function, uint32_t address, uint8_t value_length, uint32_t value )\n{\n    char gspi_internal_buffer[sizeof(wiced_bus_header_t) + sizeof(uint32_t) + sizeof(uint32_t)];\n    wiced_transfer_bytes_packet_t* internal_gspi_packet = (wiced_transfer_bytes_packet_t*) gspi_internal_buffer;\n\n    /* Flip the bytes if we're not in 32 bit mode */\n    if ( wiced_gspi_32bit == WICED_FALSE )\n    {\n        value = H32TO16LE(value);\n    }\n    /* Write the value and value_length into the packet */\n    internal_gspi_packet->data[0] = value;\n\n    /* Send it off */\n    return wiced_bus_transfer_bytes( BUS_WRITE, function, address, value_length, internal_gspi_packet );\n}\n\n/*\n * Write a value to a register on the backplane\n * Prerequisites: value_length <= 4\n */\nwiced_result_t wiced_write_backplane_value( uint32_t address, uint8_t register_length, uint32_t value )\n{\n    VERIFY_RESULT( wiced_set_backplane_window(address) );\n    return wiced_write_register_value( BACKPLANE_FUNCTION, address & BACKPLANE_ADDRESS_MASK, register_length, value );\n}\n\n/*\n * Read the value of a register on the backplane\n * Prerequisites: value_length <= 4\n */\nwiced_result_t wiced_read_backplane_value( uint32_t address, uint8_t register_length, /*@out@*/ uint8_t* value )\n{\n    *value = 0;\n    VERIFY_RESULT( wiced_set_backplane_window(address) );\n    return wiced_read_register_value( BACKPLANE_FUNCTION, address & BACKPLANE_ADDRESS_MASK, register_length, value );\n}\n\nwiced_result_t wiced_bus_transfer_bytes( bus_transfer_direction_t direction, bus_function_t function, uint32_t address, uint16_t size, /*@in@*/ /*@out@*/ wiced_transfer_bytes_packet_t* data )\n{\n    uint32_t* temp;\n    wiced_result_t result;\n    uint16_t newsize;\n\n    data->bus_header.gspi_header = (gspi_header_t) ( (uint32_t) ( ( gspi_command_mapping[(int)direction] & 0x1     ) << 31 ) |\n                                                     (uint32_t) ( ( GSPI_INCREMENT_ADDRESS               & 0x1     ) << 30 ) |\n                                                     (uint32_t) ( ( function                             & 0x3     ) << 28 ) |\n                                                     (uint32_t) ( ( address                              & 0x1FFFF ) << 11 ) |\n                                                     (uint32_t) ( ( size                                 & 0x7FF   ) <<  0 ) );\n\n    /* Reshuffle the bits if we're not in 32 bit mode */\n    if ( wiced_gspi_32bit == WICED_FALSE )\n    {\n        /* Note: This typecast should always be valid if the buffer containing the GSpi packet has been correctly declared as 32-bit aligned */\n        temp  = (uint32_t*) data;\n        *temp = H32TO16LE(*temp);\n    }\n\n    /* Round size up to 32-bit alignment */\n    newsize = (uint16_t) ROUND_UP(size, 4);\n\n    /* Ensure we are clear to write */\n    if ( ( direction == BUS_WRITE ) && ( function == WLAN_FUNCTION ) )\n    {\n        uint32_t wiced_gspi_status;\n        uint32_t loop_count = 0;\n\n        /* Verify the SDPCM size and stated size match */\n        uint16_t* frametag_ptr = (uint16_t*) &data->data;\n        if ( size != *frametag_ptr )\n        {\n            WPRINT_WWD_DEBUG((\"Error - gSPI size does not match SDPCM size!\\r\\n\"));\n            return WICED_ERROR;\n        }\n\n        /* Wait for WLAN FIFO to be ready to accept data */\n        while ( ( ( result = wiced_read_register_value( BUS_FUNCTION, SPI_STATUS_REGISTER, (uint8_t) 4, (uint8_t*) &wiced_gspi_status ) ) == WICED_SUCCESS ) &&\n                ( ( wiced_gspi_status & ( 1 << 5 ) ) == 0 ) &&\n                ( loop_count < (uint32_t) F2_READY_TIMEOUT_LOOPS ) )\n        {\n            ++loop_count;\n        }\n\n        if ( result != WICED_SUCCESS )\n        {\n            return result;\n        }\n\n        if ( loop_count >= (uint32_t) F2_READY_TIMEOUT_LOOPS )\n        {\n            WPRINT_WWD_DEBUG((\"Timeout waiting for data FIFO to be ready\\r\\n\"));\n            return WICED_TIMEOUT;\n        }\n\n        add_log_entry( LOG_TX, function, address, (unsigned long)size, (char*)&data->data );\n    }\n\n    /* Send the data */\n    result = host_platform_spi_transfer( direction, (uint8_t*) data, (uint16_t) ( newsize + sizeof(gspi_header_t) ) );\n\n    if ( direction == BUS_READ )\n    {\n        add_log_entry( LOG_RX, function, address, (unsigned long)((function == BACKPLANE_FUNCTION)?size-4:size), (function == BACKPLANE_FUNCTION)?((char*)&data->data)+4:(char*)&data->data );\n    }\n\n    return result;\n}\n\n\nwiced_result_t wiced_bus_ensure_wlan_bus_is_up( void )\n{\n    uint8_t csr = 0;\n\n    /* Ensure HT clock is up */\n    wiced_write_register_value( BACKPLANE_FUNCTION, 0x1000E, 1, ( 1 << 4 ) );\n\n    do\n    {\n        wiced_read_register_value( BACKPLANE_FUNCTION, 0x1000E, 1, &csr );\n    }\n    while (!(csr & (1 << 7)));\n\n    return WICED_SUCCESS;\n}\n\nwiced_result_t wiced_bus_allow_wlan_bus_to_sleep( void )\n{\n    /* Clear HT clock request */\n    return wiced_write_register_value( BACKPLANE_FUNCTION, 0x1000E, 1, 0 );\n}\n\n\n\n/******************************************************\n *             Static  Function definitions\n ******************************************************/\n\nstatic wiced_result_t wiced_download_firmware( void )\n{\n    uint8_t csr_val;\n    wiced_result_t result;\n    uint32_t loop_count = 0;\n\n    VERIFY_RESULT( wiced_disable_device_core(ARM_CORE) );\n    VERIFY_RESULT( wiced_disable_device_core(SOCRAM_CORE) );\n    VERIFY_RESULT( wiced_reset_device_core(SOCRAM_CORE) );\n\n    VERIFY_RESULT( wiced_write_wifi_firmware_image( ) );\n\n    VERIFY_RESULT( wiced_write_wifi_nvram_image( ) );\n\n    /* Take the ARM core out of reset */\n    VERIFY_RESULT( wiced_reset_device_core( ARM_CORE ) );\n    result = wiced_device_core_is_up( ARM_CORE );\n    if ( result != WICED_SUCCESS )\n    {\n        WPRINT_WWD_DEBUG((\"Could not bring ARM core up\\r\\n\"));\n        return result;\n    }\n\n    /* Wait until the HT clock is available */\n    while ( ( ( result = wiced_read_register_value( BACKPLANE_FUNCTION, SDIO_CHIP_CLOCK_CSR, (uint8_t) 1, &csr_val ) ) == WICED_SUCCESS ) &&\n            ( ( csr_val & SBSDIO_HT_AVAIL ) == 0 ) &&\n            ( loop_count < (uint32_t) HT_AVAIL_TIMEOUT_MS ) )\n    {\n        host_rtos_delay_milliseconds( (uint32_t) 1 );\n        loop_count++;\n    }\n    if ( loop_count >= (uint32_t) HT_AVAIL_TIMEOUT_MS )\n    {\n        return WICED_TIMEOUT;\n    }\n    if ( result != WICED_SUCCESS )\n    {\n        return result;\n    }\n\n    /* Set up the interrupt mask and enable interrupts */\n    VERIFY_RESULT( wiced_write_backplane_value(SDIO_INT_HOST_MASK, (uint8_t) 4, I_HMB_SW_MASK) );\n\n    /* Lower F2 Watermark to avoid DMA Hang in F2 when SD Clock is stopped. */\n    return wiced_write_backplane_value( SDIO_FUNCTION2_WATERMARK, (uint8_t) 1, (uint32_t) SPI_F2_WATERMARK );\n}\n\n/*\n * Read the value of a register NOT on the backplane\n * Prerequisites: value_length <= 4\n */\nstatic wiced_result_t wiced_read_register_value( bus_function_t function, uint32_t address, uint8_t value_length, /*@out@*/ uint8_t* value )\n{\n    uint32_t* data_ptr;\n    wiced_result_t result;\n    uint8_t padding = 0;\n\n    char gspi_internal_buffer[sizeof(wiced_bus_header_t) + sizeof(uint32_t) + sizeof(uint32_t)];\n\n    /* Clear the receiving part of memory and set the value_length */\n    if ( function == BACKPLANE_FUNCTION )\n    {\n        gspi_backplane_f1_read_packet_t* pkt = (gspi_backplane_f1_read_packet_t*) gspi_internal_buffer;\n        data_ptr = pkt->data;\n        padding = 4; /* Add response delay */\n    }\n    else\n    {\n        wiced_transfer_bytes_packet_t* pkt = (wiced_transfer_bytes_packet_t*) gspi_internal_buffer;\n        data_ptr = pkt->data;\n    }\n    *data_ptr = 0;\n    result = wiced_bus_transfer_bytes( BUS_READ, function, address, (uint16_t)(value_length + padding), (wiced_transfer_bytes_packet_t*) gspi_internal_buffer );\n\n    memcpy( value, data_ptr, value_length );\n\n    return result;\n}\n",
-			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/WWD/SPI/wwd_bus_protocol.c",
-			"file_size": 27116,
-			"file_write_time": 1409719887000000,
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverWdg.h",
 			"settings":
 			{
-				"buffer_size": 27116,
+				"buffer_size": 3483,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "/*\n * Copyright 2013, Broadcom Corporation\n * All Rights Reserved.\n *\n * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Broadcom Corporation;\n * the contents of this file may not be disclosed to third parties, copied\n * or duplicated in any form, in whole or in part, without the prior\n * written permission of Broadcom Corporation.\n */\n\n/** @file\n *  Broadcom WLAN SDIO Protocol interface\n *\n *  Implements the WICED Bus Protocol Interface for SDIO\n *  Provides functions for initialising, de-intitialising 802.11 device,\n *  sending/receiving raw packets etc\n */\n\n\n#include \"internal/SDPCM.h\"\n#include <string.h> /* For memcpy */\n#include \"wwd_assert.h\"\n#include \"Network/wwd_buffer_interface.h\"\n#include \"internal/wwd_internal.h\"\n#include \"RTOS/wwd_rtos_interface.h\"\n#include \"internal/wifi_image/wwd_wifi_image_interface.h\"\n#include \"Platform/wwd_platform_interface.h\"\n#include \"internal/Bus_protocols/wwd_bus_protocol_interface.h\"\n#include \"chip_constants.h\"\n\n/******************************************************\n *             Constants\n ******************************************************/\n\n#define F0_WORKING_TIMEOUT_MS (500)\n#define F1_AVAIL_TIMEOUT_MS   (500)\n#define F2_AVAIL_TIMEOUT_MS   (500)\n#define F2_READY_TIMEOUT_MS   (1000)\n#define ALP_AVAIL_TIMEOUT_MS  (100)\n#define HT_AVAIL_TIMEOUT_MS   (500)\n#define ABORT_TIMEOUT_MS      (100)\n/* Taken from FALCON_5_90_195_26 dhd/sys/dhd_sdio.c. */\n#define SDIO_F2_WATERMARK     (8)\n\n#define WLAN_BUS_UP_ATTEMPTS  (1000)\n\n#define INITIAL_READ   4\n\n#define BUS_PROTOCOL_LEVEL_MAX_RETRIES   5\n\n#define VERIFY_RESULT( x )  { wiced_result_t verify_result; verify_result = (x); if ( verify_result != WICED_SUCCESS ) return verify_result; }\n\n#ifndef WICED_BUS_RESET_DELAY\n#define WICED_BUS_RESET_DELAY    (1)\n#endif\n\n/******************************************************\n *             Structures\n ******************************************************/\n\n#pragma pack(1)\ntypedef struct\n{\n    unsigned char stuff_bits;\n    unsigned int  ocr :24;\n} sdio_cmd5_argument_t;\n\ntypedef struct\n{\n    unsigned int  _unique2         : 9; /* 0-8   */\n    unsigned int  register_address :17; /* 9-25  */\n    unsigned int  _unique          : 2; /* 26-27 */\n    unsigned int  function_number  : 3; /* 28-30 */\n    unsigned int  rw_flag          : 1; /* 31    */\n} sdio_cmd5x_argument_t;\n\ntypedef struct\n{\n    uint8_t       write_data;           /* 0 - 7 */\n    unsigned int  _stuff2          : 1; /* 8     */\n    unsigned int  register_address :17; /* 9-25  */\n    unsigned int  _stuff           : 1; /* 26    */\n    unsigned int  raw_flag         : 1; /* 27    */\n    unsigned int  function_number  : 3; /* 28-30 */\n    unsigned int  rw_flag          : 1; /* 31    */\n} sdio_cmd52_argument_t;\n\ntypedef struct\n{\n    unsigned int  count            : 9; /* 0-8   */\n    unsigned int  register_address :17; /* 9-25  */\n    unsigned int  op_code          : 1; /* 26    */\n    unsigned int  block_mode       : 1; /* 27    */\n    unsigned int  function_number  : 3; /* 28-30 */\n    unsigned int  rw_flag          : 1; /* 31    */\n} sdio_cmd53_argument_t;\n\ntypedef union\n{\n    uint32_t              value;\n    sdio_cmd5_argument_t  cmd5;\n    sdio_cmd5x_argument_t cmd5x;\n    sdio_cmd52_argument_t cmd52;\n    sdio_cmd53_argument_t cmd53;\n} sdio_cmd_argument_t;\n\ntypedef struct\n{\n    unsigned int  ocr              :24; /* 0-23  */\n    unsigned int  stuff_bits       : 3; /* 24-26 */\n    unsigned int  memory_present   : 1; /* 27    */\n    unsigned int  function_count   : 3; /* 28-30 */\n    unsigned int  c                : 1; /* 31    */\n} sdio_response4_t;\n\ntypedef struct\n{\n    uint8_t       data;                /* 0-7   */\n    uint8_t       response_flags;       /* 8-15  */\n    uint16_t      stuff;               /* 16-31 */\n} sdio_response5_t;\n\ntypedef struct\n{\n    uint16_t      card_status;          /* 0-15  */\n    uint16_t      rca;                 /* 16-31 */\n} sdio_response6_t;\n\ntypedef union\n{\n    uint32_t                    value;\n    sdio_response4_t            r4;\n    sdio_response5_t            r5;\n    sdio_response6_t            r6;\n} sdio_response_t;\n\n#pragma pack()\n\n/******************************************************\n *             Variables\n ******************************************************/\n\nstatic wiced_bool_t bus_is_up                 = WICED_FALSE;\nstatic wiced_bool_t wiced_bus_flow_controlled = WICED_FALSE;\n\n/******************************************************\n *             Function declarations\n ******************************************************/\n\nstatic wiced_result_t wiced_sdio_transfer    ( bus_transfer_direction_t direction, bus_function_t function, uint32_t address, uint16_t data_size, /*@in@*/ /*@out@*/  uint8_t* data, sdio_response_needed_t response_expected );\nstatic wiced_result_t sdio_cmd52             ( bus_transfer_direction_t direction, bus_function_t function, uint32_t address, uint8_t value, sdio_response_needed_t response_expected, /*@out@*/ uint8_t* response );\nstatic wiced_result_t sdio_cmd53             ( bus_transfer_direction_t direction, bus_function_t function, sdio_transfer_mode_t mode, uint32_t address, uint16_t data_size, /*@in@*/ /*@out@*/  uint8_t* data, sdio_response_needed_t response_expected, /*@null@*/ /*@out@*/ uint32_t* response );\nstatic wiced_result_t wiced_abort_read       ( wiced_bool_t retry );\nstatic wiced_result_t wiced_download_firmware( void );\nstatic wiced_result_t wiced_read_register_value( bus_function_t function, uint32_t address, uint8_t value_length, /*@out@*/ uint8_t* value );\n\n#ifndef WICED_DISABLE_MCU_POWERSAVE\nstatic wiced_result_t wiced_sdio_redirect_oob_interrupt( void );\n#endif\n\n/******************************************************\n *             SDIO Logging\n * Enable this section for logging of SDIO transfers\n * by changing \"if 0\" to \"if 1\"\n ******************************************************/\n#if 0\n\n#define SDIO_LOG_SIZE (110)\n#define SDIO_LOG_HEADER_SIZE (0)   /*(0x30) */\n\ntypedef struct sdio_log_entry_struct\n{\n    bus_transfer_direction_t  direction;\n    bus_function_t            function;\n    uint32_t                  address;\n    unsigned long             time;\n    unsigned long             length;\n#if ( SDIO_LOG_HEADER_SIZE != 0 )\n    unsigned char             header[SDIO_LOG_HEADER_SIZE];\n#endif /* if ( SDIO_LOG_HEADER_SIZE != 0 ) */\n} sdio_log_entry_t;\n\nstatic int next_sdio_log_pos = 0;\nstatic sdio_log_entry_t sdio_log_data[SDIO_LOG_SIZE];\n\nstatic void add_log_entry( bus_transfer_direction_t dir, bus_function_t function, uint32_t address, unsigned long length, uint8_t* data )\n{\n    sdio_log_data[next_sdio_log_pos].direction = dir;\n    sdio_log_data[next_sdio_log_pos].function  = function;\n    sdio_log_data[next_sdio_log_pos].address   = address;\n    sdio_log_data[next_sdio_log_pos].time      = host_rtos_get_time();\n    sdio_log_data[next_sdio_log_pos].length    = length;\n#if ( SDIO_LOG_HEADER_SIZE != 0 )\n    memcpy( sdio_log_data[next_sdio_log_pos].header, data, (length>=SDIO_LOG_HEADER_SIZE)?SDIO_LOG_HEADER_SIZE:length );\n#else\n    UNUSED_PARAMETER(data);\n#endif /* if ( SDIO_LOG_HEADER_SIZE != 0 ) */\n    next_sdio_log_pos++;\n    if (next_sdio_log_pos >= SDIO_LOG_SIZE)\n    {\n        next_sdio_log_pos = 0;\n    }\n}\n#else /* #if 0 */\n#define add_log_entry( dir, function, address, length, data)\n#endif /* #if 0 */\n\n\n/******************************************************\n *             Global Function definitions\n ******************************************************/\n\n/* Device data transfer functions */\nwiced_result_t wiced_bus_transfer_buffer( bus_transfer_direction_t direction, bus_function_t function, uint32_t address, wiced_buffer_t buffer )\n{\n    return wiced_bus_transfer_bytes( direction, function, address, (uint16_t) ( host_buffer_get_current_piece_size( buffer ) - sizeof(wiced_buffer_t) ), (wiced_transfer_bytes_packet_t*)( host_buffer_get_current_piece_data_pointer( buffer ) + sizeof(wiced_buffer_t) ) );\n}\n\n\nwiced_result_t wiced_bus_init( void )\n{\n    uint8_t        byte_data;\n    wiced_result_t result;\n    uint32_t       loop_count;\n\n    wiced_bus_flow_controlled = WICED_FALSE;\n\n    host_platform_power_wifi( WICED_TRUE );\n    host_platform_reset_wifi( WICED_TRUE );\n    (void) host_rtos_delay_milliseconds( (uint32_t) WICED_BUS_RESET_DELAY );  /* Ignore return - nothing can be done if it fails */\n    host_platform_reset_wifi( WICED_FALSE );\n\n    host_platform_sdio_enumerate();\n\n    /* Setup the backplane*/\n    loop_count = 0;\n    do\n    {\n        /* Enable function 1 (backplane) */\n        VERIFY_RESULT( wiced_write_register_value( BUS_FUNCTION, SDIOD_CCCR_IOEN, (uint8_t) 1, SDIO_FUNC_ENABLE_1 ) );\n        if (loop_count != 0)\n        {\n            (void) host_rtos_delay_milliseconds( (uint32_t) 1 );  /* Ignore return - nothing can be done if it fails */\n        }\n        VERIFY_RESULT( wiced_read_register_value ( BUS_FUNCTION, SDIOD_CCCR_IOEN, (uint8_t) 1, &byte_data ) );\n        loop_count++;\n        if ( loop_count >= (uint32_t) F0_WORKING_TIMEOUT_MS )\n        {\n            return WICED_TIMEOUT;\n        }\n    } while (byte_data != (uint8_t) SDIO_FUNC_ENABLE_1);\n\n#ifndef SDIO_1_BIT\n    /* Read the bus width and set to 4 bits */\n    VERIFY_RESULT( wiced_read_register_value (BUS_FUNCTION, SDIOD_CCCR_BICTRL, (uint8_t) 1, &byte_data) );\n    VERIFY_RESULT( wiced_write_register_value(BUS_FUNCTION, SDIOD_CCCR_BICTRL, (uint8_t) 1, (byte_data & (~BUS_SD_DATA_WIDTH_MASK)) | BUS_SD_DATA_WIDTH_4BIT ) );\n    /* NOTE: We don't need to change our local bus settings since we're not sending any data (only using CMD52) until after we change the bus speed further down */\n#endif\n    /* Set the block size */\n\n    /* Wait till the backplane is ready */\n    loop_count = 0;\n    while ( ( ( result = wiced_write_register_value( BUS_FUNCTION, SDIOD_CCCR_BLKSIZE_0, (uint8_t) 1, (uint32_t) SDIO_64B_BLOCK ) ) == WICED_SUCCESS ) &&\n            ( ( result = wiced_read_register_value ( BUS_FUNCTION, SDIOD_CCCR_BLKSIZE_0, (uint8_t) 1, &byte_data                ) ) == WICED_SUCCESS ) &&\n            ( byte_data != (uint8_t)  SDIO_64B_BLOCK ) &&\n            ( loop_count < (uint32_t) F0_WORKING_TIMEOUT_MS ) )\n    {\n        (void) host_rtos_delay_milliseconds( (uint32_t) 1 );  /* Ignore return - nothing can be done if it fails */\n        loop_count++;\n        if ( loop_count >= (uint32_t) F0_WORKING_TIMEOUT_MS )\n        {\n            /* If the system fails here, check the high frequency crystal is working */\n            return WICED_TIMEOUT;\n        }\n    }\n\n    VERIFY_RESULT( result );\n\n    VERIFY_RESULT( wiced_write_register_value( BUS_FUNCTION, SDIOD_CCCR_BLKSIZE_0,   (uint8_t) 1, (uint32_t) SDIO_64B_BLOCK ) );\n    VERIFY_RESULT( wiced_write_register_value( BUS_FUNCTION, SDIOD_CCCR_F1BLKSIZE_0, (uint8_t) 1, (uint32_t) SDIO_64B_BLOCK ) );\n    VERIFY_RESULT( wiced_write_register_value( BUS_FUNCTION, SDIOD_CCCR_F2BLKSIZE_0, (uint8_t) 1, (uint32_t) SDIO_64B_BLOCK ) );\n    VERIFY_RESULT( wiced_write_register_value( BUS_FUNCTION, SDIOD_CCCR_F2BLKSIZE_1, (uint8_t) 1, (uint32_t) 0              ) ); /* Function 2 = 64 */\n\n    /* Enable/Disable Client interrupts */\n    VERIFY_RESULT( wiced_write_register_value( BUS_FUNCTION, SDIOD_CCCR_INTEN,       (uint8_t) 1, INTR_CTL_MASTER_EN | INTR_CTL_FUNC1_EN | INTR_CTL_FUNC2_EN ) );\n\n\n#if 0\n    /* This code is required if we want more than 25 MHz clock */\n    VERIFY_RESULT( wiced_read_register_value( BUS_FUNCTION, SDIOD_CCCR_SPEED_CONTROL, 1, &byte_data ) );\n    if ( ( byte_data & 0x1 ) != 0 )\n    {\n        VERIFY_RESULT( wiced_write_register_value( BUS_FUNCTION, SDIOD_CCCR_SPEED_CONTROL, 1, byte_data | SDIO_SPEED_EHS ) );\n    }\n    else\n    {\n        return WICED_ERROR;\n    }\n#endif\n\n    /* Switch to high speed mode and change to 4 bit mode */\n    host_platform_enable_high_speed_sdio( );\n\n    /* Wait till the backplane is ready */\n    loop_count = 0;\n    while ( ( ( result = wiced_read_register_value( BUS_FUNCTION, SDIOD_CCCR_IORDY, (uint8_t) 1, &byte_data ) ) == WICED_SUCCESS ) &&\n            ( ( byte_data & SDIO_FUNC_READY_1 ) == 0 ) &&\n            ( loop_count < (uint32_t) F1_AVAIL_TIMEOUT_MS ) )\n    {\n        (void) host_rtos_delay_milliseconds( (uint32_t) 1 ); /* Ignore return - nothing can be done if it fails */\n        loop_count++;\n    }\n    if ( loop_count >= (uint32_t) F1_AVAIL_TIMEOUT_MS )\n    {\n        return WICED_TIMEOUT;\n    }\n    VERIFY_RESULT( result );\n\n    /* Set the ALP */\n    VERIFY_RESULT( wiced_write_register_value( BACKPLANE_FUNCTION, SDIO_CHIP_CLOCK_CSR, (uint8_t) 1, (uint32_t)( SBSDIO_FORCE_HW_CLKREQ_OFF | SBSDIO_ALP_AVAIL_REQ | SBSDIO_FORCE_ALP ) ) );\n\n    loop_count = 0;\n    while ( ( ( result = wiced_read_register_value( BACKPLANE_FUNCTION, SDIO_CHIP_CLOCK_CSR, (uint8_t) 1, &byte_data ) ) == WICED_SUCCESS ) &&\n            ( ( byte_data & SBSDIO_ALP_AVAIL ) == 0 ) &&\n            ( loop_count < (uint32_t) ALP_AVAIL_TIMEOUT_MS ) )\n    {\n        (void) host_rtos_delay_milliseconds( (uint32_t) 1 ); /* Ignore return - nothing can be done if it fails */\n        loop_count++;\n    }\n    if ( loop_count >= (uint32_t) ALP_AVAIL_TIMEOUT_MS )\n    {\n        return WICED_TIMEOUT;\n    }\n    VERIFY_RESULT( result );\n\n    /* Clear request for ALP */\n    VERIFY_RESULT( wiced_write_register_value( BACKPLANE_FUNCTION, SDIO_CHIP_CLOCK_CSR, (uint8_t) 1, 0 ) );\n\n    /* Disable the extra SDIO pull-ups */\n#ifndef WICED_USE_WLAN_SDIO_PULLUPS\n    VERIFY_RESULT( wiced_write_register_value( BACKPLANE_FUNCTION, SDIO_PULL_UP,  (uint8_t) 1, 0 ) );\n#endif\n\n    /* Enable F1 and F2 */\n    VERIFY_RESULT( wiced_write_register_value( BUS_FUNCTION, SDIOD_CCCR_IOEN, (uint8_t) 1, SDIO_FUNC_ENABLE_1 | SDIO_FUNC_ENABLE_2 ) );\n\n#ifndef WICED_DISABLE_MCU_POWERSAVE\n    /* Enable out-of-band interrupt */\n    VERIFY_RESULT( wiced_write_register_value( BUS_FUNCTION, SDIOD_SEP_INT_CTL, (uint8_t) 1, SEP_INTR_CTL_MASK | SEP_INTR_CTL_EN | SEP_INTR_CTL_POL ) );\n\n    if ( host_platform_get_oob_interrupt_pin( ) == 1 )\n    {\n        /* If OOB interrupt pin is connected to GPIO1, redirect it */\n        wiced_sdio_redirect_oob_interrupt();\n    }\n\n    host_enable_oob_interrupt( );\n#endif /* ifndef WICED_DISABLE_MCU_POWERSAVE */\n\n    /* Enable F2 interrupt only */\n    VERIFY_RESULT( wiced_write_register_value( BUS_FUNCTION, SDIOD_CCCR_INTEN, (uint8_t) 1, INTR_CTL_MASTER_EN | INTR_CTL_FUNC2_EN ) );\n\n    VERIFY_RESULT( wiced_read_register_value( BUS_FUNCTION, SDIOD_CCCR_IORDY, (uint8_t) 1, &byte_data ) );\n\n    result = wiced_download_firmware( );\n    if ( result != WICED_SUCCESS )\n    {\n        WPRINT_WWD_ERROR((\"Could not download firmware\\r\\n\"));\n        return result;\n    }\n\n    /* Wait for F2 to be ready */\n    loop_count = 0;\n    while ( ( ( result = wiced_read_register_value( BUS_FUNCTION, SDIOD_CCCR_IORDY, (uint8_t) 1, &byte_data ) ) == WICED_SUCCESS ) &&\n            ( ( byte_data & SDIO_FUNC_READY_2 ) == 0 ) &&\n            ( loop_count < (uint32_t) F2_READY_TIMEOUT_MS ) )\n    {\n        (void) host_rtos_delay_milliseconds( (uint32_t) 1 ); /* Ignore return - nothing can be done if it fails */\n        loop_count++;\n    }\n    if ( loop_count >= (uint32_t) F2_READY_TIMEOUT_MS )\n    {\n        /* If your system fails here, it could be due to incorrect NVRAM variables.\n         * Check which 'wifi_nvram_image.h' file your platform is using, and\n         * check that it matches the WLAN device on your platform, including the\n         * crystal frequency.\n         */\n        WPRINT_WWD_ERROR((\"Timeout while waiting for function 2 to be ready\\r\\n\"));\n        return WICED_TIMEOUT;\n    }\n\n    bus_is_up = WICED_TRUE;\n\n    return result;\n}\n\nwiced_result_t wiced_bus_deinit( void )\n{\n    /* put device in reset. */\n    host_platform_reset_wifi( WICED_TRUE );\n\n    bus_is_up = WICED_FALSE;\n\n    return WICED_SUCCESS;\n}\n\nwiced_result_t wiced_bus_ack_interrupt(uint32_t intstatus)\n{\n    return wiced_write_backplane_value( (uint32_t) SDIO_INT_STATUS, (uint8_t) 4, intstatus);\n}\n\n\nuint32_t wiced_bus_process_interrupt(void)\n{\n    uint32_t int_status = 0;\n\n    // Read the IntStatus\n    if ( wiced_read_backplane_value( (uint32_t) SDIO_INT_STATUS, (uint8_t) 4, (uint8_t*)&int_status ) != WICED_SUCCESS )\n    {\n    }\n\n    /* Clear any interrupts */\n    if ( wiced_write_backplane_value( (uint32_t) SDIO_INT_STATUS, (uint8_t) 4, int_status ) != WICED_SUCCESS )\n    {\n    }\n\n    return int_status;\n}\n\n/*\n * From internal documentation: hwnbu-twiki/SdioMessageEncapsulation\n * When data is available on the device, the device will issue an interrupt:\n * - the device should signal the interrupt as a hint that one or more data frames may be available on the device for reading\n * - the host may issue reads of the 4 byte length tag at any time -- that is, whether an interupt has been issued or not\n * - if a frame is available, the tag read should return a nonzero length (>= 4) and the host can then read the remainder of the frame by issuing one or more CMD53 reads\n * - if a frame is not available, the 4byte tag read should return zero\n */\n/*@only@*//*@null@*/wiced_result_t wiced_read_frame( wiced_buffer_t* buffer )\n{\n    uint16_t hwtag[8];\n    uint16_t extra_space_required;\n    wiced_result_t result;\n\n    *buffer = NULL;\n\n    /* Ensure the wlan backplane bus is up */\n    if ( wiced_bus_ensure_wlan_bus_is_up() != WICED_SUCCESS )\n    {\n        return WICED_ERROR;\n    }\n\n    /* Read the frame header and verify validity */\n    memset( hwtag, 0, sizeof(hwtag) );\n\n    if ( WICED_SUCCESS != ( result = wiced_sdio_transfer(BUS_READ, WLAN_FUNCTION, 0, (uint16_t) INITIAL_READ, (uint8_t*)hwtag, RESPONSE_NEEDED) ) )\n    {\n        wiced_abort_read( WICED_FALSE );\n        return WICED_ERROR;\n    }\n\n    if ( ( ( hwtag[0] | hwtag[1] ) == 0                 ) ||\n         ( ( hwtag[0] ^ hwtag[1] ) != (uint16_t) 0xFFFF ) )\n    {\n        return WICED_ERROR;\n    }\n\n    if (hwtag[0] == 12 && (wiced_wlan_status.state == WLAN_UP))\n    {\n        result = wiced_sdio_transfer(BUS_READ, WLAN_FUNCTION, 0, 8, (uint8_t*)&hwtag[2], RESPONSE_NEEDED);\n        if ( result == WICED_SUCCESS )\n        {\n            wiced_process_bus_credit_update((uint8_t*)hwtag);\n        }\n        else\n        {\n            wiced_abort_read( WICED_FALSE );\n        }\n        return WICED_SUCCESS;\n    }\n\n    /* Calculate the space we need to store entire packet */\n    if ( ( hwtag[0] > (uint16_t) INITIAL_READ ) )\n    {\n        extra_space_required = (uint16_t) ( hwtag[0] - (uint16_t) INITIAL_READ );\n    }\n    else\n    {\n        extra_space_required = 0;\n    }\n\n    /* Allocate a suitable buffer */\n    result = host_buffer_get( buffer, WICED_NETWORK_RX, (unsigned short) ( (uint16_t) INITIAL_READ + extra_space_required + (uint16_t) sizeof(wiced_buffer_header_t) ), WICED_FALSE );\n    if ( result != WICED_SUCCESS )\n    {\n        /* Read out the first 12 bytes to get the bus credit information */\n        uint8_t temp_buffer[12];\n        wiced_assert( \"Get buffer error\", ( ( result == WICED_BUFFER_UNAVAILABLE_TEMPORARY ) || ( result == WICED_BUFFER_UNAVAILABLE_PERMANENT ) ) );\n        wiced_bus_transfer_bytes( BUS_READ, WLAN_FUNCTION, 0, 12, (wiced_transfer_bytes_packet_t*) temp_buffer );\n        result = wiced_abort_read( WICED_FALSE );\n        wiced_assert( \"Read-abort failed\", result==WICED_SUCCESS )\n        wiced_process_bus_credit_update( (uint8_t*) ( temp_buffer ) );\n        return WICED_ERROR;\n    }\n\n    /* Copy the data already read */\n    memset( host_buffer_get_current_piece_data_pointer( *buffer ) + sizeof(wiced_buffer_header_t), 0, ( size_t )( INITIAL_READ + extra_space_required ) );\n    memcpy( host_buffer_get_current_piece_data_pointer( *buffer ) + sizeof(wiced_buffer_header_t), hwtag, (size_t) INITIAL_READ );\n\n    /* Read the rest of the data */\n    if ( extra_space_required > 0 )\n    {\n        result = wiced_sdio_transfer(BUS_READ, WLAN_FUNCTION, 0, extra_space_required, host_buffer_get_current_piece_data_pointer( *buffer ) + sizeof(wiced_buffer_header_t) + INITIAL_READ, RESPONSE_NEEDED);\n        if ( result != WICED_SUCCESS )\n        {\n            wiced_abort_read( WICED_FALSE );\n            host_buffer_release(*buffer, WICED_NETWORK_RX);\n            return WICED_ERROR;\n        }\n    }\n\n    return WICED_SUCCESS;\n}\n\n#ifdef DHD_DEBUG\ntypedef struct {\n    uint32_t          buf;            /* Can't be pointer on (64-bit) hosts */\n    uint32_t            buf_size;\n    uint32_t            idx;\n        char            *_buf_compat;   /* Redundant pointer for backward compat. */\n} hndrte_log_t;\n\ntypedef struct {\n	uint32_t	flags;\n	uint32_t  	trap_addr;\n	uint32_t  	assert_exp_addr;\n	uint32_t  	assert_file_addr;\n	uint32_t  	assert_line;\n	uint32_t	console_addr;\n	uint32_t  	msgtrace_addr;\n	uint32_t  	brpt_addr;\n} sdpcm_tt;\n\nint start_log = 0;\n\nwiced_result_t read_data_frame(int address, uint8_t * data, uint16_t len)\n{\n#define addr_mask_low     	0x80\n#define addr_mask_mid     	0xff\n#define addr_mask_hig     	0xff\n#define start_addr_low		0x1000A\n#define start_addr_mid		0x1000B\n#define start_addr_hig		0x1000C\n\n	wiced_result_t result = 0;\n	uint8_t add = 0;\n\n	add = (uint8_t)((address >> 8 ) & addr_mask_low);\n	//printf(\"add = %02x \\r\\n\", add);\n	wiced_sdio_transfer(BUS_WRITE, BACKPLANE_FUNCTION, start_addr_low, (uint16_t)1, &add, RESPONSE_NEEDED);\n	add = (uint8_t)((address >> 16 ) & addr_mask_mid);\n	//printf(\"add = %02x \\r\\n\", add);\n	wiced_sdio_transfer(BUS_WRITE, BACKPLANE_FUNCTION, start_addr_mid, (uint16_t)1, &add, RESPONSE_NEEDED);\n	add = (uint8_t)((address >> 24 ) & addr_mask_hig);\n	//printf(\"add = %02x \\r\\n\", add);\n	wiced_sdio_transfer(BUS_WRITE, BACKPLANE_FUNCTION, start_addr_hig, (uint16_t)1, &add, RESPONSE_NEEDED);\n\n	(void)len;\n	(void)data;\n	result = wiced_sdio_transfer(BUS_READ, BACKPLANE_FUNCTION, address & 0xffff, (uint16_t)len, (uint8_t*)(data), RESPONSE_NEEDED);\n\n	add = 0x0;\n	wiced_sdio_transfer(BUS_WRITE, BACKPLANE_FUNCTION, start_addr_low, (uint16_t)1, &add, RESPONSE_NEEDED);\n	add = 0x0;\n	wiced_sdio_transfer(BUS_WRITE, BACKPLANE_FUNCTION, start_addr_mid, (uint16_t)1, &add, RESPONSE_NEEDED);\n	add = 0x18;\n	wiced_sdio_transfer(BUS_WRITE, BACKPLANE_FUNCTION, start_addr_hig, (uint16_t)1, &add, RESPONSE_NEEDED);\n\n	return result;\n\n}\n\n\nchar console_log[256];\nint log_idx = 0;\n\n/*\n * From internal documentation: hwnbu-twiki/SdioMessageEncapsulation\n * When data is available on the device, the device will issue an interrupt:\n * - the device should signal the interrupt as a hint that one or more data frames may be available on the device for reading\n * - the host may issue reads of the 4 byte length tag at any time -- that is, whether an interupt has been issued or not\n * - if a frame is available, the tag read should return a nonzero length (>= 4) and the host can then read the remainder of the frame by issuing one or more CMD53 reads\n * - if a frame is not available, the 4byte tag read should return zero\n */\n/*@only@*//*@null@*/wiced_result_t wiced_read_console( int time )\n{\n#define console_header_add 		0x0003a6f8\n#define console_buffer_add 		0x0000a2e8\n#define console_header_add1 	0x0003a6f8\n#define shared_ram_add			0x0003bffc\n#define shared_header_add	    0x000209e8\n\n	sdpcm_tt shared_header;\n	int console_header[4];\n	int console_address = 0;\n	int console_len = 0;\n	static int console_header_address = 0;\n	int ram_data = 0;\n	\n    /* Ensure the wlan backplane bus is up */\n    if ( wiced_bus_ensure_wlan_bus_is_up() != WICED_SUCCESS )\n    {\n        return WICED_ERROR;\n    }\n	\n	start_log = 1;\n    memset((void *)(&shared_header), 0, sizeof(shared_header) );\n	memset((void *)(&console_log), 0, sizeof(console_log) );\n\n/////////////////////get real console_header_address\n	if(console_header_address == 0) {\n		\n	    if ( WICED_SUCCESS != (read_data_frame(shared_ram_add, (uint8_t*)(&ram_data), (uint16_t)sizeof(ram_data))))\n	    {\n			printf(\"%s read error \\r\\n\", __func__);	\n	        wiced_abort_read( WICED_FALSE );\n\n			start_log = 0;		\n	        return WICED_ERROR;\n	    }\n		//printf(\"ram_data = %08x \\r\\n\", ram_data);\n		\n	    if ( WICED_SUCCESS != (read_data_frame(ram_data, (uint8_t*)(&shared_header), (uint16_t)sizeof(sdpcm_tt))))\n	    {\n			printf(\"%s read error \\r\\n\", __func__);	\n	        wiced_abort_read( WICED_FALSE );\n\n			start_log = 0;		\n	        return WICED_ERROR;\n	    }\n		console_header_address = (int)(shared_header.console_addr + 8);\n	} \n	\n	//printf(\"console_addr %08x  \\r\\n\", console_address);\n\n//////////////get real console header\n    if ( WICED_SUCCESS != (read_data_frame(console_header_address, (uint8_t*)(console_header), (uint16_t)sizeof(console_header)) ))\n    {\n		printf(\"%s read error \\r\\n\", __func__);	\n        wiced_abort_read( WICED_FALSE );\n\n		start_log = 0;		\n        return WICED_ERROR;\n    }\n\n	console_address = console_header[3];\n	if(log_idx == console_header[2])\n		return WICED_SUCCESS;\n\n    if(console_header[2] > log_idx) {\n	console_len = console_header[2] - log_idx;\n    if ( WICED_SUCCESS != (read_data_frame(console_address + log_idx, (uint8_t*)(&console_log), (uint16_t)console_len) ))\n    {\n		printf(\"%s read error \\r\\n\", __func__);	\n        wiced_abort_read( WICED_FALSE );\n            return WICED_ERROR;\n        }\n    } else {\n        console_len = console_header[1] - log_idx;\n        if ( WICED_SUCCESS != (read_data_frame(console_address + log_idx, (uint8_t*)(&console_log), (uint16_t)console_len) ))\n        {\n            printf(\"%s read error \\r\\n\", __func__);                \n            wiced_abort_read( WICED_FALSE );               \n            return WICED_ERROR;\n        }\n\n        if ( WICED_SUCCESS != (read_data_frame(console_address, (uint8_t*)(&console_log) + console_len, (uint16_t)console_header[2]) ))\n        {\n            printf(\"%s read error \\r\\n\", __func__);                \n            wiced_abort_read( WICED_FALSE );\n        return WICED_ERROR;\n    }\n    }\n\n	log_idx = console_header[2];	\n	\n	printf(\"/**********CONSOLE time = %d ***************/\\r\\n\", time);\n	printf(\"CONSOLE header: %08x, %08x, %08x, %08x\\r\\n\", \n			console_header[0], console_header[1], console_header[2], console_header[3]);\n	\n	printf(\"%s\\r\\n\", console_log);\n	printf(\"/*****************CONSOLE***************/\\r\\n\\r\\n\");\n\n	start_log = 0;\n    return WICED_SUCCESS;\n}\n#endif\n\n/******************************************************\n *     Function definitions for Protocol Common\n ******************************************************/\n\n/* Device register access functions */\nwiced_result_t wiced_write_backplane_value( uint32_t address, uint8_t register_length, uint32_t value )\n{\n    VERIFY_RESULT( wiced_set_backplane_window( address ) );\n\n    return wiced_sdio_transfer( BUS_WRITE, BACKPLANE_FUNCTION, address & 0x07FFF, register_length, (uint8_t*) &value, RESPONSE_NEEDED );\n}\n\nwiced_result_t wiced_read_backplane_value( uint32_t address, uint8_t register_length, /*@out@*/ uint8_t* value )\n{\n    *value = 0;\n    VERIFY_RESULT( wiced_set_backplane_window( address ) );\n\n    return wiced_sdio_transfer( BUS_READ, BACKPLANE_FUNCTION, address & 0x07FFF, register_length, value, RESPONSE_NEEDED );\n}\n\nwiced_result_t wiced_write_register_value( bus_function_t function, uint32_t address, uint8_t value_length, uint32_t value )\n{\n    return wiced_sdio_transfer( BUS_WRITE, function, address, value_length, (uint8_t*) &value, RESPONSE_NEEDED );\n}\n\nwiced_result_t wiced_bus_transfer_bytes( bus_transfer_direction_t direction, bus_function_t function, uint32_t address, uint16_t size, /*@in@*/ /*@out@*/ wiced_transfer_bytes_packet_t* data )\n{\n    return wiced_sdio_transfer( direction, function, address, size, (uint8_t*)data, RESPONSE_NEEDED );\n}\n\n\n/******************************************************\n *             Static  Function definitions\n ******************************************************/\n\nstatic wiced_result_t wiced_sdio_transfer( bus_transfer_direction_t direction, bus_function_t function, uint32_t address, uint16_t data_size, /*@in@*/ /*@out@*/ uint8_t* data, sdio_response_needed_t response_expected )\n{\n    wiced_result_t result;\n    uint8_t retry_count = 0;\n    do\n    {\n        if ( data_size == (uint16_t) 1 )\n        {\n            result = sdio_cmd52( direction, function, address, *data, response_expected, data );\n        }\n        else\n        {\n            result = sdio_cmd53( direction, function, ( data_size >= (uint16_t) 64 ) ? SDIO_BLOCK_MODE : SDIO_BYTE_MODE, address, data_size, data, response_expected, NULL );\n        }\n\n        if ( result != WICED_SUCCESS )\n        {\n            return result;\n//            if (function == WLAN_FUNCTION && direction == BUS_READ)\n//            {\n//                (void) wiced_abort_read( WICED_TRUE ); /* Ignore return as there is not much to be done if this fails */\n//                wiced_assert(\"Attempting to abort read after transfer failure - may not fix bus\", 0 != 0 );\n//            }\n//\n//            ++retry_count;\n        }\n    } while ( ( result != WICED_SUCCESS ) && ( retry_count < (uint8_t) BUS_PROTOCOL_LEVEL_MAX_RETRIES ) );\n\n    return result;\n}\n\nstatic wiced_result_t sdio_cmd52( bus_transfer_direction_t direction, bus_function_t function, uint32_t address, uint8_t value, sdio_response_needed_t response_expected, uint8_t* response )\n{\n    uint32_t sdio_response;\n    wiced_result_t result;\n    sdio_cmd_argument_t arg;\n    arg.value = 0;\n    arg.cmd52.function_number  = (unsigned int) ( function & BUS_FUNCTION_MASK );\n    arg.cmd52.register_address = (unsigned int) ( address & 0x00001ffff );\n    arg.cmd52.rw_flag = (unsigned int) ( ( direction == BUS_WRITE ) ? 1 : 0 );\n    arg.cmd52.write_data = value;\n    result = host_platform_sdio_transfer( direction, SDIO_CMD_52, SDIO_BYTE_MODE, SDIO_1B_BLOCK, arg.value, 0, 0, response_expected, &sdio_response );\n    if ( response != NULL )\n    {\n        *response = (uint8_t) ( sdio_response & 0x00000000ff );\n    }\n    return result;\n}\n\nstatic wiced_result_t sdio_cmd53( bus_transfer_direction_t direction, bus_function_t function, sdio_transfer_mode_t mode, uint32_t address, uint16_t data_size, /*@in@*/ /*@out@*/ uint8_t* data, sdio_response_needed_t response_expected, /*@null@*/ uint32_t* response )\n{\n    sdio_cmd_argument_t arg;\n    wiced_result_t result;\n\n    if ( direction == BUS_WRITE )\n    {\n        add_log_entry(direction, function, address, data_size, data);\n    }\n\n    arg.value = 0;\n    arg.cmd53.function_number  = (unsigned int) ( function & BUS_FUNCTION_MASK );\n    arg.cmd53.register_address = (unsigned int) ( address & 0x00001ffff );\n    arg.cmd53.op_code = (unsigned int) 1;\n    arg.cmd53.rw_flag = (unsigned int) ( ( direction == BUS_WRITE ) ? 1 : 0 );\n    if ( mode == SDIO_BYTE_MODE )\n    {\n        wiced_assert(\"SDIO_CMD53: data_size > 512 for byte mode\", (data_size <= 512));\n        arg.cmd53.count = (unsigned int) ( data_size & 0x1FF );\n    }\n    else\n    {\n        arg.cmd53.count = (unsigned int) ( ( data_size / (uint16_t)SDIO_64B_BLOCK ) & 0x0000001ff );\n        if ( (uint32_t) ( arg.cmd53.count * (uint16_t)SDIO_64B_BLOCK ) < data_size )\n        {\n            ++arg.cmd53.count;\n        }\n        arg.cmd53.block_mode = (unsigned int) 1;\n    }\n\n    if ( direction == BUS_READ ) \n    {\n        if (data_size > 2048) {\n            return WICED_ERROR;\n        }\n    }\n    result = host_platform_sdio_transfer( direction, SDIO_CMD_53, mode, SDIO_64B_BLOCK, arg.value, (uint32_t*) data, data_size, response_expected, response );\n\n    if ( direction == BUS_READ )\n    {\n        add_log_entry(direction, function, address, data_size, data);\n    }\n\n    return result;\n}\n\nstatic wiced_result_t wiced_download_firmware( void )\n{\n    uint8_t csr_val = 0;\n    wiced_result_t result;\n    uint32_t loop_count;\n\n    VERIFY_RESULT( wiced_disable_device_core( ARM_CORE ) );\n    VERIFY_RESULT( wiced_disable_device_core( SOCRAM_CORE ) );\n    VERIFY_RESULT( wiced_reset_device_core( SOCRAM_CORE ) );\n\n#if 0\n    /* 43362 specific: Remap JTAG pins to UART output */\n    uint32_t data = 0;\n    VERIFY_RESULT( wiced_write_backplane_value(0x18000650, 1, 1) );\n    VERIFY_RESULT( wiced_read_backplane_value(0x18000654, 4, (uint8_t*)&data) );\n    data |= (1 << 24);\n    VERIFY_RESULT( wiced_write_backplane_value(0x18000654, 4, data) );\n#endif\n\n    VERIFY_RESULT( wiced_write_wifi_firmware_image( ) );\n    VERIFY_RESULT( wiced_write_wifi_nvram_image( ) );\n\n    /* Take the ARM core out of reset */\n    VERIFY_RESULT( wiced_reset_device_core( ARM_CORE ) );\n\n    result = wiced_device_core_is_up( ARM_CORE );\n    if ( result != WICED_SUCCESS )\n    {\n        WPRINT_WWD_ERROR((\"Could not bring ARM core up\\r\\n\"));\n        return result;\n    }\n\n    /* Wait until the High Throughput clock is available */\n    loop_count = 0;\n    while ( ( ( result = wiced_read_register_value( BACKPLANE_FUNCTION, SDIO_CHIP_CLOCK_CSR, (uint8_t) 1, &csr_val ) ) == WICED_SUCCESS ) &&\n            ( ( csr_val & SBSDIO_HT_AVAIL ) == 0 ) &&\n            ( loop_count < (uint32_t) HT_AVAIL_TIMEOUT_MS ) )\n    {\n        (void) host_rtos_delay_milliseconds( (uint32_t) 1 ); /* Ignore return - nothing can be done if it fails */\n        loop_count++;\n    }\n    if ( loop_count >= (uint32_t) HT_AVAIL_TIMEOUT_MS )\n    {\n        /* If your system times out here, it means that the WLAN firmware is not booting.\n         * Check that your WLAN chip matches the 'wifi_image.c' being built - in GNU toolchain, $(CHIP)\n         * makefile variable must be correct.\n         */\n         WPRINT_WWD_ERROR((\"Timeout while waiting for high throughput clock\\r\\n\"));\n        return WICED_TIMEOUT;\n    }\n    if ( result != WICED_SUCCESS )\n    {\n        WPRINT_WWD_ERROR((\"Error while waiting for high throughput clock\\r\\n\"));\n        return result;\n    }\n\n    /* Set up the interrupt mask and enable interrupts */\n    VERIFY_RESULT( wiced_write_backplane_value( SDIO_INT_HOST_MASK, (uint8_t) 4, I_HMB_SW_MASK ) );\n\n    /* Enable F2 interrupts. This wasn't required for 4319 but is for the 43362 */\n    VERIFY_RESULT( wiced_write_backplane_value( SDIO_FUNCTION_INT_MASK, (uint8_t) 1, (uint32_t) 2) );\n\n    /* Lower F2 Watermark to avoid DMA Hang in F2 when SD Clock is stopped. */\n    VERIFY_RESULT( wiced_write_register_value( BACKPLANE_FUNCTION, SDIO_FUNCTION2_WATERMARK, (uint8_t) 1, (uint32_t) SDIO_F2_WATERMARK ) );\n\n    return WICED_SUCCESS;\n}\n\n/** Aborts a SDIO read of a packet from the 802.11 device\n *\n * This function is necessary because the only way to obtain the size of the next\n * available received packet is to read the first four bytes of the packet.\n * If the system reads these four bytes, and then fails to allocate the required\n * memory, then this function allows the system to abort the packet read cleanly,\n * and to optionally tell the 802.11 device to keep it allowing reception once\n * memory is available.\n *\n * In order to do this abort, the following actions are performed:\n * - Sets abort bit for Function 2 (WLAN Data) to request stopping transfer\n * - Sets Read Frame Termination bit to flush and reset fifos\n * - If packet is to be kept and resent by 802.11 device, a NAK  is sent\n * - Wait whilst the Fifo is emptied of the packet ( reading during this period would cause all zeros to be read )\n *\n * @param retry : WICED_TRUE if 802.11 device is to keep and resend packet\n *                WICED_FALSE if 802.11 device is to drop packet\n *\n * @return WICED_SUCCESS if successful, otherwise error code\n */\nstatic wiced_result_t wiced_abort_read( wiced_bool_t retry )\n{\n    /* Abort transfer on WLAN_FUNCTION */\n    VERIFY_RESULT( wiced_write_register_value( BUS_FUNCTION, SDIOD_CCCR_IOABORT, (uint8_t) 1, (uint32_t) WLAN_FUNCTION ) );\n\n    /* Send frame terminate */\n    VERIFY_RESULT( wiced_write_register_value( BACKPLANE_FUNCTION, SDIO_FRAME_CONTROL, (uint8_t) 1, SFC_RF_TERM ) );\n\n    /* If we want to retry message, send NAK */\n    if ( retry == WICED_TRUE )\n    {\n        VERIFY_RESULT( wiced_write_backplane_value( (uint32_t) SDIO_TO_SB_MAIL_BOX, (uint8_t) 1, SMB_NAK ) );\n    }\n\n    return WICED_SUCCESS;\n}\n\nstatic wiced_result_t wiced_read_register_value( bus_function_t function, uint32_t address, uint8_t value_length, /*@out@*/ uint8_t* value )\n{\n    memset( value, 0, (size_t) value_length );\n    return wiced_sdio_transfer( BUS_READ, function, address, value_length, value, RESPONSE_NEEDED );\n}\n\nwiced_result_t wiced_bus_ensure_wlan_bus_is_up( void )\n{\n    wiced_result_t result;\n    uint8_t csr = 0;\n    uint32_t attempts = (uint32_t) WLAN_BUS_UP_ATTEMPTS;\n\n    /* Ensure HT clock is up */\n    if (bus_is_up == WICED_TRUE)\n    {\n        return WICED_SUCCESS;\n    }\n\n    if ( WICED_SUCCESS != ( result = wiced_write_register_value( BACKPLANE_FUNCTION, (uint32_t) SDIO_CHIP_CLOCK_CSR, (uint8_t) 1, (uint32_t) SBSDIO_HT_AVAIL_REQ | SBSDIO_FORCE_HT ) ) )\n    {\n        return result;\n    }\n\n    do\n    {\n        if ( WICED_SUCCESS != ( result = wiced_read_register_value( BACKPLANE_FUNCTION, (uint32_t) SDIO_CHIP_CLOCK_CSR, (uint8_t) 1, &csr ) ) )\n        {\n            return result;\n        }\n        --attempts;\n    }\n    while (((csr & SBSDIO_HT_AVAIL) == 0) && (attempts != 0) && (host_rtos_delay_milliseconds(1),1==1));\n\n    if (attempts == 0)\n    {\n        return WICED_ERROR;\n    }\n    else\n    {\n        bus_is_up = WICED_TRUE;\n        return WICED_SUCCESS;\n    }\n}\n\nwiced_result_t wiced_bus_poke_wlan( void )\n{\n    return wiced_write_backplane_value( SDIO_TO_SB_MAILBOX, (uint8_t) 4, (1 << 3) );\n}\n\nwiced_result_t wiced_bus_set_flow_control( uint8_t value )\n{\n    if ( value != 0 )\n    {\n        wiced_bus_flow_controlled = WICED_TRUE;\n    }\n    else\n    {\n        wiced_bus_flow_controlled = WICED_FALSE;\n    }\n    return WICED_SUCCESS;\n}\n\nwiced_bool_t wiced_bus_is_flow_controlled( void )\n{\n    return wiced_bus_flow_controlled;\n}\n\nwiced_result_t wiced_bus_allow_wlan_bus_to_sleep( void )\n{\n    /* Clear HT clock request */\n    if (bus_is_up == WICED_TRUE)\n    {\n        bus_is_up = WICED_FALSE;\n        return wiced_write_register_value( BACKPLANE_FUNCTION, (uint32_t) SDIO_CHIP_CLOCK_CSR, (uint8_t) 1, 0 );\n    }\n    else\n    {\n        return WICED_SUCCESS;\n    }\n}\n\n#ifndef WICED_DISABLE_MCU_POWERSAVE\nstatic wiced_result_t wiced_sdio_redirect_oob_interrupt( void )\n{\n    /* The following register writes redirect the OOB interrupt to GPIO1 */\n\n    wiced_write_register_value( BACKPLANE_FUNCTION, SDIO_GPIO_SELECT, (uint8_t)1, 0xF );\n    wiced_write_register_value( BACKPLANE_FUNCTION, SDIO_GPIO_OUTPUT, (uint8_t)1, 0x0 );\n\n    /* Enable GPIO1 (bit 1) */\n    wiced_write_register_value( BACKPLANE_FUNCTION, SDIO_GPIO_ENABLE, (uint8_t)1, 0x2 );\n\n    /* Set GPIO1 (bit 1) on Chipcommon GPIO Control register */\n    wiced_write_register_value( BACKPLANE_FUNCTION, CHIPCOMMON_GPIO_CONTROL, (uint8_t)4, 0x2 );\n\n    return WICED_SUCCESS;\n}\n#endif\n",
-			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/WWD/SDIO/wwd_bus_protocol.c",
-			"file_size": 38558,
-			"file_write_time": 1409719887000000,
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverI2c.c",
 			"settings":
 			{
-				"buffer_size": 38558,
-				"line_ending": "Unix"
+				"buffer_size": 30562,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/PlatformUartxx.c",
+			"settings":
+			{
+				"buffer_size": 11227,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverUart.c",
+			"settings":
+			{
+				"buffer_size": 26202,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/platform.h",
+			"settings":
+			{
+				"buffer_size": 15437,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICOEntrance.c",
+			"settings":
+			{
+				"buffer_size": 13601,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/Debug.h",
+			"settings":
+			{
+				"buffer_size": 29650,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverUart.h",
+			"settings":
+			{
+				"buffer_size": 5317,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverSpi.h",
+			"settings":
+			{
+				"buffer_size": 3817,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverSpi.c",
+			"settings":
+			{
+				"buffer_size": 14753,
+				"line_ending": "Windows"
 			}
 		}
 	],
@@ -602,52 +660,76 @@
 	},
 	"file_history":
 	[
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Projects/COM.MXCHIP.SPP/sublime/COM.MXCHIP.SPP.sublime-project",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/WWD/SDIO/wwd_bus_protocol.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/wwd_platform.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/SPI/wwd_bus.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/SDIO/wwd_bus.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverWdg.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/WPS/WPS.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoPlatform.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverAdc.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverAdc.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverI2c.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/IAR/stdio_IAR.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/stm32f2xx_platform.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/platform.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/gpio_irq.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICONTPClient.c",
+		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoSocket.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoPlatform.h",
+		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/MICOAppDefine.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/MICOConfigDelegate.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverPwm.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverRtc.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverGpio.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/read_wifi_firmware.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICOEntrance.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverRng.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/STM32F2xx_Drv/STM32F2xx_StdPeriph_Driver/inc/stm32f2xx_rtc.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/stm32f2xx_platform.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverRng.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoSocket.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverI2c.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDefaults.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MICO.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoRTOS.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/inc/MICORTOS.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/MICOAppDefine.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/MICOAppEntrance.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverWdg.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/STM32F2xx_Drv/STM32F2xx_StdPeriph_Driver/src/stm32f2xx_rtc.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/stm32f2xx_it.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/gpio_irq.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/SDIO/wwd_bus.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/startup_stm32f2xx_IAR.s",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/hardfault.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/wwd_platform.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/SDIO/wwd_bus.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/PlatformLogging.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/rtc.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Projects/COM.MXCHIP.SPP/sublime/COM.MXCHIP.SPP.sublime-project",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/WWD/SPI/wwd_bus_protocol.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/WWD/SDIO/wwd_bus_protocol.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/SPI/wwd_bus.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverWdg.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/WPS/WPS.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/stm32f2xx_platform_mxchip.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverSpi.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/platformxx.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/platform.c",
 		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MICODriverGpio.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/platform.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverRng.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverRng.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/PlatformRandomNumberxx.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICOEntrance.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICOSystemMonitor.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverWdg.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICODefine.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/PlatformWDG.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/watchdog.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverRtc.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverRtc.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/wiced_defaults.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/PlatformWDG.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverGpio.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICONotificationCenter.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICONotificationCenter.c",
 		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/Platform.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICONTPClient.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/stm32f2xx_platform.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverI2c.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverI2c.c",
 		"/Users/william/Develop/Clang_lib/ARMCC/include/time.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverGpio.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/WAC/PlatformMFiAuth.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/Debug.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MICOPlatform.h",
 		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Library/inc/MICOWlan.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/EasyLink/EasyLink.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/WPS/WPS.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverPwm.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverUart.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverPwm.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverSpi.h",
@@ -658,20 +740,15 @@
 		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/include/platform_sleep.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/platform_common_config.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/Common.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/IAR/stdio_IAR.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/STM32F2xx_Drv/STM32F2xx_StdPeriph_Driver/src/stm32f2xx_tim.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/PlatformRandomNumber.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MICODriverPwm.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MICOPlatformPwm.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/STM32F2xx_StdPeriph_Driver/src/misc.c",
 		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/platform.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/MICOAppDefine.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/SppProtocol.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/MICOConfigDelegate.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/stm32f2xx_platform.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/temp/MICOPlatformUart.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/temp/MICOPlatform.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/MICOAppEntrance.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/UartRecv.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/SHAUtils.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/RingBufferUtils.h",
@@ -710,26 +787,7 @@
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/PlatformRTC.c",
 		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/STM32F2xx_StdPeriph_Driver/inc/stm32f2xx_rtc.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/STM32F2xx_StdPeriph_Driver/src/stm32f2xx_rtc.c",
-		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Library/inc/MICORtos.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/RemoteTcpClient.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/MICOBonjour.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/inc/MICOSocket.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/STM32F2xx_StdPeriph_Driver/src/stm32f2xx_tim.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/PlatformFlash.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICOConfigServer.c",
-		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/STM32F2xx_StdPeriph_Driver/inc/stm32f2xx_flash.h",
-		"/Users/William/Library/Containers/com.apple.mail/Data/Library/Mail Downloads/85E9D55A-6E96-448B-80C4-BA0A51E1B738/NTPclient.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/inc/MICORTOS.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/inc/MICOWlan.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/stm32f2xx_it.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/STM32F2xx_StdPeriph_Driver/src/stm32f2xx_i2c.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/inc/MICO.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/STM32F2xx_StdPeriph_Driver/CMSIS/core_cm3.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/STM32F2xx_StdPeriph_Driver/src/stm32f2xx_spi.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/STM32F2xx_StdPeriph_Driver/inc/stm32f2xx_adc.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/STM32F2xx_StdPeriph_Driver/inc/misc.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICOConfigMenu.c",
-		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/external/JSON-C/json_object.h"
+		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Library/inc/MICORtos.h"
 	],
 	"find":
 	{
@@ -737,7 +795,7 @@
 	},
 	"find_in_files":
 	{
-		"height": 0.0,
+		"height": 93.0,
 		"where_history":
 		[
 			"<open folders>",
@@ -756,6 +814,50 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"thread_wakeup",
+			"mico_uart_t",
+			"dma_peripheral_clock",
+			"peripheral_clock_func_t",
+			"tx_dma_irq",
+			"IRQn_Type",
+			"_Rx_irq_handler",
+			"uart_mapping",
+			"thread_wakeup",
+			"thread_wakeup\nthread_wakeup",
+			"thread_wakeup",
+			"uart_wakeup_thread_handler",
+			"&wakeup",
+			"dma_flag_tc",
+			"MicoRtcInitialize",
+			"mico_mcu_powersave_config",
+			"mico_i2c_message_t",
+			"MESSAGE_DISABLE_DMA",
+			"MESSAGE_DISABLE_DMA\nMESSAGE_DISABLE_DMA",
+			"MESSAGE_DISABLE_DMA",
+			"micoInit",
+			"Platform functions",
+			"SCB",
+			"sdio_irq",
+			"gpio_irq",
+			"wake_up_interrupt_triggered",
+			"wiced_platform_notify_irq",
+			"requested_sleep_time",
+			"rtc_reset_fail",
+			"rtc_sleep_abort",
+			"stm32f2xx_clocks_needed",
+			"RTC_WKUP_irq",
+			"select_wut_prescaler_calculate_wakeup_time",
+			"scale_factor",
+			"select_wut_prescaler_calculate_wakeup_time",
+			"WEAK",
+			"rtc_timeout_start_time",
+			"stdio_uart_config",
+			"tile",
+			"va",
+			"UART_BUFFER_LENGTH",
+			"reset_rtc_values",
+			"wake_up_interrupt_triggered",
+			"host_platform_reset_wifi",
 			"host_platform_ran",
 			"random",
 			"MICODriverRng",
@@ -839,51 +941,7 @@
 			"__Debug_h__",
 			"uart_config",
 			"WICED_UART_1",
-			"stdio_rx_data",
-			"MicoUartInitialize",
-			"MICO",
-			"stdio",
-			"stdio_tx_mutex",
-			"uart",
-			" Platform",
-			"host_rtos_get_semaphore",
-			"mico_rtos_set",
-			"nvic",
-			"stm32f2xx_clocks_needed",
-			"MCU_CLOCKS_NEEDED",
-			"platform_set_rtc_time",
-			"ptrdiff_t",
-			"__PTRDIFF_TYPE__",
-			"WICED_DISABLE_STDIO",
-			"platform_uart_init",
-			"platform_uart_receive_bytes",
-			"platform_stdio_write",
-			"rx_buffer",
-			"rx_data",
-			"ring_buffer_init",
-			"mico_rtos_init_semaphore",
-			"DATA_WIDTH_8BIT",
-			"wiced_uart_config_t",
-			"usart2_rx_dma_irq",
-			"*/\n",
-			"tx_dma_result",
-			"uart_mapping",
-			"RR_CLASS_IN",
-			"RR_CACHE_FLUSH",
-			"AES 128-bit ECB API",
-			"AesEncryptDirect",
-			"aes_ecb_encrypt",
-			"AES_ECB_Update",
-			"Update failed",
-			"DataToHexStringWithColons",
-			"DataToHexString",
-			"DataToHexStringWithSpaces",
-			"debugString",
-			"RTC->TR",
-			"RTC_AM_PM",
-			"TR",
-			"RTC_DateStructure",
-			"settimeofday"
+			"stdio_rx_data"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -903,23 +961,51 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 3,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/WWD/SPI/wwd_bus_protocol.c",
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverWdg.h",
 					"settings":
 					{
-						"buffer_size": 27116,
+						"buffer_size": 3483,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								1526,
+								1537
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 648.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverI2c.c",
+					"settings":
+					{
+						"buffer_size": 30562,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3442,
+								3442
 							]
 						],
 						"settings":
@@ -935,25 +1021,221 @@
 					"type": "text"
 				},
 				{
-					"buffer": 1,
-					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/WWD/SDIO/wwd_bus_protocol.c",
+					"buffer": 2,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/PlatformUartxx.c",
 					"settings":
 					{
-						"buffer_size": 38558,
+						"buffer_size": 11227,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1484,
-								1484
+								5882,
+								5552
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1725.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverUart.c",
+					"settings":
+					{
+						"buffer_size": 26202,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1249,
+								1265
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/C++/C.tmLanguage",
 							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 327.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/platform.h",
+					"settings":
+					{
+						"buffer_size": 15437,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								12492,
+								12503
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3526.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICOEntrance.c",
+					"settings":
+					{
+						"buffer_size": 13601,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								12328,
+								12328
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 5124.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/Debug.h",
+					"settings":
+					{
+						"buffer_size": 29650,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1392,
+								1398
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 5.0,
+						"translation.y": 5.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverUart.h",
+					"settings":
+					{
+						"buffer_size": 5317,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4196,
+								4212
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1734.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverSpi.h",
+					"settings":
+					{
+						"buffer_size": 3817,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3740,
+								3755
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 986.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverSpi.c",
+					"settings":
+					{
+						"buffer_size": 14753,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								13480,
+								13480
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.tmLanguage",
+							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
@@ -998,7 +1280,7 @@
 	"menu_visible": true,
 	"output.clang":
 	{
-		"height": 135.0
+		"height": 89.0
 	},
 	"output.exec":
 	{

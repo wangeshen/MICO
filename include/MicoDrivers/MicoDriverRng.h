@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    MICORTOS.h 
+  * @file    MICODriverRng.h 
   * @author  William Xu
   * @version V1.0.0
   * @date    05-May-2014
-  * @brief   This file provides all the headers of GPIO operation functions.
+  * @brief   This file provides all the headers of RNG operation functions.
   ******************************************************************************
   * @attention
   *
@@ -26,13 +26,20 @@
 #include "Common.h"
 #include "platform.h"
 
+
+
+/** @addtogroup MICO_PLATFORM
+* @{
+*/
+
 /******************************************************
- *                   Macros
+ *@cond             Macros
  ******************************************************/  
-//#define host_platform_rand MicoRandomNumberRead
-#define PlatformRandomBytes MicoRandomNumberRead
+
+#define PlatformRandomBytes MicoRandomNumberRead   /**< For API compatiable with older version */
+
 /******************************************************
- *                   Enumerations
+ *@endcond           Enumerations
  ******************************************************/
 
 
@@ -40,21 +47,27 @@
  *                 Type Definitions
  ******************************************************/
 
-
-/*****************************************************************************/
-/** @addtogroup rng       Random number generater
- *  @ingroup platform
- *
- * Random number generater (RNG) Functions
- *
- *
- *  @{
+ /******************************************************
+ *                 Function Declarations
+ ******************************************************/
+ 
+/** @defgroup MICO_RNG MICO RNG Driver
+ * @brief  Random Number Generater(RNG) Functions
+ * @{
  */
-/*****************************************************************************/
 
+/** Fill in a memory buffer with random data
+ *
+ * @param inBuffer        : Point to a valid memory buffer, this function will fill 
+                            in this memory with random numbers after excuted
+ * @param inByteCount     : Length of the memory buffer (bytes)
+ *
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
+ */
+OSStatus MicoRandomNumberRead( void *inBuffer, int inByteCount );
 
-int MicoRandomNumberRead( void *inBuffer, int inByteCount );
-
+/** @} */
 /** @} */
 
 #endif

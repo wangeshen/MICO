@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    MICORTOS.h 
+  * @file    MICODriverUart.h 
   * @author  William Xu
   * @version V1.0.0
   * @date    05-May-2014
@@ -27,6 +27,10 @@
 #include "RingBufferUtils.h"
 #include "platform.h"
 
+/** @addtogroup MICO_PLATFORM
+* @{
+*/
+
 /******************************************************
  *                   Enumerations
  ******************************************************/
@@ -38,13 +42,13 @@ typedef enum
     DATA_WIDTH_7BIT,
     DATA_WIDTH_8BIT,
     DATA_WIDTH_9BIT
-} wiced_uart_data_width_t;
+} mico_uart_data_width_t;
 
 typedef enum
 {
     STOP_BITS_1,
     STOP_BITS_2,
-} wiced_uart_stop_bits_t;
+} mico_uart_stop_bits_t;
 
 typedef enum
 {
@@ -52,14 +56,19 @@ typedef enum
     FLOW_CONTROL_CTS,
     FLOW_CONTROL_RTS,
     FLOW_CONTROL_CTS_RTS
-} wiced_uart_flow_control_t;
+} mico_uart_flow_control_t;
 
 typedef enum
 {
     NO_PARITY,
     ODD_PARITY,
     EVEN_PARITY,
-} wiced_uart_parity_t;
+} mico_uart_parity_t;
+
+#define UART_WAKEUP_MASK_POSN   0
+#define UART_WAKEUP_DISABLE    (0 << UART_WAKEUP_MASK_POSN) /**< UART can not wakeup MCU from stop mode */
+#define UART_WAKEUP_ENABLE     (1 << UART_WAKEUP_MASK_POSN) /**< UART can wake up MCU from stop mode */
+
 
 /******************************************************
  *                    Structures
@@ -68,23 +77,26 @@ typedef enum
  typedef struct
 {
     uint32_t                  baud_rate;
-    wiced_uart_data_width_t   data_width;
-    wiced_uart_parity_t       parity;
-    wiced_uart_stop_bits_t    stop_bits;
-    wiced_uart_flow_control_t flow_control;
+    mico_uart_data_width_t    data_width;
+    mico_uart_parity_t        parity;
+    mico_uart_stop_bits_t     stop_bits;
+    mico_uart_flow_control_t  flow_control;
+    uint8_t                   flags;          /**< if set, UART can wake up MCU from stop mode, reference: @ref UART_WAKEUP_DISABLE and @ref UART_WAKEUP_ENABLE*/
 } mico_uart_config_t;
 
+/******************************************************
+ *                 Type Definitions
+ ******************************************************/
 
-/*****************************************************************************/
-/** @addtogroup uart       UART
- *  @ingroup platform
- *
- * Universal Asynchronous Receiver Transmitter (UART) Functions
- *
- *
- *  @{
- */
-/*****************************************************************************/
+/******************************************************
+ *                 Function Declarations
+ ******************************************************/
+
+/** @defgroup MICO_UART MICO UART Driver
+* @brief  Universal Asynchronous Receiver Transmitter (UART) Functions
+* @{
+*/
+
 
 /** Initialises a UART interface
  *
@@ -94,8 +106,8 @@ typedef enum
  * @param  config   : UART configuration structure
  * @param  optional_rx_buffer : Pointer to an optional RX ring buffer
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoUartInitialize( mico_uart_t uart, const mico_uart_config_t* config, ring_buffer_t* optional_rx_buffer );
 
@@ -107,8 +119,8 @@ OSStatus MicoUartInitialize( mico_uart_t uart, const mico_uart_config_t* config,
  * @param  config   : UART configuration structure
  * @param  optional_rx_buffer : Pointer to an optional RX ring buffer
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoStdioUartInitialize( const mico_uart_config_t* config, ring_buffer_t* optional_rx_buffer );
 
@@ -117,8 +129,8 @@ OSStatus MicoStdioUartInitialize( const mico_uart_config_t* config, ring_buffer_
  *
  * @param  uart : the interface which should be deinitialised
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoUartFinalize( mico_uart_t uart );
 
@@ -129,8 +141,8 @@ OSStatus MicoUartFinalize( mico_uart_t uart );
  * @param  data     : pointer to the start of data
  * @param  size     : number of bytes to transmit
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoUartSend( mico_uart_t uart, const void* data, uint32_t size );
 
@@ -142,8 +154,8 @@ OSStatus MicoUartSend( mico_uart_t uart, const void* data, uint32_t size );
  * @param  size     : number of bytes to receive
  * @param  timeout  : timeout in milisecond
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoUartRecv( mico_uart_t uart, void* data, uint32_t size, uint32_t timeout );
 
@@ -155,6 +167,7 @@ OSStatus MicoUartRecv( mico_uart_t uart, void* data, uint32_t size, uint32_t tim
  */
 uint32_t MicoUartGetLengthInBuffer( mico_uart_t uart ); 
 
+/** @} */
 /** @} */
 
 #endif

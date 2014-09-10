@@ -164,7 +164,7 @@ const platform_uart_mapping_t uart_mapping[] =
         .rx_dma_channel               = DMA_Channel_4,
         .rx_dma_peripheral_clock      = RCC_AHB1Periph_DMA2,
         .rx_dma_peripheral_clock_func = RCC_AHB1PeriphClockCmd,
-        .rx_dma_irq                   = DMA2_Stream2_IRQn
+        .rx_dma_irq                   = DMA2_Stream2_IRQn,
     },
     [MICO_UART_2] =
     {
@@ -188,7 +188,7 @@ const platform_uart_mapping_t uart_mapping[] =
         .rx_dma_channel               = DMA_Channel_5,
         .rx_dma_peripheral_clock      = RCC_AHB1Periph_DMA2,
         .rx_dma_peripheral_clock_func = RCC_AHB1PeriphClockCmd,
-        .rx_dma_irq                   = DMA2_Stream1_IRQn
+        .rx_dma_irq                   = DMA2_Stream1_IRQn,
     },
 };
 
@@ -274,13 +274,6 @@ OSStatus wiced_platform_init( void )
 
 void init_platform( void )
 {
-    /*STM32 wakeup by watchdog in standby mode, re-enter standby mode in this situation*/
-    PlatformWDGReload();
-    if ( (PWR_GetFlagStatus(PWR_FLAG_SB) != RESET) && RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET){
-        RCC_ClearFlag();
-        MicoSystemStandBy();
-    }
-    PWR_ClearFlag(PWR_FLAG_SB);
 
     MicoGpioInitialize( (mico_gpio_t)MICO_SYS_LED, OUTPUT_PUSH_PULL );
     MicoGpioOutputLow( (mico_gpio_t)MICO_SYS_LED );

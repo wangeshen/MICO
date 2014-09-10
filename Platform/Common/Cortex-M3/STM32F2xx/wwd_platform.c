@@ -145,8 +145,8 @@ OSStatus host_platform_init_wlan_powersave_clock( void )
 {
 #if ( MICO_WLAN_POWERSAVE_CLOCK_SOURCE == MICO_WLAN_POWERSAVE_CLOCK_IS_PWM )
 
-    MicoPwmInitialize( (mico_pwm_t) WICED_PWM_WLAN_POWERSAVE_CLOCK, WLAN_POWERSAVE_CLOCK_FREQUENCY, WLAN_POWERSAVE_CLOCK_DUTY_CYCLE );
-    MicoPwmStart( (mico_pwm_t) WICED_PWM_WLAN_POWERSAVE_CLOCK );
+    MicoPwmInitialize( (mico_pwm_t) MICO_PWM_WLAN_POWERSAVE_CLOCK, WLAN_POWERSAVE_CLOCK_FREQUENCY, WLAN_POWERSAVE_CLOCK_DUTY_CYCLE );
+    MicoPwmStart( (mico_pwm_t) MICO_PWM_WLAN_POWERSAVE_CLOCK );
     return WICED_SUCCESS;
 
 #elif ( MICO_WLAN_POWERSAVE_CLOCK_SOURCE == MICO_WLAN_POWERSAVE_CLOCK_IS_MCO )
@@ -183,7 +183,7 @@ OSStatus host_platform_deinit_wlan_powersave_clock( void )
 {
 #if ( MICO_WLAN_POWERSAVE_CLOCK_SOURCE == MICO_WLAN_POWERSAVE_CLOCK_IS_PWM )
 
-    MicoPwmStop( (mico_pwm_t) WICED_PWM_WLAN_POWERSAVE_CLOCK );
+    MicoPwmStop( (mico_pwm_t) MICO_PWM_WLAN_POWERSAVE_CLOCK );
     platform_reset_wlan_powersave_clock( );
     return kNoErr;
 

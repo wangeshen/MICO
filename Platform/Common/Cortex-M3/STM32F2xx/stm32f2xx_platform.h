@@ -19,6 +19,8 @@
 #include "stm32f2xx_pwr.h"
 #include "stm32f2xx_rng.h"
 
+#include "MicoRtos.h"
+
 /******************************************************
  *                      Macros
  ******************************************************/
@@ -91,6 +93,8 @@ typedef struct
     uint8_t                       tx_dma_stream_number;
     uint8_t                       rx_dma_stream_number;
 } platform_spi_mapping_t;
+
+typedef void (* wakeup_irq_handler_t)(void *arg);
 
 typedef struct
 {

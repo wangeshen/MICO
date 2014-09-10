@@ -116,7 +116,7 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
   char *rfVer = NULL, *rfVerTemp = NULL;
   json_object *sectors, *sector, *subMenuSectors, *subMenuSector, *mainObject = NULL;
 
-  micoGetRfVer( rfVersion, 50 );
+  MicoGetRfVer( rfVersion, 50 );
   rfVer = strstr(rfVersion, "version ");
   if(rfVer) rfVer = rfVer + strlen("version ");
   rfVerTemp = rfVer;
@@ -184,7 +184,7 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
         require_noerr(err, exit);
         err = MICOAddStringCellToSector(subMenuSector, "Hardware Rev.",  HARDWARE_REVISION, "RO", NULL);
         require_noerr(err, exit);
-        err = MICOAddStringCellToSector(subMenuSector, "MICO OS Rev.",   micoGetVer(),      "RO", NULL);
+        err = MICOAddStringCellToSector(subMenuSector, "MICO OS Rev.",   MicoGetVer(),      "RO", NULL);
         require_noerr(err, exit);
         err = MICOAddStringCellToSector(subMenuSector, "RF Driver Rev.", rfVer,             "RO", NULL);
         require_noerr(err, exit);

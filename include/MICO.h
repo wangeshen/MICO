@@ -23,26 +23,26 @@
 
   This documentation describes the MICO APIs.
   It consists of:
-
-     - MICO RTOS and Timer APIs       - mico_rtos.h
-     - MICO Wi-Fi connectivith APIs   - mico_wlan.h
-     - MICO BSD socket APIs           - mico_socket.h
-= */
+     - MICO Hardware Abstract Layer   
+     - MICO RTOS and Timer APIs       
+     - MICO Wi-Fi Connectivith APIs   
+     - MICO BSD Socket APIs           
+ */
 
 #ifndef __MICO_H_
 #define __MICO_H_
 
 #include "Debug.h"
 #include "Common.h" 
-#include "MICORTOS.h"
-#include "MICOWlan.h"
-#include "MICOSocket.h"
-#include "MICOAlgorithm.h"
+#include "MicoRTOS.h"
+#include "MicoWlan.h"
+#include "MicoSocket.h"
+#include "MicoAlgorithm.h"
 
-#define micoGetRfVer                wlan_driver_version
-#define micoGetVer                  system_lib_version
-#define micoInit                    mxchipInit
-#define micoGetMemoryInfo           mico_memory_info
+#define MicoGetRfVer                wlan_driver_version
+#define MicoGetVer                  system_lib_version
+#define MicoInit                    mxchipInit
+#define MicoGetMemoryInfo           mico_memory_info
 
 /** \defgroup MICO_Core_APIs MICO Core APIs
   This file defines all structures and symbols for MICO core:
@@ -76,7 +76,7 @@ typedef struct  {
   *
   * @return None
   */
-void micoGetRfVer( char* outVersion, uint8_t inLength );
+void MicoGetRfVer( char* outVersion, uint8_t inLength );
 
 /**
   * @brief  Get MICO's version.
@@ -85,7 +85,7 @@ void micoGetRfVer( char* outVersion, uint8_t inLength );
   *
   * @return Point to the MICO's version string.
   */
-char* micoGetVer( void );
+char* MicoGetVer( void );
 
 /**
   * @brief  Initialize the TCPIP stack thread, RF driver thread, and other
@@ -96,7 +96,7 @@ char* micoGetVer( void );
   *
   * @return None
   */
-void micoInit( void );
+void MicoInit( void );
 
 /**
   * @brief  Get memory usage information
@@ -105,7 +105,7 @@ void micoInit( void );
   *
   * @return Point to structure of memory usage information in heap
   */
-micoMemInfo_t* micoGetMemoryInfo( void );
+micoMemInfo_t* MicoGetMemoryInfo( void );
 
 #endif /* __MICO_H_ */
 

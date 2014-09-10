@@ -2851,9 +2851,6 @@
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\SppProtocol.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\stm32f2xx_it.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\UartRecv.c</name>
     </file>
   </group>
@@ -3180,6 +3177,9 @@
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\gpio_irq.h</name>
           </file>
           <file>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\hardfault.c</name>
+          </file>
+          <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverAdc.c</name>
           </file>
           <file>
@@ -3243,6 +3243,9 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform_internal_gpio.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\read_wifi_firmware.c</name>
       </file>
     </group>
     <file>

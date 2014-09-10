@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    MICORTOS.h 
+  * @file    MicoDriverGpio.h 
   * @author  William Xu
   * @version V1.0.0
   * @date    05-May-2014
@@ -26,6 +26,10 @@
 #include "Common.h"
 #include "platform.h"
 
+/** @addtogroup MICO_PLATFORM
+* @{
+*/
+
 /******************************************************
  *                   Macros
  ******************************************************/  
@@ -38,38 +42,35 @@
 
  typedef enum
 {
-    INPUT_PULL_UP,                  /* Input with an internal pull-up resistor - use with devices that actively drive the signal low - e.g. button connected to ground */
-    INPUT_PULL_DOWN,                /* Input with an internal pull-down resistor - use with devices that actively drive the signal high - e.g. button connected to a power rail */
-    INPUT_HIGH_IMPEDANCE,           /* Input - must always be driven, either actively or by an external pullup resistor */
-    OUTPUT_PUSH_PULL,               /* Output actively driven high and actively driven low - must not be connected to other active outputs - e.g. LED output */
-    OUTPUT_OPEN_DRAIN_NO_PULL,      /* Output actively driven low but is high-impedance when set high - can be connected to other open-drain/open-collector outputs. Needs an external pull-up resistor */
-    OUTPUT_OPEN_DRAIN_PULL_UP,      /* Output actively driven low and is pulled high with an internal resistor when set high - can be connected to other open-drain/open-collector outputs. */
+    INPUT_PULL_UP,                  /**< Input with an internal pull-up resistor - use with devices that actively drive the signal low - e.g. button connected to ground */
+    INPUT_PULL_DOWN,                /**< Input with an internal pull-down resistor - use with devices that actively drive the signal high - e.g. button connected to a power rail */
+    INPUT_HIGH_IMPEDANCE,           /**< Input - must always be driven, either actively or by an external pullup resistor */
+    OUTPUT_PUSH_PULL,               /**< Output actively driven high and actively driven low - must not be connected to other active outputs - e.g. LED output */
+    OUTPUT_OPEN_DRAIN_NO_PULL,      /**< Output actively driven low but is high-impedance when set high - can be connected to other open-drain/open-collector outputs. Needs an external pull-up resistor */
+    OUTPUT_OPEN_DRAIN_PULL_UP,      /**< Output actively driven low and is pulled high with an internal resistor when set high - can be connected to other open-drain/open-collector outputs. */
 } mico_gpio_config_t;
 
 typedef enum
 {
-    IRQ_TRIGGER_RISING_EDGE  = 0x1, /* Interrupt triggered at input signal's rising edge  */
-    IRQ_TRIGGER_FALLING_EDGE = 0x2, /* Interrupt triggered at input signal's falling edge */
-    IRQ_TRIGGER_BOTH_EDGES   = IRQ_TRIGGER_RISING_EDGE | IRQ_TRIGGER_FALLING_EDGE,
+    IRQ_TRIGGER_RISING_EDGE  = 0x1, /**< Interrupt triggered at input signal's rising edge  */
+    IRQ_TRIGGER_FALLING_EDGE = 0x2, /**< Interrupt triggered at input signal's falling edge */
+    IRQ_TRIGGER_BOTH_EDGES   = IRQ_TRIGGER_RISING_EDGE | IRQ_TRIGGER_FALLING_EDGE, /**< Interrupt triggered at input signal's rising or falling edge */
 } mico_gpio_irq_trigger_t;
 
 /******************************************************
  *                 Type Definitions
  ******************************************************/
 
+ /******************************************************
+ *                 Function Declarations
+ ******************************************************/
+
 typedef void (*mico_gpio_irq_handler_t)( void* arg );
 
-/*****************************************************************************/
-/** @addtogroup gpio       GPIO
- *  @ingroup platform
- *
- * General Purpose Input/Output pin (GPIO) Functions
- *
- *
- *  @{
- */
-/*****************************************************************************/
-
+/** @defgroup MICO_GPIO MICO GPIO Driver
+* @brief  General Purpose Input/Output pin (GPIO) Functions
+* @{
+*/
 
 /** Initialises a GPIO pin
  *
@@ -79,8 +80,8 @@ typedef void (*mico_gpio_irq_handler_t)( void* arg );
  * @param configuration : A structure containing the required
  *                        gpio configuration
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoGpioInitialize( mico_gpio_t gpio, mico_gpio_config_t configuration );
 
@@ -92,8 +93,8 @@ OSStatus MicoGpioInitialize( mico_gpio_t gpio, mico_gpio_config_t configuration 
  *
  * @param gpio          : the gpio pin which should be set high
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoGpioOutputHigh( mico_gpio_t gpio );
 
@@ -105,8 +106,8 @@ OSStatus MicoGpioOutputHigh( mico_gpio_t gpio );
  *
  * @param gpio          : the gpio pin which should be set low
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoGpioOutputLow( mico_gpio_t gpio );
 
@@ -117,8 +118,8 @@ OSStatus MicoGpioOutputLow( mico_gpio_t gpio );
  *
  * @param gpio          : the gpio pin which should be set low
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoGpioOutputTrigger( mico_gpio_t gpio );
 
@@ -131,8 +132,8 @@ OSStatus MicoGpioOutputTrigger( mico_gpio_t gpio );
  *
  * @param gpio          : the gpio pin which should be read
  *
- * @return    WICED_TRUE  : if high
- * @return    WICED_FALSE : if low
+ * @return    true  : if high
+ * @return    fasle : if low
  */
 bool   MicoGpioInputGet( mico_gpio_t gpio );
 
@@ -149,8 +150,8 @@ bool   MicoGpioInputGet( mico_gpio_t gpio );
  * @param arg     : an argument that will be passed to the
  *                  interrupt handler
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoGpioEnableIRQ( mico_gpio_t gpio, mico_gpio_irq_trigger_t trigger, mico_gpio_irq_handler_t handler, void* arg );
 
@@ -163,11 +164,12 @@ OSStatus MicoGpioEnableIRQ( mico_gpio_t gpio, mico_gpio_irq_trigger_t trigger, m
  *
  * @param gpio    : the gpio pin which provided the interrupt trigger
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoGpioDisableIRQ( mico_gpio_t gpio );
 
+/** @} */
 /** @} */
 
 #endif

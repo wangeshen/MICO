@@ -613,3 +613,14 @@ static uint32_t sdio_get_blocksize_dctrl(sdio_block_size_t block_size)
         default: return 0;
     }
 }
+
+void SDIO_IRQHandler(void)
+{
+  /* Process All SDIO Interrupt Sources */
+  sdio_irq();
+}
+
+void DMA2_Stream3_IRQHandler(void)
+{
+  dma_irq();
+}

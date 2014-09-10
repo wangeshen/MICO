@@ -483,26 +483,6 @@ bool mico_is_timer_running( mico_timer_t* timer );
   * @}
   */
 
-/** @defgroup MICO_RTOS_Power_Save MICO RTOS Power Management Functions
-  * @{
-  */
-/** @brief    Enables the MCU to enter deepsleep mode when all threads are suspended.
-  *
-  * @note:    When all threads are suspended, mcu can shut down some peripherals to 
-  *           save power. For example, STM32 enters STOP mode in this condition, 
-  *           its peripherals are not working and needs to be wake up by an external
-  *           interrupt or MICO core's internal timer. So if you are using a peripherals,  
-  *           you should disable this function temporarily.
-  *
-  * @param    enable : 1 = enable MCU powersave, 0 = disable MCU powersave
-  * @return   void
-  */
-void mico_mcu_powersave_config( int enable );
-
-/**
-  * @}
-  */
-
 #endif
 
 /**

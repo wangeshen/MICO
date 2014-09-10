@@ -53,21 +53,18 @@ OSStatus MicoWdgInitialize( uint32_t timeout_ms )
   /* Get the LSI frequency:  TIM5 is used to measure the LSI frequency */
   LsiFreq = GetLSIFrequency();
   
-  reloadTick = LsiFreq*timeout_ms/128000;
+  /* Set counter reload value to obtain 250ms IWDG TimeOut.
+     Counter Reload Value = timeout_ms /IWDG counter clock period
+                          = timeout_ms * (LSI/256) / 1000
+   */
+  reloadTick = LsiFreq*timeout_ms/256000;
   require_action( reloadTick <= 0xFFF, exit, err = kParamErr );
 
   IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
 
-  /* IWDG counter clock: LSI/32 */
-  IWDG_SetPrescaler(IWDG_Prescaler_128);
+  /* IWDG counter clock: LSI/256 */
+  IWDG_SetPrescaler(IWDG_Prescaler_256);
 
-  /* Set counter reload value to obtain 250ms IWDG TimeOut.
-     Counter Reload Value = 250ms/IWDG counter clock period
-                          = 250ms / (LSI/32)
-                          = 0.25s / (LsiFreq/32)
-                          = LsiFreq/(32 * 4)
-                          = LsiFreq/128
-   */
   IWDG_SetReload(reloadTick);
 
   /* Reload IWDG counter */

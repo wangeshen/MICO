@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    MICORTOS.h 
+  * @file    MicoDriverPwm.h 
   * @author  William Xu
   * @version V1.0.0
   * @date    05-May-2014
-  * @brief   This file provides all the headers of GPIO operation functions.
+  * @brief   This file provides all the headers PWM GPIO operation functions.
   ******************************************************************************
   * @attention
   *
@@ -26,6 +26,10 @@
 #include "Common.h"
 #include "platform.h"
 
+/** @addtogroup MICO_PLATFORM
+* @{
+*/
+
 /******************************************************
  *                   Enumerations
  ******************************************************/
@@ -34,17 +38,14 @@
  *                 Type Definitions
  ******************************************************/
 
-/*****************************************************************************/
-/** @addtogroup pwm       PWM
- *  @ingroup platform
- *
- * Pulse-Width Modulation (PWM) Functions
- *
- *
- *  @{
- */
-/*****************************************************************************/
+ /******************************************************
+ *                 Function Declarations
+ ******************************************************/
 
+/** @defgroup MICO_PWM MICO PWM Driver
+* @brief  Pulse-Width Modulation (PWM) Functions
+* @{
+*/
 
 /** Initialises a PWM pin
  *
@@ -55,8 +56,8 @@
  * @param frequency  : Output signal frequency in Hertz
  * @param duty_cycle : Duty cycle of signal as a floating-point percentage (0.0 to 100.0)
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoPwmInitialize(mico_pwm_t pwm, uint32_t frequency, float duty_cycle);
 
@@ -67,8 +68,8 @@ OSStatus MicoPwmInitialize(mico_pwm_t pwm, uint32_t frequency, float duty_cycle)
  *
  * @param pwm        : the PWM interface which should be started
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoPwmStart(mico_pwm_t pwm);
 
@@ -79,12 +80,12 @@ OSStatus MicoPwmStart(mico_pwm_t pwm);
  *
  * @param pwm        : the PWM interface which should be stopped
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
 OSStatus MicoPwmStop(mico_pwm_t pwm);
 
 /** @} */
-
+/** @} */
 
 #endif

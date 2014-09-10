@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    MICOSocket.h 
+  * @file    MicoSocket.h 
   * @author  William Xu
   * @version V1.0.0
   * @date    05-May-2014
@@ -19,6 +19,7 @@
   ******************************************************************************
   */ 
 
+
 #ifndef __MICOSOCKET_H__
 #define __MICOSOCKET_H__
 
@@ -28,7 +29,7 @@
 * @{
 */
 
-/** @defgroup MICO_SOCKET MICO Socket operations
+/** @defgroup MICO_SOCKET MICO Socket Operations
   * @brief Communicate with other device using TCP or UDP over MICO network
   * @{
   */
@@ -72,6 +73,8 @@ typedef enum {
   SO_BROADCAST            = 0x0006,     /**< MICO socket always support this option. */
   IP_ADD_MEMBERSHIP       = 0x0003,     /**< Join multicast group. */
   IP_DROP_MEMBERSHIP      = 0x0004,     /**< Leave Multicast group. */
+  TCP_CONN_NUM            = 0x0006,     /**< Read the current connected TCP client number. */
+  TCP_MAX_CONN_NUM        = 0x0007,     /**< Set the max number of TCP client that server can support. */
   SO_BLOCKMODE            = 0x1000,     /**< set socket as block(optval=0)/non-block(optval=1) mode. 
                                              Default is block mode. */
   SO_SNDTIMEO             = 0x1005,     /**< Send timeout in block mode. block for ever in dafault mode. */
@@ -101,7 +104,7 @@ typedef struct fd_set {
 #define FD_ISSET(n, p)    ((p)->fds_bits[(n)/NFDBITS] & _fdset_mask(n))   /**< Check if the fd is set in FD set. */
 #define FD_ZERO(p)        memset(p, 0, sizeof(*(p)))                      /**< Clear FD set. */
 
-/** @defgroup MICO_SOCKET_GROUP_1 MICO BSD-like Socket functions
+/** @defgroup MICO_SOCKET_GROUP_1 MICO BSD-like Socket Functions
   * @{
   */
 
@@ -363,7 +366,7 @@ int close(int fd);
   */
 
 
-/** @defgroup MICO_SOCKET_GROUP_2 MICO Socket Tool functions
+/** @defgroup MICO_SOCKET_GROUP_2 MICO Socket Tool Functions
   * @{
   */
 
@@ -443,14 +446,15 @@ void get_tcp_keepalive(int *outMaxErrNum, int *outSeconds);
   * @}
   */
 
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
 
 #endif /*__MICO_SOCKET_H__*/
 
-/**
-  * @}
-  */
 
-/**
-  * @}
-  */
 

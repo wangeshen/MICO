@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    MICORTOS.h 
+  * @file    MicoDriverAdc.h 
   * @author  William Xu
   * @version V1.0.0
   * @date    05-May-2014
-  * @brief   This file provides all the headers of GPIO operation functions.
+  * @brief   This file provides all the headers of ADC operation functions.
   ******************************************************************************
   * @attention
   *
@@ -25,6 +25,11 @@
 #pragma once
 #include "Common.h"
 #include "platform.h"
+
+/** @addtogroup MICO_PLATFORM
+* @{
+*/
+
 
 /******************************************************
  *                   Macros
@@ -52,20 +57,10 @@
  * @endcond           Function Declarations
  ******************************************************/
 
-
-
-
-/*****************************************************************************/
-/** @addtogroup adc       ADC
- *  @ingroup platform
- *
- * Analog to Digital Converter (ADC) Functions
- *
- *
- *  @{
- */
-/*****************************************************************************/
-
+/** @defgroup MICO_ADC MICO ADC Driver
+* @brief  Analog to Digital Converter (ADC) Functions
+* @{
+*/
 
 /** Initialises an ADC interface
  *
@@ -76,10 +71,10 @@
  *                         MCU does not support the value provided, the closest
  *                         supported value is used.
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
-OSStatus wiced_adc_init( mico_adc_t adc, uint32_t sampling_cycle );
+OSStatus MicoAdcInitialize( mico_adc_t adc, uint32_t sampling_cycle );
 
 
 
@@ -90,10 +85,10 @@ OSStatus wiced_adc_init( mico_adc_t adc, uint32_t sampling_cycle );
  * @param adc    : the interface which should be sampled
  * @param output : pointer to a variable which will receive the sample
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
-OSStatus wiced_adc_take_sample( mico_adc_t adc, uint16_t* output );
+OSStatus MicoAdcTakeSample( mico_adc_t adc, uint16_t* output );
 
 
 /** Takes multiple samples from an ADC interface
@@ -107,10 +102,10 @@ OSStatus wiced_adc_take_sample( mico_adc_t adc, uint16_t* output );
  * @param buffer_length : length in bytes of the memory buffer.
  *
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
-OSStatus wiced_adc_take_sample_stream( mico_adc_t adc, void* buffer, uint16_t buffer_length );
+OSStatus MicoAdcTakeSampleStreram( mico_adc_t adc, void* buffer, uint16_t buffer_length );
 
 
 /** De-initialises an ADC interface
@@ -119,10 +114,11 @@ OSStatus wiced_adc_take_sample_stream( mico_adc_t adc, void* buffer, uint16_t bu
  *
  * @param  adc : the interface which should be de-initialised
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred with any step
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
  */
-OSStatus wiced_adc_deinit( mico_adc_t adc );
+OSStatus  MicoAdcFinalize( mico_adc_t adc );
 
+/** @} */
 /** @} */
 #endif

@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    MICORTOS.h 
+  * @file    MicoDrvierI2C.h 
   * @author  William Xu
   * @version V1.0.0
   * @date    05-May-2014
@@ -23,18 +23,16 @@
 #define __MICODRIVERI2C_H__
 
 #pragma once
-#include "Common.h"
+#include "common.h"
 #include "platform.h"
+
+/** @addtogroup MICO_PLATFORM
+* @{
+*/
 
 /******************************************************
  *                   Macros
  ******************************************************/  
-
-#define MicoGpioInputGet wiced_gpio_input_get
-
-#define I2C_DEVICE_DMA_MASK_POSN 0
-#define I2C_DEVICE_NO_DMA    (0 << I2C_DEVICE_DMA_MASK_POSN)
-#define I2C_DEVICE_USE_DMA   (1 << I2C_DEVICE_DMA_MASK_POSN)
 
 /******************************************************
  *                   Enumerations
@@ -42,16 +40,16 @@
 
 typedef enum
 {
-    I2C_ADDRESS_WIDTH_7BIT,
-    I2C_ADDRESS_WIDTH_10BIT,
-    I2C_ADDRESS_WIDTH_16BIT,
+    I2C_ADDRESS_WIDTH_7BIT,     /**< I2C device has 7bit address */
+    I2C_ADDRESS_WIDTH_10BIT,    /**< I2C device has 10bit address */
+    I2C_ADDRESS_WIDTH_16BIT,    /**< I2C device has 16bit address */
 } mico_i2c_bus_address_width_t;
 
 typedef enum
 {
-    I2C_LOW_SPEED_MODE,         /* 10Khz devices */
-    I2C_STANDARD_SPEED_MODE,    /* 100Khz devices */
-    I2C_HIGH_SPEED_MODE         /* 400Khz devices */
+    I2C_LOW_SPEED_MODE,         /**< I2C clock speed for 10Khz devices */
+    I2C_STANDARD_SPEED_MODE,    /**< I2C clock speed for 100Khz devices */
+    I2C_HIGH_SPEED_MODE         /**< I2C clock speed for 400Khz devices */
 } mico_i2c_speed_mode_t;
 
 /******************************************************
@@ -60,39 +58,34 @@ typedef enum
 
 typedef struct
 {
-    mico_i2c_t                   port;
-    uint16_t                      address;       /* the address of the device on the i2c bus */
-    mico_i2c_bus_address_width_t address_width;
-    uint8_t                       flags;
-    mico_i2c_speed_mode_t        speed_mode;    /* speed mode the device operates in */
+    mico_i2c_t                    port;           /**< Platform I2C port that is connected to the target I2C device, - e.g. MICO_I2C_1 */
+    uint16_t                      address;        /**< The address of the device on the I2C bus */
+    mico_i2c_bus_address_width_t  address_width;  /**< I2C device's address length */
+    mico_i2c_speed_mode_t         speed_mode;     /**< Speed mode the device operates in */
 } mico_i2c_device_t;
 
 typedef struct
 {
-    const void*  tx_buffer;  /* A pointer to the data to be transmitted. If NULL, the message is an RX message when 'combined' is FALSE */
-    void*        rx_buffer;  /* A pointer to the data to be transmitted. If NULL, the message is an TX message when 'combined' is FALSE */
-    uint16_t     tx_length;
-    uint16_t     rx_length;
-    uint16_t     retries;    /* Number of times to retry the message */
-    bool combined;
-    uint8_t      flags;      /* MESSAGE_DISABLE_DMA : if set, this flag disables use of DMA for the message */
+    const void*  tx_buffer;  /**< A pointer to the data to be transmitted. If NULL, the message is an RX message when 'combined' is FALSE */
+    void*        rx_buffer;  /**< A pointer to the data to be transmitted. If NULL, the message is an TX message when 'combined' is FALSE */
+    uint16_t     tx_length;  /**< Number of bytes to transmit */
+    uint16_t     rx_length;  /**< Number of bytes to receive */
+    uint16_t     retries;    /**< Number of times to retry the message */
+    bool combined;           /**< If set, this message is used for both tx and rx. */
 } mico_i2c_message_t;
 
 /******************************************************
  *                 Type Definitions
  ******************************************************/
 
-/*****************************************************************************/
-/** @addtogroup i2c       I2C
- *  @ingroup platform
- *
- * Inter-IC bus (I2C) Functions
- *
- *
- *  @{
- */
-/*****************************************************************************/
+/******************************************************
+ *                 Function Declarations
+ ******************************************************/
 
+/** @defgroup MICO_I2C MICO I2C Driver
+* @brief  Inter-IC bus (I2C) Functions
+* @{
+*/
 
 /** Initialises an I2C interface
  *
@@ -100,8 +93,8 @@ typedef struct
  *
  * @param  device : the device for which the i2c port should be initialised
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred during initialisation
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred during initialisation
  */
 OSStatus MicoI2cInitialize( mico_i2c_device_t* device );
 
@@ -112,44 +105,38 @@ OSStatus MicoI2cInitialize( mico_i2c_device_t* device );
  * @param  device : the i2c device to be probed
  * @param  retries    : the number of times to attempt to probe the device
  *
- * @return    WICED_TRUE : device is found.
- * @return    WICED_FALSE: device is not found
+ * @return    true : device is found.
+ * @return    false: device is not found
  */
 bool MicoI2cProbeDevice( mico_i2c_device_t* device, int retries );
 
 
-/** Initialize the wiced_i2c_message_t structure for i2c tx transaction
+/** Initialize the mico_i2c_message_t structure for i2c tx transaction
  *
  * @param message : pointer to a message structure, this should be a valid pointer
  * @param tx_buffer : pointer to a tx buffer that is already allocated
  * @param tx_buffer_length : number of bytes to transmit
  * @param retries    : the number of times to attempt send a message in case it can't not be sent
- * @param disable_dma : if true, disables the dma for current tx transaction. You may find it useful to switch off dma for short tx messages.
- *                     if you set this flag to 0, then you should make sure that the device flags was configured with I2C_DEVICE_USE_DMA. If the
- *                     device doesnt support DMA, the message will be transmitted with no DMA.
  *
- * @return    WICED_SUCCESS : message structure was initialised properly.
- * @return    WICED_BADARG: one of the arguments is given incorrectly
+ * @return    kNoErr    : message structure was initialised properly.
+ * @return    kParamErr : one of the arguments is given incorrectly
  */
-OSStatus MicoI2cBuildTxMessage(mico_i2c_message_t* message, const void* tx_buffer, uint16_t  tx_buffer_length, uint16_t retries , bool disable_dma);
+OSStatus MicoI2cBuildTxMessage(mico_i2c_message_t* message, const void* tx_buffer, uint16_t  tx_buffer_length, uint16_t retries);
 
-/** Initialize the wiced_i2c_message_t structure for i2c rx transaction
+/** Initialize the mico_i2c_message_t structure for i2c rx transaction
  *
  * @param message : pointer to a message structure, this should be a valid pointer
  * @param rx_buffer : pointer to an rx buffer that is already allocated
  * @param rx_buffer_length : number of bytes to receive
  * @param retries    : the number of times to attempt receive a message in case device doesnt respond
- * @param disable_dma : if true, disables the dma for current rx transaction. You may find it useful to switch off dma for short rx messages.
- *                     if you set this flag to 0, then you should make sure that the device flags was configured with I2C_DEVICE_USE_DMA. If the
- *                     device doesnt support DMA, the message will be received not using DMA.
  *
- * @return    WICED_SUCCESS : message structure was initialised properly.
- * @return    WICED_BADARG: one of the arguments is given incorrectly
+ * @return    kNoErr    : message structure was initialised properly.
+ * @return    kParamErr : one of the arguments is given incorrectly
  */
-OSStatus MicoI2cBuildRxMessage(mico_i2c_message_t* message, void* rx_buffer, uint16_t rx_buffer_length, uint16_t retries , bool disable_dma);
+OSStatus MicoI2cBuildRxMessage(mico_i2c_message_t* message, void* rx_buffer, uint16_t rx_buffer_length, uint16_t retries);
 
 
-/** Initialize the wiced_i2c_message_t structure for i2c combined transaction
+/** Initialize the mico_i2c_message_t structure for i2c combined transaction
  *
  * @param  message : pointer to a message structure, this should be a valid pointer
  * @param tx_buffer: pointer to a tx buffer that is already allocated
@@ -157,14 +144,11 @@ OSStatus MicoI2cBuildRxMessage(mico_i2c_message_t* message, void* rx_buffer, uin
  * @param tx_buffer_length: number of bytes to transmit
  * @param rx_buffer_length: number of bytes to receive
  * @param  retries    : the number of times to attempt receive a message in case device doesnt respond
- * @param disable_dma: if true, disables the dma for current rx transaction. You may find it useful to switch off dma for short rx messages.
- *                     if you set this flag to 0, then you should make sure that the device flags was configured with I2C_DEVICE_USE_DMA. If the
- *                     device doesnt support DMA, the message will be received not using DMA.
  *
- * @return    WICED_SUCCESS : message structure was initialised properly.
- * @return    WICED_BADARG: one of the arguments is given incorrectly
+ * @return    kNoErr    : message structure was initialised properly.
+ * @return    kParamErr : one of the arguments is given incorrectly
  */
-OSStatus MicoI2cBuildCombinedMessage(mico_i2c_message_t* message, const void* tx_buffer, void* rx_buffer, uint16_t tx_buffer_length, uint16_t rx_buffer_length, uint16_t retries , bool disable_dma);
+OSStatus MicoI2cBuildCombinedMessage(mico_i2c_message_t* message, const void* tx_buffer, void* rx_buffer, uint16_t tx_buffer_length, uint16_t rx_buffer_length, uint16_t retries);
 
 
 /** Transmits and/or receives data over an I2C interface
@@ -173,8 +157,8 @@ OSStatus MicoI2cBuildCombinedMessage(mico_i2c_message_t* message, const void* tx
  * @param  message            : a pointer to a message (or an array of messages) to be transmitted/received
  * @param  number_of_messages : the number of messages to transfer. [1 .. N] messages
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred during message transfer
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred during message transfer
  */
 OSStatus MicoI2cTransfer( mico_i2c_device_t* device, mico_i2c_message_t* message, uint16_t number_of_messages );
 
@@ -183,13 +167,13 @@ OSStatus MicoI2cTransfer( mico_i2c_device_t* device, mico_i2c_message_t* message
  *
  * @param  device : the device for which the i2c port should be deinitialised
  *
- * @return    WICED_SUCCESS : on success.
- * @return    WICED_ERROR   : if an error occurred during deinitialisation
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred during deinitialisation
  */
 OSStatus MicoI2cFinalize( mico_i2c_device_t* device );
 
 
-
+/** @} */
 /** @} */
 
 #endif
