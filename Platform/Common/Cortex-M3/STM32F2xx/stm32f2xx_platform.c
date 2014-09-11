@@ -1,16 +1,36 @@
-/*
-* Copyright 2013, Broadcom Corporation
-* All Rights Reserved.
+/**
+******************************************************************************
+* @file    stm32f2xx_platform.c 
+* @author  William Xu
+* @version V1.0.0
+* @date    05-May-2014
+* @brief   This file provide functions called by MICO to drive stm32f2xx 
+*          platform: - e.g. power save, reboot, platform initialize
+******************************************************************************
 *
-* This is UNPUBLISHED PROPRIETARY SOURCE CODE of Broadcom Corporation;
-* the contents of this file may not be disclosed to third parties, copied
-* or duplicated in any form, in whole or in part, without the prior
-* written permission of Broadcom Corporation.
-*/
+*  The MIT License
+*  Copyright (c) 2014 MXCHIP Inc.
+*
+*  Permission is hereby granted, free of charge, to any person obtaining a copy 
+*  of this software and associated documentation files (the "Software"), to deal
+*  in the Software without restriction, including without limitation the rights 
+*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*  copies of the Software, and to permit persons to whom the Software is furnished
+*  to do so, subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in
+*  all copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+*  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+*  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+******************************************************************************
+*/ 
 
-/** @file
-*
-*/
+
 #include "stm32f2xx_platform.h"
 #include "platform.h"
 #include "platform_common_config.h"
@@ -170,14 +190,15 @@ void init_architecture( void )
   SCB->VTOR = 0x20000000; /* Change the vector table to point to start of SRAM */
 #endif /* ifdef INTERRUPT_VECTORS_IN_RAM */
   
-    /*STM32 wakeup by watchdog in standby mode, re-enter standby mode in this situation*/
-  PlatformWDGReload();
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+
+  /*STM32 wakeup by watchdog in standby mode, re-enter standby mode in this situation*/
   if ( (PWR_GetFlagStatus(PWR_FLAG_SB) != RESET) && RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET){
       RCC_ClearFlag();
       MicoSystemStandBy();
   }
   PWR_ClearFlag(PWR_FLAG_SB);
-  
+
   if ( stm32_platform_inited == 1 )
     return;
   
@@ -431,8 +452,6 @@ void MicoSystemStandBy(void)
   PWR_WakeUpPinCmd(ENABLE);
   PWR_EnterSTANDBYMode();
 }
-
-//These functions need to be deprecated
 
 void MicoMcuPowerSaveConfig( int enable )
 {

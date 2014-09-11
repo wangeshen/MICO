@@ -253,57 +253,33 @@ typedef enum
 } mico_uart_t;
 
 #define STM32_UART_1 MICO_UART_1
-#define STM32_UART_2 MICO_UART_MAX
-#define STM32_UART_3 MICO_UART_MAX
-#define STM32_UART_4 MICO_UART_MAX
-#define STM32_UART_5 MICO_UART_MAX
 #define STM32_UART_6 MICO_UART_2
 
-#define MICO_PLATFORM_INCLUDES_SPI_FLASH
-#define MICO_SPI_FLASH_CS  (MICO_GPIO_5)
+/* #define MICO_PLATFORM_INCLUDES_SPI_FLASH */
+/* #define MICO_SPI_FLASH_CS  (MICO_GPIO_5) */
 /*      MICO_SPI_FLASH_MOSI MICO_GPIO_8 */
 /*      MICO_SPI_FLASH_MISO MICO_GPIO_7 */
 /*      MICO_SPI_FLASH_CLK  MICO_GPIO_6 */
 
 /* Components connected to external I/Os*/
-#define MICO_LED2           (MICO_GPIO_13)
 #define MICO_RF_LED         (MICO_GPIO_16)
 #define EasyLink_BUTTON     (MICO_GPIO_11)
 #define Standby_SEL         (MICO_GPIO_29)
-#define MICO_BUTTON2        (MICO_GPIO_14)
-#define MICO_THERMISTOR     (MICO_GPIO_4)
 
 /* I/O connection <-> Peripheral Connections */
-#define MICO_LED1_JOINS_PWM       (MICO_PWM_1)
-#define MICO_LED2_JOINS_PWM       (MICO_PWM_2)
-#define MICO_THERMISTOR_JOINS_ADC (MICO_ADC_3)
+#define MICO_I2C_CP         (MICO_I2C_1)
 
 /* WLAN Powersave Clock Source
  * The WLAN sleep clock can be driven from one of two sources:
  * 1. Timer/PWM (default)
  *    - With the PWM selected, the STM32 can *NOT* be put into MCU powersave mode or the PWM output will be disabled
- * 2. MCO (MCU Clock Output). NOTE: Versions of BCM943362WCD4 up to and including P200 require a hardware patch to enable this mode
- *    - Connect STM32F205RGT6 pin 41 (PA8) to pin 44 (PA11)
+ * 2. MCO (MCU Clock Output). 
  *    - Change the following directive to MICO_WLAN_POWERSAVE_CLOCK_IS_MCO
  */
 #define MICO_WLAN_POWERSAVE_CLOCK_SOURCE MICO_WLAN_POWERSAVE_CLOCK_IS_MCO
 
 #define RestoreDefault_TimeOut          3000  /**< Restore default and start easylink after 
                                                    press down EasyLink button for 3 seconds. */
-
-#define MXCHIP_GPIO_EASYLINK  MICO_GPIO_5
-#define MXCHIP_GPIO_NFC_INT   MICO_GPIO_6
-#define MXCHIP_GPIO_MCU_PS    MICO_GPIO_7
-#define MXCHIP_GPIO_MCU_STD   MICO_GPIO_8
-#define MXCHIP_GPIO_RED_LED   MICO_GPIO_13
-#define MXCHIP_GPIO_STATUS    MICO_GPIO_14
-#define MXCHIP_GPIO_GRN_LED   MICO_GPIO_15
-#define MXCHIP_GPIO_WPS       MICO_GPIO_16
-
-#define MXCHIP_UART           MICO_UART_1
-
-#define MICO_I2C_CP           MICO_I2C_1
-
 
 #ifdef __cplusplus
 } /*extern "C" */

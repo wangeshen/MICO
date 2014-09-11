@@ -38,18 +38,8 @@
 
 #define CONFIG_SERVICE_PORT     8000
 
-#define BUNDLE_SEED_ID          "C6P64J2MZX"  
-#define EA_PROTOCOL             "com.issc.datapath"
-
 #define APPLICATION_WATCHDOG_TIMEOUT_SECONDS  5 /**< Watch-dog enabled by MICO's main thread:
                                                      5 seconds to reload. */
-
-#define EasyLink_TimeOut                20000 /**< EasyLink timeout 20 seconds. */
-
-#define EasyLink_ConnectWlan_Timeout    20000 /**< Connect to wlan after configured y easylink.
-                                                   Restart easylink after timeout: 20 seconds. */
-
-#define WPS_TimeOut                     60000 /**< WPS timeout 60 seconds. */
 
 #define maxSsidLen          32
 #define maxKeyLen           64
@@ -152,7 +142,6 @@ typedef struct _current_mico_status_t
   mico_semaphore_t      sys_state_change_sem;
 } current_mico_status_t;
 
-
 typedef struct _mico_Context_t
 {
   /*Flash content*/
@@ -163,34 +152,6 @@ typedef struct _mico_Context_t
   current_mico_status_t     micoStatus;
   current_app_status_t      appStatus;
 } mico_Context_t;
-
-/**
- *   @brief Parameters controlled by the platform to configure the WAC process. 
- */
-typedef struct
-{
-    uint8_t macAddress[ 6 ];        /**< REQUIRED: Accessory MAC address, e.g. 00:11:22:33:44:55. */
-    
-    bool    isUnconfigured;         /**< TRUE/FALSE: whether the accessory is unconfigured. Should be true for current cases. */
-    bool    supportsAirPlay;        /**< TRUE/FALSE: whether the accessory supports AirPlay. */
-    bool    supportsAirPrint;       /**< TRUE/FALSE: whether the accessory supports AirPrint. */
-    bool    supports2_4GHzWiFi;     /**< TRUE/FALSE: whether the accessory supports 2.4 GHz Wi-Fi. */
-    bool    supports5GHzWiFi;       /**< TRUE/FALSE: whether the accessory supports 5 GHz Wi-Fi. */
-    bool    supportsWakeOnWireless; /**< TRUE/FALSE: whether the accessory supports Wake On Wireless. */
-    
-    char    *firmwareRevision;      /**< REQUIRED: Version of the accessory's firmware, e.g. 1.0.0. */
-    char    *hardwareRevision;      /**< REQUIRED: Version of the accessory's hardware, e.g. 1.0.0. */
-    char    *serialNumber;          /**< OPTIONAL: Accessory's serial number. */
-    
-    char    *name;                  /**< REQUIRED: Name of the accessory. */
-    char    *model;                 /**< REQUIRED: Model name of the accessory. */
-    char    *manufacturer;          /**< REQUIRED: Manufacturer name of the accessory. */
-    
-    char    **eaProtocols;          /**< OPTIONAL: Array of EA Protocol strings. */
-    uint8_t numEAProtocols;         /**< OPTIONAL: Number of EA Protocol strings contained in the eaProtocols array. */
-    char    *eaBundleSeedID;        /**< OPTIONAL: Accessory manufacturer's BundleSeedID. */
-    
-} WACPlatformParameters_t;
 
 #define CONFIG_DATA_SIZE (sizeof(application_config_t)-sizeof(uint32_t))
 

@@ -3171,6 +3171,9 @@
             </file>
           </group>
           <file>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_platform.c</name>
+          </file>
+          <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\gpio_irq.c</name>
           </file>
           <file>
@@ -3211,9 +3214,6 @@
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\stm32f2xx_platform.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\wwd_platform.c</name>
           </file>
         </group>
         <file>

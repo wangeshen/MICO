@@ -28,6 +28,11 @@
 
 #define FTC_PORT 8000
 
+#define EasyLink_TimeOut                20000 /**< EasyLink timeout 20 seconds. */
+
+#define EasyLink_ConnectWlan_Timeout    20000 /**< Connect to wlan after configured y easylink.
+                                                   Restart easylink after timeout: 20 seconds. */
+
 OSStatus startEasyLink( mico_Context_t * const inContext);
 
 OSStatus stopEasyLink( mico_Context_t * const inContext);

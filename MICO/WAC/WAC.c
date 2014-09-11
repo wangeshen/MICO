@@ -13,6 +13,7 @@
 #include "Platform.h"
 #include "MDNSUtils.h"
 #include "MFi-SAP.h"
+#include "MFi_WAC.h"
 //#include "MFi_WAC/debug.h"
 #include "PlatformMFiAuth.h"
 //#include "MFi_WAC/platform/PlatformRandomNumber.h"

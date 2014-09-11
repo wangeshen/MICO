@@ -26,6 +26,7 @@
 
 #include "MICODefine.h"
 
+#define WPS_TimeOut                     60000 /**< WPS timeout 60 seconds. */
 
 OSStatus startWPS( mico_Context_t * const inContext);
 

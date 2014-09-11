@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "debug.h"
+#include "MFi_WAC.h"
 #include "MICO.h"
 #include "MICODefine.h"
 #include "MicoPlatform.h"
