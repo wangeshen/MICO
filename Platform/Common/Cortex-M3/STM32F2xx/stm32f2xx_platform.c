@@ -35,6 +35,8 @@
 #include "platform.h"
 #include "platform_common_config.h"
 #include "MicoPlatform.h"
+#include "PlatformLogging.h"
+#include "rtc.h"
 #include <string.h> // For memcmp
 #include "crt0.h"
 #include "platform_sleep.h"
@@ -137,9 +139,9 @@ static unsigned long rtc_timeout_start_time           = 0;
 ******************************************************/
 
 /* STM32F2 common clock initialisation function
- * This brings up enough clocks to allow the processor to run quickly while initialising memory.
- * Other platform specific clock init can be done in init_platform() or init_architecture()
- */
+* This brings up enough clocks to allow the processor to run quickly while initialising memory.
+* Other platform specific clock init can be done in init_platform() or init_architecture()
+*/
 WEAK void init_clocks( void )
 {
   //RCC_DeInit( ); /* if not commented then the LSE PA8 output will be disabled and never comes up again */
@@ -191,14 +193,14 @@ void init_architecture( void )
 #endif /* ifdef INTERRUPT_VECTORS_IN_RAM */
   
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
-
+  
   /*STM32 wakeup by watchdog in standby mode, re-enter standby mode in this situation*/
   if ( (PWR_GetFlagStatus(PWR_FLAG_SB) != RESET) && RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET){
-      RCC_ClearFlag();
-      MicoSystemStandBy();
+    RCC_ClearFlag();
+    MicoSystemStandBy();
   }
   PWR_ClearFlag(PWR_FLAG_SB);
-
+  
   if ( stm32_platform_inited == 1 )
     return;
   
@@ -327,6 +329,7 @@ void wake_up_interrupt_notify( void )
   wake_up_interrupt_triggered = true;
 }
 
+
 static unsigned long stop_mode_power_down_hook( unsigned long delay_ms )
 {
   unsigned long retval;
@@ -336,8 +339,6 @@ static unsigned long stop_mode_power_down_hook( unsigned long delay_ms )
   UNUSED_PARAMETER(rtc_timeout_start_time);
   UNUSED_PARAMETER(scale_factor);
   
-  DISABLE_INTERRUPTS;
-
   if ( ( ( SCB->SCR & (unsigned long)SCB_SCR_SLEEPDEEP_Msk) != 0) && delay_ms < 5 ){
     SCB->SCR &= (~((unsigned long)SCB_SCR_SLEEPDEEP_Msk));
     __asm("wfi");
@@ -347,12 +348,12 @@ static unsigned long stop_mode_power_down_hook( unsigned long delay_ms )
     return 0;
   }
   
-  
-  if ( ( ( SCB->SCR & (unsigned long)SCB_SCR_SLEEPDEEP_Msk) != 0) )
+  if ( ( ( SCB->SCR & (unsigned long)SCB_SCR_SLEEPDEEP_Msk) ) != 0 )
   {
     /* pick up the appropriate prescaler for a requested delay */
     select_wut_prescaler_calculate_wakeup_time(&rtc_timeout_start_time, delay_ms, &scale_factor );
-
+    DISABLE_INTERRUPTS;
+    
     SysTick->CTRL &= (~(SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk)); /* systick IRQ off */
     RTC_ITConfig(RTC_IT_WUT, ENABLE);
     
@@ -362,6 +363,7 @@ static unsigned long stop_mode_power_down_hook( unsigned long delay_ms )
     
     RTC_SetWakeUpCounter( rtc_timeout_start_time );
     RTC_WakeUpCmd( ENABLE );
+    rtc_sleep_entry();
     
     DBGMCU->CR |= 0x03; /* Enable debug in stop mode */
     
@@ -374,27 +376,22 @@ static unsigned long stop_mode_power_down_hook( unsigned long delay_ms )
     /* So, if the interrupt has been triggered just before the wfi instruction */
     /* it remains pending and wfi instruction will be treated as a nop  */
     __asm("wfi");
+    
+    /* After CPU exits powerdown mode, the processer will not execute the interrupt handler(PRIMASK is set to 1) */
+    /* Disable rtc for now */
+    RTC_WakeUpCmd( DISABLE );
     RTC_ITConfig(RTC_IT_WUT, DISABLE);
-
+    
     /* Initialise the clocks again */
     init_clocks( );
     
     /* Enable CPU ticks */
     SysTick->CTRL |= (SysTick_CTRL_TICKINT_Msk|SysTick_CTRL_ENABLE_Msk);
     
-    /* After CPU exits powerdown mode, the processer will not execute the interrupt handler(PRIMASK is set to 1) */
-    /* Disable rtc for now */
-    RTC_WakeUpCmd( DISABLE );
-    
     /* Get the time of how long the sleep lasted */
-    if(RTC->ISR & RTC_ISR_WUTF)
-      wut_ticks_passed = 2 * rtc_timeout_start_time - RTC_GetWakeUpCounter();
-    else{
-      wut_ticks_passed = rtc_timeout_start_time - RTC_GetWakeUpCounter();
-    }
-
-    retval = wut_ticks_passed/NUMBER_OF_LSE_TICKS_PER_MILLISECOND( scale_factor );
-    
+    wut_ticks_passed = rtc_timeout_start_time - RTC_GetWakeUpCounter();
+    UNUSED_VARIABLE(wut_ticks_passed);
+    rtc_sleep_exit( delay_ms, &retval );
     /* as soon as interrupts are enabled, we will go and execute the interrupt handler */
     /* which triggered a wake up event */
     ENABLE_INTERRUPTS;
@@ -404,8 +401,9 @@ static unsigned long stop_mode_power_down_hook( unsigned long delay_ms )
   else
   {
     UNUSED_PARAMETER(wut_ticks_passed);
-    __asm("wfi");
     ENABLE_INTERRUPTS;
+    __asm("wfi");
+    
     /* Note: We return 0 ticks passed because system tick is still going when wfi instruction gets executed */
     return 0;
   }
@@ -455,9 +453,9 @@ void MicoSystemStandBy(void)
 
 void MicoMcuPowerSaveConfig( int enable )
 {
-    if (enable == 1)
-        MCU_CLOCKS_NOT_NEEDED();
-    else
-        MCU_CLOCKS_NEEDED();
+  if (enable == 1)
+    MCU_CLOCKS_NOT_NEEDED();
+  else
+    MCU_CLOCKS_NEEDED();
 }
 

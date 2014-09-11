@@ -229,6 +229,7 @@ int application_start(void)
   struct tm currentTime;
   mico_rtc_time_t time;
  
+ 
   /*Read current configurations*/
   context = ( mico_Context_t *)malloc(sizeof(mico_Context_t) );
   require_action( context, exit, err = kNoMemoryErr );
@@ -270,13 +271,13 @@ int application_start(void)
   mico_log("%s mxchipWNet library version: %s", APP_INFO, MicoGetVer());
 
   /*Start system monotor thread*/
-  err = MICOStartSystemMonitor(context);
-  require_noerr_action( err, exit, mico_log("ERROR: Unable to start the system monitor.") );
- 
-  err = MICORegisterSystemMonitor(&mico_monitor, APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000);
-  require_noerr( err, exit );
-  mico_init_timer(&_watchdog_reload_timer,APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000 - 100, _watchdog_reload_timer_handler, NULL);
-  mico_start_timer(&_watchdog_reload_timer);
+//  err = MICOStartSystemMonitor(context);
+//  require_noerr_action( err, exit, mico_log("ERROR: Unable to start the system monitor.") );
+// 
+//  err = MICORegisterSystemMonitor(&mico_monitor, APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000);
+//  require_noerr( err, exit );
+//  mico_init_timer(&_watchdog_reload_timer,APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000 - 100, _watchdog_reload_timer_handler, NULL);
+//  mico_start_timer(&_watchdog_reload_timer);
   
   if(context->flashContentInRam.micoSystemConfig.configured != allConfigured){
     mico_log("Empty configuration. Starting configuration mode...");
@@ -353,7 +354,7 @@ int application_start(void)
     /*Start mico application*/
     err = MICOStartApplication( context );
     require_noerr( err, exit );
-    
+
     _ConnectToAP( context );
   }
   
@@ -361,10 +362,10 @@ int application_start(void)
   // mico_log("Memory remains %d", MicoGetMemoryInfo()->free_memory);
   // ENABLE_INTERRUPTS;
   
-//  while(1){
-//    MicoGpioOutputTrigger((mico_gpio_t)MICO_SYS_LED);
-//    mico_thread_msleep(1000);
-//  }
+  while(1){
+    MicoGpioOutputTrigger((mico_gpio_t)MICO_SYS_LED);
+    mico_thread_sleep(1);
+  }
   
   /*System status changed*/
   while(mico_rtos_get_semaphore(&context->micoStatus.sys_state_change_sem, MICO_WAIT_FOREVER)==kNoErr){
