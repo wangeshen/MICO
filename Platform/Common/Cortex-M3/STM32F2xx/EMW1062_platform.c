@@ -135,13 +135,6 @@ OSStatus host_platform_deinit( void )
     return kNoErr;
 }
 
-uint32_t host_platform_get_cycle_count(void)
-{
-/* From the ARM Cortex-M3 Techinical Reference Manual
- * 0xE0001004  DWT_CYCCNT  RW  0x00000000  Cycle Count Register */
-    return *((volatile uint32_t*)0xE0001004);
-}
-
 bool host_platform_is_in_interrupt_context( void )
 {
     /* From the ARM Cortex-M3 Techinical Reference Manual

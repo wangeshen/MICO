@@ -128,8 +128,18 @@ static uint32_t convert_rtc_calendar_values_to_units_passed( void )
 static void reset_rtc_values( void )
 {
     ErrorStatus status;
+    int retry = 3;
 
     /* Disable write protection of rtc registers */
+    do{
+      RTC_WriteProtectionCmd(DISABLE);
+      status = RTC_EnterInitMode();
+      REFERENCE_DEBUG_ONLY_VARIABLE(status);
+      retry--;
+    }while( retry && (status!=SUCCESS) );
+      
+    check_string( status==SUCCESS, "Rtc can not enter intialisation mode");  
+      
     RTC_WriteProtectionCmd(DISABLE);
     status = RTC_EnterInitMode();
     REFERENCE_DEBUG_ONLY_VARIABLE(status);

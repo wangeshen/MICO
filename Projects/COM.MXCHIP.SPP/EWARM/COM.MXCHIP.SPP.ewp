@@ -3180,9 +3180,6 @@
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\gpio_irq.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\hardfault.c</name>
-          </file>
-          <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverAdc.c</name>
           </file>
           <file>
@@ -3477,6 +3474,9 @@
         </group>
         <file>
           <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\crt0_IAR.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\hardfault.c</name>
         </file>
       </group>
       <group>
