@@ -23,7 +23,7 @@
 #include "MICODefine.h"
 #include "SocketUtils.h"
 #include "Platform.h"
-#include "PlatformFlash.h"  
+#include "Platform_common_config.h"
 #include "HTTPUtils.h"
 
 

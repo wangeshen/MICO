@@ -21,7 +21,7 @@
 
 #include "MICODefine.h"
 #include "MICO.h"
-#include "PlatformFlash.h"
+#include "platform_common_config.h"
 #include "MicoPlatform.h"
 
 /* Update seed number every time*/
@@ -52,13 +52,13 @@ OSStatus MICORestoreDefault(mico_Context_t *inContext)
   /*Application's default configuration*/
   appRestoreDefault_callback(inContext);
 
-  err = PlatformFlashInitialize();
+  err = MicoFlashInitialize(MICO_FLASH_FOR_PARA);
   require_noerr(err, exit);
-  err = PlatformFlashErase(paraStartAddress, paraEndAddress);
+  err = MicoFlashErase(MICO_FLASH_FOR_PARA, paraStartAddress, paraEndAddress);
   require_noerr(err, exit);
-  err = PlatformFlashWrite(&paraStartAddress, (void *)inContext, sizeof(flash_content_t));
+  err =MicoFlashWrite(MICO_FLASH_FOR_PARA, &paraStartAddress, (void *)inContext, sizeof(flash_content_t));
   require_noerr(err, exit);
-  err = PlatformFlashFinalize();
+  err = MicoFlashFinalize(MICO_FLASH_FOR_PARA);
   require_noerr(err, exit);
 
 exit:
@@ -100,13 +100,13 @@ OSStatus MICOUpdateConfiguration(mico_Context_t *inContext)
   paraEndAddress = PARA_END_ADDRESS;
 
   inContext->flashContentInRam.micoSystemConfig.seed = ++seedNum;
-  err = PlatformFlashInitialize();
+  err = MicoFlashInitialize(MICO_FLASH_FOR_PARA);
   require_noerr(err, exit);
-  err = PlatformFlashErase(paraStartAddress, paraEndAddress);
+  err = MicoFlashErase(MICO_FLASH_FOR_PARA, paraStartAddress, paraEndAddress);
   require_noerr(err, exit);
-  err = PlatformFlashWrite(&paraStartAddress, (u32 *)&inContext->flashContentInRam, sizeof(flash_content_t));
+  err = MicoFlashWrite(MICO_FLASH_FOR_PARA, &paraStartAddress, (uint32_t *)&inContext->flashContentInRam, sizeof(flash_content_t));
   require_noerr(err, exit);
-  err = PlatformFlashFinalize();
+  err = MicoFlashFinalize(MICO_FLASH_FOR_PARA);
   require_noerr(err, exit);
 
 exit:

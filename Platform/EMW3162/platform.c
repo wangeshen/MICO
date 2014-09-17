@@ -1,16 +1,34 @@
-/*
- * Copyright 2014, Broadcom Corporation
- * All Rights Reserved.
- *
- * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Broadcom Corporation;
- * the contents of this file may not be disclosed to third parties, copied
- * or duplicated in any form, in whole or in part, without the prior
- * written permission of Broadcom Corporation.
- */
-
-/** @file
- *
- */
+/**
+******************************************************************************
+* @file    platform.c 
+* @author  William Xu
+* @version V1.0.0
+* @date    05-May-2014
+* @brief   This file provides all MICO Peripherals mapping table and platform
+*          specific funcgtions.
+******************************************************************************
+*
+*  The MIT License
+*  Copyright (c) 2014 MXCHIP Inc.
+*
+*  Permission is hereby granted, free of charge, to any person obtaining a copy 
+*  of this software and associated documentation files (the "Software"), to deal
+*  in the Software without restriction, including without limitation the rights 
+*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*  copies of the Software, and to permit persons to whom the Software is furnished
+*  to do so, subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in
+*  all copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+*  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+*  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+******************************************************************************
+*/ 
 #include "platform.h"
 #include "MICOPlatform.h"
 #include "debug.h"
@@ -20,7 +38,6 @@
 #include "string.h"
 #include "stm32f2xx_platform.h"
 #include "platform_common_config.h"
-#include "platform_internal_gpio.h"
 #include "PlatformLogging.h"
 
 /******************************************************
@@ -89,6 +106,10 @@ const platform_pin_mapping_t gpio_mapping[] =
     /* Extended GPIOs for internal use */
     [MICO_GPIO_WLAN_POWERSAVE_CLOCK]    = {WL_32K_OUT_BANK, WL_32K_OUT_PIN, WL_32K_OUT_BANK_CLK},
     [MICO_SYS_LED]                      = {GPIOB,  0,  RCC_AHB1Periph_GPIOB},
+    [WL_GPIO0]                          = {GPIOB, 12,  RCC_AHB1Periph_GPIOB},
+    [WL_GPIO1]                          = {GPIOB, 13,  RCC_AHB1Periph_GPIOB},
+    [WL_REG]                            = {GPIOC,  1,  RCC_AHB1Periph_GPIOC},
+    [WL_RESET]                          = {GPIOC,  5,  RCC_AHB1Periph_GPIOC},
 };
 
 /*
@@ -294,11 +315,11 @@ void host_platform_reset_wifi( bool reset_asserted )
 {
     if ( reset_asserted == true )
     {
-        GPIO_ResetBits( WL_RESET_BANK, WL_RESET_PIN );
+      MicoGpioOutputLow( (mico_gpio_t)WL_RESET );  
     }
     else
     {
-        GPIO_SetBits( WL_RESET_BANK, WL_RESET_PIN );
+      MicoGpioOutputHigh( (mico_gpio_t)WL_RESET ); 
     }
 }
 
@@ -306,10 +327,10 @@ void host_platform_power_wifi( bool power_enabled )
 {
     if ( power_enabled == true )
     {
-        GPIO_ResetBits( WL_REG_ON_BANK, WL_REG_ON_PIN );
+      MicoGpioOutputLow( (mico_gpio_t)WL_REG );  
     }
     else
     {
-        GPIO_SetBits( WL_REG_ON_BANK, WL_REG_ON_PIN );
+      MicoGpioOutputHigh( (mico_gpio_t)WL_REG ); 
     }
 }

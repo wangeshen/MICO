@@ -24,7 +24,6 @@
 #include "MICONotificationCenter.h"
 
 #include "MicoPlatform.h"
-#include "PlatformFlash.h"
 #include "StringUtils.h"
 #include "HTTPUtils.h"
 

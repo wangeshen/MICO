@@ -1,23 +1,45 @@
-/*
- * Copyright 2013, Broadcom Corporation
- * All Rights Reserved.
- *
- * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Broadcom Corporation;
- * the contents of this file may not be disclosed to third parties, copied
- * or duplicated in any form, in whole or in part, without the prior
- * written permission of Broadcom Corporation.
- */
+/**
+******************************************************************************
+* @file    wlan_bus.h 
+* @author  William Xu
+* @version V1.0.0
+* @date    16-Sep-2014
+* @brief   This file provides bus communication functions with Wi-Fi RF chip.
+******************************************************************************
+*
+*  The MIT License
+*  Copyright (c) 2014 MXCHIP Inc.
+*
+*  Permission is hereby granted, free of charge, to any person obtaining a copy 
+*  of this software and associated documentation files (the "Software"), to deal
+*  in the Software without restriction, including without limitation the rights 
+*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*  copies of the Software, and to permit persons to whom the Software is furnished
+*  to do so, subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in
+*  all copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+*  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+*  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+******************************************************************************
+*/ 
 
 #include "MicoRtos.h"
 #include "misc.h"
-#include "wwd_bus.h"
+#include "wlan_bus.h"
 #include "string.h" /* For memcpy */
 #include "gpio_irq.h"
 #include "platform_common_config.h"
-#include "Debug.h"
+#include "stm32f2xx_platform.h"
+#include "PlatformLogging.h"
 
 /* Powersave functionality */
-#ifndef WICED_DISABLE_MCU_POWERSAVE
+#ifndef MICO_DISABLE_MCU_POWERSAVE
 extern void stm32f2xx_clocks_needed( void );
 extern void stm32f2xx_clocks_not_needed( void );
 extern void wake_up_interrupt_notify( void );
@@ -29,7 +51,7 @@ extern void wake_up_interrupt_notify( void );
 #define MCU_CLOCKS_NEEDED()
 #define MCU_CLOCKS_NOT_NEEDED()
 #define MCU_NOTIFY_WAKE_UP()
-#endif /* ifndef WICED_DISABLE_MCU_POWERSAVE */
+#endif /* ifndef MICO_DISABLE_MCU_POWERSAVE */
 
 /******************************************************
  *             Constants
@@ -194,27 +216,17 @@ static void sdio_disable_bus_irq( void )
 
 OSStatus host_enable_oob_interrupt( void )
 {
-    GPIO_InitTypeDef gpio_init_structure;
-
-    RCC_AHB1PeriphClockCmd( WL_GPIO0_BANK_CLK | WL_GPIO1_BANK_CLK, ENABLE );
-
-    /* Set GPIO_B[1:0] to input. One of them will be re-purposed as OOB interrupt */
-    gpio_init_structure.GPIO_Speed = GPIO_Speed_50MHz;
-    gpio_init_structure.GPIO_Mode  = GPIO_Mode_IN;
-    gpio_init_structure.GPIO_OType = GPIO_OType_OD;
-    gpio_init_structure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
-    gpio_init_structure.GPIO_Pin   = ( 1 << WL_GPIO0_PIN );
-    GPIO_Init( WL_GPIO0_BANK, &gpio_init_structure );
-    gpio_init_structure.GPIO_Pin   = ( 1 << WL_GPIO1_PIN );
-    GPIO_Init( WL_GPIO1_BANK, &gpio_init_structure );
-
-    gpio_irq_enable( SDIO_OOB_IRQ_BANK, SDIO_OOB_IRQ_PIN, IRQ_TRIGGER_RISING_EDGE, sdio_oob_irq_handler, 0 );
-    return kNoErr;
+   /* Set GPIO_B[1:0] to input. One of them will be re-purposed as OOB interrupt */
+  MicoGpioInitialize( (mico_gpio_t)WL_GPIO0, OUTPUT_OPEN_DRAIN_NO_PULL );
+  MicoGpioInitialize( (mico_gpio_t)WL_GPIO0, OUTPUT_OPEN_DRAIN_NO_PULL );
+  MicoGpioEnableIRQ( (mico_gpio_t)WL_GPIO1, IRQ_TRIGGER_RISING_EDGE, sdio_oob_irq_handler, 0 );
+  
+  return kNoErr;
 }
 
 uint8_t host_platform_get_oob_interrupt_pin( void )
 {
-    if ( ( WL_GPIO1_BANK == SDIO_OOB_IRQ_BANK ) && ( WL_GPIO1_PIN == SDIO_OOB_IRQ_PIN ) )
+    if ( ( gpio_mapping[ WL_GPIO1 ].bank == SDIO_OOB_IRQ_BANK ) && ( gpio_mapping[ WL_GPIO1 ].number == SDIO_OOB_IRQ_PIN ) )
     {
         /* WLAN GPIO1 */
         return 1;
@@ -258,15 +270,15 @@ OSStatus host_platform_bus_init( void )
     nvic_init_structure.NVIC_IRQChannelCmd                = ENABLE;
     NVIC_Init( &nvic_init_structure );
 
-    RCC_AHB1PeriphClockCmd( SDIO_CMD_BANK_CLK | SDIO_CLK_BANK_CLK | SDIO_D0_BANK_CLK | SDIO_D1_BANK_CLK | SDIO_D2_BANK_CLK | SDIO_D3_BANK_CLK | WL_GPIO0_BANK_CLK | WL_GPIO1_BANK_CLK, ENABLE );
+    RCC_AHB1PeriphClockCmd( SDIO_CMD_BANK_CLK | SDIO_CLK_BANK_CLK | SDIO_D0_BANK_CLK | SDIO_D1_BANK_CLK | SDIO_D2_BANK_CLK | SDIO_D3_BANK_CLK, ENABLE );
 
     /* Set GPIO_B[1:0] to 00 to put WLAN module into SDIO mode */
-    WL_GPIO0_BANK->MODER   |= (GPIO_Mode_OUT << (2*WL_GPIO0_PIN));
-    WL_GPIO1_BANK->MODER   |= (GPIO_Mode_OUT << (2*WL_GPIO1_PIN));
-    WL_GPIO0_BANK->OSPEEDR |= (GPIO_Speed_50MHz << (2*WL_GPIO0_PIN));
-    WL_GPIO1_BANK->OSPEEDR |= (GPIO_Speed_50MHz << (2*WL_GPIO1_PIN));
-    WL_GPIO0_BANK->BSRRH    = 1 << WL_GPIO0_PIN;
-    WL_GPIO1_BANK->BSRRH    = 1 << WL_GPIO1_PIN;
+    
+    MicoGpioInitialize( (mico_gpio_t)WL_GPIO0, OUTPUT_OPEN_DRAIN_NO_PULL );
+    MicoGpioOutputLow( (mico_gpio_t)WL_GPIO0 );
+    
+    MicoGpioInitialize( (mico_gpio_t)WL_GPIO1, OUTPUT_OPEN_DRAIN_NO_PULL );
+    MicoGpioOutputLow( (mico_gpio_t)WL_GPIO1 );
 
     /* Setup GPIO pins for SDIO data & clock */
     SDIO_CMD_BANK->MODER |= (GPIO_Mode_AF << (2*SDIO_CMD_PIN));
@@ -381,8 +393,8 @@ OSStatus host_platform_bus_deinit( void )
     SDIO_D3_BANK->OTYPER  &= ((uint32_t) ~(GPIO_OType_OD << SDIO_D3_PIN ));
 
     /* Clear GPIO_B[1:0] */
-    WL_GPIO0_BANK->MODER  &= ((uint32_t) ~(3 << (2*WL_GPIO0_PIN)));
-    WL_GPIO1_BANK->MODER  &= ((uint32_t) ~(3 << (2*WL_GPIO1_PIN)));
+    MicoGpioFinalize( (mico_gpio_t)WL_GPIO0 );
+    MicoGpioFinalize( (mico_gpio_t)WL_GPIO1 );
 
     /* Turn off SDIO IRQ */
     nvic_init_structure.NVIC_IRQChannel                   = SDIO_IRQ_CHANNEL;

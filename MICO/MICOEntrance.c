@@ -19,10 +19,9 @@
   ******************************************************************************
   */ 
 #include "time.h"
-#include "PlatformFlash.h"
 #include "MicoPlatform.h"
-#include "Platform_internal_gpio.h"
 #include "platform.h"
+#include "platform_common_config.h"
 #include "MICODefine.h"
 #include "MICOAppDefine.h"
 
@@ -271,13 +270,13 @@ int application_start(void)
   mico_log("%s mxchipWNet library version: %s", APP_INFO, MicoGetVer());
 
   /*Start system monotor thread*/
-//  err = MICOStartSystemMonitor(context);
-//  require_noerr_action( err, exit, mico_log("ERROR: Unable to start the system monitor.") );
-// 
-//  err = MICORegisterSystemMonitor(&mico_monitor, APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000);
-//  require_noerr( err, exit );
-//  mico_init_timer(&_watchdog_reload_timer,APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000 - 100, _watchdog_reload_timer_handler, NULL);
-//  mico_start_timer(&_watchdog_reload_timer);
+  err = MICOStartSystemMonitor(context);
+  require_noerr_action( err, exit, mico_log("ERROR: Unable to start the system monitor.") );
+ 
+  err = MICORegisterSystemMonitor(&mico_monitor, APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000);
+  require_noerr( err, exit );
+  mico_init_timer(&_watchdog_reload_timer,APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000 - 100, _watchdog_reload_timer_handler, NULL);
+  mico_start_timer(&_watchdog_reload_timer);
   
   if(context->flashContentInRam.micoSystemConfig.configured != allConfigured){
     mico_log("Empty configuration. Starting configuration mode...");
@@ -358,14 +357,11 @@ int application_start(void)
     _ConnectToAP( context );
   }
   
+  //free((void *)0x08004000);
+  
   // DISABLE_INTERRUPTS;
   // mico_log("Memory remains %d", MicoGetMemoryInfo()->free_memory);
   // ENABLE_INTERRUPTS;
-  
-  while(1){
-    MicoGpioOutputTrigger((mico_gpio_t)MICO_SYS_LED);
-    mico_thread_sleep(1);
-  }
   
   /*System status changed*/
   while(mico_rtos_get_semaphore(&context->micoStatus.sys_state_change_sem, MICO_WAIT_FOREVER)==kNoErr){

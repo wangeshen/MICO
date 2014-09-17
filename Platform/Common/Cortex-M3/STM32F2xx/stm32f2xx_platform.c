@@ -39,7 +39,6 @@
 #include "rtc.h"
 #include <string.h> // For memcmp
 #include "crt0.h"
-#include "platform_sleep.h"
 #include "MicoRTOS.h"
 
 #ifdef __GNUC__

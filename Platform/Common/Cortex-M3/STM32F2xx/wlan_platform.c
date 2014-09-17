@@ -1,10 +1,10 @@
 /**
 ******************************************************************************
-* @file    EMW1062_platform.c 
+* @file    wlan_platform.c 
 * @author  William Xu
 * @version V1.0.0
 * @date    05-May-2014
-* @brief   This file provide functions called by MICO to drive EMW1062 RF module
+* @brief   This file provide functions called by MICO to wlan RF module
 ******************************************************************************
 *
 *  The MIT License
@@ -33,17 +33,8 @@
 #include "stm32f2xx.h"
 #include "gpio_irq.h"
 #include "platform.h"
-#include "platform_sleep.h"
 #include "platform_common_config.h"
-#include "platform_internal_gpio.h"
 #include "MICOPlatform.h"
-
-#ifndef WL_RESET_BANK
-#error Missing WL_RESET_BANK definition
-#endif
-#ifndef WL_REG_ON_BANK
-#error Missing WL_REG_ON_BANK definition
-#endif
 
 /******************************************************
  *                      Macros
@@ -90,24 +81,12 @@ extern void host_platform_power_wifi( bool power_enabled );
 
 OSStatus host_platform_init( void )
 {
-    GPIO_InitTypeDef gpio_init_structure;
-
     platform_reset_wlan_powersave_clock( );
-
-    /* Enable the GPIO peripherals related to the reset and reg_on pins */
-    RCC_AHB1PeriphClockCmd( WL_RESET_BANK_CLK | WL_REG_ON_BANK_CLK, ENABLE );
-
-    /* Setup the reset pin */
-    gpio_init_structure.GPIO_Speed = GPIO_Speed_50MHz;
-    gpio_init_structure.GPIO_Mode = GPIO_Mode_OUT;
-    gpio_init_structure.GPIO_OType = GPIO_OType_PP;
-    gpio_init_structure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-    gpio_init_structure.GPIO_Pin = WL_RESET_PIN;
-    GPIO_Init( WL_RESET_BANK, &gpio_init_structure );
+    
+    MicoGpioInitialize((mico_gpio_t)WL_RESET, OUTPUT_PUSH_PULL);
     host_platform_reset_wifi( true ); /* Start wifi chip in reset */
-
-    gpio_init_structure.GPIO_Pin = WL_REG_ON_PIN;
-    GPIO_Init( WL_REG_ON_BANK, &gpio_init_structure );
+    
+    MicoGpioInitialize((mico_gpio_t)WL_REG, OUTPUT_PUSH_PULL);
     host_platform_power_wifi( false ); /* Start wifi chip with regulators off */
 
     return kNoErr;
@@ -115,20 +94,11 @@ OSStatus host_platform_init( void )
 
 OSStatus host_platform_deinit( void )
 {
-    GPIO_InitTypeDef gpio_init_structure;
-
-    /* Re-Setup the reset pin and REG_ON pin - these need to be held low to keep the chip powered down */
-    gpio_init_structure.GPIO_Speed = GPIO_Speed_50MHz;
-    gpio_init_structure.GPIO_Mode = GPIO_Mode_OUT;
-    gpio_init_structure.GPIO_OType = GPIO_OType_PP;
-    gpio_init_structure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-    gpio_init_structure.GPIO_Pin = WL_RESET_PIN;
-    GPIO_Init( WL_RESET_BANK, &gpio_init_structure );
-    host_platform_reset_wifi( true ); /* Start wifi chip in reset */
-
-    gpio_init_structure.GPIO_Pin = WL_REG_ON_PIN;
-    GPIO_Init( WL_REG_ON_BANK, &gpio_init_structure );
-    host_platform_power_wifi( false ); /* Start wifi chip with regulators off */
+    MicoGpioInitialize((mico_gpio_t)WL_RESET, OUTPUT_PUSH_PULL);
+    host_platform_reset_wifi( true ); /* Stop wifi chip in reset */
+    
+    MicoGpioInitialize((mico_gpio_t)WL_REG, OUTPUT_PUSH_PULL);
+    host_platform_power_wifi( false ); /* Stop wifi chip with regulators off */
 
     platform_reset_wlan_powersave_clock( );
 

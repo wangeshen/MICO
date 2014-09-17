@@ -99,6 +99,25 @@ OSStatus MicoGpioInitialize( mico_gpio_t gpio, mico_gpio_config_t configuration 
   return kNoErr;
 }
 
+OSStatus MicoGpioFinalize( mico_gpio_t gpio )
+{
+  GPIO_InitTypeDef gpio_init_structure;
+  
+  MicoMcuPowerSaveConfig(false);
+ 
+  gpio_init_structure.GPIO_Mode  = GPIO_Mode_IN;
+  gpio_init_structure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
+  
+  gpio_init_structure.GPIO_Pin = (uint16_t) ( 1 << gpio_mapping[gpio].number );
+  GPIO_Init( gpio_mapping[gpio].bank, &gpio_init_structure );
+  
+  MicoGpioDisableIRQ( gpio );
+  
+  MicoMcuPowerSaveConfig(true);
+  
+  return kNoErr;
+}
+
 OSStatus MicoGpioOutputHigh( mico_gpio_t gpio )
 {
   MicoMcuPowerSaveConfig(false);

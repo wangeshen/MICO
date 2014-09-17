@@ -1,29 +1,49 @@
-/*
- * Copyright 2014, Broadcom Corporation
- * All Rights Reserved.
- *
- * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Broadcom Corporation;
- * the contents of this file may not be disclosed to third parties, copied
- * or duplicated in any form, in whole or in part, without the prior
- * written permission of Broadcom Corporation.
- */
+/**
+******************************************************************************
+* @file    platform_common_config.h
+* @author  William Xu
+* @version V1.0.0
+* @date    05-May-2014
+* @brief   This file provides common configuration for current platform.
+******************************************************************************
+*
+*  The MIT License
+*  Copyright (c) 2014 MXCHIP Inc.
+*
+*  Permission is hereby granted, free of charge, to any person obtaining a copy 
+*  of this software and associated documentation files (the "Software"), to deal
+*  in the Software without restriction, including without limitation the rights 
+*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*  copies of the Software, and to permit persons to whom the Software is furnished
+*  to do so, subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in
+*  all copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+*  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+*  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+******************************************************************************
+*/ 
+
+#include "platform.h"
 #pragma once
 
-#include "EMW3162/platform.h"
-#include "platform_sleep.h"
+/******************************************************
+*                      Macros
+******************************************************/
 
 /******************************************************
- *                      Macros
- ******************************************************/
-
-/******************************************************
- *                    Constants
- ******************************************************/
+*                    Constants
+******************************************************/
 
 /* The clock configuration utility from ST is used to calculate these values
- * http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/utility/stsw-stm32090.zip
- * The CPU Clock Frequency (CPU_CLOCK_HZ) is independently defined in <WICED-SDK>/Wiced/Platform/BCM943362WCD4/BCM943362WCD4.mk
- */
+* http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/utility/stsw-stm32090.zip
+* The CPU Clock Frequency (CPU_CLOCK_HZ) is independently defined in <WICED-SDK>/Wiced/Platform/BCM943362WCD4/BCM943362WCD4.mk
+*/
 #define HSE_SOURCE              RCC_HSE_ON               /* Use external crystal                 */
 #define AHB_CLOCK_DIVIDER       RCC_SYSCLK_Div1          /* AHB clock = System clock             */
 #define APB1_CLOCK_DIVIDER      RCC_HCLK_Div4            /* APB1 clock = AHB clock / 4           */
@@ -76,84 +96,86 @@
 #define SDIO_D2_PIN             10
 #define SDIO_D3_PIN             11
 
-#ifdef BUS_SPI
-#define WL_GPIO0_BANK          GPIOB
-#define WL_GPIO0_PIN           5
-#define WL_GPIO0_BANK_CLK      RCC_AHB1Periph_GPIOB
-#define WL_GPIO1_BANK          GPIOB
-#define WL_GPIO1_PIN           1
-#define WL_GPIO1_BANK_CLK      RCC_AHB1Periph_GPIOB
+/* These are internal platform connections only */
+typedef enum
+{
+  MICO_GPIO_WLAN_POWERSAVE_CLOCK = MICO_GPIO_MAX,
+  MICO_SYS_LED,
+  WL_GPIO0,
+  WL_GPIO1,
+  WL_REG,
+  WL_RESET,
+} mico_extended_gpio_t;
 
-#define WL_REG_ON_BANK         GPIOC
-#define WL_REG_ON_PIN          GPIO_Pin_1
-#define WL_REG_ON_BANK_CLK     RCC_AHB1Periph_GPIOC
+/* How the wlan's powersave clock is connected */
+typedef enum
+{
+  MICO_PWM_WLAN_POWERSAVE_CLOCK = MICO_PWM_MAX
+} mico_extended_pwm_t;
 
-#define WL_RESET_BANK          GPIOA
-#define WL_RESET_PIN           GPIO_Pin_3
-#define WL_RESET_BANK_CLK      RCC_AHB1Periph_GPIOA
+#define MICO_WLAN_POWERSAVE_CLOCK_IS_PWM 0
+#define MICO_WLAN_POWERSAVE_CLOCK_IS_MCO 1
 
-#else
-
-#define WL_GPIO0_BANK          GPIOB
-#define WL_GPIO0_PIN           12
-#define WL_GPIO0_BANK_CLK      RCC_AHB1Periph_GPIOB
-#define WL_GPIO1_BANK          GPIOB
-#define WL_GPIO1_PIN           13
-#define WL_GPIO1_BANK_CLK      RCC_AHB1Periph_GPIOB
-
-#define WL_REG_ON_BANK         GPIOC
-#define WL_REG_ON_PIN          GPIO_Pin_1
-#define WL_REG_ON_BANK_CLK     RCC_AHB1Periph_GPIOC
-
-#define WL_RESET_BANK          GPIOC
-#define WL_RESET_PIN           GPIO_Pin_5
-#define WL_RESET_BANK_CLK      RCC_AHB1Periph_GPIOC
-
-#endif
-
-#if ( MICO_WLAN_POWERSAVE_CLOCK_SOURCE == MICO_WLAN_POWERSAVE_CLOCK_IS_MCO )
+#define WLAN_POWERSAVE_CLOCK_FREQUENCY 32768 /* 32768Hz        */
+#define WLAN_POWERSAVE_CLOCK_DUTY_CYCLE   50 /* 50% duty-cycle */
 
 #define WL_32K_OUT_BANK         GPIOA
 #define WL_32K_OUT_PIN          8
 #define WL_32K_OUT_BANK_CLK     RCC_AHB1Periph_GPIOA
-
-#else
-
-#define WL_32K_OUT_BANK         GPIOA
-#define WL_32K_OUT_PIN          11
-#define WL_32K_OUT_BANK_CLK     RCC_AHB1Periph_GPIOA
-
-#endif
-
-/*  Bootloader LED D1 */
-#define BOOTLOADER_LED_GPIO     WICED_LED1
-#define BOOTLOADER_LED_ON_STATE WICED_ACTIVE_HIGH
-
- /* Bootloader Button S1 */
-#define BOOTLOADER_BUTTON_GPIO          WICED_BUTTON1
-#define BOOTLOADER_BUTTON_PRESSED_STATE WICED_ACTIVE_LOW
 
 /* The number of UART interfaces this hardware platform has */
 #define NUMBER_OF_UART_INTERFACES  2
 
 #define STDIO_UART       MICO_UART_1
 
-/******************************************************
- *                   Enumerations
- ******************************************************/
+/* Define the address from where user application will be loaded.
+Note: the 1st sector 0x08000000-0x08003FFF is reserved for the IAP code */
+#define MICO_FLASH_FOR_APPLICATION  MICO_INTERNAL_FLASH
+#define APPLICATION_START_ADDRESS   (uint32_t)0x0800C200
+#define APPLICATION_END_ADDRESS     (uint32_t)0x0805FFFF
+#define USER_FLASH_SIZE             (APPLICATION_END_ADDRESS - APPLICATION_START_ADDRESS + 1)
+
+#define MICO_FLASH_FOR_UPDATE	    MICO_INTERNAL_FLASH
+#define UPDATE_START_ADDRESS        (uint32_t)0x08060000 
+#define UPDATE_END_ADDRESS          (uint32_t)0x080BFFFF 
+#define UPDATE_FLASH_SIZE           (UPDATE_END_ADDRESS - UPDATE_START_ADDRESS + 1)
+
+#define MICO_FLASH_FOR_BOOT	    MICO_INTERNAL_FLASH
+#define BOOT_START_ADDRESS          (uint32_t)0x08000000 
+#define BOOT_END_ADDRESS            (uint32_t)0x08003FFF 
+#define BOOT_FLASH_SIZE             (BOOT_END_ADDRESS - BOOT_START_ADDRESS + 1)
+
+#define MICO_FLASH_FOR_DRIVER	    MICO_INTERNAL_FLASH
+#define DRIVER_START_ADDRESS        (uint32_t)0x080C0000 
+#define DRIVER_END_ADDRESS          (uint32_t)0x080FFFFF 
+#define DRIVER_FLASH_SIZE           (DRIVER_END_ADDRESS - DRIVER_START_ADDRESS + 1)
+
+#define MICO_FLASH_FOR_PARA	    MICO_INTERNAL_FLASH
+#define PARA_START_ADDRESS          (uint32_t)0x08004000 
+#define PARA_END_ADDRESS            (uint32_t)0x08007FFF
+#define PARA_FLASH_SIZE             (PARA_END_ADDRESS - PARA_START_ADDRESS + 1)  
+
+#define MICO_FLASH_FOR_EX_PARA      MICO_INTERNAL_FLASH
+#define EX_PARA_START_ADDRESS       (uint32_t)0x08008000 
+#define EX_PARA_END_ADDRESS         (uint32_t)0x0800BFFF
+#define EX_PARA_FLASH_SIZE          (EX_PARA_END_ADDRESS - EX_PARA_START_ADDRESS + 1)  
 
 /******************************************************
- *                 Type Definitions
- ******************************************************/
+*                   Enumerations
+******************************************************/
 
 /******************************************************
- *                    Structures
- ******************************************************/
+*                 Type Definitions
+******************************************************/
 
 /******************************************************
- *                 Global Variables
- ******************************************************/
+*                    Structures
+******************************************************/
 
 /******************************************************
- *               Function Declarations
- ******************************************************/
+*                 Global Variables
+******************************************************/
+
+/******************************************************
+*               Function Declarations
+******************************************************/

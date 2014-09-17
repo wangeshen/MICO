@@ -1,10 +1,10 @@
 /**
 ******************************************************************************
-* @file    MicoDriverWdg.h 
+* @file    MicoDriverFlash.h 
 * @author  William Xu
 * @version V1.0.0
 * @date    16-Sep-2014
-* @brief   This file provides all the headers of WDG operation functions.
+* @brief   This file provides all the headers of flash operation functions.
 ******************************************************************************
 *
 *  The MIT License
@@ -29,9 +29,8 @@
 ******************************************************************************
 */ 
 
-
-#ifndef __MICODRIVERWDG_H__
-#define __MICODRIVERWDG_H__
+#ifndef __MICODRIVERFLASH_H__
+#define __MICODRIVERFLASH_H__
 
 #pragma once
 #include "Common.h"
@@ -45,67 +44,28 @@
  *                   Macros
  ******************************************************/  
 
-#define PlatformWDGInitialize   MicoWdgInitialize /**< For API compatiable with older version */
-#define PlatformWDGReload       MicoWdgReload     /**< For API compatiable with older version */
-#define PlatformWDGFinalize     MicoWdgFinalize   /**< For API compatiable with older version */
-
 /******************************************************
- *@cond              Enumerations
+ *                   Enumerations
  ******************************************************/
 
 /******************************************************
- *@endcond         Type Definitions
+ *                 Type Definitions
  ******************************************************/
 
  /******************************************************
- *                    Structures
+ *                 Function Declarations
  ******************************************************/
 
 
-/******************************************************
- *                     Variables
- ******************************************************/
+OSStatus MicoFlashInitialize( mico_flash_t flash );
 
-/******************************************************
- * @endcond           Function Declarations
- ******************************************************/
+OSStatus MicoFlashErase(mico_flash_t flash, uint32_t StartAddress, uint32_t EndAddress);
 
-/** @defgroup MICO_WDG MICO WDG Driver
-* @brief  Hardware watch dog Functions (WDG) Functions
-* @note   These Functions are used by MICO's system monitor service, If any defined system monitor 
-*          cannot be reloaded for some reason, system monitor service use this hardware watch dog 
-*          to perform a system reset. So the watch dog reload time should be greater than system 
-*          monitor's refresh time.
-* @{
-*/
+OSStatus MicoFlashWrite(mico_flash_t flash, volatile uint32_t* FlashAddress, uint32_t* Data ,uint32_t DataLength);
 
-/**
- * This function will initialize the on board CPU hardware watch dog
- *
- * @param timeout        : Watchdag timeout, application should call MicoWdgReload befor timeout.
- *
- * @return    kNoErr        : on success.
- * @return    kGeneralErr   : if an error occurred with any step
- */
-OSStatus MicoWdgInitialize( uint32_t timeout );
+OSStatus MicoFlashFinalize( mico_flash_t flash );
 
-/**
- * Reload watchdog counter.
- *
- * @param     none
- * @return    none
- */
-void MicoWdgReload( void );
 
-/**
- * This function performs any platform-specific cleanup needed for hardware watch dog.
- *
- * @param     none
- *
- * @return    kNoErr        : on success.
- * @return    kGeneralErr   : if an error occurred with any step
- */
-OSStatus MicoWdgFinalize( void );
 
 /** @} */
 /** @} */
