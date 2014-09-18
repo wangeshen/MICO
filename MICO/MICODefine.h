@@ -27,14 +27,14 @@
 #include "Common.h"
 #include "Debug.h"
 #include "MICO.h"
-#include "external/JSON-C/json.h"
+#include "JSON-C/json.h"
 #include "MICOAppDefine.h"
 
 //#define CONFIG_MODE_EASYLINK
-//#define CONFIG_MODE_EASYLINK_WITH_SOFTAP
+#define CONFIG_MODE_EASYLINK_WITH_SOFTAP
 //#define CONFIG_MODE_WPS
 //#define CONFIG_MODE_WPS_WITH_SOFTAP
-#define CONFIG_MODE_WAC
+//#define CONFIG_MODE_WAC
 
 #define CONFIG_SERVICE_PORT     8000
 
@@ -163,11 +163,5 @@ OSStatus MICOStartApplication           ( mico_Context_t * const inContext );
 OSStatus MICORestoreDefault             ( mico_Context_t * const inContext );
 OSStatus MICOReadConfiguration          ( mico_Context_t * const inContext );
 OSStatus MICOUpdateConfiguration        ( mico_Context_t * const inContext );
-
-
-
-
-
-
 
 #endif /* __MICO_DEFINE_H */

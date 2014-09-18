@@ -21,7 +21,7 @@
   */
 
 #include "Debug.h"
-#include "external/JSON-C/json.h"
+#include "JSON-C/json.h"
 #include "MICOConfigMenu.h"
 
 OSStatus MICOAddSector(json_object* sectors, char* const name,  json_object *menus)

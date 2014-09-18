@@ -140,7 +140,7 @@ Note: the 1st sector 0x08000000-0x08003FFF is reserved for the IAP code */
 #define UPDATE_END_ADDRESS          (uint32_t)0x080BFFFF 
 #define UPDATE_FLASH_SIZE           (UPDATE_END_ADDRESS - UPDATE_START_ADDRESS + 1)
 
-#define MICO_FLASH_FOR_BOOT	    MICO_INTERNAL_FLASH
+#define MICO_FLASH_FOR_BOOT	        MICO_INTERNAL_FLASH
 #define BOOT_START_ADDRESS          (uint32_t)0x08000000 
 #define BOOT_END_ADDRESS            (uint32_t)0x08003FFF 
 #define BOOT_FLASH_SIZE             (BOOT_END_ADDRESS - BOOT_START_ADDRESS + 1)
@@ -150,7 +150,7 @@ Note: the 1st sector 0x08000000-0x08003FFF is reserved for the IAP code */
 #define DRIVER_END_ADDRESS          (uint32_t)0x080FFFFF 
 #define DRIVER_FLASH_SIZE           (DRIVER_END_ADDRESS - DRIVER_START_ADDRESS + 1)
 
-#define MICO_FLASH_FOR_PARA	    MICO_INTERNAL_FLASH
+#define MICO_FLASH_FOR_PARA	        MICO_INTERNAL_FLASH
 #define PARA_START_ADDRESS          (uint32_t)0x08004000 
 #define PARA_END_ADDRESS            (uint32_t)0x08007FFF
 #define PARA_FLASH_SIZE             (PARA_END_ADDRESS - PARA_START_ADDRESS + 1)  

@@ -23,7 +23,7 @@
 #ifndef __Debug_h__
 #define __Debug_h__
 
-#include "MICORTOS.h"
+#include "MicoRTOS.h"
 #include "platform_assert.h"
 
 // ==== LOGGING ====

@@ -23,7 +23,7 @@
 #define __MICOCONFIGMENU_H
 
 #include "Common.h"
-#include "external/JSON-C/json.h"
+#include "JSON-C/json.h"
 
 typedef struct {
   char*  protocol;

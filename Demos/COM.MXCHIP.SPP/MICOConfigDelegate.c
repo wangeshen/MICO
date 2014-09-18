@@ -27,7 +27,7 @@
 #include "Platform_common_config.h"
 
 #include "EasyLink/EasyLink.h"
-#include "external/JSON-C/json.h"
+#include "JSON-C/json.h"
 #include "MICO.h"
 #include "MICODefine.h"
 #include "MICOAppDefine.h"

@@ -29,13 +29,12 @@
 *  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ******************************************************************************
 */ 
-#include "platform.h"
-#include "MICOPlatform.h"
-#include "debug.h"
-#include "gpio_irq.h"
-#include "MICODefine.h"
+
 #include "stdio.h"
 #include "string.h"
+
+#include "MICOPlatform.h"
+#include "platform.h"
 #include "stm32f2xx_platform.h"
 #include "platform_common_config.h"
 #include "PlatformLogging.h"

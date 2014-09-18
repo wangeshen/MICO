@@ -21,7 +21,8 @@
 
 #include "HomeKitPairlist.h"
 #include "Debug.h"
-#include "PlatformFlash.h"
+#include "MicoPlatform.h"
+#include "platform_common_config.h"
 
 /* Update seed number every time*/
 
@@ -36,13 +37,13 @@ OSStatus HMClearPairList(void)
   pairList = calloc(1, sizeof(pair_list_in_flash_t));
   require_action(pairList, exit, err = kNoMemoryErr);
 
-  err = PlatformFlashInitialize();
+  err = MicoFlashInitialize(MICO_FLASH_FOR_EX_PARA);
   require_noerr(err, exit);
-  err = PlatformFlashErase(exParaStartAddress, exParaEndAddress);
+  err = MicoFlashErase(MICO_FLASH_FOR_EX_PARA, exParaStartAddress, exParaEndAddress);
   require_noerr(err, exit);
-  err = PlatformFlashWrite(&exParaStartAddress, (uint32_t *)pairList, sizeof(pair_list_in_flash_t));
+  err = MicoFlashWrite(MICO_FLASH_FOR_EX_PARA, &exParaStartAddress, (uint32_t *)pairList, sizeof(pair_list_in_flash_t));
   require_noerr(err, exit);
-  err = PlatformFlashFinalize();
+  err = MicoFlashFinalize(MICO_FLASH_FOR_EX_PARA);
   require_noerr(err, exit);
 
 exit:
@@ -71,13 +72,13 @@ OSStatus HMUpdatePairList(pair_list_in_flash_t *pPairList)
   exParaStartAddress = EX_PARA_START_ADDRESS;
   exParaEndAddress = EX_PARA_END_ADDRESS;
 
-  err = PlatformFlashInitialize();
+  err = MicoFlashInitialize(MICO_FLASH_FOR_EX_PARA);
   require_noerr(err, exit);
-  err = PlatformFlashErase(exParaStartAddress, exParaEndAddress);
+  err = MicoFlashErase(MICO_FLASH_FOR_EX_PARA, exParaStartAddress, exParaEndAddress);
   require_noerr(err, exit);
-  err = PlatformFlashWrite(&exParaStartAddress, (uint32_t *)pPairList, sizeof(pair_list_in_flash_t));
+  err = MicoFlashWrite(MICO_FLASH_FOR_EX_PARA, &exParaStartAddress, (uint32_t *)pPairList, sizeof(pair_list_in_flash_t));
   require_noerr(err, exit);
-  err = PlatformFlashFinalize();
+  err = MicoFlashFinalize(MICO_FLASH_FOR_EX_PARA);
   require_noerr(err, exit);
 
 exit:
