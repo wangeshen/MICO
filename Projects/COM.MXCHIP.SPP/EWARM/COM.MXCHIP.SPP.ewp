@@ -2946,7 +2946,7 @@
       </file>
     </group>
     <file>
-      <name>$PROJ_DIR$\..\..\..\include\MICO.h</name>
+      <name>$PROJ_DIR$\..\..\..\include\Mico.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\include\MicoAES.h</name>
@@ -3048,18 +3048,24 @@
         <group>
           <name>STM32F2xx</name>
           <group>
-            <name>SDIO</name>
+            <name>EMW1062_Driver</name>
+            <group>
+              <name>SDIO</name>
+              <file>
+                <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\SDIO\wlan_bus.c</name>
+              </file>
+            </group>
+            <group>
+              <name>SPI</name>
+              <file>
+                <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\SPI\wwd_bus.c</name>
+                <excluded>
+                  <configuration>EMW3162_Debug</configuration>
+                </excluded>
+              </file>
+            </group>
             <file>
-              <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\SDIO\wlan_bus.c</name>
-            </file>
-          </group>
-          <group>
-            <name>SPI</name>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\SPI\wwd_bus.c</name>
-              <excluded>
-                <configuration>EMW3162_Debug</configuration>
-              </excluded>
+              <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\wlan_platform.c</name>
             </file>
           </group>
           <group>
@@ -3221,9 +3227,6 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\hardfault.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\wlan_platform.c</name>
         </file>
       </group>
       <group>
