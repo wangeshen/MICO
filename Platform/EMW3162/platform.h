@@ -288,6 +288,8 @@ typedef enum
 /*      MICO_SPI_FLASH_CLK  MICO_GPIO_6 */
 
 /* Components connected to external I/Os*/
+#define BOOT_SEL            (MICO_GPIO_16)
+#define MFG_SEL             (MICO_GPIO_30)
 #define MICO_RF_LED         (MICO_GPIO_16)
 #define EasyLink_BUTTON     (MICO_GPIO_11)
 #define Standby_SEL         (MICO_GPIO_29)

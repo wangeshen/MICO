@@ -61,10 +61,10 @@ else \
 #else
 #ifdef MICO_ENABLE_MCU_RTC
 #define platform_rtc_init      MicoRtcInitialize            
-#else /* #ifdef WICED_ENABLE_MCU_RTC */
-#define platform_rtc_noinit     MicoRtcInitialize()
-#endif /* #ifdef WICED_ENABLE_MCU_RTC */
-#endif /* ifndef WICED_DISABLE_MCU_POWERSAVE */
+#else /* #ifdef MICO_ENABLE_MCU_RTC */
+#define platform_rtc_noinit     MicoRtcInitialize
+#endif /* #ifdef MICO_ENABLE_MCU_RTC */
+#endif /* ifndef MICO_DISABLE_MCU_POWERSAVE */
 
 #define USE_RTC_BKP 0x00BB32F2 // Use RTC BKP to initilize system time.
 

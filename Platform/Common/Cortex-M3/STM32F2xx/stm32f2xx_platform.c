@@ -58,14 +58,6 @@
 #define BOOTLOADER_MAGIC_NUMBER 0x4d435242
 #endif
 
-#ifndef MICO_DISABLE_MCU_POWERSAVE
-#define MCU_CLOCKS_NEEDED()       stm32f2xx_clocks_needed()
-#define MCU_CLOCKS_NOT_NEEDED()   stm32f2xx_clocks_not_needed()
-#else
-#define MCU_CLOCKS_NEEDED()
-#define MCU_CLOCKS_NOT_NEEDED()
-#endif /* ifndef MICO_DISABLE_MCU_POWERSAVE */
-
 #define NUMBER_OF_LSE_TICKS_PER_MILLISECOND(scale_factor) ( 32768 / 1000 / scale_factor )
 #define CONVERT_FROM_TICKS_TO_MS(n,s) ( n / NUMBER_OF_LSE_TICKS_PER_MILLISECOND(s) )
 
@@ -97,10 +89,8 @@
 *               Function Declarations
 ******************************************************/
 
-#ifndef MICO_DISABLE_MCU_POWERSAVE
-void stm32f2xx_clocks_needed    ( void );
-void stm32f2xx_clocks_not_needed( void );
-#endif
+void MCU_CLOCKS_NEEDED    ( void );
+void MCU_CLOCKS_NOT_NEEDED( void );
 
 void wake_up_interrupt_notify( void );
 
@@ -187,10 +177,6 @@ void init_architecture( void )
 {
   uint8_t i;
   
-#ifdef INTERRUPT_VECTORS_IN_RAM
-  SCB->VTOR = 0x20000000; /* Change the vector table to point to start of SRAM */
-#endif /* ifdef INTERRUPT_VECTORS_IN_RAM */
-  
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
   
   /*STM32 wakeup by watchdog in standby mode, re-enter standby mode in this situation*/
@@ -212,10 +198,12 @@ void init_architecture( void )
   NVIC_PriorityGroupConfig( NVIC_PriorityGroup_4 );
   
 #ifndef MICO_DISABLE_STDIO
+#ifndef NO_MICO_RTOS
   mico_rtos_init_mutex( &stdio_tx_mutex );
   mico_rtos_unlock_mutex ( &stdio_tx_mutex );
   mico_rtos_init_mutex( &stdio_rx_mutex );
   mico_rtos_unlock_mutex ( &stdio_rx_mutex );
+#endif
   ring_buffer_init  ( (ring_buffer_t*)&stdio_rx_buffer, (uint8_t*)stdio_rx_data, STDIO_BUFFER_SIZE );
   MicoStdioUartInitialize( &stdio_uart_config, (ring_buffer_t*)&stdio_rx_buffer );
 #endif
@@ -228,19 +216,33 @@ void init_architecture( void )
   /* Disable MCU powersave at start-up. Application must explicitly enable MCU powersave if desired */
   MCU_CLOCKS_NEEDED();
   
-  stm32_platform_inited = 1;
+  stm32_platform_inited = 1;  
+  
 }
 
 /******************************************************
 *            Interrupt Service Routines
 ******************************************************/
 
-#ifndef MICO_DISABLE_MCU_POWERSAVE
+
 
 static int stm32f2_clock_needed_counter = 0;
 
 void stm32f2xx_clocks_needed( void )
 {
+  MCU_CLOCKS_NEEDED();
+}
+
+void stm32f2xx_clocks_not_needed( void )
+{
+  MCU_CLOCKS_NOT_NEEDED();
+}
+
+
+
+void MCU_CLOCKS_NEEDED( void )
+{
+#ifndef MICO_DISABLE_MCU_POWERSAVE
   DISABLE_INTERRUPTS;
   if ( stm32f2_clock_needed_counter <= 0 )
   {
@@ -249,10 +251,14 @@ void stm32f2xx_clocks_needed( void )
   }
   stm32f2_clock_needed_counter++;
   ENABLE_INTERRUPTS;
+#else
+  return;
+#endif
 }
 
-void stm32f2xx_clocks_not_needed( void )
+void MCU_CLOCKS_NOT_NEEDED( void )
 {
+#ifndef MICO_DISABLE_MCU_POWERSAVE
   DISABLE_INTERRUPTS;
   stm32f2_clock_needed_counter--;
   if ( stm32f2_clock_needed_counter <= 0 )
@@ -261,7 +267,12 @@ void stm32f2xx_clocks_not_needed( void )
     stm32f2_clock_needed_counter = 0;
   }
   ENABLE_INTERRUPTS;
+#else
+  return;
+#endif
 }
+
+#ifndef MICO_DISABLE_MCU_POWERSAVE
 
 #define WUT_COUNTER_MAX  0xFFFF
 

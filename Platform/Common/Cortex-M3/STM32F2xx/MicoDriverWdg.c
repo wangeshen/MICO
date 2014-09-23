@@ -120,7 +120,11 @@ OSStatus MicoWdgFinalize( void )
 
 void MicoWdgReload( void )
 {
+#ifndef MICO_DISABLE_WATCHDOG
   IWDG_ReloadCounter(); 
+#else
+  return;
+#endif
 }
 
 

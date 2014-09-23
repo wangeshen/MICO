@@ -38,17 +38,13 @@
 #include "PlatformLogging.h"
 
 /* Powersave functionality */
-#ifndef MICO_DISABLE_MCU_POWERSAVE
-extern void stm32f2xx_clocks_needed( void );
-extern void stm32f2xx_clocks_not_needed( void );
-extern void wake_up_interrupt_notify( void );
+extern void MCU_CLOCKS_NEEDED( void );
+extern void MCU_CLOCKS_NOT_NEEDED( void );
 
-#define MCU_CLOCKS_NEEDED()         stm32f2xx_clocks_needed()
-#define MCU_CLOCKS_NOT_NEEDED()     stm32f2xx_clocks_not_needed()
+#ifndef MICO_DISABLE_MCU_POWERSAVE
+extern void wake_up_interrupt_notify( void );
 #define MCU_NOTIFY_WAKE_UP()        wake_up_interrupt_notify()
 #else
-#define MCU_CLOCKS_NEEDED()
-#define MCU_CLOCKS_NOT_NEEDED()
 #define MCU_NOTIFY_WAKE_UP()
 #endif /* ifndef MICO_DISABLE_MCU_POWERSAVE */
 

@@ -210,7 +210,8 @@ UsageFault_Handler
         PUBWEAK SVC_Handler
         SECTION .text:CODE:REORDER(1)
 SVC_Handler
-        B vPortSVCHandler
+;        B vPortSVCHandler
+         B SVC_Handler
 
         PUBWEAK DebugMon_Handler
         SECTION .text:CODE:REORDER(1)
@@ -220,12 +221,14 @@ DebugMon_Handler
         PUBWEAK PendSV_Handler
         SECTION .text:CODE:REORDER(1)
 PendSV_Handler
-        B xPortPendSVHandler
+;        B xPortPendSVHandler
+        B PendSV_Handler
 
         PUBWEAK SysTick_Handler
         SECTION .text:CODE:REORDER(1)
 SysTick_Handler
-        B xPortSysTickHandler
+;        B xPortSysTickHandler
+        B SysTick_Handler
 
         PUBWEAK WWDG_IRQHandler
         SECTION .text:CODE:REORDER(1)

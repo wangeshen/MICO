@@ -73,7 +73,6 @@
 #define SPI_BUS_CS_PIN          12
 #define SPI_IRQ_PIN             1
 
-
 #define SDIO_OOB_IRQ_BANK       GPIOB
 #define SDIO_CLK_BANK           GPIOC
 #define SDIO_CMD_BANK           GPIOD
@@ -130,8 +129,12 @@ typedef enum
 
 /* Define the address from where user application will be loaded.
 Note: the 1st sector 0x08000000-0x08003FFF is reserved for the IAP code */
+#define INTERNAL_FLASH_START_ADDRESS   (uint32_t)0x08000000
+#define INTERNAL_FLASH_END_ADDRESS     (uint32_t)0x080FFFFF
+#define INTERNAL_FLASH_SIZE            (INTERNAL_FLASH_END_ADDRESS - INTERNAL_FLASH_START_ADDRESS + 1)
+
 #define MICO_FLASH_FOR_APPLICATION  MICO_INTERNAL_FLASH
-#define APPLICATION_START_ADDRESS   (uint32_t)0x0800C200
+#define APPLICATION_START_ADDRESS   (uint32_t)0x08010000
 #define APPLICATION_END_ADDRESS     (uint32_t)0x0805FFFF
 #define USER_FLASH_SIZE             (APPLICATION_END_ADDRESS - APPLICATION_START_ADDRESS + 1)
 
@@ -142,7 +145,7 @@ Note: the 1st sector 0x08000000-0x08003FFF is reserved for the IAP code */
 
 #define MICO_FLASH_FOR_BOOT	        MICO_INTERNAL_FLASH
 #define BOOT_START_ADDRESS          (uint32_t)0x08000000 
-#define BOOT_END_ADDRESS            (uint32_t)0x08003FFF 
+#define BOOT_END_ADDRESS            (uint32_t)0x08007FFF 
 #define BOOT_FLASH_SIZE             (BOOT_END_ADDRESS - BOOT_START_ADDRESS + 1)
 
 #define MICO_FLASH_FOR_DRIVER	    MICO_INTERNAL_FLASH
@@ -151,13 +154,13 @@ Note: the 1st sector 0x08000000-0x08003FFF is reserved for the IAP code */
 #define DRIVER_FLASH_SIZE           (DRIVER_END_ADDRESS - DRIVER_START_ADDRESS + 1)
 
 #define MICO_FLASH_FOR_PARA	        MICO_INTERNAL_FLASH
-#define PARA_START_ADDRESS          (uint32_t)0x08004000 
-#define PARA_END_ADDRESS            (uint32_t)0x08007FFF
+#define PARA_START_ADDRESS          (uint32_t)0x08008000 
+#define PARA_END_ADDRESS            (uint32_t)0x0800BFFF
 #define PARA_FLASH_SIZE             (PARA_END_ADDRESS - PARA_START_ADDRESS + 1)  
 
 #define MICO_FLASH_FOR_EX_PARA      MICO_INTERNAL_FLASH
-#define EX_PARA_START_ADDRESS       (uint32_t)0x08008000 
-#define EX_PARA_END_ADDRESS         (uint32_t)0x0800BFFF
+#define EX_PARA_START_ADDRESS       (uint32_t)0x0800C000 
+#define EX_PARA_END_ADDRESS         (uint32_t)0x0800FFFF
 #define EX_PARA_FLASH_SIZE          (EX_PARA_END_ADDRESS - EX_PARA_START_ADDRESS + 1)  
 
 /******************************************************

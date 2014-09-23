@@ -17,15 +17,15 @@
         <debug>0</debug>
         <option>
           <name>ExePath</name>
-          <state>..\..\..\Build\COM.MXCHIP.SPP\Output\EMW3162</state>
+          <state>..\..\..\Build\Bootloader\Output\EMW3162</state>
         </option>
         <option>
           <name>ObjPath</name>
-          <state>..\..\..\Build\COM.MXCHIP.SPP\EMW3162\Obj</state>
+          <state>..\..\..\Build\Bootloader\EMW3162\Obj</state>
         </option>
         <option>
           <name>ListPath</name>
-          <state>..\..\..\Build\COM.MXCHIP.SPP\EMW3162\list</state>
+          <state>..\..\..\Build\Bootloader\EMW3162\list</state>
         </option>
         <option>
           <name>Variant</name>
@@ -48,11 +48,11 @@
         <option>
           <name>Output variant</name>
           <version>2</version>
-          <state>1</state>
+          <state>5</state>
         </option>
         <option>
           <name>Output description</name>
-          <state>Full formatting.</state>
+          <state>No specifier a, A, no specifier n, no float nor long long.</state>
         </option>
         <option>
           <name>GOutputBinary</name>
@@ -70,16 +70,16 @@
         <option>
           <name>GRuntimeLibSelect</name>
           <version>0</version>
-          <state>2</state>
+          <state>1</state>
         </option>
         <option>
           <name>GRuntimeLibSelectSlave</name>
           <version>0</version>
-          <state>2</state>
+          <state>1</state>
         </option>
         <option>
           <name>RTDescription</name>
-          <state>Use the full configuration of the C/C++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
+          <state>Use the normal configuration of the C/C++ runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
         </option>
         <option>
           <name>OGProductVersion</name>
@@ -133,7 +133,7 @@
         </option>
         <option>
           <name>RTConfigPath2</name>
-          <state>$TOOLKIT_DIR$\INC\c\DLib_Config_Full.h</state>
+          <state>$TOOLKIT_DIR$\INC\c\DLib_Config_Normal.h</state>
         </option>
         <option>
           <name>GFPUCoreSlave</name>
@@ -155,7 +155,7 @@
         </option>
         <option>
           <name>GRuntimeLibThreads</name>
-          <state>1</state>
+          <state>0</state>
         </option>
       </data>
     </settings>
@@ -173,6 +173,7 @@
         <option>
           <name>CCDefines</name>
           <state>USE_STDPERIPH_DRIVER</state>
+          <state>BOOTLOADER</state>
           <state>DEBUG</state>
         </option>
         <option>
@@ -304,13 +305,11 @@
           <name>CCIncludePath2</name>
           <state>$PROJ_DIR$\..\..\..\Platform</state>
           <state>$PROJ_DIR$\..\..\..\Library\support</state>
-          <state>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP</state>
-          <state>$PROJ_DIR$\..\..\..\MICO</state>
+          <state>$PROJ_DIR$\..\..\..\Bootloader</state>
           <state>$PROJ_DIR$\..\..\..\Platform\EMW3162</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc</state>
           <state>$PROJ_DIR$\..\..\..\include</state>
-          <state>$PROJ_DIR$\..\..\..\External</state>
           <state>$PROJ_DIR$\..\..\..\Platform\include</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv</state>
@@ -596,7 +595,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>COM.MXCHIP.SPP.bin</state>
+          <state>bootloader.bin</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -714,7 +713,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$PROJ_DIR$\mxchipWNet.icf</state>
+          <state>$PROJ_DIR$\bootloader.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -947,37 +946,284 @@
     </settings>
   </configuration>
   <group>
-    <name>Application</name>
+    <name>Bootloader</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\LocalTcpServer.c</name>
+      <name>$PROJ_DIR$\..\..\..\Bootloader\Getline.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\MICOAppDefine.h</name>
+      <name>$PROJ_DIR$\..\..\..\Bootloader\menu.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\MICOAppEntrance.c</name>
+      <name>$PROJ_DIR$\..\..\..\Bootloader\MicoDefaults.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\MICOBonjour.c</name>
+      <name>$PROJ_DIR$\..\..\..\Bootloader\MICOEntrance.c</name>
+      <configuration>
+        <name>EMW3162</name>
+        <settings>
+          <name>ICCARM</name>
+          <data>
+            <version>29</version>
+            <wantNonLocal>0</wantNonLocal>
+            <debug>0</debug>
+            <option>
+              <name>CCOptimizationNoSizeConstraints</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCDefines</name>
+              <state>USE_STDPERIPH_DRIVER</state>
+              <state>DEBUG</state>
+            </option>
+            <option>
+              <name>CCPreprocFile</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCPreprocComments</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCPreprocLine</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCListCFile</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCListCMnemonics</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCListCMessages</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCListAssFile</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCListAssSource</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCEnableRemarks</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCDiagSuppress</name>
+              <state>Pa050</state>
+            </option>
+            <option>
+              <name>CCDiagRemark</name>
+              <state></state>
+            </option>
+            <option>
+              <name>CCDiagWarning</name>
+              <state></state>
+            </option>
+            <option>
+              <name>CCDiagError</name>
+              <state></state>
+            </option>
+            <option>
+              <name>CCObjPrefix</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>CCAllowList</name>
+              <version>1</version>
+              <state>0000000</state>
+            </option>
+            <option>
+              <name>CCDebugInfo</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>IEndianMode</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>IProcessor</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>IExtraOptionsCheck</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>IExtraOptions</name>
+              <state></state>
+            </option>
+            <option>
+              <name>CCLangConformance</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCSignedPlainChar</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>CCRequirePrototypes</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCMultibyteSupport</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCDiagWarnAreErr</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCCompilerRuntimeInfo</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>IFpuProcessor</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>OutputFile</name>
+              <state>$FILE_BNAME$.o</state>
+            </option>
+            <option>
+              <name>CCLibConfigHeader</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>PreInclude</name>
+              <state></state>
+            </option>
+            <option>
+              <name>CompilerMisraOverride</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCIncludePath2</name>
+              <state>$PROJ_DIR$\..\..\..\Platform</state>
+              <state>$PROJ_DIR$\..\..\..\Library\support</state>
+              <state>$PROJ_DIR$\..\..\..\Bootloader</state>
+              <state>$PROJ_DIR$\..\..\..\Platform\EMW3162</state>
+              <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx</state>
+              <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc</state>
+              <state>$PROJ_DIR$\..\..\..\include</state>
+              <state>$PROJ_DIR$\..\..\..\Platform\include</state>
+              <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3</state>
+              <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv</state>
+            </option>
+            <option>
+              <name>CCStdIncCheck</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCCodeSection</name>
+              <state>.text</state>
+            </option>
+            <option>
+              <name>IInterwork2</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>IProcessorMode2</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>CCOptLevel</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCOptStrategy</name>
+              <version>0</version>
+              <state>1</state>
+            </option>
+            <option>
+              <name>CCOptLevelSlave</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CompilerMisraRules98</name>
+              <version>0</version>
+              <state>1000111110110101101110011100111111101110011011000101110111101101100111111111111100110011111001110111001111111111111111111111111</state>
+            </option>
+            <option>
+              <name>CompilerMisraRules04</name>
+              <version>0</version>
+              <state>111101110010111111111000110111111111111111111111111110010111101111010101111111111111111111111111101111111011111001111011111011111111111111111</state>
+            </option>
+            <option>
+              <name>CCPosIndRopi</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCPosIndRwpi</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCPosIndNoDynInit</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>IccLang</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>IccCDialect</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>IccAllowVLA</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>IccCppDialect</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>IccExceptions</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>IccRTTI</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>IccStaticDestr</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>IccCppInlineSemantics</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>IccCmsis</name>
+              <state>1</state>
+            </option>
+            <option>
+              <name>IccFloatSemantics</name>
+              <state>0</state>
+            </option>
+            <option>
+              <name>CCNoLiteralPool</name>
+              <state>0</state>
+            </option>
+          </data>
+        </settings>
+      </configuration>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\MICOConfigDelegate.c</name>
+      <name>$PROJ_DIR$\..\..\..\Bootloader\Serial.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\MicoDefaults.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\RemoteTcpClient.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\SppProtocol.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\UartRecv.c</name>
+      <name>$PROJ_DIR$\..\..\..\Bootloader\ymodem.c</name>
     </file>
   </group>
   <group>
     <name>External</name>
+    <excluded>
+      <configuration>EMW3162</configuration>
+    </excluded>
     <group>
       <name>Curve25519</name>
       <file>
@@ -1038,31 +1284,31 @@
     <group>
       <name>MicoDriver</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverAdc.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverAdc.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverGpio.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverGpio.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverI2c.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverI2c.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverPwm.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverPwm.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverRng.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverRng.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverRtc.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverRtc.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverSpi.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverSpi.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverUart.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverUART.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverWdg.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverWdg.h</name>
       </file>
     </group>
     <file>
@@ -1097,57 +1343,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm3_sdio.a</name>
-    </file>
-  </group>
-  <group>
-    <name>MICO</name>
-    <group>
-      <name>EasyLink</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\MICO\EasyLink\EasyLink.c</name>
-      </file>
-    </group>
-    <group>
-      <name>WAC</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\MICO\WAC\MFi_WAC_CM3_Debug.a</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\MICO\WAC\MFi_WAC_CM3_Release.a</name>
-        <excluded>
-          <configuration>EMW3162</configuration>
-        </excluded>
-      </file>
-    </group>
-    <group>
-      <name>WPS</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\MICO\WPS\WPS.c</name>
-      </file>
-    </group>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICOConfigMenu.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICOConfigServer.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICODefine.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICOEntrance.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICONotificationCenter.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICONTPClient.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICOParaStorage.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICOSystemMonitor.c</name>
+      <excluded>
+        <configuration>EMW3162</configuration>
+      </excluded>
     </file>
   </group>
   <group>
@@ -1165,12 +1363,18 @@
             <name>EMW1062_Driver</name>
             <group>
               <name>SDIO</name>
+              <excluded>
+                <configuration>EMW3162</configuration>
+              </excluded>
               <file>
                 <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\SDIO\wlan_bus.c</name>
               </file>
             </group>
             <group>
               <name>SPI</name>
+              <excluded>
+                <configuration>EMW3162</configuration>
+              </excluded>
               <file>
                 <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\SPI\wwd_bus.c</name>
                 <excluded>
@@ -1188,6 +1392,9 @@
               <name>STM32F2xx_StdPeriph_Driver</name>
               <file>
                 <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\misc.c</name>
+              </file>
+              <file>
+                <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\startup_stm32f2xx_bootloader_IAR.s</name>
               </file>
               <file>
                 <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_adc.c</name>
@@ -1281,9 +1488,6 @@
               </file>
             </group>
             <file>
-              <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\startup_stm32f2xx_IAR.s</name>
-            </file>
-            <file>
               <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\stm32f2xx.h</name>
             </file>
             <file>
@@ -1325,9 +1529,267 @@
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverUart.c</name>
+            <configuration>
+              <name>EMW3162</name>
+              <settings>
+                <name>ICCARM</name>
+                <data>
+                  <version>29</version>
+                  <wantNonLocal>0</wantNonLocal>
+                  <debug>0</debug>
+                  <option>
+                    <name>CCOptimizationNoSizeConstraints</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCDefines</name>
+                    <state>USE_STDPERIPH_DRIVER</state>
+                    <state>BOOTLOADER</state>
+                    <state>NO_OS</state>
+                    <state>DEBUG</state>
+                  </option>
+                  <option>
+                    <name>CCPreprocFile</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCPreprocComments</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCPreprocLine</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCListCFile</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCListCMnemonics</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCListCMessages</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCListAssFile</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCListAssSource</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCEnableRemarks</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCDiagSuppress</name>
+                    <state>Pa050</state>
+                  </option>
+                  <option>
+                    <name>CCDiagRemark</name>
+                    <state></state>
+                  </option>
+                  <option>
+                    <name>CCDiagWarning</name>
+                    <state></state>
+                  </option>
+                  <option>
+                    <name>CCDiagError</name>
+                    <state></state>
+                  </option>
+                  <option>
+                    <name>CCObjPrefix</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>CCAllowList</name>
+                    <version>1</version>
+                    <state>0000000</state>
+                  </option>
+                  <option>
+                    <name>CCDebugInfo</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>IEndianMode</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>IProcessor</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>IExtraOptionsCheck</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>IExtraOptions</name>
+                    <state></state>
+                  </option>
+                  <option>
+                    <name>CCLangConformance</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCSignedPlainChar</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>CCRequirePrototypes</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCMultibyteSupport</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCDiagWarnAreErr</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCCompilerRuntimeInfo</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>IFpuProcessor</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>OutputFile</name>
+                    <state>$FILE_BNAME$.o</state>
+                  </option>
+                  <option>
+                    <name>CCLibConfigHeader</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>PreInclude</name>
+                    <state></state>
+                  </option>
+                  <option>
+                    <name>CompilerMisraOverride</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCIncludePath2</name>
+                    <state>$PROJ_DIR$\..\..\..\Platform</state>
+                    <state>$PROJ_DIR$\..\..\..\Library\support</state>
+                    <state>$PROJ_DIR$\..\..\..\Bootloader</state>
+                    <state>$PROJ_DIR$\..\..\..\Platform\EMW3162</state>
+                    <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx</state>
+                    <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc</state>
+                    <state>$PROJ_DIR$\..\..\..\include</state>
+                    <state>$PROJ_DIR$\..\..\..\Platform\include</state>
+                    <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3</state>
+                    <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv</state>
+                  </option>
+                  <option>
+                    <name>CCStdIncCheck</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCCodeSection</name>
+                    <state>.text</state>
+                  </option>
+                  <option>
+                    <name>IInterwork2</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>IProcessorMode2</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>CCOptLevel</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCOptStrategy</name>
+                    <version>0</version>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>CCOptLevelSlave</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CompilerMisraRules98</name>
+                    <version>0</version>
+                    <state>1000111110110101101110011100111111101110011011000101110111101101100111111111111100110011111001110111001111111111111111111111111</state>
+                  </option>
+                  <option>
+                    <name>CompilerMisraRules04</name>
+                    <version>0</version>
+                    <state>111101110010111111111000110111111111111111111111111110010111101111010101111111111111111111111111101111111011111001111011111011111111111111111</state>
+                  </option>
+                  <option>
+                    <name>CCPosIndRopi</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCPosIndRwpi</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCPosIndNoDynInit</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>IccLang</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>IccCDialect</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>IccAllowVLA</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>IccCppDialect</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>IccExceptions</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>IccRTTI</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>IccStaticDestr</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>IccCppInlineSemantics</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>IccCmsis</name>
+                    <state>1</state>
+                  </option>
+                  <option>
+                    <name>IccFloatSemantics</name>
+                    <state>0</state>
+                  </option>
+                  <option>
+                    <name>CCNoLiteralPool</name>
+                    <state>0</state>
+                  </option>
+                </data>
+              </settings>
+            </configuration>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverWdg.c</name>
+            <excluded>
+              <configuration>EMW3162</configuration>
+            </excluded>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\rtc.c</name>
@@ -1365,44 +1827,23 @@
         <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform_common_config.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform_internal_gpio.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\read_wifi_firmware.c</name>
+        <excluded>
+          <configuration>EMW3162</configuration>
+        </excluded>
       </file>
     </group>
   </group>
   <group>
     <name>Support</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\AESUtils.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\HTTPUtils.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\MDNSUtils.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\RingBufferUtils.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\SecurityUtils.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\SHAUtils.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\SocketUtils.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\StringUtils.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\TimeUtils.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\TLVUtils.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\URLUtils.c</name>
     </file>
   </group>
 </project>

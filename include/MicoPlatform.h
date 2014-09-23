@@ -36,7 +36,7 @@
 
 #include "common.h"
 
-#include "RingBufferUtils.h"
+#include "MicoDefaults.h"
 #include "platform.h" /* This file is unique for each platform */
 
 #include "MicoDrivers/MICODriverUART.h"

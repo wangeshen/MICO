@@ -65,7 +65,7 @@ void WPSNotify_WPSCompleteHandler(network_InitTypeDef_st *nwkpara, mico_Context_
   MicoSystemReboot();
   return;
 
-/*EasyLink is not start*/    
+/*WPS timeout*/    
 exit:
   wps_log("ERROR, err: %d", err);
 #if defined (CONFIG_MODE_WPS_WITH_SOFTAP)

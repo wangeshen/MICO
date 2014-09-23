@@ -42,7 +42,7 @@ int __low_level_init( void );
 /* This is the code that gets called on processor reset. To initialize the */
 /* device. */
 #pragma section=".intvec"
- int __low_level_init( void )
+int __low_level_init( void )
 {
      extern void init_clocks(void);
      extern void init_memory(void);

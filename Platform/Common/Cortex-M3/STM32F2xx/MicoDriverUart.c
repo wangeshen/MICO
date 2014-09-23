@@ -61,8 +61,13 @@ typedef struct
 {
     uint32_t            rx_size;
     ring_buffer_t*      rx_buffer;
+#ifndef NO_MICO_RTOS
     mico_semaphore_t    rx_complete;
     mico_semaphore_t    tx_complete;
+#else
+    bool                rx_complete;
+    bool                tx_complete;
+#endif
     mico_semaphore_t    sem_wakeup;
     OSStatus            tx_dma_result;
     OSStatus            rx_dma_result;
@@ -82,11 +87,14 @@ static mico_uart_t current_uart;
 static OSStatus internal_uart_init ( mico_uart_t uart, const mico_uart_config_t* config, ring_buffer_t* optional_rx_buffer );
 static OSStatus platform_uart_receive_bytes( mico_uart_t uart, void* data, uint32_t size, uint32_t timeout );
 
-static void thread_wakeup(void *arg);
+
 
 
 /* Interrupt service functions - called from interrupt vector table */
+#ifndef NO_MICO_RTOS
+static void thread_wakeup(void *arg);
 static void RX_PIN_WAKEUP_handler(void *arg);
+#endif
 
 void usart2_rx_dma_irq( void );
 void usart1_rx_dma_irq( void );
@@ -128,8 +136,13 @@ OSStatus internal_uart_init( mico_uart_t uart, const mico_uart_config_t* config,
     NVIC_InitTypeDef  nvic_init_structure;
     DMA_InitTypeDef   dma_init_structure;
 
+#ifndef NO_MICO_RTOS
     mico_rtos_init_semaphore(&uart_interfaces[uart].tx_complete, 1);
     mico_rtos_init_semaphore(&uart_interfaces[uart].rx_complete, 1);
+#else
+    uart_interfaces[uart].tx_complete = false;
+    uart_interfaces[uart].rx_complete = false;
+#endif
 
     MicoMcuPowerSaveConfig(false);
 
@@ -154,11 +167,13 @@ OSStatus internal_uart_init( mico_uart_t uart, const mico_uart_config_t* config,
     GPIO_Init( uart_mapping[uart].pin_rx->bank, &gpio_init_structure );
     GPIO_PinAFConfig( uart_mapping[uart].pin_rx->bank, uart_mapping[uart].pin_rx->number, uart_mapping[uart].gpio_af );
 
+#ifndef NO_MICO_RTOS
     if(config->flags & UART_WAKEUP_ENABLE){
         current_uart = uart;
         mico_rtos_init_semaphore( &uart_interfaces[uart].sem_wakeup, 1 );
         mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART_WAKEUP", thread_wakeup, 0x100, &current_uart);
     }
+#endif
 
     /* Check if any of the flow control is enabled */
     if ( uart_mapping[uart].pin_cts && (config->flow_control == FLOW_CONTROL_CTS || config->flow_control == FLOW_CONTROL_CTS_RTS) )
@@ -401,8 +416,10 @@ OSStatus MicoUartFinalize( mico_uart_t uart )
     /* Disable registers clocks */
     uart_mapping[uart].usart_peripheral_clock_func( uart_mapping[uart].usart_peripheral_clock, DISABLE );
 
+#ifndef NO_MICO_RTOS
     mico_rtos_deinit_semaphore(&uart_interfaces[uart].rx_complete);
     mico_rtos_deinit_semaphore(&uart_interfaces[uart].tx_complete);
+#endif
 
     MicoMcuPowerSaveConfig(true);
 
@@ -414,7 +431,7 @@ OSStatus MicoUartSend( mico_uart_t uart, const void* data, uint32_t size )
     /* Reset DMA transmission result. The result is assigned in interrupt handler */
     uart_interfaces[uart].tx_dma_result = kGeneralErr;
 
-    MicoMcuPowerSaveConfig(false);
+    MicoMcuPowerSaveConfig(false);  
 
     uart_mapping[uart].tx_dma_stream->CR  &= ~(uint32_t) DMA_SxCR_CIRC;
     uart_mapping[uart].tx_dma_stream->NDTR = size;
@@ -424,7 +441,12 @@ OSStatus MicoUartSend( mico_uart_t uart, const void* data, uint32_t size )
     USART_ClearFlag( uart_mapping[uart].usart, USART_FLAG_TC );
     DMA_Cmd( uart_mapping[uart].tx_dma_stream, ENABLE );
 
+#ifndef NO_MICO_RTOS
     mico_rtos_get_semaphore( &uart_interfaces[ uart ].tx_complete, MICO_NEVER_TIMEOUT );
+#else
+    while(uart_interfaces[ uart ].tx_complete == false);
+    uart_interfaces[ uart ].tx_complete = true;
+#endif
 
     while ( ( uart_mapping[ uart ].usart->SR & USART_SR_TC ) == 0 )
     {
@@ -436,6 +458,7 @@ OSStatus MicoUartSend( mico_uart_t uart, const void* data, uint32_t size )
     MicoMcuPowerSaveConfig(true);
 
     return uart_interfaces[uart].tx_dma_result;
+//#endif
 }
 
 OSStatus MicoUartRecv( mico_uart_t uart, void* data, uint32_t size, uint32_t timeout )
@@ -451,13 +474,18 @@ OSStatus MicoUartRecv( mico_uart_t uart, void* data, uint32_t size, uint32_t tim
             {
                 /* Set rx_size and wait in rx_complete semaphore until data reaches rx_size or timeout occurs */
                 uart_interfaces[uart].rx_size = transfer_size;
-
+                
+#ifndef NO_MICO_RTOS
                 if ( mico_rtos_get_semaphore( &uart_interfaces[uart].rx_complete, timeout) != kNoErr )
                 {
                     uart_interfaces[uart].rx_size = 0;
                     return kTimeoutErr;
                 }
-
+#else
+                uart_interfaces[uart].rx_complete = false;
+                while(uart_interfaces[uart].rx_complete == false);
+#endif
+                
                 /* Reset rx_size to prevent semaphore being set while nothing waits for the data */
                 uart_interfaces[uart].rx_size = 0;
             }
@@ -515,11 +543,18 @@ static OSStatus platform_uart_receive_bytes( mico_uart_t uart, void* data, uint3
     uart_mapping[uart].rx_dma_stream->M0AR = (uint32_t)data;
     uart_mapping[uart].rx_dma_stream->CR  |= DMA_SxCR_EN;
 
+
     if ( timeout > 0 )
     {
+#ifndef NO_MICO_RTOS
         mico_rtos_get_semaphore( &uart_interfaces[uart].rx_complete, timeout );
+#else
+        uart_interfaces[uart].rx_complete = false;
+        while(uart_interfaces[uart].rx_complete == false)
+#endif
         return uart_interfaces[uart].rx_dma_result;
     }
+
 
     return kNoErr;
 }
@@ -529,6 +564,7 @@ uint32_t MicoUartGetLengthInBuffer( mico_uart_t uart )
     return ring_buffer_used_space( uart_interfaces[uart].rx_buffer );
 }
 
+#ifndef NO_MICO_RTOS
 static void thread_wakeup(void *arg)
 {
   mico_uart_t uart = *(mico_uart_t *)arg;
@@ -540,11 +576,12 @@ static void thread_wakeup(void *arg)
     }
   }
 }
+#endif
 
 /******************************************************
  *            Interrupt Service Routines
  ******************************************************/
-
+#ifndef NO_MICO_RTOS
 void RX_PIN_WAKEUP_handler(void *arg)
 {
   (void)arg;
@@ -558,7 +595,7 @@ void RX_PIN_WAKEUP_handler(void *arg)
   MicoMcuPowerSaveConfig(false);
   mico_rtos_set_semaphore(&uart_interfaces[uart].sem_wakeup);
 }
-
+#endif
 
 
 void USART1_IRQHandler( void )
@@ -571,14 +608,20 @@ void USART1_IRQHandler( void )
 
     // Notify thread if sufficient data are available
     if ( ( uart_interfaces[ STM32_UART_1 ].rx_size > 0 ) &&
-         ( ring_buffer_used_space( uart_interfaces[ STM32_UART_1 ].rx_buffer ) >= uart_interfaces[0].rx_size ) )
+         ( ring_buffer_used_space( uart_interfaces[ STM32_UART_1 ].rx_buffer ) >= uart_interfaces[STM32_UART_1].rx_size ) )
     {
+#ifndef NO_MICO_RTOS
         mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_1 ].rx_complete );
+#else
+        uart_interfaces[ STM32_UART_1 ].rx_complete = true;
+#endif
         uart_interfaces[ STM32_UART_1 ].rx_size = 0;
     }
 
+#ifndef NO_MICO_RTOS
     if(uart_interfaces[ STM32_UART_1 ].sem_wakeup)
       mico_rtos_set_semaphore(&uart_interfaces[ STM32_UART_1 ].sem_wakeup);
+#endif
 }
 
 void USART6_IRQHandler( void )
@@ -593,12 +636,18 @@ void USART6_IRQHandler( void )
     if ( ( uart_interfaces[ STM32_UART_6 ].rx_size > 0 ) &&
          ( ring_buffer_used_space( uart_interfaces[ STM32_UART_6 ].rx_buffer ) >= uart_interfaces[ STM32_UART_6 ].rx_size ) )
     {
+#ifndef NO_MICO_RTOS
         mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_6 ].rx_complete );
+#else
+        uart_interfaces[ STM32_UART_1 ].rx_complete = true;
+#endif
         uart_interfaces[ STM32_UART_6 ].rx_size = 0;
     }
 
+#ifndef NO_MICO_RTOS
     if(uart_interfaces[ STM32_UART_6 ].sem_wakeup)
       mico_rtos_set_semaphore(&uart_interfaces[ STM32_UART_6 ].sem_wakeup);
+#endif
 }
 
 //usart1_tx_dma_irq
@@ -625,9 +674,13 @@ void DMA2_Stream7_IRQHandler( void )
             uart_interfaces[ STM32_UART_1 ].tx_dma_result = kGeneralErr;
         }
     }
-
+    
+#ifndef NO_MICO_RTOS
     /* Set semaphore regardless of result to prevent waiting thread from locking up */
     mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_1 ].tx_complete);
+#else
+    uart_interfaces[ STM32_UART_1 ].tx_complete = true;
+#endif
 }
 
 //usart6_tx_dma_irq
@@ -654,7 +707,13 @@ void DMA2_Stream6_IRQHandler( void )
         }
     }
 
-    mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_6 ].tx_complete );
+#ifndef NO_MICO_RTOS
+    /* Set semaphore regardless of result to prevent waiting thread from locking up */
+    mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_6 ].tx_complete);
+#else
+    uart_interfaces[ STM32_UART_6 ].tx_complete = true;
+#endif
+
 }
 
 //usart1_rx_dma_irq
@@ -673,8 +732,11 @@ void DMA2_Stream2_IRQHandler( void )
         DMA2->LIFCR |= ( DMA_LISR_TEIF2 | DMA_LISR_DMEIF2 | DMA_LISR_FEIF2 );
         uart_interfaces[ STM32_UART_1 ].rx_dma_result = kGeneralErr;
     }
-
+#ifndef NO_MICO_RTOS
     mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_1 ].rx_complete );
+#else
+    uart_interfaces[ STM32_UART_1 ].tx_complete = true;
+#endif
 }
 
 //usart6_rx_dma_irq
@@ -695,7 +757,11 @@ void DMA2_Stream1_IRQHandler( void )
         uart_interfaces[ STM32_UART_6 ].rx_dma_result = kGeneralErr;
     }
 
+#ifndef NO_MICO_RTOS
     mico_rtos_set_semaphore( &uart_interfaces[ STM32_UART_6 ].rx_complete );
+#else
+    uart_interfaces[ STM32_UART_6 ].tx_complete = true;
+#endif
 }
 
 

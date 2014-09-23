@@ -359,9 +359,9 @@ int application_start(void)
   
   //free((void *)0x08004000);
   
-  // DISABLE_INTERRUPTS;
-  // mico_log("Memory remains %d", MicoGetMemoryInfo()->free_memory);
-  // ENABLE_INTERRUPTS;
+   DISABLE_INTERRUPTS;
+   mico_log("Memory remains %d", MicoGetMemoryInfo()->free_memory);
+   ENABLE_INTERRUPTS;
   
   /*System status changed*/
   while(mico_rtos_get_semaphore(&context->micoStatus.sys_state_change_sem, MICO_WAIT_FOREVER)==kNoErr){

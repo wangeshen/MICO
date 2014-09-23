@@ -32,6 +32,7 @@
 #include "stdio.h"
 #include "stm32f2xx.h"
 #include "MicoRTOS.h"
+#include "MicoDefaults.h"
 #include "MicoPlatform.h"
 #include "platform_common_config.h"
 #include "stm32f2xx_platform.h"
