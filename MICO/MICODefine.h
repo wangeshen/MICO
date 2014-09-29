@@ -30,6 +30,7 @@
 #include "JSON-C/json.h"
 #include "MICOAppDefine.h"
 
+//#define CONFIG_MODE_EASYLINK_PLUS
 //#define CONFIG_MODE_EASYLINK
 #define CONFIG_MODE_EASYLINK_WITH_SOFTAP
 //#define CONFIG_MODE_WPS

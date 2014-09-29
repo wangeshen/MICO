@@ -47,6 +47,7 @@
 #define micoWlanSuspendSoftAP     uap_stop
 #define micoWlanStartEasyLink     OpenEasylink2_withdata
 #define micoWlanStopEasyLink      CloseEasylink2
+#define micoWlanStartEasyLinkPlus OpenEasylink
 #define micoWlanStartWPS          OpenConfigmodeWPS
 #define micoWlanStopWPS           CloseConfigmodeWPS
 #define micoWlanEnablePowerSave   ps_enable
@@ -250,6 +251,15 @@ typedef struct _linkStatus_t{
   uint8_t  bssid[6];      /**< BSSID of the current connected wlan */
 } LinkStatusTypeDef;
 
+
+typedef struct {
+    char bssid[6];
+    char ssid[33];
+    char key[65];
+    int  user_data_len;
+    char user_data[65];
+} easylink_result_t;
+
 /** @defgroup MICO_WLAN_GROUP_1 MICO Wlan Functions
   * @{
   */
@@ -370,7 +380,28 @@ OSStatus micoWlanSuspendStation(void);
  */
 OSStatus micoWlanSuspendSoftAP(void);
 
-/** @brief  Start EasyLink configuration V2 with user extra data
+/** @brief  Start EasyLink configuration with user extra data
+ * 
+ *  @detail This function can read SSID, password and extra user data sent from
+ *          Easylink APP.  
+ *          MICO sends a callback: mico_notify_EASYLINK_WPS_COMPLETED
+ *          with function:
+ *          void (*function)(network_InitTypeDef_st *nwkpara, mico_Context_t * const inContext);
+ *          that provide SSID and password, nwkpara is NULL if timeout or get an error
+ *          More
+ *          MICO sends a callback: mico_notify_EASYLINK_GET_EXTRA_DATA
+ *          with function:
+ *          void (*function)(int datalen, char*data, mico_Context_t * const inContext);
+ *          that provide a buffer where the data is saved
+ *
+ *  @param  inTimeout: If easylink is excuted longer than this parameter in backgound.
+ *          MICO stops EasyLink and sends a callback where nwkpara is NULL
+ *
+ *  @retval kNoErr.
+ */
+OSStatus micoWlanStartEasyLink(int inTimeout);
+
+/** @brief  Start EasyLink plus configuration with user extra data
  * 
  *  @detail This function has the same function as OpenEasylink2(), but it can 
  *          read more data besides SSID and password, these data is sent from
@@ -385,7 +416,7 @@ OSStatus micoWlanSuspendSoftAP(void);
  *
  *  @retval kNoErr.
  */
-OSStatus micoWlanStartEasyLink(int inTimeout);
+OSStatus micoWlanStartEasyLinkPlus(int inTimeout);
 
 /** @brief  Stop EasyLink configuration procedure
  *  

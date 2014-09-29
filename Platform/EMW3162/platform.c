@@ -287,7 +287,7 @@ bool watchdog_check_last_reset( void )
   return false;
 }
 
-OSStatus wiced_platform_init( void )
+OSStatus mico_platform_init( void )
 {
   platform_log( "Platform initialised" );
   

@@ -519,6 +519,78 @@
 	},
 	"buffers":
 	[
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICODefine.h",
+			"settings":
+			{
+				"buffer_size": 5552,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICOEntrance.c",
+			"settings":
+			{
+				"buffer_size": 13655,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/EasyLink/EasyLink.c",
+			"settings":
+			{
+				"buffer_size": 22999,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoRTOS.h",
+			"settings":
+			{
+				"buffer_size": 15751,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoWlan.h",
+			"settings":
+			{
+				"buffer_size": 20459,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICONotificationCenter.h",
+			"settings":
+			{
+				"buffer_size": 3153,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICONotificationCenter.c",
+			"settings":
+			{
+				"buffer_size": 8809,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/EasyLink/EasyLink.h",
+			"settings":
+			{
+				"buffer_size": 1551,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/MICOConfigDelegate.c",
+			"settings":
+			{
+				"buffer_size": 16746,
+				"line_ending": "Windows"
+			}
+		}
 	],
 	"build_system": "",
 	"command_palette":
@@ -715,7 +787,7 @@
 	},
 	"find_in_files":
 	{
-		"height": 93.0,
+		"height": 0.0,
 		"where_history":
 		[
 			"<open folders>",
@@ -734,6 +806,21 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"%f",
+			"lf",
+			"_cleanEasyLinkResource",
+			"_Led_EL_timer",
+			"ConfigWillStop",
+			"ConfigWillStop\nConfigWillStop",
+			"_FTCRespondInComingMessage",
+			"easylink_sem",
+			"easylink_thread",
+			"easylinkClient_fd",
+			"_cleanEasyLinkResource",
+			"stopEasyLink",
+			"EasyLinkNotify_SYSWillPowerOffHandler",
+			"str2hex",
+			"easylink_thread",
 			"rtc",
 			"_PlatformFlashByteWrite",
 			"APP_HDR_START_ADDR",
@@ -846,22 +933,7 @@
 			"wiced_default_time",
 			";\n",
 			"wiced_rtc_time_t",
-			"mico_rtc_time_t",
-			"RTC_Wakeup_init",
-			"USE_RTC_BKP",
-			"WICED_ENABLE_MCU_RTC",
-			"wake_up_interrupt_notify",
-			"RTC_WKUP_irq",
-			"CP_BufferWrite_2",
-			"CP_ReadBuffer_2",
-			"CP_BufferWrite_2",
-			"i2c_wait_for_event",
-			"CP_ReadBuffer_2",
-			"CP_BufferWrite_2",
-			"mico_i2c_transfer",
-			"I2C_CheckEvent",
-			"CP_BufferWrite_2",
-			"CP_ReadBuffer_2"
+			"mico_rtc_time_t"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -881,8 +953,261 @@
 	"groups":
 	[
 		{
+			"selected": 8,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICODefine.h",
+					"settings":
+					{
+						"buffer_size": 5552,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1130,
+								1130
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 528.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICOEntrance.c",
+					"settings":
+					{
+						"buffer_size": 13655,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2251,
+								2251
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 660.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/EasyLink/EasyLink.c",
+					"settings":
+					{
+						"buffer_size": 22999,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								19984,
+								19984
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoRTOS.h",
+					"settings":
+					{
+						"buffer_size": 15751,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								15065,
+								15106
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 7331.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoWlan.h",
+					"settings":
+					{
+						"buffer_size": 20459,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								12914,
+								12931
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICONotificationCenter.h",
+					"settings":
+					{
+						"buffer_size": 3153,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICONotificationCenter.c",
+					"settings":
+					{
+						"buffer_size": 8809,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1046,
+								1046
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/EasyLink/EasyLink.h",
+					"settings":
+					{
+						"buffer_size": 1551,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1116,
+								1116
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Demos/COM.MXCHIP.SPP/MICOConfigDelegate.c",
+					"settings":
+					{
+						"buffer_size": 16746,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								15510,
+								15510
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 5638.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
 			]
 		}
 	],
@@ -962,6 +1287,6 @@
 	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 206.0,
+	"side_bar_width": 302.0,
 	"status_bar_visible": true
 }

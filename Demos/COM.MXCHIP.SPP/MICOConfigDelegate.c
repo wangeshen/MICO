@@ -35,14 +35,15 @@
 #include "MICOConfigMenu.h"
 #include "StringUtils.h"
 
-#define SYS_LED_TRIGGER_INTERVAL 500 
+#define SYS_LED_TRIGGER_INTERVAL 100 
+#define SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK 500 
 #define config_delegate_log(M, ...) custom_log("Config Delegate", M, ##__VA_ARGS__)
 #define config_delegate_log_trace() custom_log_trace("Config Delegate")
   
 extern volatile ring_buffer_t  rx_buffer;
 extern volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
 
-static mico_timer_t _Led_EL_timer;
+static mico_timer_t _Led_EL_timer = NULL;
 
 static void _led_EL_Timeout_handler( void* arg )
 {
@@ -64,9 +65,22 @@ void ConfigWillStop( mico_Context_t * const inContext )
 {
   (void)(inContext); 
   config_delegate_log_trace();
+
   mico_stop_timer(&_Led_EL_timer);
   mico_deinit_timer( &_Led_EL_timer );
   MicoGpioOutputLow((mico_gpio_t)MICO_SYS_LED);
+  return;
+}
+
+void ConfigEasyLinkIsSuccess( mico_Context_t * const inContext )
+{
+  (void)(inContext); 
+  config_delegate_log_trace();
+
+  mico_stop_timer(&_Led_EL_timer);
+  mico_deinit_timer( &_Led_EL_timer );
+  mico_init_timer(&_Led_EL_timer, SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK, _led_EL_Timeout_handler, NULL);
+  mico_start_timer(&_Led_EL_timer);
   return;
 }
 

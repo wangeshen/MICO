@@ -226,7 +226,9 @@ void init_architecture( void )
 
 
 
+#ifndef MICO_DISABLE_MCU_POWERSAVE
 static int stm32f2_clock_needed_counter = 0;
+#endif
 
 void stm32f2xx_clocks_needed( void )
 {
@@ -237,8 +239,6 @@ void stm32f2xx_clocks_not_needed( void )
 {
   MCU_CLOCKS_NOT_NEEDED();
 }
-
-
 
 void MCU_CLOCKS_NEEDED( void )
 {
