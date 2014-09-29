@@ -33,8 +33,8 @@
 #include "MICORTOS.h"
 #include "MICOPlatform.h"
 
-#include "EMW3162/platform.h"
-#include "EMW3162/platform_common_config.h"
+#include "platform.h"
+#include "platform_common_config.h"
 #include "stm32f2xx_platform.h"
 #include "stm32f2xx.h"
 

@@ -8,27 +8,31 @@
  * written permission of Broadcom Corporation.
  */
 
-#include "stm32f2xx.h"
-#include "wwd_bus_protocol.h"
-#include "Platform/wwd_platform_interface.h"
-#include "Platform/wwd_bus_interface.h"
-#include "Platform/wwd_spi_interface.h"
-#include "internal/wifi_image/wwd_wifi_image_interface.h"
-#include "wifi_nvram_image.h"
-#include "Network/wwd_buffer_interface.h"
-#include "string.h" /* for memcpy */
-#include "wwd_assert.h"
+#include "MicoRtos.h"
+#include "misc.h"
+#include "string.h" /* For memcpy */
 #include "gpio_irq.h"
 #include "platform_common_config.h"
+#include "stm32f2xx_platform.h"
+#include "PlatformLogging.h"
 
 /******************************************************
  *             Constants
  ******************************************************/
 
 #define DMA_TIMEOUT_LOOPS      (10000000)
-#define EXTI9_5_IRQChannel     ((u8)0x17)  /* External Line[9:5] Interrupts */
 
-#define DMA1_3_IRQ_CHANNEL     ((u8)DMA1_Stream3_IRQn)
+#define DMA1_3_IRQ_CHANNEL     ((uint8_t)DMA1_Stream3_IRQn)
+
+/**
+ * Transfer direction for the mico platform bus interface
+ */
+typedef enum
+{
+    /* If updating this enum, the bus_direction_mapping variable will also need to be updated */
+    BUS_READ,
+    BUS_WRITE
+} bus_transfer_direction_t;
 
 /******************************************************
  *             Structures
@@ -38,25 +42,24 @@
  *             Variables
  ******************************************************/
 
-static host_semaphore_type_t spi_transfer_finished_semaphore;
+static mico_semaphore_t spi_transfer_finished_semaphore;
 
 /******************************************************
  *             Function declarations
  ******************************************************/
 
-#ifndef WICED_DISABLE_MCU_POWERSAVE
-extern void stm32f2xx_clocks_needed( void );
-extern void stm32f2xx_clocks_not_needed( void );
+#ifndef MICO_DISABLE_MCU_POWERSAVE
 extern void wake_up_interrupt_notify( void );
-#define MCU_CLOCKS_NEEDED()      stm32f2xx_clocks_needed()
-#define MCU_CLOCKS_NOT_NEEDED()  stm32f2xx_clocks_not_needed()
+#define MCU_NOTIFY_WAKE_UP()        wake_up_interrupt_notify()
 #else
-#define MCU_CLOCKS_NEEDED()
-#define MCU_CLOCKS_NOT_NEEDED()
-#endif /* ifndef WICED_DISABLE_MCU_POWERSAVE */
+#define MCU_NOTIFY_WAKE_UP()
+#endif /* ifndef MICO_DISABLE_MCU_POWERSAVE */
 
+/* Powersave functionality */
+extern void MCU_CLOCKS_NEEDED( void );
+extern void MCU_CLOCKS_NOT_NEEDED( void );
 
-void dma_irq( void );
+extern void wiced_platform_notify_irq( void );
 
 /******************************************************
  *             Function definitions
@@ -66,9 +69,9 @@ static void spi_irq_handler( void* arg )
 {
     UNUSED_PARAMETER(arg);
 
-#ifndef WICED_DISABLE_MCU_POWERSAVE
+#ifndef MICO_DISABLE_MCU_POWERSAVE
     wake_up_interrupt_notify( );
-#endif /* ifndef WICED_DISABLE_MCU_POWERSAVE */
+#endif /* ifndef MICO_DISABLE_MCU_POWERSAVE */
 
     wiced_platform_notify_irq( );
 }
@@ -77,10 +80,10 @@ void dma_irq( void )
 {
     /* Clear interrupt */
     DMA1->LIFCR = (uint32_t) (0x3F << 22);
-    host_rtos_set_semaphore( &spi_transfer_finished_semaphore, WICED_TRUE );
+    mico_rtos_set_semaphore( &spi_transfer_finished_semaphore );
 }
 
-wiced_result_t host_platform_bus_init( void )
+OSStatus host_platform_bus_init( void )
 {
     SPI_InitTypeDef  spi_init;
     DMA_InitTypeDef  dma_init_structure;
@@ -89,7 +92,7 @@ wiced_result_t host_platform_bus_init( void )
 
     MCU_CLOCKS_NEEDED();
 
-    host_rtos_init_semaphore(&spi_transfer_finished_semaphore);
+    mico_rtos_init_semaphore(&spi_transfer_finished_semaphore, 1);
 
     RCC_PCLK1Config( RCC_HCLK_Div2 ); /* Set clock to 18MHz (assuming 72MHz STM32 system clock) */
 
@@ -134,15 +137,11 @@ wiced_result_t host_platform_bus_init( void )
     GPIO_SetBits( SPI_BUS_CS_BANK, ( 1 << SPI_BUS_CS_PIN ) ); /* Set CS high (disabled) */
 
     /* Set GPIO_B[1:0] to 01 to put WLAN module into gSPI mode */
-    gpio_init_structure.GPIO_Mode = GPIO_Mode_OUT;
-    gpio_init_structure.GPIO_OType = GPIO_OType_PP;
-    gpio_init_structure.GPIO_Speed = GPIO_Speed_100MHz;
-    gpio_init_structure.GPIO_Pin = ( 1 << WL_GPIO0_PIN );
-    GPIO_Init( WL_GPIO0_BANK, &gpio_init_structure );
-    gpio_init_structure.GPIO_Pin = ( 1 << WL_GPIO1_PIN );
-    GPIO_Init( WL_GPIO1_BANK, &gpio_init_structure );
-    GPIO_SetBits( WL_GPIO0_BANK, ( 1 << WL_GPIO0_PIN ) );
-    GPIO_ResetBits( WL_GPIO1_BANK, ( 1 << WL_GPIO1_PIN ) );
+    MicoGpioInitialize( (mico_gpio_t)WL_GPIO0, OUTPUT_PUSH_PULL );
+    MicoGpioOutputHigh( (mico_gpio_t)WL_GPIO0 );
+    
+    MicoGpioInitialize( (mico_gpio_t)WL_GPIO1, OUTPUT_PUSH_PULL );
+    MicoGpioOutputLow( (mico_gpio_t)WL_GPIO1 );
 
     /* Setup DMA for SPI2 RX */
     DMA_DeInit( DMA1_Stream3 );
@@ -212,10 +211,10 @@ wiced_result_t host_platform_bus_init( void )
 
     MCU_CLOCKS_NOT_NEEDED();
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-wiced_result_t host_platform_bus_deinit( void )
+OSStatus host_platform_bus_deinit( void )
 {
     GPIO_InitTypeDef gpio_init_structure;
 
@@ -229,13 +228,8 @@ wiced_result_t host_platform_bus_deinit( void )
     DMA_DeInit( DMA1_Stream3 );
 
     /* Clear GPIO_B[1:0] */
-    gpio_init_structure.GPIO_Mode = GPIO_Mode_AIN;
-    gpio_init_structure.GPIO_OType = GPIO_OType_PP;
-    gpio_init_structure.GPIO_Speed = GPIO_Speed_100MHz;
-    gpio_init_structure.GPIO_Pin = ( 1 << WL_GPIO0_PIN );
-    GPIO_Init( WL_GPIO0_BANK, &gpio_init_structure );
-    gpio_init_structure.GPIO_Pin = ( 1 << WL_GPIO1_PIN );
-    GPIO_Init( WL_GPIO1_BANK, &gpio_init_structure );
+    MicoGpioFinalize( (mico_gpio_t)WL_GPIO0 );
+    MicoGpioFinalize( (mico_gpio_t)WL_GPIO1 );
 
     /* Clear SPI slave select GPIOs */
     gpio_init_structure.GPIO_Mode = GPIO_Mode_AIN;
@@ -260,12 +254,12 @@ wiced_result_t host_platform_bus_deinit( void )
 
     MCU_CLOCKS_NOT_NEEDED();
 
-    return WICED_SUCCESS;
+    return kNoErr;
 }
 
-wiced_result_t host_platform_spi_transfer( bus_transfer_direction_t dir, uint8_t* buffer, uint16_t buffer_length )
+OSStatus host_platform_spi_transfer( bus_transfer_direction_t dir, uint8_t* buffer, uint16_t buffer_length )
 {
-    wiced_result_t result;
+    OSStatus result;
     uint32_t junk;
 
     MCU_CLOCKS_NEEDED();
@@ -290,7 +284,7 @@ wiced_result_t host_platform_spi_transfer( bus_transfer_direction_t dir, uint8_t
     DMA_Cmd( DMA1_Stream4, ENABLE );
 
     /* Wait for DMA TX to complete */
-    result = host_rtos_get_semaphore( &spi_transfer_finished_semaphore, 100, WICED_TRUE );
+    result = mico_rtos_get_semaphore( &spi_transfer_finished_semaphore, 100 );
 //    loop_count = 0;
 //    while ( ( DMA_GetFlagStatus( DMA1_Stream3, DMA_FLAG_TCIF3 ) == RESET ) && ( loop_count < (uint32_t) DMA_TIMEOUT_LOOPS ) )
 //    {

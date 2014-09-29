@@ -34,7 +34,7 @@ const char menu[] =
 "\r\n"
 "+***************(C) COPYRIGHT 2014 MXCHIP corporation************+\r\n"
 "|               MICO Common Bootloader                           |\r\n"
-"+ command ----------------+ function ----_-----------------------+\r\n"
+"+ command ----------------+ function ----------------------------+\r\n"
 "| 1:FWUPDATE <-a>    | update the firmware from UART using Ymodem|\r\n"
 "| 3:BOOT             | excute the current firmware               |\r\n"
 "| 4:REBOOT           | Reboot                                    |\r\n"
@@ -114,8 +114,8 @@ int main(void)
   init_memory();
   init_architecture();
   
-  MicoGpioInitialize(BOOT_SEL, INPUT_HIGH_IMPEDANCE);
-  MicoGpioInitialize(MFG_SEL, INPUT_HIGH_IMPEDANCE);
+  MicoGpioInitialize((mico_gpio_t)BOOT_SEL, INPUT_PULL_UP);
+  MicoGpioInitialize((mico_gpio_t)MFG_SEL, INPUT_HIGH_IMPEDANCE);
   
   /* BOOT_SEL = 1 => Normal start*/
   if(MicoGpioInputGet(BOOT_SEL)==true)

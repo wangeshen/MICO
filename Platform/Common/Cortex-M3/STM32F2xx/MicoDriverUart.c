@@ -33,8 +33,8 @@
 #include "MICORTOS.h"
 #include "MICOPlatform.h"
 
-#include "EMW3162/platform.h"
-#include "EMW3162/platform_common_config.h"
+#include "platform.h"
+#include "platform_common_config.h"
 #include "stm32f2xx_platform.h"
 #include "stm32f2xx.h"
 #include "gpio_irq.h"
@@ -65,8 +65,8 @@ typedef struct
     mico_semaphore_t    rx_complete;
     mico_semaphore_t    tx_complete;
 #else
-    bool                rx_complete;
-    bool                tx_complete;
+    volatile bool       rx_complete;
+    volatile bool       tx_complete;
 #endif
     mico_semaphore_t    sem_wakeup;
     OSStatus            tx_dma_result;

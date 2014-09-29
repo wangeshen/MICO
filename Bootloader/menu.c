@@ -213,7 +213,7 @@ void Main_Menu(void)
     }
     /***************** Command: Update the RF driver  *************************/
     else if(strcmp(cmdname, "DRIVERUPDATE") == 0) {
-      printf ("\nCaution: Prepare to update the 8782 driver, press ENTER to proceed...\n");
+      printf ("\n\rCaution: Prepare to update the 8782 driver, press ENTER to proceed...\n\r");
       if( GetKey () == 0x0D){
         printf ("\n\rUpdating......\n\r");
         SerialDownload(MICO_FLASH_FOR_DRIVER, DRIVER_START_ADDRESS, DRIVER_FLASH_SIZE);

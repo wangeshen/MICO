@@ -88,38 +88,37 @@ const platform_pin_mapping_t gpio_mapping[] =
 {
   /* Common GPIOs for internal use */
   [MICO_GPIO_WLAN_POWERSAVE_CLOCK]    = {WL_32K_OUT_BANK, WL_32K_OUT_PIN, WL_32K_OUT_BANK_CLK},
-  [WL_GPIO0]                          = {GPIOB, 12,  RCC_AHB1Periph_GPIOB},
-  [WL_GPIO1]                          = {GPIOB, 13,  RCC_AHB1Periph_GPIOB},
-  [WL_REG]                            = {GPIOC,  1,  RCC_AHB1Periph_GPIOC},
-  [WL_RESET]                          = {GPIOC,  5,  RCC_AHB1Periph_GPIOC},
-  [MICO_SYS_LED]                      = {GPIOB,  0,  RCC_AHB1Periph_GPIOB}, 
-  [MICO_RF_LED]                       = {GPIOB,  1,  RCC_AHB1Periph_GPIOB}, //MICO_GPIO_16
-  [BOOT_SEL]                          = {GPIOB,  1,  RCC_AHB1Periph_GPIOB}, //MICO_GPIO_16
-  [MFG_SEL]                           = {GPIOB,  9,  RCC_AHB1Periph_GPIOB}, //MICO_GPIO_30
-  [EasyLink_BUTTON]                   = {GPIOA,  1,  RCC_AHB1Periph_GPIOA}, //MICO_GPIO_11
+  [WL_GPIO0]                          = {GPIOB,  5,  RCC_AHB1Periph_GPIOB},
+  [WL_GPIO1]                          = {GPIOA,  2,  RCC_AHB1Periph_GPIOB},
+  [WL_REG_RESERVED]                   = NULL,
+  [WL_RESET]                          = {GPIOA,  3,  RCC_AHB1Periph_GPIOA},
+  [MICO_SYS_LED]                      = {GPIOB,  7,  RCC_AHB1Periph_GPIOB}, 
+  [MICO_RF_LED]                       = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
+  [BOOT_SEL]                          = {GPIOB,  1,  RCC_AHB1Periph_GPIOB}, 
+  [MFG_SEL]                           = {GPIOB,  9,  RCC_AHB1Periph_GPIOB}, 
+  [EasyLink_BUTTON]                   = {GPIOB,  8,  RCC_AHB1Periph_GPIOB}, 
 
   /* GPIOs for external use */
-  [MICO_GPIO_1]  = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_2]  = {GPIOB,  7,  RCC_AHB1Periph_GPIOB},
+//  [MICO_GPIO_1]  = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
+//  [MICO_GPIO_2]  = {GPIOB,  7,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_4]  = {GPIOC,  7,  RCC_AHB1Periph_GPIOC},
-  [MICO_GPIO_5]  = {GPIOA,  4,  RCC_AHB1Periph_GPIOA},
-  [MICO_GPIO_6]  = {GPIOA,  4,  RCC_AHB1Periph_GPIOA},
-  [MICO_GPIO_7]  = {GPIOB,  3,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_8]  = {GPIOB , 4,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_9]  = {GPIOB,  5,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_10] = {GPIOB,  8,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_12] = {GPIOC,  2,  RCC_AHB1Periph_GPIOC},
-  [MICO_GPIO_13] = {GPIOB, 14,  RCC_AHB1Periph_GPIOB},
+//  [MICO_GPIO_5]  = {GPIOA,  4,  RCC_AHB1Periph_GPIOA},
+//  [MICO_GPIO_6]  = {GPIOA,  4,  RCC_AHB1Periph_GPIOA},
+//  [MICO_GPIO_7]  = {GPIOB,  3,  RCC_AHB1Periph_GPIOB},
+//  [MICO_GPIO_8]  = {GPIOB , 4,  RCC_AHB1Periph_GPIOB},
+//  [MICO_GPIO_9]  = {GPIOB,  5,  RCC_AHB1Periph_GPIOB},
+//  [MICO_GPIO_10] = {GPIOB,  8,  RCC_AHB1Periph_GPIOB},
+//  [MICO_GPIO_12] = {GPIOC,  2,  RCC_AHB1Periph_GPIOC},
+//  [MICO_GPIO_13] = {GPIOB, 14,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_14] = {GPIOC,  6,  RCC_AHB1Periph_GPIOC},
-  [MICO_GPIO_16] = {GPIOB,  1,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_18] = {GPIOA, 15,  RCC_AHB1Periph_GPIOA},
-  [MICO_GPIO_19] = {GPIOB, 11,  RCC_AHB1Periph_GPIOB},
+//  [MICO_GPIO_16] = {GPIOB,  1,  RCC_AHB1Periph_GPIOB},
+//  [MICO_GPIO_18] = {GPIOA, 15,  RCC_AHB1Periph_GPIOA},
+//  [MICO_GPIO_19] = {GPIOB, 11,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_20] = {GPIOA, 12,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_21] = {GPIOA, 11,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_22] = {GPIOA,  9,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_23] = {GPIOA, 10,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_29] = {GPIOA,  0,  RCC_AHB1Periph_GPIOA},  
-
 };
 
 /*
@@ -127,47 +126,47 @@ const platform_pin_mapping_t gpio_mapping[] =
 * - Set which ADC peripheral to use for each ADC. All on one ADC allows sequential conversion on all inputs. All on separate ADCs allows concurrent conversion.
 */
 /* TODO : These need fixing */
-const platform_adc_mapping_t adc_mapping[] =
-{
-  [MICO_ADC_1] = {ADC1, ADC_Channel_1, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_2]},
-  [MICO_ADC_2] = {ADC1, ADC_Channel_2, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_4]},
-  [MICO_ADC_3] = {ADC1, ADC_Channel_3, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_5]},
-};
+//const platform_adc_mapping_t adc_mapping[] =
+//{
+//  [MICO_ADC_1] = {ADC1, ADC_Channel_1, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_2]},
+//  [MICO_ADC_2] = {ADC1, ADC_Channel_2, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_4]},
+//  [MICO_ADC_3] = {ADC1, ADC_Channel_3, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_5]},
+//};
 
 
 /* PWM mappings */
-const platform_pwm_mapping_t pwm_mappings[] =
-{
+//const platform_pwm_mapping_t pwm_mappings[] =
+//{
 #if ( MICO_WLAN_POWERSAVE_CLOCK_SOURCE == MICO_WLAN_POWERSAVE_CLOCK_IS_PWM )
   /* Extended PWM for internal use */
   [WICED_PWM_WLAN_POWERSAVE_CLOCK] = {TIM1, 4, RCC_APB2Periph_TIM1, GPIO_AF_TIM1, (platform_pin_mapping_t*)&gpio_mapping[WICED_GPIO_WLAN_POWERSAVE_CLOCK] }, /* or TIM2/Ch2                       */
 #endif
   
-  [MICO_PWM_1]  = {TIM4, 3, RCC_APB1Periph_TIM4, GPIO_AF_TIM4, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_10]},    /* or TIM10/Ch1                       */
-  [MICO_PWM_2]  = {TIM12, 1, RCC_APB1Periph_TIM12, GPIO_AF_TIM12, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_13]}, /* or TIM1/Ch2N                       */
-  [MICO_PWM_3]  = {TIM2, 4, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_19]},    
+//  [MICO_PWM_1]  = {TIM4, 3, RCC_APB1Periph_TIM4, GPIO_AF_TIM4, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_10]},    /* or TIM10/Ch1                       */
+//  [MICO_PWM_2]  = {TIM12, 1, RCC_APB1Periph_TIM12, GPIO_AF_TIM12, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_13]}, /* or TIM1/Ch2N                       */
+//  [MICO_PWM_3]  = {TIM2, 4, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_19]},    
   /* TODO: fill in the other options here ... */
-};
+//};
 
-const platform_spi_mapping_t spi_mapping[] =
-{
-  [MICO_SPI_1]  =
-  {
-    .spi_regs              = SPI1,
-    .gpio_af               = GPIO_AF_SPI1,
-    .peripheral_clock_reg  = RCC_APB2Periph_SPI1,
-    .peripheral_clock_func = RCC_APB2PeriphClockCmd,
-    .pin_mosi              = &gpio_mapping[MICO_GPIO_8],
-    .pin_miso              = &gpio_mapping[MICO_GPIO_7],
-    .pin_clock             = &gpio_mapping[MICO_GPIO_6],
-    .tx_dma_stream         = DMA2_Stream5,
-    .rx_dma_stream         = DMA2_Stream0,
-    .tx_dma_channel        = DMA_Channel_3,
-    .rx_dma_channel        = DMA_Channel_3,
-    .tx_dma_stream_number  = 5,
-    .rx_dma_stream_number  = 0
-  }
-};
+//const platform_spi_mapping_t spi_mapping[] =
+//{
+//  [MICO_SPI_1]  =
+//  {
+//    .spi_regs              = SPI1,
+//    .gpio_af               = GPIO_AF_SPI1,
+//    .peripheral_clock_reg  = RCC_APB2Periph_SPI1,
+//    .peripheral_clock_func = RCC_APB2PeriphClockCmd,
+//    .pin_mosi              = &gpio_mapping[MICO_GPIO_8],
+//    .pin_miso              = &gpio_mapping[MICO_GPIO_7],
+//    .pin_clock             = &gpio_mapping[MICO_GPIO_6],
+//    .tx_dma_stream         = DMA2_Stream5,
+//    .rx_dma_stream         = DMA2_Stream0,
+//    .tx_dma_channel        = DMA_Channel_3,
+//    .rx_dma_channel        = DMA_Channel_3,
+//    .tx_dma_stream_number  = 5,
+//    .rx_dma_stream_number  = 0
+//  }
+//};
 
 const platform_uart_mapping_t uart_mapping[] =
 {
@@ -223,25 +222,25 @@ const platform_uart_mapping_t uart_mapping[] =
   },
 };
 
-const platform_i2c_mapping_t i2c_mapping[] =
-{
-  [MICO_I2C_1] =
-  {
-    .i2c = I2C1,
-    .pin_scl                 = &gpio_mapping[MICO_GPIO_1],
-    .pin_sda                 = &gpio_mapping[MICO_GPIO_2],
-    .peripheral_clock_reg    = RCC_APB1Periph_I2C1,
-    .tx_dma                  = DMA1,
-    .tx_dma_peripheral_clock = RCC_AHB1Periph_DMA1,
-    .tx_dma_stream           = DMA1_Stream7,
-    .rx_dma_stream           = DMA1_Stream5,
-    .tx_dma_stream_id        = 7,
-    .rx_dma_stream_id        = 5,
-    .tx_dma_channel          = DMA_Channel_1,
-    .rx_dma_channel          = DMA_Channel_1,
-    .gpio_af                 = GPIO_AF_I2C1
-  },
-};
+//const platform_i2c_mapping_t i2c_mapping[] =
+//{
+//  [MICO_I2C_1] =
+//  {
+//    .i2c = I2C1,
+//    .pin_scl                 = &gpio_mapping[MICO_GPIO_1],
+//    .pin_sda                 = &gpio_mapping[MICO_GPIO_2],
+//    .peripheral_clock_reg    = RCC_APB1Periph_I2C1,
+//    .tx_dma                  = DMA1,
+//    .tx_dma_peripheral_clock = RCC_AHB1Periph_DMA1,
+//    .tx_dma_stream           = DMA1_Stream7,
+//    .rx_dma_stream           = DMA1_Stream5,
+//    .tx_dma_stream_id        = 7,
+//    .rx_dma_stream_id        = 5,
+//    .tx_dma_channel          = DMA_Channel_1,
+//    .rx_dma_channel          = DMA_Channel_1,
+//    .gpio_af                 = GPIO_AF_I2C1
+//  },
+//};
 
 /******************************************************
 *               Function Definitions

@@ -71,28 +71,7 @@
 #define SPI_BUS_MOSI_PIN        15
 #define SPI_BUS_CS_PIN          12
 #define SPI_IRQ_PIN             1
-
-#define SDIO_OOB_IRQ_BANK       GPIOB
-#define SDIO_CLK_BANK           GPIOC
-#define SDIO_CMD_BANK           GPIOD
-#define SDIO_D0_BANK            GPIOC
-#define SDIO_D1_BANK            GPIOC
-#define SDIO_D2_BANK            GPIOC
-#define SDIO_D3_BANK            GPIOC
-#define SDIO_OOB_IRQ_BANK_CLK   RCC_AHB1Periph_GPIOB
-#define SDIO_CLK_BANK_CLK       RCC_AHB1Periph_GPIOC
-#define SDIO_CMD_BANK_CLK       RCC_AHB1Periph_GPIOD
-#define SDIO_D0_BANK_CLK        RCC_AHB1Periph_GPIOC
-#define SDIO_D1_BANK_CLK        RCC_AHB1Periph_GPIOC
-#define SDIO_D2_BANK_CLK        RCC_AHB1Periph_GPIOC
-#define SDIO_D3_BANK_CLK        RCC_AHB1Periph_GPIOC
-#define SDIO_OOB_IRQ_PIN        13
-#define SDIO_CLK_PIN            12
-#define SDIO_CMD_PIN            2
-#define SDIO_D0_PIN             8
-#define SDIO_D1_PIN             9
-#define SDIO_D2_PIN             10
-#define SDIO_D3_PIN             11
+#define dma_irq                 DMA1_Stream3_IRQHandler
 
 /* These are internal platform connections only */
 typedef enum
@@ -101,7 +80,7 @@ typedef enum
   MICO_GPIO_WLAN_POWERSAVE_CLOCK = 0,
   WL_GPIO0,
   WL_GPIO1,
-  WL_REG,
+  WL_REG_RESERVED,
   WL_RESET,
   MICO_SYS_LED,
   MICO_RF_LED,
@@ -110,6 +89,8 @@ typedef enum
   EasyLink_BUTTON,
   MICO_COMMON_GPIO_MAX,
 } mico_common_gpio_t;
+
+#define WL_REG   MICO_GPIO_UNUSED
 
 /* How the wlan's powersave clock is connected */
 typedef enum
@@ -154,7 +135,7 @@ Note: the 1st sector 0x08000000-0x08003FFF is reserved for the IAP code */
 #define BOOT_END_ADDRESS            (uint32_t)0x08007FFF 
 #define BOOT_FLASH_SIZE             (BOOT_END_ADDRESS - BOOT_START_ADDRESS + 1)
 
-#define MICO_FLASH_FOR_DRIVER	      MICO_INTERNAL_FLASH
+#define MICO_FLASH_FOR_DRIVER	    MICO_INTERNAL_FLASH
 #define DRIVER_START_ADDRESS        (uint32_t)0x080C0000 
 #define DRIVER_END_ADDRESS          (uint32_t)0x080FFFFF 
 #define DRIVER_FLASH_SIZE           (DRIVER_END_ADDRESS - DRIVER_START_ADDRESS + 1)

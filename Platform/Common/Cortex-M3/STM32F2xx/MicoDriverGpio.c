@@ -70,6 +70,8 @@
 OSStatus MicoGpioInitialize( mico_gpio_t gpio, mico_gpio_config_t configuration )
 {
   GPIO_InitTypeDef gpio_init_structure;
+
+  if(gpio == (mico_gpio_t)MICO_GPIO_UNUSED ) return kUnsupportedErr;
   
   MicoMcuPowerSaveConfig(false);
   
@@ -102,6 +104,7 @@ OSStatus MicoGpioInitialize( mico_gpio_t gpio, mico_gpio_config_t configuration 
 OSStatus MicoGpioFinalize( mico_gpio_t gpio )
 {
   GPIO_InitTypeDef gpio_init_structure;
+  if(gpio == (mico_gpio_t)MICO_GPIO_UNUSED ) return kUnsupportedErr;
   
   MicoMcuPowerSaveConfig(false);
  
@@ -120,6 +123,8 @@ OSStatus MicoGpioFinalize( mico_gpio_t gpio )
 
 OSStatus MicoGpioOutputHigh( mico_gpio_t gpio )
 {
+  if(gpio == (mico_gpio_t)MICO_GPIO_UNUSED ) return kUnsupportedErr;
+
   MicoMcuPowerSaveConfig(false);
   
   GPIO_SetBits( gpio_mapping[gpio].bank, (uint16_t) (1 << gpio_mapping[gpio].number) );
@@ -131,6 +136,8 @@ OSStatus MicoGpioOutputHigh( mico_gpio_t gpio )
 
 OSStatus MicoGpioOutputLow( mico_gpio_t gpio )
 {
+  if(gpio == (mico_gpio_t)MICO_GPIO_UNUSED ) return kUnsupportedErr;
+
   MicoMcuPowerSaveConfig(false);
   
   GPIO_ResetBits( gpio_mapping[gpio].bank, (uint16_t) (1 << gpio_mapping[gpio].number) );
@@ -142,6 +149,8 @@ OSStatus MicoGpioOutputLow( mico_gpio_t gpio )
 
 OSStatus MicoGpioOutputTrigger( mico_gpio_t gpio )
 {
+  if(gpio == (mico_gpio_t)MICO_GPIO_UNUSED ) return kUnsupportedErr;
+
   MicoMcuPowerSaveConfig(false);
   
   GPIO_ToggleBits( gpio_mapping[gpio].bank, (uint16_t) (1 << gpio_mapping[gpio].number) );
@@ -155,6 +164,8 @@ bool MicoGpioInputGet( mico_gpio_t gpio )
 {
   bool result;
   
+  if(gpio == (mico_gpio_t)MICO_GPIO_UNUSED ) return kUnsupportedErr;
+
   MicoMcuPowerSaveConfig(false);
   
   result =  ( GPIO_ReadInputDataBit( gpio_mapping[gpio].bank, (uint16_t) ( 1 << gpio_mapping[gpio].number ) ) == 0 )? false : true;
@@ -166,10 +177,14 @@ bool MicoGpioInputGet( mico_gpio_t gpio )
 
 OSStatus MicoGpioEnableIRQ( mico_gpio_t gpio, mico_gpio_irq_trigger_t trigger, mico_gpio_irq_handler_t handler, void* arg )
 {
+  if(gpio == (mico_gpio_t)MICO_GPIO_UNUSED ) return kUnsupportedErr;
+
   return gpio_irq_enable( gpio_mapping[gpio].bank, gpio_mapping[gpio].number, trigger, handler, arg );
 }
 
 OSStatus MicoGpioDisableIRQ( mico_gpio_t gpio )
 {
+  if(gpio == (mico_gpio_t)MICO_GPIO_UNUSED ) return kUnsupportedErr;
+  
   return gpio_irq_disable( gpio_mapping[gpio].bank, gpio_mapping[gpio].number );
 }

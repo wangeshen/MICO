@@ -236,8 +236,6 @@ OSStatus startEasyLink( mico_Context_t * const inContext)
   err = MICOAddNotification( mico_notify_SYS_WILL_POWER_OFF, (void *)EasyLinkNotify_SYSWillPowerOffHandler );
   require_noerr( err, exit ); 
   
-
-  wifimgr_debug_enable(1);
   // Start the EasyLink thread
   ConfigWillStart(inContext);
   mico_rtos_init_semaphore(&easylink_sem, 1);

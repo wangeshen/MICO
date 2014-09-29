@@ -327,10 +327,10 @@ OSStatus host_platform_bus_init( void )
 
     /* Set GPIO_B[1:0] to 00 to put WLAN module into SDIO mode */
     
-    MicoGpioInitialize( (mico_gpio_t)WL_GPIO0, OUTPUT_OPEN_DRAIN_NO_PULL );
+    MicoGpioInitialize( (mico_gpio_t)WL_GPIO0, OUTPUT_PUSH_PULL );
     MicoGpioOutputLow( (mico_gpio_t)WL_GPIO0 );
     
-    MicoGpioInitialize( (mico_gpio_t)WL_GPIO1, OUTPUT_OPEN_DRAIN_NO_PULL );
+    MicoGpioInitialize( (mico_gpio_t)WL_GPIO1, OUTPUT_PUSH_PULL );
     MicoGpioOutputLow( (mico_gpio_t)WL_GPIO1 );
 
     /* Setup GPIO pins for SDIO data & clock */
