@@ -203,6 +203,7 @@ void Main_Menu(void)
       printf ("\n\rCaution: Prepare to update the bootloader, press ENTER to proceed...\n\r");
       if( GetKey () == 0x0D){
         printf ("\n\rUpdating......\n\r");
+        SerialDownload( MICO_FLASH_FOR_BOOT, BOOT_START_ADDRESS, BOOT_FLASH_SIZE );
         //SerialDownload(BOOT_START_ADDRESS, BOOT_FLASH_SIZE);
         printf ("\n\rUpdate success!\n\r");
         MicoSystemReboot();

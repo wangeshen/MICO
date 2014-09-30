@@ -50,9 +50,16 @@ int __low_level_init( void )
       * variables have been initialised, so the following init still needs to be done
       * When using GCC, this is done in crt0_GCC.c
       */
+     
+#ifdef BOOTLOADER  
+      /* Set the Vector Table base location at 0x20000000 */ 
+      NVIC_SetVectorTable(0x20000000, 0x0); 
+#else
      /* Setup the interrupt vectors address */
      *SCB_VTOR_ADDRESS = (unsigned long )__section_begin(".intvec");
      init_clocks();
      init_memory();
+#endif
+
      return 1; /* return 1 to force memory init */
 }

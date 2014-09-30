@@ -68,6 +68,31 @@
 __vector_table
         DCD     sfe(CSTACK)
         DCD     Reset_Handler             ; Reset Handler
+        DCD     Dummy_Handler_ROM         ; NMI Handler
+        DCD     Dummy_Handler_ROM         ; Hard Fault Handler
+        DCD     Dummy_Handler_ROM         ; MPU Fault Handler
+        DCD     Dummy_Handler_ROM         ; Bus Fault Handler
+        DCD     Dummy_Handler_ROM         ; Usage Fault Handler
+        DCD     0                         ; Reserved
+        DCD     0                         ; Reserved
+        DCD     0                         ; Reserved
+        DCD     0                         ; Reserved
+        DCD     Dummy_Handler_ROM         ; SVCall Handler
+        DCD     Dummy_Handler_ROM         ; Debug Monitor Handler
+        DCD     0                         ; Reserved
+        DCD     Dummy_Handler_ROM         ; PendSV Handler
+        DCD     Dummy_Handler_ROM         ; SysTick Handler
+
+        SECTION .intvec_RAM:CODE:ROOT(2)
+
+        EXTERN  __iar_program_start
+        EXTERN  SystemInit
+        PUBLIC  __vector_table_RAM
+
+        DATA
+__vector_table_RAM
+        DCD     sfe(CSTACK)
+        DCD     Reset_Handler             ; Reset Handler
 
         DCD     NMI_Handler               ; NMI Handler
         DCD     HardFault_Handler         ; Hard Fault Handler
@@ -634,6 +659,12 @@ CRYP_IRQHandler
         SECTION .text:CODE:REORDER(1)  
 HASH_RNG_IRQHandler  
         B HASH_RNG_IRQHandler
+
+; --------------------
+; Dummy handler placed in ROM
+
+Dummy_Handler_ROM
+                B Dummy_Handler_ROM
 
         END
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
