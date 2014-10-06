@@ -56,7 +56,7 @@ OSStatus MICORestoreDefault(mico_Context_t *inContext)
   require_noerr(err, exit);
   err = MicoFlashErase(MICO_FLASH_FOR_PARA, paraStartAddress, paraEndAddress);
   require_noerr(err, exit);
-  err =MicoFlashWrite(MICO_FLASH_FOR_PARA, &paraStartAddress, (void *)inContext, sizeof(flash_content_t));
+  err = MicoFlashWrite(MICO_FLASH_FOR_PARA, &paraStartAddress, (void *)inContext, sizeof(flash_content_t));
   require_noerr(err, exit);
   err = MicoFlashFinalize(MICO_FLASH_FOR_PARA);
   require_noerr(err, exit);
@@ -70,7 +70,7 @@ OSStatus MICOReadConfiguration(mico_Context_t *inContext)
   uint32_t configInFlash;
   OSStatus err = kNoErr;
   configInFlash = PARA_START_ADDRESS;
-  memcpy(&inContext->flashContentInRam, (void *)configInFlash, sizeof(flash_content_t));
+  err = MicoFlashRead(MICO_FLASH_FOR_PARA, &configInFlash, (uint8_t *)&inContext->flashContentInRam, sizeof(flash_content_t));
   seedNum = inContext->flashContentInRam.micoSystemConfig.seed;
   if(seedNum == -1) seedNum = 0;
 
@@ -104,7 +104,7 @@ OSStatus MICOUpdateConfiguration(mico_Context_t *inContext)
   require_noerr(err, exit);
   err = MicoFlashErase(MICO_FLASH_FOR_PARA, paraStartAddress, paraEndAddress);
   require_noerr(err, exit);
-  err = MicoFlashWrite(MICO_FLASH_FOR_PARA, &paraStartAddress, (uint32_t *)&inContext->flashContentInRam, sizeof(flash_content_t));
+  err = MicoFlashWrite(MICO_FLASH_FOR_PARA, &paraStartAddress, (uint8_t *)&inContext->flashContentInRam, sizeof(flash_content_t));
   require_noerr(err, exit);
   err = MicoFlashFinalize(MICO_FLASH_FOR_PARA);
   require_noerr(err, exit);

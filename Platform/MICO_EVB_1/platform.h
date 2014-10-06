@@ -205,10 +205,10 @@ Notes
 
 typedef enum
 {
-    //MICO_GPIO_1 = MICO_COMMON_GPIO_MAX,
-    //MICO_GPIO_2,
+    MICO_GPIO_1 = MICO_COMMON_GPIO_MAX,
+    MICO_GPIO_2,
     //MICO_GPIO_3,
-    MICO_GPIO_4 = MICO_COMMON_GPIO_MAX,
+    MICO_GPIO_4,
     //MICO_GPIO_5,
     //MICO_GPIO_6,
     //MICO_GPIO_7,
@@ -274,14 +274,19 @@ typedef enum
     MICO_UART_MAX, /* Denotes the total number of UART port aliases. Not a valid UART alias */
 } mico_uart_t;
 
+#define STM32_UART_1 MICO_UART_1
+#define STM32_UART_6 MICO_UART_2
+
 typedef enum
 {
-    MICO_SPI_FLASH_1,
+    MICO_SPI_FLASH,
     MICO_INTERNAL_FLASH,
 } mico_flash_t;
 
-#define STM32_UART_1 MICO_UART_1
-#define STM32_UART_6 MICO_UART_2
+#define USE_MICO_SPI_FLASH
+//#define SFLASH_SUPPORT_MACRONIX_PART 
+//#define SFLASH_SUPPORT_SST_PARTS
+#define SFLASH_SUPPORT_WINBOND_PARTS
 
 /* #define MICO_PLATFORM_INCLUDES_SPI_FLASH */
 /* #define MICO_SPI_FLASH_CS  (MICO_GPIO_5) */

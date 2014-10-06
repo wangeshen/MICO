@@ -99,8 +99,8 @@ const platform_pin_mapping_t gpio_mapping[] =
   [EasyLink_BUTTON]                   = {GPIOB,  8,  RCC_AHB1Periph_GPIOB}, 
 
   /* GPIOs for external use */
-//  [MICO_GPIO_1]  = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
-//  [MICO_GPIO_2]  = {GPIOB,  7,  RCC_AHB1Periph_GPIOB},
+  [MICO_GPIO_1]  = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
+  [MICO_GPIO_2]  = {GPIOB,  7,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_4]  = {GPIOC,  7,  RCC_AHB1Periph_GPIOC},
 //  [MICO_GPIO_5]  = {GPIOA,  4,  RCC_AHB1Periph_GPIOA},
 //  [MICO_GPIO_6]  = {GPIOA,  4,  RCC_AHB1Periph_GPIOA},
@@ -222,25 +222,25 @@ const platform_uart_mapping_t uart_mapping[] =
   },
 };
 
-//const platform_i2c_mapping_t i2c_mapping[] =
-//{
-//  [MICO_I2C_1] =
-//  {
-//    .i2c = I2C1,
-//    .pin_scl                 = &gpio_mapping[MICO_GPIO_1],
-//    .pin_sda                 = &gpio_mapping[MICO_GPIO_2],
-//    .peripheral_clock_reg    = RCC_APB1Periph_I2C1,
-//    .tx_dma                  = DMA1,
-//    .tx_dma_peripheral_clock = RCC_AHB1Periph_DMA1,
-//    .tx_dma_stream           = DMA1_Stream7,
-//    .rx_dma_stream           = DMA1_Stream5,
-//    .tx_dma_stream_id        = 7,
-//    .rx_dma_stream_id        = 5,
-//    .tx_dma_channel          = DMA_Channel_1,
-//    .rx_dma_channel          = DMA_Channel_1,
-//    .gpio_af                 = GPIO_AF_I2C1
-//  },
-//};
+const platform_i2c_mapping_t i2c_mapping[] =
+{
+ [MICO_I2C_1] =
+ {
+   .i2c = I2C1,
+   .pin_scl                 = &gpio_mapping[MICO_GPIO_1],
+   .pin_sda                 = &gpio_mapping[MICO_GPIO_2],
+   .peripheral_clock_reg    = RCC_APB1Periph_I2C1,
+   .tx_dma                  = DMA1,
+   .tx_dma_peripheral_clock = RCC_AHB1Periph_DMA1,
+   .tx_dma_stream           = DMA1_Stream7,
+   .rx_dma_stream           = DMA1_Stream5,
+   .tx_dma_stream_id        = 7,
+   .rx_dma_stream_id        = 5,
+   .tx_dma_channel          = DMA_Channel_1,
+   .rx_dma_channel          = DMA_Channel_1,
+   .gpio_af                 = GPIO_AF_I2C1
+ },
+};
 
 /******************************************************
 *               Function Definitions
@@ -317,6 +317,9 @@ void init_platform( void )
   //  Initialise Standby/wakeup switcher
   MicoGpioInitialize( Standby_SEL, INPUT_PULL_UP );
   MicoGpioEnableIRQ( Standby_SEL , IRQ_TRIGGER_FALLING_EDGE, _button_STANDBY_irq_handler, NULL);
+
+  MicoFlashInitialize( MICO_SPI_FLASH );
+
   
 }
 

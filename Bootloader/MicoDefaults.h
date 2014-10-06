@@ -37,7 +37,7 @@ extern "C"
 #endif
 
 #define NO_MICO_RTOS
-  
+
  /* Application thread stack size */
 #define MICO_DEFAULT_APPLICATION_STACK_SIZE         (500)
 

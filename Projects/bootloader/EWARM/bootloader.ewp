@@ -1256,6 +1256,7 @@
           <state>$PROJ_DIR$\..\..\..\Platform\include</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv</state>
+          <state>$PROJ_DIR$\..\..\..\Platform\Common\Drivers\spi_flash</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1900,10 +1901,13 @@
       <name>$PROJ_DIR$\..\..\..\Bootloader\MicoDefaults.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Bootloader\MICOEntrance.c</name>
+      <name>$PROJ_DIR$\..\..\..\Bootloader\MicoEntrance.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Bootloader\Serial.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Bootloader\Update_for_OTA.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Bootloader\ymodem.c</name>
@@ -1976,31 +1980,34 @@
     <group>
       <name>MicoDriver</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverAdc.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverAdc.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverGpio.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverFlash.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverI2c.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverGpio.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverPwm.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverI2c.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverRng.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverPwm.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverRtc.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverRng.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverSpi.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverRtc.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverUART.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverSpi.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverWdg.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverUart.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverWdg.h</name>
       </file>
     </group>
     <file>
@@ -2088,9 +2095,6 @@
               <name>STM32F2xx_StdPeriph_Driver</name>
               <file>
                 <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\misc.c</name>
-              </file>
-              <file>
-                <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\startup_stm32f2xx_bootloader_IAR.s</name>
               </file>
               <file>
                 <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_adc.c</name>
@@ -2184,6 +2188,9 @@
               </file>
             </group>
             <file>
+              <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\startup_stm32f2xx_bootloader_IAR.s</name>
+            </file>
+            <file>
               <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\stm32f2xx.h</name>
             </file>
             <file>
@@ -2258,6 +2265,18 @@
       </group>
     </group>
     <group>
+      <name>Drivers</name>
+      <group>
+        <name>spi_flash</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\Platform\Common\Drivers\spi_flash\MICO_EVB_1.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\Platform\Common\Drivers\spi_flash\spi_flash.c</name>
+        </file>
+      </group>
+    </group>
+    <group>
       <name>EMW3162</name>
       <excluded>
         <configuration>MICO_EVB_1</configuration>
@@ -2292,13 +2311,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\Platform\MICO_EVB_1\platform_common_config.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\Platform\MICO_EVB_1\read_wifi_firmware.c</name>
-        <excluded>
-          <configuration>EMW3162</configuration>
-          <configuration>MICO_EVB_1</configuration>
-        </excluded>
       </file>
     </group>
   </group>

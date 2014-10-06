@@ -27,8 +27,6 @@
 #include "Common.h"
 #include "Debug.h"
 #include "MICO.h"
-#include "JSON-C/json.h"
-#include "MICOAppDefine.h"
 
 //#define CONFIG_MODE_EASYLINK
 #define CONFIG_MODE_EASYLINK_WITH_SOFTAP
@@ -71,15 +69,7 @@ typedef enum
 } SYS_State_t;
 
 
-/* Upgrade iamge should save this table to flash */
-typedef struct  _boot_table_t {
-  uint32_t start_address; // the address of the bin saved on flash.
-  uint32_t length; // file real length
-  uint8_t version[8];
-  uint8_t type; // B:bootloader, P:boot_table, A:application, D: 8782 driver
-  uint8_t upgrade_type; //u:upgrade, 
-  uint8_t reserved[6];
-}boot_table_t;
+
 
 typedef struct _mico_sys_config_t
 {

@@ -61,7 +61,9 @@ OSStatus MicoFlashInitialize( mico_flash_t flash );
 
 OSStatus MicoFlashErase(mico_flash_t flash, uint32_t StartAddress, uint32_t EndAddress);
 
-OSStatus MicoFlashWrite(mico_flash_t flash, volatile uint32_t* FlashAddress, uint32_t* Data ,uint32_t DataLength);
+OSStatus MicoFlashWrite(mico_flash_t flash, volatile uint32_t* FlashAddress, uint8_t* Data ,uint32_t DataLength);
+
+OSStatus MicoFlashRead(mico_flash_t flash, volatile uint32_t* FlashAddress, uint8_t* Data ,uint32_t DataLength);
 
 OSStatus MicoFlashFinalize( mico_flash_t flash );
 

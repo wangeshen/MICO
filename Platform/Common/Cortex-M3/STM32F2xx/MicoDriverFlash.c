@@ -36,6 +36,7 @@
 #include "Platform_common_config.h"
 #include "stm32f2xx.h"
 #include "stdio.h"
+#include "spi_flash.h"
 
 /* Private constants --------------------------------------------------------*/
 #define ADDR_FLASH_SECTOR_0     ((uint32_t)0x08000000) /* Base @ of Sector 0, 16 Kbyte */
@@ -59,23 +60,35 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+#ifdef USE_MICO_SPI_FLASH
+static sflash_handle_t sflash_handle = {0x0, 0x0, SFLASH_WRITE_NOT_ALLOWED};
+#endif
 /* Private function prototypes -----------------------------------------------*/
 static uint32_t _GetSector( uint32_t Address );
 static OSStatus internalFlashInitialize( void );
 static OSStatus internalFlashErase(uint32_t StartAddress, uint32_t EndAddress);
-static OSStatus internalMicoFlashWrite(volatile uint32_t* FlashAddress, uint32_t* Data ,uint32_t DataLength);
+static OSStatus internalFlashWrite(volatile uint32_t* FlashAddress, uint32_t* Data ,uint32_t DataLength);
 static OSStatus internalFlashByteWrite( volatile uint32_t* FlashAddress, uint8_t* Data ,uint32_t DataLength );
 static OSStatus internalFlashFinalize( void );
-
-
-
+#ifdef USE_MICO_SPI_FLASH
+static OSStatus spiFlashErase(uint32_t StartAddress, uint32_t EndAddress);
+#endif
 
 OSStatus MicoFlashInitialize( mico_flash_t flash )
 { 
   platform_log_trace();
   if(flash == MICO_INTERNAL_FLASH){
     return internalFlashInitialize();    
-  }else
+  }
+#ifdef USE_MICO_SPI_FLASH
+  else if(flash == MICO_SPI_FLASH){
+    if(sflash_handle.device_id)
+      return kNoErr;
+    else
+      return init_sflash( &sflash_handle, 0, SFLASH_WRITE_ALLOWED );
+  }
+#endif
+  else
     return kUnsupportedErr;
 }
 
@@ -84,15 +97,48 @@ OSStatus MicoFlashErase( mico_flash_t flash, uint32_t StartAddress, uint32_t End
   platform_log_trace();
   if(flash == MICO_INTERNAL_FLASH){
     return internalFlashErase(StartAddress, EndAddress);    
-  }else
+  }
+#ifdef USE_MICO_SPI_FLASH
+  else if(flash == MICO_SPI_FLASH){
+    return spiFlashErase(StartAddress, EndAddress); 
+  }
+#endif
+  else
     return kUnsupportedErr;
 }
 
-OSStatus MicoFlashWrite(mico_flash_t flash, volatile uint32_t* FlashAddress, uint32_t* Data ,uint32_t DataLength)
+OSStatus MicoFlashWrite(mico_flash_t flash, volatile uint32_t* FlashAddress, uint8_t* Data ,uint32_t DataLength)
 {
   if(flash == MICO_INTERNAL_FLASH){
-    return internalMicoFlashWrite(FlashAddress, Data, DataLength);    
-  }else
+    return internalFlashWrite(FlashAddress, (uint32_t *)Data, DataLength);    
+  }
+#ifdef USE_MICO_SPI_FLASH
+  else if(flash == MICO_SPI_FLASH){
+    int returnVal = sflash_write( &sflash_handle, *FlashAddress, Data, DataLength );
+    *FlashAddress += DataLength;
+    return returnVal;
+  }
+#endif
+  else
+    return kUnsupportedErr;
+}
+
+OSStatus MicoFlashRead(mico_flash_t flash, volatile uint32_t* FlashAddress, uint8_t* Data ,uint32_t DataLength)
+{
+  
+  if(flash == MICO_INTERNAL_FLASH){
+    memcpy(Data, (void *)(*FlashAddress), DataLength);
+    *FlashAddress += DataLength;
+    return kNoErr;
+  }
+#ifdef USE_MICO_SPI_FLASH
+  else if(flash == MICO_SPI_FLASH){
+    int returnVal = sflash_read( &sflash_handle, *FlashAddress, Data, DataLength );
+    *FlashAddress += DataLength;
+    return returnVal;
+  }
+#endif
+  else
     return kUnsupportedErr;
 }
 
@@ -100,19 +146,25 @@ OSStatus MicoFlashFinalize( mico_flash_t flash )
 {
   if(flash == MICO_INTERNAL_FLASH){
     return internalFlashFinalize();    
-  }else
+  }
+#ifdef USE_MICO_SPI_FLASH
+  else if(flash == MICO_SPI_FLASH){
+    sflash_handle.device_id = 0x0;
+    return kNoErr;
+  }
+#endif
+  else
     return kUnsupportedErr;
 }
-
 
 OSStatus internalFlashInitialize( void )
 { 
   platform_log_trace();
-    FLASH_Unlock(); 
-    /* Clear pending flags (if any) */
-    FLASH_ClearFlag(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | 
+  FLASH_Unlock(); 
+  /* Clear pending flags (if any) */
+  FLASH_ClearFlag(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | 
                   FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR|FLASH_FLAG_PGSERR);
-    return kNoErr;    
+  return kNoErr;    
 }
 
 OSStatus internalFlashErase(uint32_t StartAddress, uint32_t EndAddress)
@@ -120,15 +172,15 @@ OSStatus internalFlashErase(uint32_t StartAddress, uint32_t EndAddress)
   platform_log_trace();
   OSStatus err = kNoErr;
   uint32_t StartSector, EndSector, i = 0;
-
+  
   /* Get the sector where start the user flash area */
   StartSector = _GetSector(StartAddress);
   EndSector = _GetSector(EndAddress);
-
+  
   for(i = StartSector; i <= EndSector; i += 8)
   {
     /* Device voltage range supposed to be [2.7V to 3.6V], the operation will
-       be done by word */
+    be done by word */
     require_action(FLASH_EraseSector(i, VoltageRange_3) == FLASH_COMPLETE, exit, err = kWriteErr); 
   }
   
@@ -136,9 +188,31 @@ exit:
   return err;
 }
 
+#ifdef USE_MICO_SPI_FLASH
+OSStatus spiFlashErase(uint32_t StartAddress, uint32_t EndAddress)
+{
+  platform_log_trace();
+  OSStatus err = kNoErr;
+  uint32_t StartSector, EndSector, i = 0;
+  
+  /* Get the sector where start the user flash area */
+  StartSector = StartAddress>>12;
+  EndSector = EndAddress>>12;
+  
+  for(i = StartSector; i <= EndSector; i += 1)
+  {
+    /* Device voltage range supposed to be [2.7V to 3.6V], the operation will
+    be done by word */
+    require_action(sflash_sector_erase(&sflash_handle, i<<12) == kNoErr, exit, err = kWriteErr); 
+  }
+  
+exit:
+  return err;
+}
+#endif
 
 
-OSStatus internalMicoFlashWrite(volatile uint32_t* FlashAddress, uint32_t* Data ,uint32_t DataLength)
+OSStatus internalFlashWrite(volatile uint32_t* FlashAddress, uint32_t* Data ,uint32_t DataLength)
 {
   platform_log_trace();
   OSStatus err = kNoErr;
@@ -160,7 +234,7 @@ OSStatus internalMicoFlashWrite(volatile uint32_t* FlashAddress, uint32_t* Data 
   for (i = 0; (i < DataLength32/4) && (*FlashAddress <= (FLASH_END_ADDRESS-3)); i++)
   {
     /* Device voltage range supposed to be [2.7V to 3.6V], the operation will
-       be done by word */ 
+    be done by word */ 
     dataInRam = *(Data+i);
     require_action(FLASH_ProgramWord(*FlashAddress, dataInRam) == FLASH_COMPLETE, exit, err = kWriteErr); 
     require_action(*(uint32_t*)*FlashAddress == dataInRam, exit, err = kChecksumErr); 
@@ -171,7 +245,7 @@ OSStatus internalMicoFlashWrite(volatile uint32_t* FlashAddress, uint32_t* Data 
   /*Last bytes that cannot be write by a 32 bit word*/
   err = internalFlashByteWrite(FlashAddress, (uint8_t *)Data + i*4, DataLength32-i*4);
   require_noerr(err, exit);
-
+  
 exit:
   return err;
 }
@@ -188,35 +262,35 @@ OSStatus internalFlashByteWrite(__IO uint32_t* FlashAddress, uint8_t* Data ,uint
   uint32_t i = 0;
   uint32_t dataInRam;
   OSStatus err = kNoErr;
-
+  
   for (i = 0; (i < DataLength) && (*FlashAddress <= (FLASH_END_ADDRESS)); i++)
   {
     /* Device voltage range supposed to be [2.7V to 3.6V], the operation will
-       be done by word */ 
+    be done by word */ 
     dataInRam = *(uint8_t*)(Data+i);
     
     require_action(FLASH_ProgramByte(*FlashAddress, dataInRam) == FLASH_COMPLETE, exit, err = kWriteErr); 
     require_action(*(uint8_t*)*FlashAddress == dataInRam, exit, err = kChecksumErr); 
     *FlashAddress +=1;
   }
-
+  
 exit:
   return err;
 }
 
 /**
-  * @brief  Returns the write protection status of user flash area.
-  * @param  None
-  * @retval 0: No write protected sectors inside the user flash area
-  *         1: Some sectors inside the user flash area are write protected
-  */
+* @brief  Returns the write protection status of user flash area.
+* @param  None
+* @retval 0: No write protected sectors inside the user flash area
+*         1: Some sectors inside the user flash area are write protected
+*/
 uint16_t _PlatformFlashGetWriteProtectionStatus(void)
 {
   uint32_t UserStartSector = FLASH_Sector_1;
-
+  
   /* Get the sector where start the user flash area */
   UserStartSector = _GetSector(APPLICATION_START_ADDRESS);
-
+  
   /* Check if there are write protected sectors inside the user flash area */
   if ((FLASH_OB_GetWRP() >> (UserStartSector/8)) == (0xFFF >> (UserStartSector/8)))
   { /* No write protected sectors inside the user flash area */
@@ -229,43 +303,43 @@ uint16_t _PlatformFlashGetWriteProtectionStatus(void)
 }
 
 /**
-  * @brief  Disables the write protection of user flash area.
-  * @param  None
-  * @retval 1: Write Protection successfully disabled
-  *         2: Error: Flash write unprotection failed
-  */
+* @brief  Disables the write protection of user flash area.
+* @param  None
+* @retval 1: Write Protection successfully disabled
+*         2: Error: Flash write unprotection failed
+*/
 uint32_t _PlatformFlashDisableWriteProtection(void)
 {
   __IO uint32_t UserStartSector = FLASH_Sector_1, UserWrpSectors = OB_WRP_Sector_1;
-
+  
   /* Get the sector where start the user flash area */
   UserStartSector = _GetSector(APPLICATION_START_ADDRESS);
-
+  
   /* Mark all sectors inside the user flash area as non protected */  
   UserWrpSectors = 0xFFF-((1 << (UserStartSector/8))-1);
-   
+  
   /* Unlock the Option Bytes */
   FLASH_OB_Unlock();
-
+  
   /* Disable the write protection for all sectors inside the user flash area */
   FLASH_OB_WRPConfig(UserWrpSectors, DISABLE);
-
+  
   /* Start the Option Bytes programming process. */  
   if (FLASH_OB_Launch() != FLASH_COMPLETE)
   {
     /* Error: Flash write unprotection failed */
     return (2);
   }
-
+  
   /* Write Protection successfully disabled */
   return (1);
 }
 
 /**
-  * @brief  Gets the sector of a given address
-  * @param  Address: Flash address
-  * @retval The sector of a given address
-  */
+* @brief  Gets the sector of a given address
+* @param  Address: Flash address
+* @retval The sector of a given address
+*/
 static uint32_t _GetSector(uint32_t Address)
 {
   uint32_t sector = 0;
@@ -318,5 +392,5 @@ static uint32_t _GetSector(uint32_t Address)
   {
     sector = FLASH_Sector_11;  
   }
-    return sector;
+  return sector;
 }

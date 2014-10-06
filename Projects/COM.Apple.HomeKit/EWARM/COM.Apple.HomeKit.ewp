@@ -314,6 +314,7 @@
           <state>$PROJ_DIR$\..\..\..\Platform\include</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv</state>
+          <state>$PROJ_DIR$\..\..\..\Platform\Common\Drivers\spi_flash</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1403,6 +1404,9 @@
               </file>
             </group>
             <file>
+              <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\read_wifi_firmware.c</name>
+            </file>
+            <file>
               <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\wlan_platform.c</name>
             </file>
           </group>
@@ -1561,6 +1565,24 @@
       <group>
         <name>Cortex-M4</name>
       </group>
+      <group>
+        <name>Drivers</name>
+        <group>
+          <name>spi_flash</name>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Drivers\spi_flash\MICO_EVB_1.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Platform\Common\Drivers\spi_flash\spi_flash.c</name>
+          </file>
+        </group>
+      </group>
+      <group>
+        <name>IAR</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\Platform\Common\IAR\stdio_IAR.c</name>
+        </file>
+      </group>
     </group>
     <group>
       <name>EMW3162</name>
@@ -1572,15 +1594,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform_common_config.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\read_wifi_firmware.c</name>
-      </file>
-    </group>
-    <group>
-      <name>IAR</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\Platform\Common\IAR\stdio_IAR.c</name>
       </file>
     </group>
   </group>

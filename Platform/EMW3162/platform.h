@@ -276,8 +276,8 @@ typedef enum
 
 typedef enum
 {
-    MICO_SPI_FLASH_1,
-    MICO_INTERNAL_FLASH,
+  MICO_SPI_FLASH,
+  MICO_INTERNAL_FLASH,
 } mico_flash_t;
 
 #define STM32_UART_1 MICO_UART_1

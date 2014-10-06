@@ -13,6 +13,7 @@
 
 #include <stdio.h>
 #include "common.h"                     /* global project definition file   */
+#include "Serial.h"
 
 #define CNTLQ      0x11
 #define CNTLS      0x13

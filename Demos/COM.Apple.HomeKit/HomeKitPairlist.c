@@ -58,7 +58,8 @@ OSStatus HMReadPairList(pair_list_in_flash_t *pPairList)
   require(pPairList, exit);
 
   configInFlash = EX_PARA_START_ADDRESS;
-  memcpy(pPairList, (void *)configInFlash, sizeof(pair_list_in_flash_t));
+  err = MicoFlashRead(MICO_FLASH_FOR_EX_PARA, &configInFlash, (uint32_t *)pPairList, sizeof(pair_list_in_flash_t));
+  //memcpy(pPairList, (void *)configInFlash, sizeof(pair_list_in_flash_t));
 
 exit: 
   return err;
@@ -90,11 +91,13 @@ uint8_t * HMFindLTPK(char * name)
 {
   int i;
 
-  pair_list_in_flash_t *pairList = (pair_list_in_flash_t *)EX_PARA_START_ADDRESS;
+  //pair_list_in_flash_t *pairList = (pair_list_in_flash_t *)EX_PARA_START_ADDRESS;
+  pair_list_in_flash_t pairList;
+  HMReadPairList(&pairList);
 
   for(i=0; i<MAXPairNumber; i++){
-    if(strncmp(pairList->pairInfo[i].controllerName, name, 64) == 0)
-      return pairList->pairInfo[i].controllerLTPK;
+    if(strncmp(pairList.pairInfo[i].controllerName, name, 64) == 0)
+      return pairList.pairInfo[i].controllerLTPK;
   }
   return NULL;
 

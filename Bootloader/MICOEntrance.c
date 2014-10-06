@@ -26,9 +26,21 @@
 #include "platform_common_config.h"
 #include "stm32f2xx.h"
 #include "menu.h"
+#include "spi_flash.h"
+#include "Update_for_OTA.h"
 
 #define boot_log(M, ...) custom_log("BOOT", M, ##__VA_ARGS__)
 #define boot_log_trace() custom_log_trace("BOOT")
+
+typedef enum
+{
+  normal,
+  chipid_error,   //chipid_error
+  RDP_error,   //undefined
+  update_error,
+} Bootloader_status;
+
+Bootloader_status bootloader_status = normal;
 
 const char menu[] =
 "\r\n"
@@ -90,6 +102,10 @@ void startApplication(void)
   }  
 }
 
+extern void init_clocks(void);
+extern void init_memory(void);
+extern void init_architecture(void);
+
 void PlatformEasyLinkButtonClickedCallback(void)
 {
   startApplication();
@@ -106,36 +122,67 @@ void PlatformStandbyButtonClickedCallback(void)
   return;
 }
 
+void Update_error_callback(UPDATE_ERROR_TypeDef error_code)
+{
+  switch(error_code){
+    case PROGRAM_TARGET_FAILED:
+      // printf("\r\nUpdate target flash failed");
+      // bootloader_status = update_error; 
+      // while(1);
+    case ERASE_UPDATE_TAG_FAILED:
+      // printf("\r\nErase update tag failed");
+      // bootloader_status = update_error; 
+      // while(1);
+    case  ERASE_UPDATE_DATA_FAILED:
+      printf("\r\nUpdate failed");
+      bootloader_status = update_error;  
+    default:
+      break;
+  }
+}
+
 int main(void)
 {
-  OSStatus err = kNoErr;  
-  
+  OSStatus err;
+  sflash_handle_t sflash_handle;
+
   init_clocks();
   init_memory();
   init_architecture();
+  
+  update();
   
   MicoGpioInitialize((mico_gpio_t)BOOT_SEL, INPUT_PULL_UP);
   MicoGpioInitialize((mico_gpio_t)MFG_SEL, INPUT_HIGH_IMPEDANCE);
   
   /* BOOT_SEL = 1 => Normal start*/
-  if(MicoGpioInputGet(BOOT_SEL)==true)
+  if(MicoGpioInputGet((mico_gpio_t)BOOT_SEL)==true)
     startApplication();
   /* BOOT_SEL = 0, MFG_SEL = 0 => Normal start, MICO will enter MFG mode when "MicoInit" is called*/
-  else if(MicoGpioInputGet(MFG_SEL)==false)
+  else if(MicoGpioInputGet((mico_gpio_t)MFG_SEL)==false)
     startApplication();
   
   boot_log("Starting Bootloader");
   printf ( menu );
+
+  
+  /* Initialise the serial flash driver */
+  err = init_sflash( &sflash_handle, 0 ,SFLASH_WRITE_ALLOWED);
+  require_noerr(err, exit);
+  boot_log("SPI flash initialise success");
+
   while(1){                             
     Main_Menu ();
   }
-  
-  return err;
+
+exit:
+  boot_log("Bootloader exit with err: %d", err);
+  MicoSystemReboot();
 }
 
 int application_start(void)
 {
-  boot_log("Bootloader should nerver come here! Rebootint......");
+  boot_log("Bootloader should never come here! Rebootint......");
   MicoSystemReboot();
   return 0;
 }

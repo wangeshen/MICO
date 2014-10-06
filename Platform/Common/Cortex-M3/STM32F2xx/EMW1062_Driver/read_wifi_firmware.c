@@ -1,10 +1,11 @@
 /**
 ******************************************************************************
-* @file    crt0_IAR.h 
+* @file    read_wifi_firmware.h
 * @author  William Xu
 * @version V1.0.0
-* @date    16-Sep-2014
-* @brief   __low_level_init called by IAR before main.
+* @date    05-May-2014
+* @brief   This file provides function called by MICO when reading RF chip's
+*          firmware.
 ******************************************************************************
 *
 *  The MIT License
@@ -27,39 +28,44 @@
 *  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
 *  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ******************************************************************************
-*/
+*/ 
 
-#include "platform.h"
-//#include "bootloader.h"
-#include "crt0.h"
+#include "Common.h"
+#include "MicoPlatform.h"
+#include "platform_common_config.h"
 
-extern void* app_hdr_start_addr_loc;
-#define SCB_VTOR_ADDRESS         ( ( volatile unsigned long* ) 0xE000ED08 )
-#define APP_HDR_START_ADDR   ((unsigned char*)&app_hdr_start_addr_loc)
-
-int __low_level_init( void );
-
-/* This is the code that gets called on processor reset. To initialize the */
-/* device. */
-#pragma section=".intvec"
-int __low_level_init( void )
-{
-     extern void init_clocks(void);
-     extern void init_memory(void);
-     /* IAR allows init functions in __low_level_init(), but it is run before global
-      * variables have been initialised, so the following init still needs to be done
-      * When using GCC, this is done in crt0_GCC.c
-      */
-     
-#ifdef BOOTLOADER  
-      /* Set the Vector Table base location at 0x20000000 */ 
-     *SCB_VTOR_ADDRESS = 0x20000000;
-#else
-     /* Setup the interrupt vectors address */
-     *SCB_VTOR_ADDRESS = (unsigned long )__section_begin(".intvec");
-     init_clocks();
-     init_memory();
+#ifndef MIN
+#define MIN(a,b) (((a) < (b))?(a):(b))
 #endif
 
-     return 1; /* return 1 to force memory init */
+const uint8_t *wifi_firmware_image2 = (uint8_t *)DRIVER_START_ADDRESS;
+
+static uint32_t image_size = DRIVER_FLASH_SIZE;
+
+uint32_t platform_get_wifi_image_size(void)
+{
+    uint32_t FlashAddress = DRIVER_START_ADDRESS + DRIVER_FLASH_SIZE - 0x4;
+    uint8_t imageTail;
+
+    MicoFlashRead(MICO_FLASH_FOR_DRIVER, &FlashAddress, &imageTail, 4);
+    while(imageTail == 0xFFFFFFFF) {
+        image_size-= 4;
+        FlashAddress -=8;
+        MicoFlashRead(MICO_FLASH_FOR_DRIVER, &FlashAddress, &imageTail, 4);
+    }
+    
+    return image_size;
 }
+
+uint32_t platform_get_wifi_image(unsigned char* buffer, uint32_t size, uint32_t offset)
+{
+    uint32_t buffer_size;
+    uint32_t FlashAddress = DRIVER_START_ADDRESS;
+    
+    buffer_size = MIN(size, (image_size - offset));
+    FlashAddress += offset;
+    
+    MicoFlashRead(MICO_FLASH_FOR_DRIVER, &FlashAddress, buffer, buffer_size);
+    return buffer_size;
+}
+

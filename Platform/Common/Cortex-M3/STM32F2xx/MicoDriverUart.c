@@ -78,7 +78,10 @@ typedef struct
  ******************************************************/
 
 static uart_interface_t uart_interfaces[NUMBER_OF_UART_INTERFACES];
+
+#ifndef NO_MICO_RTOS
 static mico_uart_t current_uart;
+#endif
 
 /******************************************************
  *               Function Declarations
