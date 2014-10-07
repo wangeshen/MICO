@@ -25,5 +25,5 @@ typedef enum
   ERASE_UPDATE_DATA_FAILED,
 } UPDATE_ERROR_TypeDef;
 
-void update(void);
+OSStatus update(void);
 

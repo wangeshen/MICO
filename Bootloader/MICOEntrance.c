@@ -122,25 +122,6 @@ void PlatformStandbyButtonClickedCallback(void)
   return;
 }
 
-void Update_error_callback(UPDATE_ERROR_TypeDef error_code)
-{
-  switch(error_code){
-    case PROGRAM_TARGET_FAILED:
-      // printf("\r\nUpdate target flash failed");
-      // bootloader_status = update_error; 
-      // while(1);
-    case ERASE_UPDATE_TAG_FAILED:
-      // printf("\r\nErase update tag failed");
-      // bootloader_status = update_error; 
-      // while(1);
-    case  ERASE_UPDATE_DATA_FAILED:
-      printf("\r\nUpdate failed");
-      bootloader_status = update_error;  
-    default:
-      break;
-  }
-}
-
 int main(void)
 {
   OSStatus err;

@@ -28,7 +28,7 @@
 
 #define APP_INFO   "mxchipWNet SPP Demo based on MICO OS"
 
-#define FIRMWARE_REVISION   "MICO_SPP_1_4"
+#define FIRMWARE_REVISION   "MICO_SPP_2_1"
 #define MANUFACTURER        "MXCHIP Inc."
 #define SERIAL_NUMBER       "20140606"
 #define PROTOCOL            "com.mxchip.spp"

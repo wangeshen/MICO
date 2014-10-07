@@ -27,6 +27,9 @@ typedef int Log_Status;
 #define MIN(a,b) (((a) < (b))?(a):(b))
 #endif
 
+#define SizePerRW 4096   /* Bootloader need 2xSizePerRW RAM heap size to operate, 
+                            but it can boost the setup. */
+
 uint32_t destStartAddress, destEndAddress;
 mico_flash_t destFlashType;
 
@@ -36,102 +39,134 @@ extern void Update_error_callback(UPDATE_ERROR_TypeDef error_code);
 #define update_log(M, ...) custom_log("UPDATE", M, ##__VA_ARGS__)
 #define update_log_trace() custom_log_trace("UPDATE")
 
-void update(void)
+OSStatus update(void)
 {
   boot_table_t updateLog;
   uint32_t i, j, size;
   uint8_t *data = NULL;
   uint8_t *newData = NULL;
-  uint8_t *paraSaveInRam;
+  uint8_t *paraSaveInRam = NULL;
   uint32_t updateStartAddress;
   uint32_t destStartAddress_tmp;
   uint32_t paraStartAddress;
+  OSStatus err = kNoErr;
   
   MicoFlashInitialize( (mico_flash_t)MICO_FLASH_FOR_UPDATE );
-  data = malloc(4096);
-  memset(data, 0xFF, 4096);
+  data = malloc(SizePerRW);
+  require_action(data, exit, err = kNoMemoryErr);
+  memset(data, 0xFF, SizePerRW);
   
   updateStartAddress = UPDATE_START_ADDRESS;
   
   paraStartAddress = PARA_START_ADDRESS;  
-  //updateLog = (boot_table_t *)LogAddress;
-  MicoFlashRead(MICO_FLASH_FOR_PARA, &paraStartAddress, (uint8_t *)&updateLog, sizeof(boot_table_t));
+  err = MicoFlashRead(MICO_FLASH_FOR_PARA, &paraStartAddress, (uint8_t *)&updateLog, sizeof(boot_table_t));
+  require_noerr(err, exit);
 
   /*Not a correct record*/
   if(updateLogCheck(&updateLog) != Log_NeedUpdate){
-    size = UPDATE_FLASH_SIZE/4096;
+    size = UPDATE_FLASH_SIZE/SizePerRW;
     for(i = 0; i <= size; i++){
-      if( i==size )
-        MicoFlashRead(MICO_FLASH_FOR_UPDATE, &updateStartAddress, data , UPDATE_FLASH_SIZE%1024);
-      else
-        MicoFlashRead(MICO_FLASH_FOR_UPDATE, &updateStartAddress, data , 1024);
+      if( i==size ){
+        err = MicoFlashRead(MICO_FLASH_FOR_UPDATE, &updateStartAddress, data , UPDATE_FLASH_SIZE%SizePerRW);
+        require_noerr(err, exit);
+      }
+      else{
+        err = MicoFlashRead(MICO_FLASH_FOR_UPDATE, &updateStartAddress, data , SizePerRW);
+        require_noerr(err, exit);
+      }
       
-      for(j=0; j<4096; j++){
+      for(j=0; j<SizePerRW; j++){
         if(data[j] != 0xFF){
           update_log("Update data need to be erased");
-          MicoFlashInitialize( MICO_FLASH_FOR_UPDATE );
-          if(MicoFlashErase( MICO_FLASH_FOR_UPDATE, UPDATE_START_ADDRESS, UPDATE_END_ADDRESS )){
-            Update_error_callback( ERASE_UPDATE_DATA_FAILED );
-          };
-          MicoFlashFinalize( MICO_FLASH_FOR_UPDATE );
+          err = MicoFlashInitialize( MICO_FLASH_FOR_UPDATE );
+          require_noerr(err, exit);
+          err = MicoFlashErase( MICO_FLASH_FOR_UPDATE, UPDATE_START_ADDRESS, UPDATE_END_ADDRESS );
+          require_noerr(err, exit);
+          err = MicoFlashFinalize( MICO_FLASH_FOR_UPDATE );
+          require_noerr(err, exit);
           break;
         }
       }
     }
-    free(data);
-    return;
+    goto exit;
   }
+  
+  update_log("Write OTA data to destination, type:%d, from %d to %d, length 0x%x", destFlashType, destStartAddress, destEndAddress, updateLog.length);
   
   destStartAddress_tmp = destStartAddress;
   updateStartAddress = UPDATE_START_ADDRESS;
   
-  MicoFlashInitialize( destFlashType );
-  MicoFlashErase( destFlashType, destStartAddress, destEndAddress );
-  size = UPDATE_FLASH_SIZE/4096;
-  newData = malloc(4096);
+  err = MicoFlashInitialize( destFlashType );
+  require_noerr(err, exit);
+  err = MicoFlashErase( destFlashType, destStartAddress, destEndAddress );
+  require_noerr(err, exit);
+  size = (updateLog.length)/SizePerRW;
+  newData = malloc(SizePerRW);
+  require_action(newData, exit, err = kNoMemoryErr);
   for(i = 0; i <= size; i++){
-    if( i==size ){
-      MicoFlashRead(MICO_FLASH_FOR_UPDATE, &updateStartAddress, data , UPDATE_FLASH_SIZE%4096);
-      MicoFlashWrite(destFlashType, &destStartAddress_tmp, data, UPDATE_FLASH_SIZE%4096);
-      destStartAddress_tmp -= UPDATE_FLASH_SIZE%4096;
-      MicoFlashRead(destFlashType, &destStartAddress_tmp, newData , UPDATE_FLASH_SIZE%4096);
-      if(memcmp(data, newData, UPDATE_FLASH_SIZE%4096))
-        Update_error_callback(PROGRAM_TARGET_FAILED);
+    if( i==size && (updateLog.length)%SizePerRW){
+      err = MicoFlashRead(MICO_FLASH_FOR_UPDATE, &updateStartAddress, data , (updateLog.length)%SizePerRW);
+      require_noerr(err, exit);
+      err = MicoFlashInitialize( destFlashType );
+      require_noerr(err, exit);
+      err = MicoFlashWrite(destFlashType, &destStartAddress_tmp, data, (updateLog.length)%SizePerRW);
+      require_noerr(err, exit);
+      destStartAddress_tmp -= (updateLog.length)%SizePerRW;
+      err = MicoFlashRead(destFlashType, &destStartAddress_tmp, newData , (updateLog.length)%SizePerRW);
+      require_noerr(err, exit);
+      err = memcmp(data, newData, (updateLog.length)%SizePerRW);
+      require_noerr_action(err, exit, err = kWriteErr);
     }
     else{
-      MicoFlashRead(MICO_FLASH_FOR_UPDATE, &updateStartAddress, data , 4096);
-      MicoFlashWrite(destFlashType, &destStartAddress_tmp, data, 4096);
-      destStartAddress_tmp -= 4096;
-      MicoFlashRead(destFlashType, &destStartAddress_tmp, newData , 4096);
-      if(memcmp(data, newData, 4096))
-        Update_error_callback(PROGRAM_TARGET_FAILED);      
+      err = MicoFlashRead(MICO_FLASH_FOR_UPDATE, &updateStartAddress, data , SizePerRW);
+      require_noerr(err, exit);
+      err = MicoFlashInitialize( destFlashType );
+      require_noerr(err, exit);
+      err = MicoFlashWrite(destFlashType, &destStartAddress_tmp, data, SizePerRW);
+      require_noerr(err, exit);
+      destStartAddress_tmp -= SizePerRW;
+      err = MicoFlashRead(destFlashType, &destStartAddress_tmp, newData , SizePerRW);
+      require_noerr(err, exit);
+      err = memcmp(data, newData, SizePerRW);
+      require_noerr_action(err, exit, err = kWriteErr); 
     }
-  }  
+  } 
+  update_log("Update start to clear data...");
+  
   
   updateStartAddress = UPDATE_START_ADDRESS;
   
+  if(data) free(data);
+  data = NULL;
+  if(newData) free(newData);
+  newData = NULL;
+  
   paraSaveInRam = (uint8_t *)malloc(PARA_FLASH_SIZE);
-  MicoFlashRead(MICO_FLASH_FOR_PARA, &paraStartAddress, paraSaveInRam , PARA_FLASH_SIZE);
+  require_action(paraSaveInRam, exit, err = kNoMemoryErr);
+  paraStartAddress = PARA_START_ADDRESS;
+  err = MicoFlashRead(MICO_FLASH_FOR_PARA, &paraStartAddress, paraSaveInRam , PARA_FLASH_SIZE);
+  require_noerr(err, exit);
   memset(paraSaveInRam, 0xff, sizeof(boot_table_t));
-  if(MicoFlashErase(MICO_FLASH_FOR_PARA, PARA_START_ADDRESS, PARA_END_ADDRESS)){
-    Update_error_callback(ERASE_UPDATE_TAG_FAILED);
-  };
+  err = MicoFlashErase(MICO_FLASH_FOR_PARA, PARA_START_ADDRESS, PARA_END_ADDRESS);
+  require_noerr(err, exit);
   
   paraStartAddress = PARA_START_ADDRESS;
-  if(MicoFlashWrite(MICO_FLASH_FOR_PARA, &paraStartAddress, paraSaveInRam, PARA_FLASH_SIZE)){
-    Update_error_callback(ERASE_UPDATE_TAG_FAILED);
-  };
-  free (paraSaveInRam);
+  err = MicoFlashWrite(MICO_FLASH_FOR_PARA, &paraStartAddress, paraSaveInRam, PARA_FLASH_SIZE);
+  require_noerr(err, exit);
   
-  if(MicoFlashErase(MICO_FLASH_FOR_PARA, UPDATE_START_ADDRESS, UPDATE_END_ADDRESS)){
-    Update_error_callback(ERASE_UPDATE_DATA_FAILED);
-  };
+  err = MicoFlashErase(MICO_FLASH_FOR_UPDATE, UPDATE_START_ADDRESS, UPDATE_END_ADDRESS);
+  require_noerr(err, exit);
+  update_log("Update success");
   
+exit:
+  if(err != kNoErr) update_log("Update exit with err = %d", err);
+  if(data) free(data);
+  if(newData) free(newData);
+  if(paraSaveInRam) free(paraSaveInRam);
   MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
   MicoFlashFinalize(destFlashType);
+  return err;
 }
-
-
 
 Log_Status updateLogCheck(boot_table_t *updateLog)
 {

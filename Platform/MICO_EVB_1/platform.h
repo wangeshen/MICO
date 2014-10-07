@@ -46,10 +46,9 @@ extern "C"
  *                    Constants
  ******************************************************/
   
-#define HARDWARE_REVISION   "3162"
-#define DEFAULT_NAME        "EMW3162 Module"
-#define MODEL               "EMW3162"
-
+#define HARDWARE_REVISION   "1062_1"
+#define DEFAULT_NAME        "EMW1062 EVB"
+#define MODEL               "MICO_EVB_1"
    
 /******************************************************
  *                   Enumerations
