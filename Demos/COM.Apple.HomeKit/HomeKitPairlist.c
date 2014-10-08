@@ -41,7 +41,7 @@ OSStatus HMClearPairList(void)
   require_noerr(err, exit);
   err = MicoFlashErase(MICO_FLASH_FOR_EX_PARA, exParaStartAddress, exParaEndAddress);
   require_noerr(err, exit);
-  err = MicoFlashWrite(MICO_FLASH_FOR_EX_PARA, &exParaStartAddress, (uint32_t *)pairList, sizeof(pair_list_in_flash_t));
+  err = MicoFlashWrite(MICO_FLASH_FOR_EX_PARA, &exParaStartAddress, (uint8_t *)pairList, sizeof(pair_list_in_flash_t));
   require_noerr(err, exit);
   err = MicoFlashFinalize(MICO_FLASH_FOR_EX_PARA);
   require_noerr(err, exit);
@@ -58,7 +58,7 @@ OSStatus HMReadPairList(pair_list_in_flash_t *pPairList)
   require(pPairList, exit);
 
   configInFlash = EX_PARA_START_ADDRESS;
-  err = MicoFlashRead(MICO_FLASH_FOR_EX_PARA, &configInFlash, (uint32_t *)pPairList, sizeof(pair_list_in_flash_t));
+  err = MicoFlashRead(MICO_FLASH_FOR_EX_PARA, &configInFlash, (uint8_t *)pPairList, sizeof(pair_list_in_flash_t));
   //memcpy(pPairList, (void *)configInFlash, sizeof(pair_list_in_flash_t));
 
 exit: 
@@ -77,7 +77,7 @@ OSStatus HMUpdatePairList(pair_list_in_flash_t *pPairList)
   require_noerr(err, exit);
   err = MicoFlashErase(MICO_FLASH_FOR_EX_PARA, exParaStartAddress, exParaEndAddress);
   require_noerr(err, exit);
-  err = MicoFlashWrite(MICO_FLASH_FOR_EX_PARA, &exParaStartAddress, (uint32_t *)pPairList, sizeof(pair_list_in_flash_t));
+  err = MicoFlashWrite(MICO_FLASH_FOR_EX_PARA, &exParaStartAddress, (uint8_t *)pPairList, sizeof(pair_list_in_flash_t));
   require_noerr(err, exit);
   err = MicoFlashFinalize(MICO_FLASH_FOR_EX_PARA);
   require_noerr(err, exit);
@@ -86,7 +86,7 @@ exit:
   return err;
 }
 
-
+static uint8_t foundControllerLTPK[32];
 uint8_t * HMFindLTPK(char * name)
 {
   int i;
@@ -97,7 +97,8 @@ uint8_t * HMFindLTPK(char * name)
 
   for(i=0; i<MAXPairNumber; i++){
     if(strncmp(pairList.pairInfo[i].controllerName, name, 64) == 0)
-      return pairList.pairInfo[i].controllerLTPK;
+      memcpy(foundControllerLTPK, pairList.pairInfo[i].controllerLTPK, 32);
+      return foundControllerLTPK;
   }
   return NULL;
 

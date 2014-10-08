@@ -26,7 +26,6 @@
 #include "platform_common_config.h"
 #include "stm32f2xx.h"
 #include "menu.h"
-#include "spi_flash.h"
 #include "Update_for_OTA.h"
 
 #define boot_log(M, ...) custom_log("BOOT", M, ##__VA_ARGS__)
@@ -46,7 +45,7 @@ const char menu[] =
 "\r\n"
 "+***************(C) COPYRIGHT 2014 MXCHIP corporation************+\r\n"
 "|               MICO Common Bootloader                           |\r\n"
-"+ command ----------------+ function ----------------------------+\r\n"
+"+ command -----------+ function ---------------------------------+\r\n"
 "| 1:FWUPDATE <-a>    | update the firmware from UART using Ymodem|\r\n"
 "| 3:BOOT             | excute the current firmware               |\r\n"
 "| 4:REBOOT           | Reboot                                    |\r\n"
@@ -109,7 +108,6 @@ extern void init_architecture(void);
 int main(void)
 {
   OSStatus err;
-  sflash_handle_t sflash_handle;
 
   init_clocks();
   init_memory();
@@ -129,12 +127,6 @@ int main(void)
   
   boot_log("Starting Bootloader");
   printf ( menu );
-
-  
-  /* Initialise the serial flash driver */
-  err = init_sflash( &sflash_handle, 0 ,SFLASH_WRITE_ALLOWED);
-  require_noerr(err, exit);
-  boot_log("SPI flash initialise success");
 
   while(1){                             
     Main_Menu ();

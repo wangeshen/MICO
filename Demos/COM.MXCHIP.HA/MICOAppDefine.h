@@ -6,7 +6,7 @@
 
 #define APP_INFO   "mxchipWNet HA Demo based on MICO OS"
 
-#define FIRMWARE_REVISION   "MICO_HA_3_1"
+#define FIRMWARE_REVISION   "MICO_HA_4_0"
 #define MANUFACTURER        "MXCHIP Inc."
 #define SERIAL_NUMBER       "20140606"
 #define PROTOCOL            "com.mxchip.ha"

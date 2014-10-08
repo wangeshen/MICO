@@ -225,7 +225,7 @@ OSStatus _ota_process(uint8_t *inBuf, int inBufLen, int *inSocketFd, mico_Contex
   total_len -= bin_len;
 
   if (bin_len>0)
-    MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flash_addr, (uint32_t *)p_bin, bin_len);
+    MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flash_addr, p_bin, bin_len);
 
   while (total_len>0) {
     FD_ZERO(&readfds);
@@ -237,7 +237,7 @@ OSStatus _ota_process(uint8_t *inBuf, int inBufLen, int *inSocketFd, mico_Contex
     if (FD_ISSET(*inSocketFd, &readfds)) {
       bin_len = recv(*inSocketFd, (char*)p_bin, 1024, 0);
       require_action(bin_len >= 0, exit, err = kConnectionErr);
-      MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flash_addr, (uint32_t *)p_bin, bin_len);
+      MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flash_addr, p_bin, bin_len);
       total_len-=bin_len;
     }
   }

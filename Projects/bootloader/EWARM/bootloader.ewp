@@ -713,7 +713,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$PROJ_DIR$\bootloader.icf</state>
+          <state>$PROJ_DIR$\..\..\..\Platform\EMW3162\bootloaderLinkerForIAR.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -1657,7 +1657,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$PROJ_DIR$\bootloader.icf</state>
+          <state>$PROJ_DIR$\..\..\..\Platform\MICO_EVB_1\bootloaderLinkerForIAR.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -2544,13 +2544,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform_common_config.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\read_wifi_firmware.c</name>
-        <excluded>
-          <configuration>EMW3162</configuration>
-          <configuration>MICO_EVB_1</configuration>
-        </excluded>
       </file>
     </group>
     <group>

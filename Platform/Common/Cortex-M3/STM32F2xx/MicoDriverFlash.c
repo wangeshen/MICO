@@ -36,7 +36,9 @@
 #include "Platform_common_config.h"
 #include "stm32f2xx.h"
 #include "stdio.h"
+#ifdef USE_MICO_SPI_FLASH
 #include "spi_flash.h"
+#endif
 
 /* Private constants --------------------------------------------------------*/
 #define ADDR_FLASH_SECTOR_0     ((uint32_t)0x08000000) /* Base @ of Sector 0, 16 Kbyte */

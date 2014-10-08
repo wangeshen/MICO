@@ -228,7 +228,7 @@ int HKSocketReadHTTPHeader( int inSock, HTTPHeader_t *inHeader, security_session
     hkhttp_utils_log("Receive OTA data!");        
     err = MicoFlashInitialize(MICO_FLASH_FOR_UPDATE);
     require_noerr(err, exit);
-    err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint32_t *)end, inHeader->extraDataLen);
+    err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint8_t *)end, inHeader->extraDataLen);
     require_noerr(err, exit);
   }else{
     inHeader->extraDataPtr = calloc(inHeader->contentLength, sizeof(uint8_t));
@@ -285,7 +285,7 @@ int HKSocketReadHTTPBody  ( int inSock, HTTPHeader_t *inHeader, security_session
       else if( readResult == 0 ) { err = kConnectionErr; goto exit; }
       else goto exit;
       
-      err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint32_t *)inHeader->otaDataPtr, readResult);
+      err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint8_t *)inHeader->otaDataPtr, readResult);
       require_noerr(err, exit);
       
       free(inHeader->otaDataPtr);
