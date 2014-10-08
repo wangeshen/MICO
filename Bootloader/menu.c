@@ -195,7 +195,7 @@ void Main_Menu(void)
       }
 
       printf ("\n\rUpdating......\n\r");
-      SerialDownload(MICO_FLASH_FOR_APPLICATION, APPLICATION_START_ADDRESS, USER_FLASH_SIZE);
+      SerialDownload(MICO_FLASH_FOR_APPLICATION, APPLICATION_START_ADDRESS, APPLICATION_FLASH_SIZE);
       break;													   	
     }
     /***************** Command: Update the bootloader  *************************/

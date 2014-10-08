@@ -244,7 +244,7 @@ int sflash_write( const sflash_handle_t* const handle, unsigned long device_addr
     {
       while (NumOfPage--)
       {
-        status = sflash_write_page( handle, device_address, data_addr, sFLASH_SPI_PAGESIZE );
+        status = sflash_write_page( handle, device_address, data_addr_ptr, sFLASH_SPI_PAGESIZE );
         //sFLASH_WritePage(pBuffer, WriteAddr, sFLASH_SPI_PAGESIZE);
         device_address +=  sFLASH_SPI_PAGESIZE;
         data_addr_ptr += sFLASH_SPI_PAGESIZE;

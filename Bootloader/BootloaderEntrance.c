@@ -106,22 +106,6 @@ extern void init_clocks(void);
 extern void init_memory(void);
 extern void init_architecture(void);
 
-void PlatformEasyLinkButtonClickedCallback(void)
-{
-  startApplication();
-  return;
-}
-
-void PlatformEasyLinkButtonLongPressedCallback(void)
-{
-  return;
-}
-
-void PlatformStandbyButtonClickedCallback(void)
-{
-  return;
-}
-
 int main(void)
 {
   OSStatus err;

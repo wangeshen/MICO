@@ -30,6 +30,10 @@ typedef int Log_Status;
 #define SizePerRW 4096   /* Bootloader need 2xSizePerRW RAM heap size to operate, 
                             but it can boost the setup. */
 
+uint8_t data[SizePerRW];
+uint8_t newData[SizePerRW];
+uint8_t paraSaveInRam[PARA_FLASH_SIZE];
+
 uint32_t destStartAddress, destEndAddress;
 mico_flash_t destFlashType;
 
@@ -43,18 +47,15 @@ OSStatus update(void)
 {
   boot_table_t updateLog;
   uint32_t i, j, size;
-  uint8_t *data = NULL;
-  uint8_t *newData = NULL;
-  uint8_t *paraSaveInRam = NULL;
   uint32_t updateStartAddress;
   uint32_t destStartAddress_tmp;
   uint32_t paraStartAddress;
   OSStatus err = kNoErr;
   
   MicoFlashInitialize( (mico_flash_t)MICO_FLASH_FOR_UPDATE );
-  data = malloc(SizePerRW);
-  require_action(data, exit, err = kNoMemoryErr);
   memset(data, 0xFF, SizePerRW);
+  memset(newData, 0xFF, SizePerRW);
+  memset(paraSaveInRam, 0xFF, PARA_FLASH_SIZE);
   
   updateStartAddress = UPDATE_START_ADDRESS;
   
@@ -101,8 +102,6 @@ OSStatus update(void)
   err = MicoFlashErase( destFlashType, destStartAddress, destEndAddress );
   require_noerr(err, exit);
   size = (updateLog.length)/SizePerRW;
-  newData = malloc(SizePerRW);
-  require_action(newData, exit, err = kNoMemoryErr);
   for(i = 0; i <= size; i++){
     if( i==size && (updateLog.length)%SizePerRW){
       err = MicoFlashRead(MICO_FLASH_FOR_UPDATE, &updateStartAddress, data , (updateLog.length)%SizePerRW);
@@ -132,24 +131,15 @@ OSStatus update(void)
     }
   } 
   update_log("Update start to clear data...");
-  
-  
-  updateStartAddress = UPDATE_START_ADDRESS;
-  
-  if(data) free(data);
-  data = NULL;
-  if(newData) free(newData);
-  newData = NULL;
-  
-  paraSaveInRam = (uint8_t *)malloc(PARA_FLASH_SIZE);
-  require_action(paraSaveInRam, exit, err = kNoMemoryErr);
+    
   paraStartAddress = PARA_START_ADDRESS;
-  err = MicoFlashRead(MICO_FLASH_FOR_PARA, &paraStartAddress, paraSaveInRam , PARA_FLASH_SIZE);
+  err = MicoFlashRead(MICO_FLASH_FOR_PARA, &paraStartAddress, paraSaveInRam, PARA_FLASH_SIZE);
   require_noerr(err, exit);
   memset(paraSaveInRam, 0xff, sizeof(boot_table_t));
+  
   err = MicoFlashErase(MICO_FLASH_FOR_PARA, PARA_START_ADDRESS, PARA_END_ADDRESS);
   require_noerr(err, exit);
-  
+
   paraStartAddress = PARA_START_ADDRESS;
   err = MicoFlashWrite(MICO_FLASH_FOR_PARA, &paraStartAddress, paraSaveInRam, PARA_FLASH_SIZE);
   require_noerr(err, exit);
@@ -160,9 +150,6 @@ OSStatus update(void)
   
 exit:
   if(err != kNoErr) update_log("Update exit with err = %d", err);
-  if(data) free(data);
-  if(newData) free(newData);
-  if(paraSaveInRam) free(paraSaveInRam);
   MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
   MicoFlashFinalize(destFlashType);
   return err;
@@ -193,7 +180,7 @@ Log_Status updateLogCheck(boot_table_t *updateLog)
       destStartAddress = APPLICATION_START_ADDRESS;
       destEndAddress = APPLICATION_END_ADDRESS;
       destFlashType = MICO_FLASH_FOR_APPLICATION;
-      if(updateLog->length > USER_FLASH_SIZE)
+      if(updateLog->length > APPLICATION_FLASH_SIZE)
         return Log_dataLengthOverFlow;
     }
     else if(updateLog->type == 'D'){
