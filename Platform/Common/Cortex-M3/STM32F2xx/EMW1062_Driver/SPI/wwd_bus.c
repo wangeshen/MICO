@@ -22,8 +22,6 @@
 
 #define DMA_TIMEOUT_LOOPS      (10000000)
 
-#define DMA1_3_IRQ_CHANNEL     ((uint8_t)DMA1_Stream3_IRQn)
-
 /**
  * Transfer direction for the mico platform bus interface
  */
@@ -79,7 +77,7 @@ static void spi_irq_handler( void* arg )
 void dma_irq( void )
 {
     /* Clear interrupt */
-    DMA1->LIFCR = (uint32_t) (0x3F << 22);
+    DMA_ClearITPendingBit(SPIX_DMA_RX_STREAM, SPIX_DMA_RX_TCIT);
     mico_rtos_set_semaphore( &spi_transfer_finished_semaphore );
 }
 
@@ -100,7 +98,7 @@ OSStatus host_platform_bus_init( void )
     RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_DMA1, ENABLE );
 
     /* Enable SPI_SLAVE Periph clock */
-    RCC_APB1PeriphClockCmd( RCC_APB1Periph_SPI2, ENABLE );
+    RCC_APB1PeriphClockCmd( SPIX_CLK, ENABLE );
 
     /* Enable GPIO Bank B & C */
     RCC_AHB1PeriphClockCmd( SPI_BUS_CLOCK_BANK_CLK | SPI_BUS_MISO_BANK_CLK | SPI_BUS_MOSI_BANK_CLK | SPI_BUS_CS_BANK_CLK | SPI_IRQ_CLK, ENABLE );
@@ -124,9 +122,9 @@ OSStatus host_platform_bus_init( void )
     gpio_init_structure.GPIO_Speed = GPIO_Speed_100MHz;
     gpio_init_structure.GPIO_Pin = ( 1 << SPI_BUS_CLOCK_PIN ) | ( 1 << SPI_BUS_MISO_PIN ) | ( 1 << SPI_BUS_MOSI_PIN );
     GPIO_Init( SPI_BUS_CLOCK_BANK, &gpio_init_structure );
-    GPIO_PinAFConfig( SPI_BUS_CLOCK_BANK, SPI_BUS_CLOCK_PIN, GPIO_AF_SPI2 );
-    GPIO_PinAFConfig( SPI_BUS_MISO_BANK, SPI_BUS_MISO_PIN, GPIO_AF_SPI2 );
-    GPIO_PinAFConfig( SPI_BUS_MOSI_BANK, SPI_BUS_MOSI_PIN, GPIO_AF_SPI2 );
+    GPIO_PinAFConfig( SPI_BUS_CLOCK_BANK, SPI_BUS_CLOCK_PIN, SPIX_AF );
+    GPIO_PinAFConfig( SPI_BUS_MISO_BANK, SPI_BUS_MISO_PIN, SPIX_AF );
+    GPIO_PinAFConfig( SPI_BUS_MOSI_BANK, SPI_BUS_MOSI_PIN, SPIX_AF );
 
     /* Setup SPI slave select GPIOs */
     gpio_init_structure.GPIO_Mode = GPIO_Mode_OUT;
@@ -143,10 +141,10 @@ OSStatus host_platform_bus_init( void )
     MicoGpioInitialize( (mico_gpio_t)WL_GPIO1, OUTPUT_PUSH_PULL );
     MicoGpioOutputLow( (mico_gpio_t)WL_GPIO1 );
 
-    /* Setup DMA for SPI2 RX */
-    DMA_DeInit( DMA1_Stream3 );
+    /* Setup DMA for SPIX RX */
+    DMA_DeInit( SPIX_DMA_RX_STREAM );
     dma_init_structure.DMA_Channel = DMA_Channel_0;
-    dma_init_structure.DMA_PeripheralBaseAddr = (uint32_t) &SPI2->DR;
+    dma_init_structure.DMA_PeripheralBaseAddr = (uint32_t) &SPIX->DR;
     dma_init_structure.DMA_Memory0BaseAddr = 0;
     dma_init_structure.DMA_DIR = DMA_DIR_PeripheralToMemory;
     dma_init_structure.DMA_BufferSize = 0;
@@ -160,12 +158,12 @@ OSStatus host_platform_bus_init( void )
     dma_init_structure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
     dma_init_structure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
     dma_init_structure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-    DMA_Init( DMA1_Stream3, &dma_init_structure );
+    DMA_Init( SPIX_DMA_RX_STREAM, &dma_init_structure );
 
-    /* Setup DMA for SPI2 TX */
-    DMA_DeInit( DMA1_Stream4 );
+    /* Setup DMA for SPIX TX */
+    DMA_DeInit( SPIX_DMA_TX_STREAM );
     dma_init_structure.DMA_Channel = DMA_Channel_0;
-    dma_init_structure.DMA_PeripheralBaseAddr = (uint32_t) &SPI2->DR;
+    dma_init_structure.DMA_PeripheralBaseAddr = (uint32_t) &SPIX->DR;
     dma_init_structure.DMA_Memory0BaseAddr = 0;
     dma_init_structure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
     dma_init_structure.DMA_BufferSize = 0;
@@ -179,20 +177,20 @@ OSStatus host_platform_bus_init( void )
     dma_init_structure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
     dma_init_structure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
     dma_init_structure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-    DMA_Init( DMA1_Stream4, &dma_init_structure );
+    DMA_Init( SPIX_DMA_TX_STREAM, &dma_init_structure );
 
     /* Must be lower priority than the value of configMAX_SYSCALL_INTERRUPT_PRIORITY */
     /* otherwise FreeRTOS will not be able to mask the interrupt */
     /* keep in mind that ARMCM3 interrupt priority logic is inverted, the highest value */
     /* is the lowest priority */
-    nvic_init_structure.NVIC_IRQChannel                   = DMA1_3_IRQ_CHANNEL;
+    nvic_init_structure.NVIC_IRQChannel                   = SPIX_DMA_RX_IRQ_CHANNEL;
     nvic_init_structure.NVIC_IRQChannelPreemptionPriority = (uint8_t) 0x3;
     nvic_init_structure.NVIC_IRQChannelSubPriority        = 0x0;
     nvic_init_structure.NVIC_IRQChannelCmd                = ENABLE;
     NVIC_Init( &nvic_init_structure );
 
     /* Enable DMA for TX */
-    SPI_I2S_DMACmd( SPI2, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, ENABLE );
+    SPI_I2S_DMACmd( SPIX, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, ENABLE );
 
     /* Setup SPI */
     spi_init.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
@@ -206,8 +204,8 @@ OSStatus host_platform_bus_init( void )
     spi_init.SPI_CRCPolynomial = (uint16_t) 7;
 
     /* Init SPI and enable it */
-    SPI_Init( SPI2, &spi_init );
-    SPI_Cmd( SPI2, ENABLE );
+    SPI_Init( SPIX, &spi_init );
+    SPI_Cmd( SPIX, ENABLE );
 
     MCU_CLOCKS_NOT_NEEDED();
 
@@ -221,11 +219,11 @@ OSStatus host_platform_bus_deinit( void )
     MCU_CLOCKS_NEEDED();
 
     /* Disable SPI and SPI DMA */
-    SPI_Cmd( SPI2, DISABLE );
-    SPI_I2S_DeInit( SPI2 );
-    SPI_I2S_DMACmd( SPI2, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, DISABLE );
-    DMA_DeInit( DMA1_Stream4 );
-    DMA_DeInit( DMA1_Stream3 );
+    SPI_Cmd( SPIX, DISABLE );
+    SPI_I2S_DeInit( SPIX );
+    SPI_I2S_DMACmd( SPIX, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, DISABLE );
+    DMA_DeInit( SPIX_DMA_TX_STREAM );
+    DMA_DeInit( SPIX_DMA_RX_STREAM );
 
     /* Clear GPIO_B[1:0] */
     MicoGpioFinalize( (mico_gpio_t)WL_GPIO0 );
@@ -248,7 +246,7 @@ OSStatus host_platform_bus_deinit( void )
     gpio_irq_disable( SPI_IRQ_BANK, SPI_IRQ_PIN );
 
     /* Disable SPI_SLAVE Periph clock and DMA1 clock */
-    RCC_APB1PeriphClockCmd( RCC_APB1Periph_SPI2, DISABLE );
+    RCC_APB1PeriphClockCmd( SPIX_CLK, DISABLE );
     RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_DMA1, DISABLE );
     RCC_APB2PeriphClockCmd( RCC_APB2Periph_SYSCFG, DISABLE );
 
@@ -264,40 +262,40 @@ OSStatus host_platform_spi_transfer( bus_transfer_direction_t dir, uint8_t* buff
 
     MCU_CLOCKS_NEEDED();
 
-    DMA1_Stream4->NDTR = buffer_length;
-    DMA1_Stream4->M0AR = (uint32_t) buffer;
+    SPIX_DMA_TX_STREAM->NDTR = buffer_length;
+    SPIX_DMA_TX_STREAM->M0AR = (uint32_t) buffer;
     if ( dir == BUS_READ )
     {
-        DMA1_Stream3->NDTR = buffer_length;
-        DMA1_Stream3->M0AR = (uint32_t) buffer;
-        DMA1_Stream3->CR |= DMA_MemoryInc_Enable  | ( 1 << 4);
+        SPIX_DMA_RX_STREAM->NDTR = buffer_length;
+        SPIX_DMA_RX_STREAM->M0AR = (uint32_t) buffer;
+        SPIX_DMA_RX_STREAM->CR |= DMA_MemoryInc_Enable  | ( 1 << 4);
     }
     else
     {
-        DMA1_Stream3->NDTR = buffer_length;
-        DMA1_Stream3->M0AR = (uint32_t) &junk;
-        DMA1_Stream3->CR &= ( ~DMA_MemoryInc_Enable ) | ( 1 << 4);
+        SPIX_DMA_RX_STREAM->NDTR = buffer_length;
+        SPIX_DMA_RX_STREAM->M0AR = (uint32_t) &junk;
+        SPIX_DMA_RX_STREAM->CR &= ( ~DMA_MemoryInc_Enable ) | ( 1 << 4);
     }
 
     GPIO_ResetBits( SPI_BUS_CS_BANK, ( 1 << SPI_BUS_CS_PIN ) ); /* CS low (to select) */
-    DMA_Cmd( DMA1_Stream3, ENABLE );
-    DMA_Cmd( DMA1_Stream4, ENABLE );
+    DMA_Cmd( SPIX_DMA_RX_STREAM, ENABLE );
+    DMA_Cmd( SPIX_DMA_TX_STREAM, ENABLE );
 
     /* Wait for DMA TX to complete */
     result = mico_rtos_get_semaphore( &spi_transfer_finished_semaphore, 100 );
 //    loop_count = 0;
-//    while ( ( DMA_GetFlagStatus( DMA1_Stream3, DMA_FLAG_TCIF3 ) == RESET ) && ( loop_count < (uint32_t) DMA_TIMEOUT_LOOPS ) )
+//    while ( ( DMA_GetFlagStatus( SPIX_DMA_RX_STREAM, DMA_FLAG_TCIF3 ) == RESET ) && ( loop_count < (uint32_t) DMA_TIMEOUT_LOOPS ) )
 //    {
 //        loop_count++;
 //    }
 
-    DMA_Cmd( DMA1_Stream3, DISABLE );
-    DMA_Cmd( DMA1_Stream4, DISABLE );
+    DMA_Cmd( SPIX_DMA_RX_STREAM, DISABLE );
+    DMA_Cmd( SPIX_DMA_TX_STREAM, DISABLE );
 
     /* Clear the CS pin and the DMA status flag */
     GPIO_SetBits( SPI_BUS_CS_BANK, ( 1 << SPI_BUS_CS_PIN ) ); /* CS high (to deselect) */
-    DMA_ClearFlag( DMA1_Stream3, DMA_FLAG_TCIF4 );
-    DMA_ClearFlag( DMA1_Stream4, DMA_FLAG_TCIF3 );
+    DMA_ClearFlag( SPIX_DMA_RX_STREAM, SPIX_DMA_RX_TCFLAG );
+    DMA_ClearFlag( SPIX_DMA_TX_STREAM, SPIX_DMA_TX_TCFLAG );
 
     MCU_CLOCKS_NOT_NEEDED();
 

@@ -71,6 +71,16 @@
 #define SPI_BUS_MOSI_PIN        15
 #define SPI_BUS_CS_PIN          12
 #define SPI_IRQ_PIN             1
+
+#define SPIX_CLK                RCC_APB1Periph_SPI2
+#define SPIX                    SPI2
+#define SPIX_AF                 GPIO_AF_SPI2
+#define SPIX_DMA_RX_STREAM      DMA1_Stream3
+#define SPIX_DMA_TX_STREAM      DMA1_Stream4
+#define SPIX_DMA_RX_TCFLAG      DMA_FLAG_TCIF3
+#define SPIX_DMA_TX_TCFLAG      DMA_FLAG_TCIF4
+#define SPIX_DMA_RX_IRQ_CHANNEL DMA1_Stream3_IRQn
+#define SPIX_DMA_RX_TCIT        DMA_IT_TCIF3
 #define dma_irq                 DMA1_Stream3_IRQHandler
 
 /* These are internal platform connections only */

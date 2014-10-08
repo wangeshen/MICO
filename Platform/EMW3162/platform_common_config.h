@@ -56,22 +56,6 @@
 #define SYSTICK_CLOCK_SOURCE    SysTick_CLKSource_HCLK   /* SysTick clock source = AHB clock     */
 #define INT_FLASH_WAIT_STATE    FLASH_Latency_3          /* Internal flash wait state = 3 cycles */
 
-#define SPI_BUS_CLOCK_BANK      GPIOB
-#define SPI_BUS_MISO_BANK       GPIOB
-#define SPI_BUS_MOSI_BANK       GPIOB
-#define SPI_BUS_CS_BANK         GPIOB
-#define SPI_IRQ_BANK            GPIOA
-#define SPI_BUS_CLOCK_BANK_CLK  RCC_AHB1Periph_GPIOB
-#define SPI_BUS_MISO_BANK_CLK   RCC_AHB1Periph_GPIOB
-#define SPI_BUS_MOSI_BANK_CLK   RCC_AHB1Periph_GPIOB
-#define SPI_BUS_CS_BANK_CLK     RCC_AHB1Periph_GPIOB
-#define SPI_IRQ_CLK             RCC_AHB1Periph_GPIOA
-#define SPI_BUS_CLOCK_PIN       13
-#define SPI_BUS_MISO_PIN        14
-#define SPI_BUS_MOSI_PIN        15
-#define SPI_BUS_CS_PIN          12
-#define SPI_IRQ_PIN             1
-
 #define SDIO_OOB_IRQ_BANK       GPIOB
 #define SDIO_CLK_BANK           GPIOC
 #define SDIO_CMD_BANK           GPIOD
