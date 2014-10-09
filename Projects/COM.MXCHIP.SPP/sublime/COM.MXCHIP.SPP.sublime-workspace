@@ -523,7 +523,7 @@
 			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform.h",
 			"settings":
 			{
-				"buffer_size": 15879,
+				"buffer_size": 15907,
 				"line_ending": "Windows"
 			}
 		},
@@ -531,7 +531,7 @@
 			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverFlash.c",
 			"settings":
 			{
-				"buffer_size": 13131,
+				"buffer_size": 13248,
 				"line_ending": "Windows"
 			}
 		},
@@ -547,7 +547,7 @@
 			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/HTTPUtils.c",
 			"settings":
 			{
-				"buffer_size": 21546,
+				"buffer_size": 21544,
 				"line_ending": "Windows"
 			}
 		}
@@ -612,6 +612,7 @@
 	},
 	"file_history":
 	[
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverRtc.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/platform.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICOEntrance.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICODefine.h",
@@ -669,7 +670,6 @@
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/stm32f2xx_platform.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Projects/COM.MXCHIP.SPP/sublime/COM.MXCHIP.SPP.sublime-project",
 		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/platform_common_config.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverRtc.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverUart.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/SDIO/wwd_bus.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/SPI/wwd_bus.c",
@@ -747,7 +747,7 @@
 	},
 	"find_in_files":
 	{
-		"height": 0.0,
+		"height": 93.0,
 		"where_history":
 		[
 			"<open folders>",
@@ -766,6 +766,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"MicoRtcGetTime",
 			"FLASH_Sector_6",
 			"%f",
 			"lf",
@@ -892,8 +893,7 @@
 			"mico_default_time",
 			"RTC_ENABLED",
 			"wiced_default_time",
-			";\n",
-			"wiced_rtc_time_t"
+			";\n"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -913,7 +913,7 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 3,
 			"sheets":
 			[
 				{
@@ -921,7 +921,7 @@
 					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform.h",
 					"settings":
 					{
-						"buffer_size": 15879,
+						"buffer_size": 15907,
 						"regions":
 						{
 						},
@@ -949,15 +949,15 @@
 					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverFlash.c",
 					"settings":
 					{
-						"buffer_size": 13131,
+						"buffer_size": 13248,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4981,
-								4995
+								0,
+								0
 							]
 						],
 						"settings":
@@ -967,7 +967,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1071.0,
+						"translation.y": 1065.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1005,15 +1005,15 @@
 					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/HTTPUtils.c",
 					"settings":
 					{
-						"buffer_size": 21546,
+						"buffer_size": 21544,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								6201,
-								6215
+								1252,
+								1252
 							]
 						],
 						"settings":
@@ -1023,7 +1023,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2051.0,
+						"translation.y": 63.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

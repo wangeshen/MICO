@@ -56,6 +56,7 @@ static  int32_t Receive_Byte (uint8_t *c, uint32_t timeout)
     {
       return 0;
     }
+    for(int i = 0; i<100000; i++);
   }
   return -1;
 }
@@ -322,16 +323,18 @@ void Ymodem_PrepareIntialPacket(uint8_t *data, const uint8_t* fileName, uint32_t
   }
 }
 
+
+
+
 /**
   * @brief  Prepare the data packet
   * @param  timeout
   *     0: end of transmission
   * @retval None
   */
-void Ymodem_PreparePacket(uint8_t *SourceBuf, uint8_t *data, uint8_t pktNo, uint32_t sizeBlk)
+void Ymodem_PreparePacket(mico_flash_t flash, uint32_t flashdestination, uint8_t *data, uint8_t pktNo, uint32_t sizeBlk)
 {
   uint16_t i, size, packetSize;
-  uint8_t* file_ptr;
   
   /* Make first three packet */
   packetSize = sizeBlk >= PACKET_1K_SIZE ? PACKET_1K_SIZE : PACKET_SIZE;
@@ -346,13 +349,16 @@ void Ymodem_PreparePacket(uint8_t *SourceBuf, uint8_t *data, uint8_t pktNo, uint
   }
   data[1] = pktNo;
   data[2] = (~pktNo);
-  file_ptr = SourceBuf;
+  //file_ptr = SourceBuf;
   
   /* Filename packet has valid data */
-  for (i = PACKET_HEADER; i < size + PACKET_HEADER;i++)
-  {
-     data[i] = *file_ptr++;
-  }
+  // for (i = PACKET_HEADER; i < size + PACKET_HEADER;i++)
+  // {
+  //    data[i] = *file_ptr++;
+  // }
+  MicoFlashRead(flash, &flashdestination, data + PACKET_HEADER, size);
+
+
   if ( size  <= packetSize)
   {
     for (i = size + PACKET_HEADER; i < packetSize + PACKET_HEADER; i++)
@@ -432,247 +438,250 @@ uint8_t CalChecksum(const uint8_t* data, uint32_t size)
   * @param  length
   * @retval None
   */
-// void Ymodem_SendPacket(uint8_t *data, uint16_t length)
-// {
-//   uint16_t i;
-//   i = 0;
-//   while (i < length)
-//   {
-//     Send_Byte(data[i]);
-//     i++;
-//   }
-// }
+void Ymodem_SendPacket(uint8_t *data, uint16_t length)
+{
+  uint16_t i;
+  i = 0;
+  while (i < length)
+  {
+    Send_Byte(data[i]);
+    i++;
+  }
+}
 
 /**
   * @brief  Transmit a file using the ymodem protocol
   * @param  buf: Address of the first byte
   * @retval The size of the file
   */
-// uint8_t Ymodem_Transmit (uint8_t *buf, const uint8_t* sendFileName, uint32_t sizeFile)
-// {
+uint8_t Ymodem_Transmit (mico_flash_t flash, uint32_t flashdestination, const uint8_t* sendFileName, uint32_t sizeFile)
+{
   
-//   uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD];
-//   uint8_t filename[FILE_NAME_LENGTH];
-//   uint8_t *buf_ptr, tempCheckSum;
-//   uint16_t tempCRC;
-//   uint16_t blkNumber;
-//   uint8_t receivedC[2], CRC16_F = 0, i;
-//   uint32_t errors, ackReceived, size = 0, pktSize;
+  uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD];
+  uint8_t filename[FILE_NAME_LENGTH];
+  uint8_t tempCheckSum;
+  uint32_t buf_ptr;
+  uint16_t tempCRC;
+  uint16_t blkNumber;
+  uint8_t receivedC[2], CRC16_F = 0, i;
+  uint32_t errors, ackReceived, size = 0, pktSize;
 
-//   errors = 0;
-//   ackReceived = 0;
-//   for (i = 0; i < (FILE_NAME_LENGTH - 1); i++)
-//   {
-//     filename[i] = sendFileName[i];
-//   }
-//   CRC16_F = 1;
+  errors = 0;
+  ackReceived = 0;
+  for (i = 0; i < (FILE_NAME_LENGTH - 1); i++)
+  {
+    filename[i] = sendFileName[i];
+  }
+  CRC16_F = 1;
     
-//   /* Prepare first block */
-//   Ymodem_PrepareIntialPacket(&packet_data[0], filename, &sizeFile);
+  /* Prepare first block */
+  Ymodem_PrepareIntialPacket(&packet_data[0], filename, &sizeFile);
   
-//   do 
-//   {
-//     /* Send Packet */
-//     Ymodem_SendPacket(packet_data, PACKET_SIZE + PACKET_HEADER);
+  do 
+  {
+    /* Send Packet */
+    Ymodem_SendPacket(packet_data, PACKET_SIZE + PACKET_HEADER);
 
-//     /* Send CRC or Check Sum based on CRC16_F */
-//     if (CRC16_F)
-//     {
-//        tempCRC = Cal_CRC16(&packet_data[3], PACKET_SIZE);
-//        Send_Byte(tempCRC >> 8);
-//        Send_Byte(tempCRC & 0xFF);
-//     }
-//     else
-//     {
-//        tempCheckSum = CalChecksum (&packet_data[3], PACKET_SIZE);
-//        Send_Byte(tempCheckSum);
-//     }
+    /* Send CRC or Check Sum based on CRC16_F */
+    if (CRC16_F)
+    {
+       tempCRC = Cal_CRC16(&packet_data[3], PACKET_SIZE);
+       Send_Byte(tempCRC >> 8);
+       Send_Byte(tempCRC & 0xFF);
+    }
+    else
+    {
+       tempCheckSum = CalChecksum (&packet_data[3], PACKET_SIZE);
+       Send_Byte(tempCheckSum);
+    }
   
-//     /* Wait for Ack and 'C' */
-//     if (Receive_Byte(&receivedC[0], 10000) == 0)  
-//     {
-//       if (receivedC[0] == ACK)
-//       { 
-//         /* Packet transferred correctly */
-//         ackReceived = 1;
-//       }
-//     }
-//     else
-//     {
-//         errors++;
-//     }
-//   }while (!ackReceived && (errors < 0x0A));
+    /* Wait for Ack and 'C' */
+    if (Receive_Byte(&receivedC[0], 1000) == 0)  
+    {
+      if (receivedC[0] == ACK)
+      { 
+        /* Packet transferred correctly */
+        ackReceived = 1;
+      }
+    }
+    else
+    {
+        errors++;
+    }
+  }while (!ackReceived && (errors < 0x0A));
   
-//   if (errors >=  0x0A)
-//   {
-//     return errors;
-//   }
-//   buf_ptr = buf;
-//   size = sizeFile;
-//   blkNumber = 0x01;
-//   /* Here 1024 bytes package is used to send the packets */
+  if (errors >=  0x0A)
+  {
+    return errors;
+  }
+  buf_ptr = flashdestination;
+  size = sizeFile;
+  blkNumber = 0x01;
+  /* Here 1024 bytes package is used to send the packets */
   
-  
-//   /* Resend packet if NAK  for a count of 10 else end of communication */
-//   while (size)
-//   {
-//     /* Prepare next packet */
-//     Ymodem_PreparePacket(buf_ptr, &packet_data[0], blkNumber, size);
-//     ackReceived = 0;
-//     receivedC[0]= 0;
-//     errors = 0;
-//     do
-//     {
-//       /* Send next packet */
-//       if (size >= PACKET_1K_SIZE)
-//       {
-//         pktSize = PACKET_1K_SIZE;
+  Receive_Byte(&receivedC[0], 1000);
+  /* Resend packet if NAK  for a count of 10 else end of communication */
+  while (size)
+  {
+    /* Prepare next packet */
+    //Ymodem_PreparePacket(buf_ptr, &packet_data[0], blkNumber, size);
+    Ymodem_PreparePacket(flash, buf_ptr, &packet_data[0], blkNumber, size);
+    ackReceived = 0;
+    receivedC[0]= 0;
+    errors = 0;
+    do
+    {
+      /* Send next packet */
+      if (size >= PACKET_1K_SIZE)
+      {
+        pktSize = PACKET_1K_SIZE;
        
-//       }
-//       else
-//       {
-//         pktSize = PACKET_SIZE;
-//       }
-//       Ymodem_SendPacket(packet_data, pktSize + PACKET_HEADER);
-//       /* Send CRC or Check Sum based on CRC16_F */
-//       /* Send CRC or Check Sum based on CRC16_F */
-//       if (CRC16_F)
-//       {
-//          tempCRC = Cal_CRC16(&packet_data[3], pktSize);
-//          Send_Byte(tempCRC >> 8);
-//          Send_Byte(tempCRC & 0xFF);
-//       }
-//       else
-//       {
-//         tempCheckSum = CalChecksum (&packet_data[3], pktSize);
-//         Send_Byte(tempCheckSum);
-//       }
+      }
+      else
+      {
+        pktSize = PACKET_SIZE;
+      }
+      Ymodem_SendPacket(packet_data, pktSize + PACKET_HEADER);
+      /* Send CRC or Check Sum based on CRC16_F */
+      /* Send CRC or Check Sum based on CRC16_F */
+      if (CRC16_F)
+      {
+         tempCRC = Cal_CRC16(&packet_data[3], pktSize);
+         Send_Byte(tempCRC >> 8);
+         Send_Byte(tempCRC & 0xFF);
+      }
+      else
+      {
+        tempCheckSum = CalChecksum (&packet_data[3], pktSize);
+        Send_Byte(tempCheckSum);
+      }
       
-//       /* Wait for Ack */
-//       if ((Receive_Byte(&receivedC[0], 100000) == 0)  && (receivedC[0] == ACK))
-//       {
-//         ackReceived = 1;  
-//         if (size > pktSize)
-//         {
-//            buf_ptr += pktSize;  
-//            size -= pktSize;
-//            if (blkNumber == (USER_FLASH_SIZE/1024))
-//            {
-//              return 0xFF; /*  error */
-//            }
-//            else
-//            {
-//               blkNumber++;
-//            }
-//         }
-//         else
-//         {
-//           buf_ptr += pktSize;
-//           size = 0;
-//         }
-//       }
-//       else
-//       {
-//         errors++;
-//       }
-//     }while(!ackReceived && (errors < 0x0A));
-//     /* Resend packet if NAK  for a count of 10 else end of communication */
+      /* Wait for Ack */
+      if ((Receive_Byte(&receivedC[0], 1000) == 0)  && (receivedC[0] == ACK))
+      {
+        ackReceived = 1;  
+        if (size > pktSize)
+        {
+           buf_ptr += pktSize;  
+           size -= pktSize;
+           // if (blkNumber == (USER_FLASH_SIZE/1024))
+           // {
+           //   return 0xFF; /*  error */
+           // }
+           // else
+           // {
+              blkNumber++;
+           //}
+        }
+        else
+        {
+          buf_ptr += pktSize;
+          size = 0;
+        }
+      }
+      else
+      {
+        errors++;
+      }
+    }while(!ackReceived && (errors < 0x0A));
+    /* Resend packet if NAK  for a count of 10 else end of communication */
     
-//     if (errors >=  0x0A)
-//     {
-//       return errors;
-//     }
+    if (errors >=  0x0A)
+    {
+      return errors;
+    }
     
-//   }
-//   ackReceived = 0;
-//   receivedC[0] = 0x00;
-//   errors = 0;
-//   do 
-//   {
-//     Send_Byte(EOT);
-//     /* Send (EOT); */
-//     /* Wait for Ack */
-//     if ((Receive_Byte(&receivedC[0], 10000) == 0)  && receivedC[0] == ACK)
-//     {
-//       ackReceived = 1;  
-//     }
-//     else
-//     {
-//       errors++;
-//     }
-//   }while (!ackReceived && (errors < 0x0A));
+  }
+  ackReceived = 0;
+  receivedC[0] = 0x00;
+  errors = 0;
+  do 
+  {
+    Send_Byte(EOT);
+    /* Send (EOT); */
+    /* Wait for Ack */
+    if ((Receive_Byte(&receivedC[0], 1000) == 0)  && receivedC[0] == ACK)
+    {
+      ackReceived = 1;  
+    }
+    else
+    {
+      errors++;
+    }
+  }while (!ackReceived && (errors < 0x0A));
     
-//   if (errors >=  0x0A)
-//   {
-//     return errors;
-//   }
+  if (errors >=  0x0A)
+  {
+    return errors;
+  }
   
-//   /* Last packet preparation */
-//   ackReceived = 0;
-//   receivedC[0] = 0x00;
-//   errors = 0;
+  /* Last packet preparation */
+  ackReceived = 0;
+  receivedC[0] = 0x00;
+  errors = 0;
 
-//   packet_data[0] = SOH;
-//   packet_data[1] = 0;
-//   packet_data [2] = 0xFF;
+  packet_data[0] = SOH;
+  packet_data[1] = 0;
+  packet_data [2] = 0xFF;
 
-//   for (i = PACKET_HEADER; i < (PACKET_SIZE + PACKET_HEADER); i++)
-//   {
-//      packet_data [i] = 0x00;
-//   }
+  for (i = PACKET_HEADER; i < (PACKET_SIZE + PACKET_HEADER); i++)
+  {
+     packet_data [i] = 0x00;
+  }
   
-//   do 
-//   {
-//     /* Send Packet */
-//     Ymodem_SendPacket(packet_data, PACKET_SIZE + PACKET_HEADER);
+  do 
+  {
+    /* Send Packet */
+    Ymodem_SendPacket(packet_data, PACKET_SIZE + PACKET_HEADER);
 
-//     /* Send CRC or Check Sum based on CRC16_F */
-//     tempCRC = Cal_CRC16(&packet_data[3], PACKET_SIZE);
-//     Send_Byte(tempCRC >> 8);
-//     Send_Byte(tempCRC & 0xFF);
+    /* Send CRC or Check Sum based on CRC16_F */
+    tempCRC = Cal_CRC16(&packet_data[3], PACKET_SIZE);
+    Send_Byte(tempCRC >> 8);
+    Send_Byte(tempCRC & 0xFF);
   
-//     /* Wait for Ack and 'C' */
-//     if (Receive_Byte(&receivedC[0], 10000) == 0)  
-//     {
-//       if (receivedC[0] == ACK)
-//       { 
-//         /* Packet transferred correctly */
-//         ackReceived = 1;
-//       }
-//     }
-//     else
-//     {
-//         errors++;
-//     }
-//   }while (!ackReceived && (errors < 0x0A));
+    /* Wait for Ack and 'C' */
+    if (Receive_Byte(&receivedC[0], 1000) == 0)  
+    {
+      if (receivedC[0] == ACK)
+      { 
+        /* Packet transferred correctly */
+        ackReceived = 1;
+      }
+    }
+    else
+    {
+        errors++;
+    }
+  }while (!ackReceived && (errors < 0x0A));
 
-//   /* Resend packet if NAK  for a count of 10  else end of communication */
-//   if (errors >=  0x0A)
-//   {
-//     return errors;
-//   }  
+  /* Resend packet if NAK  for a count of 10  else end of communication */
+  if (errors >=  0x0A)
+  {
+    return errors;
+  }  
   
-//   do 
-//   {
-//     Send_Byte(EOT);
-//     /* Send (EOT); */
-//     /* Wait for Ack */
-//     if ((Receive_Byte(&receivedC[0], 10000) == 0)  && receivedC[0] == ACK)
-//     {
-//       ackReceived = 1;  
-//     }
-//     else
-//     {
-//       errors++;
-//     }
-//   }while (!ackReceived && (errors < 0x0A));
+  do 
+  {
+    Send_Byte(EOT);
+    /* Send (EOT); */
+    /* Wait for Ack */
+    if ((Receive_Byte(&receivedC[0], 10) == 0)  && receivedC[0] == ACK)
+    {
+      ackReceived = 1;  
+    }
+    else
+    {
+      errors++;
+    }
+  }while (!ackReceived && (errors < 0x0A));
 
-//   if (errors >=  0x0A)
-//   {
-//     return errors;
-//   }
-//   return 0; /* file transmitted successfully */
-// }
+  if (errors >=  0x0A)
+  {
+    return errors;
+  }
+  
+  return 0; /* file transmitted successfully */
+}
 
 /**
   * @}

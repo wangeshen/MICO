@@ -5,7 +5,11 @@
 		[
 			[
 				"uint",
-				"uint32_t	typedef"
+				"uint8_t	typedef"
+			],
+			[
+				"con",
+				"continue	"
 			],
 			[
 				"MICO_SPI",
@@ -510,119 +514,73 @@
 			[
 				"support",
 				"supports5GHzWiFi	bool"
-			],
-			[
-				"supportsAirp",
-				"supportsAirPrint	bool"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform.h",
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/Update_for_OTA.c",
 			"settings":
 			{
-				"buffer_size": 15766,
+				"buffer_size": 6815,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Drivers/spi_flash/spi_flash.h",
+			"file": "/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MICODriverFlash.h",
 			"settings":
 			{
-				"buffer_size": 1505,
+				"buffer_size": 2755,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/MICOEntrance.c",
+			"file": "/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform_common_config.h",
 			"settings":
 			{
-				"buffer_size": 4800,
+				"buffer_size": 7844,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Drivers/spi_flash/spi_flash.c",
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/MicoDefaults.h",
 			"settings":
 			{
-				"buffer_size": 13510,
+				"buffer_size": 2457,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"contents": "Searching 228 files for \"sflash_write_enable\"\n\n/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Drivers/spi_flash/spi_flash.c:\n   19  }\n   20  \n   21: // int sflash_write_enable( const sflash_handle_t* const handle )\n   22  // {\n   23  //     if ( handle->write_allowed == SFLASH_WRITE_ALLOWED )\n   24  //     {\n   25  //         /* Send write-enable command */\n   26: //         int status = generic_sflash_command( handle, SFLASH_WRITE_ENABLE, 0, NULL, 0, NULL, NULL );\n   27  //         if ( status != 0 )\n   28  //         {\n   ..\n   47  \n   48  //             /* Re-Enable writing */\n   49: //             if (0 != ( status = generic_sflash_command( handle, SFLASH_WRITE_ENABLE, 0, NULL, 0, NULL, NULL ) ) )\n   50  //             {\n   51  //                 return status;\n   ..\n   60  // }\n   61  \n   62: int sflash_write_enable( const sflash_handle_t* const handle, bool enable )\n   63  {\n   64      int status;\n   ..\n   84  \n   85          /* Re-Enable writing */\n   86:         if (0 != ( status = generic_sflash_command( handle, SFLASH_WRITE_ENABLE, 0, NULL, 0, NULL, NULL ) ) )\n   87          {\n   88              return status;\n   ..\n  213  \n  214      if ( ( enable_before_every_write == 0 ) &&\n  215:          ( 0 != ( status = sflash_write_enable( handle ) ) ) )\n  216      {\n  217          return status;\n  ...\n  228  \n  229          if ( ( enable_before_every_write == 1 ) &&\n  230:              ( 0 != ( status = sflash_write_enable( handle ) ) ) )\n  231          {\n  232              return status;\n  ...\n  288      handle->write_allowed = SFLASH_WRITE_NOT_ALLOWED;\n  289  \n  290:     if (0 != ( status = sflash_write_enable( handle, false ) ) )\n  291      {\n  292          return status;\n\n/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Drivers/spi_flash/spi_flash.h:\n   36  \n   37  int init_sflash         (  sflash_handle_t* const handle, int peripheral_id );\n   38: int sflash_write_enable (  sflash_handle_t* const handle, bool enable );\n   39  int sflash_read         (  sflash_handle_t* const handle, unsigned long device_address, void* const data_addr, unsigned int size );\n   40  int sflash_write        (  sflash_handle_t* const handle, unsigned long device_address, const void* const data_addr, int size );\n\n/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Drivers/spi_flash/spi_flash_internal.h:\n   39      SFLASH_WRITE_DISABLE                = 0x04, /* WRDI                   */\n   40      SFLASH_READ_STATUS_REGISTER         = 0x05, /* RDSR                   */\n   41:     SFLASH_WRITE_ENABLE                 = 0x06, /* WREN                   */\n   42      SFLASH_FAST_READ                    = 0x0B,\n   43      SFLASH_SECTOR_ERASE                 = 0x20, /* SE                     */\n\n10 matches across 3 files\n",
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/BootloaderEntrance.c",
 			"settings":
 			{
-				"buffer_size": 2800,
-				"line_ending": "Unix",
-				"name": "Find Results",
-				"scratch": true
-			}
-		},
-		{
-			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Drivers/spi_flash/spi_flash_internal.h",
-			"settings":
-			{
-				"buffer_size": 3797,
+				"buffer_size": 5031,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverFlash.c",
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/menu.c",
 			"settings":
 			{
-				"buffer_size": 12866,
+				"buffer_size": 12225,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoPlatform.h",
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/StringUtils.h",
 			"settings":
 			{
-				"buffer_size": 3839,
+				"buffer_size": 3710,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "bootloader.sublime-project",
+			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/ymodem.c",
 			"settings":
 			{
-				"buffer_size": 1610,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform_common_config.h",
-			"settings":
-			{
-				"buffer_size": 7680,
+				"buffer_size": 16742,
 				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverFlash.h",
-			"settings":
-			{
-				"buffer_size": 2757,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform.c",
-			"settings":
-			{
-				"buffer_size": 13418,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/EMW1062_Driver/read_wifi_firmware.c",
-			"settings":
-			{
-				"buffer_size": 2624,
-				"line_ending": "Unix"
 			}
 		}
 	],
@@ -686,31 +644,37 @@
 	},
 	"file_history":
 	[
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/read_wifi_firmware.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/ymodem.h",
+		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MICODriverFlash.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Drivers/spi_flash/spi_flash_internal.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/Serial.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/read_wifi_firmware.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Drivers/spi_flash/spi_flash.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/MICOEntrance.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Drivers/spi_flash/spi_flash.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverFlash.c",
 		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoPlatform.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Projects/bootloader/sublime/bootloader.sublime-project",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform_common_config.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverFlash.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/EMW1062_Driver/read_wifi_firmware.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/read_wifi_firmware.c",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/Serial.h",
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/read_wifi_firmware.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/MicoDefaults.h",
 		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/Debug.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverUart.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoPlatform.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/platform.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/stm32f2xx_platform.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/platform.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/MICOEntrance.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/menu.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/EMW1062_Driver/SDIO/wlan_bus.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/EMW1062_Driver/SPI/wwd_bus.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform_common_config.h",
 		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2XX/stm32f2xx_platform.h",
 		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2XX/STM32F2XX_Drv/stm32f2xx.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverGpio.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/bootloader.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/ymodem.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/ymodem.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/StringUtils.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/StringUtils.h",
@@ -723,7 +687,6 @@
 		"/Users/william/Develop/Clang_lib/ARMCC/include/stdio.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/HTTPUtils.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/include/platform_sleep.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverFlash.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/hardfault.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/rtc.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/rtc.h",
@@ -747,7 +710,6 @@
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICOEntrance.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoAES.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverI2c.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverFlash.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/EMW1062_platform.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverAdc.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverGpio.h",
@@ -809,11 +771,7 @@
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/wiced_defaults.h",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/PlatformWDG.c",
 		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICONotificationCenter.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICONotificationCenter.c",
-		"/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/Platform.h",
-		"/Users/william/Develop/Clang_lib/ARMCC/include/time.h",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/WAC/PlatformMFiAuth.c",
-		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MICOPlatform.h"
+		"/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/MICO/MICONotificationCenter.c"
 	],
 	"find":
 	{
@@ -821,7 +779,7 @@
 	},
 	"find_in_files":
 	{
-		"height": 93.0,
+		"height": 0.0,
 		"where_history":
 		[
 			"<open folders>",
@@ -840,6 +798,20 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"SOH",
+			"SerialUpload",
+			"Ymodem_PreparePacket",
+			"blkNumber",
+			"Ymodem_PreparePacket",
+			"blkNumber",
+			"Receive_Byte",
+			"Ymodem_PrepareIntialPacket",
+			"Ymodem_PreparePacket",
+			"buf",
+			"SerialUpload",
+			"Ymodem_SendPacket",
+			"MicoFlashInitialize",
+			"paraSaveInRam",
 			"generic_sflash_command",
 			"spiFlashErase",
 			"enable_before_every_write",
@@ -953,21 +925,7 @@
 			"rtc_sleep_abort",
 			"stm32f2xx_clocks_needed",
 			"RTC_WKUP_irq",
-			"select_wut_prescaler_calculate_wakeup_time",
-			"scale_factor",
-			"select_wut_prescaler_calculate_wakeup_time",
-			"WEAK",
-			"rtc_timeout_start_time",
-			"stdio_uart_config",
-			"tile",
-			"va",
-			"UART_BUFFER_LENGTH",
-			"reset_rtc_values",
-			"wake_up_interrupt_triggered",
-			"host_platform_reset_wifi",
-			"host_platform_ran",
-			"random",
-			"MICODriverRng"
+			"select_wut_prescaler_calculate_wakeup_time"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -987,51 +945,51 @@
 	"groups":
 	[
 		{
-			"selected": 9,
+			"selected": 3,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform.h",
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/Update_for_OTA.c",
 					"settings":
 					{
-						"buffer_size": 15766,
+						"buffer_size": 6815,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								14956,
-								14956
+								5352,
+								5352
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"tab_size": 4,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3548.0,
+						"translation.y": 2008.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Drivers/spi_flash/spi_flash.h",
+					"file": "/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MICODriverFlash.h",
 					"settings":
 					{
-						"buffer_size": 1505,
+						"buffer_size": 2755,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1256,
-								1256
+								2670,
+								2558
 							]
 						],
 						"settings":
@@ -1039,299 +997,53 @@
 							"syntax": "Packages/C++/C++.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 243.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 2,
-					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/MICOEntrance.c",
+					"file": "/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform_common_config.h",
 					"settings":
 					{
-						"buffer_size": 4800,
+						"buffer_size": 7844,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4540,
-								4540
+								5289,
+								5312
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C.tmLanguage",
+							"syntax": "Packages/C++/C++.tmLanguage",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1370.0,
+						"translation.y": 1325.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 3,
-					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Drivers/spi_flash/spi_flash.c",
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/MicoDefaults.h",
 					"settings":
 					{
-						"buffer_size": 13510,
+						"buffer_size": 2457,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4416,
-								4441
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 2160.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"settings":
-					{
-						"buffer_size": 2800,
-						"regions":
-						{
-							"match":
-							{
-								"flags": 112,
-								"regions":
-								[
-									[
-										176,
-										195
-									],
-									[
-										443,
-										462
-									],
-									[
-										681,
-										700
-									],
-									[
-										833,
-										852
-									],
-									[
-										1057,
-										1076
-									],
-									[
-										1260,
-										1279
-									],
-									[
-										1449,
-										1468
-									],
-									[
-										1642,
-										1661
-									],
-									[
-										1930,
-										1949
-									],
-									[
-										2561,
-										2580
-									]
-								],
-								"scope": ""
-							}
-						},
-						"selection":
-						[
-							[
-								848,
-								848
-							]
-						],
-						"settings":
-						{
-							"detect_indentation": false,
-							"output_tag": 1,
-							"result_base_dir": "",
-							"result_file_regex": "^([A-Za-z\\\\/<].*):$",
-							"result_line_regex": "^ +([0-9]+):",
-							"scroll_past_end": true,
-							"syntax": "Packages/Default/Find Results.hidden-tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Drivers/spi_flash/spi_flash_internal.h",
-					"settings":
-					{
-						"buffer_size": 3797,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1283,
-								1283
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 293.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/MicoDriverFlash.c",
-					"settings":
-					{
-						"buffer_size": 12866,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								7275,
-								7294
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 2210.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoPlatform.h",
-					"settings":
-					{
-						"buffer_size": 3839,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1844,
-								1844
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "bootloader.sublime-project",
-					"settings":
-					{
-						"buffer_size": 1610,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								667,
-								667
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JSON.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform_common_config.h",
-					"settings":
-					{
-						"buffer_size": 7680,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6284,
-								6284
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1440.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/include/MicoDrivers/MicoDriverFlash.h",
-					"settings":
-					{
-						"buffer_size": 2757,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2635,
-								2643
+								1646,
+								1646
 							]
 						],
 						"settings":
@@ -1339,25 +1051,25 @@
 							"syntax": "Packages/C++/C++.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 216.0,
+						"translation.y": 28.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
-					"buffer": 11,
-					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/platform.c",
+					"buffer": 4,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/BootloaderEntrance.c",
 					"settings":
 					{
-						"buffer_size": 13418,
+						"buffer_size": 5031,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								12149,
-								12149
+								4288,
+								4288
 							]
 						],
 						"settings":
@@ -1367,35 +1079,91 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4038.0,
+						"translation.y": 1294.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
-					"buffer": 12,
-					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2xx/EMW1062_Driver/read_wifi_firmware.c",
+					"buffer": 5,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/menu.c",
 					"settings":
 					{
-						"buffer_size": 2624,
+						"buffer_size": 12225,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1080,
-								1080
+								5796,
+								5796
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/C++/C.tmLanguage",
-							"tab_size": 4,
+							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 160.0,
+						"translation.y": 1989.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/StringUtils.h",
+					"settings":
+					{
+						"buffer_size": 3710,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2166,
+								2166
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 208.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/Users/William/Develop/mxchipWNet Pro Demo@EMW316x/Bootloader/ymodem.c",
+					"settings":
+					{
+						"buffer_size": 16742,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								15259,
+								15259
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 8826.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

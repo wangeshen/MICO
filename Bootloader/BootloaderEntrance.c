@@ -43,16 +43,25 @@ Bootloader_status bootloader_status = normal;
 
 const char menu[] =
 "\r\n"
-"+***************(C) COPYRIGHT 2014 MXCHIP corporation************+\r\n"
+"+************** (C) COPYRIGHT 2014 MXCHIP Corporation ***********+\r\n"
 "|               MICO Common Bootloader                           |\r\n"
-"+ command -----------+ function ---------------------------------+\r\n"
-"| 1:FWUPDATE <-a>    | update the firmware from UART using Ymodem|\r\n"
-"| 3:BOOT             | excute the current firmware               |\r\n"
-"| 4:REBOOT           | Reboot                                    |\r\n"
-"| ?:HELP             | displays this help                        |\r\n"
+"+ command --------------------------------+ function ------------+\r\n"
+"| 0:BOOTUPDATE  <-r>                      | Update bootloader    |\r\n"
+"| 1:FWUPDATE    <-r>                      | Update application   |\r\n"
+"| 2:DRIVERUPDATE     <-r>                 | Update RF driver     |\r\n"
+"| 3:PARAUPDATE <-e>                       | Update MICO settings |\r\n"
+"| 4:FWUPDATE  <-i><-s><-e><-r>            |                      |\r\n"
+"|  <-start hex or dec><-end hex or dec>   | Update flash content |\r\n"
+"| 5:BOOT                                  | Excute application   |\r\n"
+"| 6:REBOOT                                | Reboot               |\r\n"
+"| ?:HELP                                  | displays this help   |\r\n"
 "+--------------------+-------------------------------------------+\r\n"
-"|                           By William Xu from MXCHIP M2M Team   |\r\n"
-"+----------------------------------------------------------------+\r\n";
+" -e Erase only  -r Read from flash\r\n"
+" -i internal flash  -s SPI flash -start flash start address\r\n"
+" -end flash start address\r\n"
+" Example: Input \"4 -i -start 0x400 -end 0x800\": Update internal\r\n"
+"          flash from address 0x400 to 0x 800\r\n"
+" By William Xu from MXCHIP M2M Team\r\n";
 
 #if defined ( __ICCARM__ )
 
@@ -107,8 +116,6 @@ extern void init_architecture(void);
 
 int main(void)
 {
-  OSStatus err;
-
   init_clocks();
   init_memory();
   init_architecture();
@@ -125,21 +132,19 @@ int main(void)
   else if(MicoGpioInputGet((mico_gpio_t)MFG_SEL)==false)
     startApplication();
   
-  boot_log("Starting Bootloader");
   printf ( menu );
 
   while(1){                             
     Main_Menu ();
   }
 
-exit:
-  boot_log("Bootloader exit with err: %d", err);
+  printf("Bootloader exit with error! Rebooting...\r\n");
   MicoSystemReboot();
 }
 
 int application_start(void)
 {
-  boot_log("Bootloader should never come here! Rebootint......");
+  boot_log("Bootloader should never come here! Rebooting......");
   MicoSystemReboot();
   return 0;
 }
