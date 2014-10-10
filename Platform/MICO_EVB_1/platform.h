@@ -280,6 +280,7 @@ typedef enum
 {
     MICO_SPI_FLASH,
     MICO_INTERNAL_FLASH,
+    MICO_FLASH_MAX,
 } mico_flash_t;
 
 #define USE_MICO_SPI_FLASH

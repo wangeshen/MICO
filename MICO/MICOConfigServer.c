@@ -210,6 +210,7 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
     }
     goto exit;
   }
+#ifdef MICO_FLASH_FOR_UPDATE
   else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLOTA ) == kNoErr){
     if(inHeader->contentLength > 0){
       config_log("Receive OTA data!");
@@ -228,6 +229,7 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
     }
     goto exit;
   }
+#endif
   else{
     return kNotFoundErr;
   };

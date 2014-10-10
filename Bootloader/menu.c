@@ -50,6 +50,30 @@ uint8_t tab_1024[1024] =
   {
     0
   };
+
+#ifdef MICO_FLASH_FOR_UPDATE
+const char MEMMAP[] = "\r\n\
++******************** MICO Flash Map **************+\r\n\
++-- Content --+-- Flash ---+--- Start ---+--- End ----+\r\n\
+| Bootloader  | %8s   |  0x%08x | 0x%08x |\r\n\
+| Settings    | %8s   |  0x%08x | 0x%08x |\r\n\
+| Application | %8s   |  0x%08x | 0x%08x |\r\n\
+| OTA Storage | %8s   |  0x%08x | 0x%08x |\r\n\
+| RF Driver   | %8s   |  0x%08x | 0x%08x |\r\n\
++-------------+------------+-------------+------------+\r\n";
+#else
+const char MEMMAP[] = "\r\n\
++******************** MICO Flash Map *****************+\r\n\
++-- Content --+-- Flash ---+--- Start ---+--- End ----+\r\n\
+| Bootloader  | %8s   |  0x%08x | 0x%08x |\r\n\
+| Settings    | %8s   |  0x%08x | 0x%08x |\r\n\
+| Application | %8s   |  0x%08x | 0x%08x |\r\n\
+| RF Driver   | %8s   |  0x%08x | 0x%08x |\r\n\
++-------------+------------+-------------+------------+\r\n";
+#endif
+
+
+
 char FileName[FILE_NAME_LENGTH];
 char ERROR_STR [] = "\n\r*** ERROR: %s\n\r";    /* ERROR message string in code   */
 
@@ -59,7 +83,7 @@ extern void startApplication(void);
 
 /* Private function prototypes -----------------------------------------------*/
 void SerialDownload(mico_flash_t flash, uint32_t flashdestination, int32_t maxRecvSize);
-void SerialUpload(mico_flash_t flash, uint32_t flashdestination, int32_t maxRecvSize);
+void SerialUpload(mico_flash_t flash, uint32_t flashdestination, char * fileName, int32_t maxRecvSize);
 
 /* Private functions ---------------------------------------------------------*/
 /**
@@ -159,7 +183,7 @@ void SerialDownload(mico_flash_t flash, uint32_t flashdestination, int32_t maxRe
   * @param  None
   * @retval None
   */
-void SerialUpload(mico_flash_t flash, uint32_t flashdestination, int32_t maxRecvSize)
+void SerialUpload(mico_flash_t flash, uint32_t flashdestination, char *fileName, int32_t maxRecvSize)
 {
   uint8_t status = 0;
   uint8_t key;
@@ -170,7 +194,7 @@ void SerialUpload(mico_flash_t flash, uint32_t flashdestination, int32_t maxRecv
   if (key == CRC16)
   {
     /* Transmit the flash image through ymodem protocol */
-    status = Ymodem_Transmit(flash, flashdestination, (const uint8_t*)"UploadedFlashImage.bin", maxRecvSize);
+    status = Ymodem_Transmit(flash, flashdestination, (uint8_t *)fileName, maxRecvSize);
 
     if (status != 0)
     {
@@ -217,7 +241,7 @@ void Main_Menu(void)
       if (findCommandPara(cmdbuf, "r", NULL, 0) != -1){
         printf ("\n\rRead Bootloader only......\n\r");
         MicoFlashInitialize(MICO_FLASH_FOR_BOOT);
-        SerialUpload(MICO_FLASH_FOR_BOOT, BOOT_START_ADDRESS, BOOT_FLASH_SIZE);
+        SerialUpload(MICO_FLASH_FOR_BOOT, BOOT_START_ADDRESS, "BootLoaderImage.bin", BOOT_FLASH_SIZE);
         MicoFlashFinalize(MICO_FLASH_FOR_BOOT);
         continue;
       }
@@ -230,12 +254,12 @@ void Main_Menu(void)
       if (findCommandPara(cmdbuf, "r", NULL, 0) != -1){
         printf ("\n\rRead MICO application only......\n\r");
         MicoFlashInitialize(MICO_FLASH_FOR_APPLICATION);
-        SerialUpload(MICO_FLASH_FOR_APPLICATION, APPLICATION_START_ADDRESS, APPLICATION_FLASH_SIZE);
+        SerialUpload(MICO_FLASH_FOR_APPLICATION, APPLICATION_START_ADDRESS, "ApplicationImage.bin", APPLICATION_FLASH_SIZE);
         MicoFlashFinalize(MICO_FLASH_FOR_APPLICATION);
         continue;
       }
       printf ("\n\rUpdating MICO application......\n\r");
-      SerialDownload(MICO_FLASH_FOR_APPLICATION, APPLICATION_START_ADDRESS, APPLICATION_FLASH_SIZE);   									   	
+      SerialDownload(MICO_FLASH_FOR_APPLICATION, APPLICATION_START_ADDRESS, APPLICATION_FLASH_SIZE); 							   	
     }
 
     /***************** Command "2" or "DRIVERUPDATE": Update the RF driver  *************************/
@@ -243,7 +267,7 @@ void Main_Menu(void)
       if (findCommandPara(cmdbuf, "r", NULL, 0) != -1){
         printf ("\n\rRead RF driver only......\n\r");
         MicoFlashInitialize(MICO_FLASH_FOR_DRIVER);
-        SerialUpload(MICO_FLASH_FOR_DRIVER, DRIVER_START_ADDRESS, DRIVER_FLASH_SIZE);
+        SerialUpload(MICO_FLASH_FOR_DRIVER, DRIVER_START_ADDRESS, "DriverImage.bin", DRIVER_FLASH_SIZE);
         MicoFlashFinalize(MICO_FLASH_FOR_DRIVER);
         continue;
       }
@@ -264,8 +288,8 @@ void Main_Menu(void)
       SerialDownload(MICO_FLASH_FOR_PARA, PARA_START_ADDRESS, PARA_FLASH_SIZE);                        
     }
 
-    /***************** Command "4" or "FWUPDATE": : Update the Flash  *************************/
-    else if(strcmp(cmdname, "FWUPDATE") == 0 || strcmp(cmdname, "4") == 0) {
+    /***************** Command "4" or "FLASHUPDATE": : Update the Flash  *************************/
+    else if(strcmp(cmdname, "FLASHUPDATE") == 0 || strcmp(cmdname, "4") == 0) {
       if (findCommandPara(cmdbuf, "i", NULL, 0) != -1){
         targetFlash = MICO_INTERNAL_FLASH;
       }else if(findCommandPara(cmdbuf, "s", NULL, 200) != -1){
@@ -305,8 +329,13 @@ void Main_Menu(void)
           startAddress = INTERNAL_FLASH_START_ADDRESS;
           endAddress = INTERNAL_FLASH_END_ADDRESS;
         }else{
+#ifdef USE_MICO_SPI_FLASH        
           startAddress = SPI_FLASH_START_ADDRESS;
           endAddress = SPI_FLASH_END_ADDRESS;
+#else
+          printf ("\n\rSPI Flash not exist\n\r");
+          continue;
+#endif
         }
       }
 
@@ -321,7 +350,7 @@ void Main_Menu(void)
       if (findCommandPara(cmdbuf, "r", NULL, 0) != -1){
         printf ("\n\rRead flash content From 0x%x to 0x%x\n\r", startAddress, endAddress);
         MicoFlashInitialize((mico_flash_t)targetFlash);
-        SerialUpload((mico_flash_t)targetFlash, startAddress, endAddress-startAddress+1);
+        SerialUpload((mico_flash_t)targetFlash, startAddress, "FlashImage.bin", endAddress-startAddress+1);
         MicoFlashFinalize((mico_flash_t)targetFlash);
         continue;
       }
@@ -329,21 +358,37 @@ void Main_Menu(void)
       printf ("\n\rUpdating flash content From 0x%x to 0x%x\n\r", startAddress, endAddress);
       SerialDownload((mico_flash_t)targetFlash, startAddress, endAddress-startAddress+1);                           
     }
+
+    /***************** Command: Reboot *************************/
+    else if(strcmp(cmdname, "MEMORYMAP") == 0 || strcmp(cmdname, "5") == 0)  {
+#ifdef MICO_FLASH_FOR_UPDATE
+      printf(MEMMAP, flash_name[MICO_FLASH_FOR_BOOT],BOOT_START_ADDRESS,BOOT_END_ADDRESS,\
+                     flash_name[MICO_FLASH_FOR_PARA], PARA_START_ADDRESS, PARA_END_ADDRESS,\
+                     flash_name[MICO_FLASH_FOR_APPLICATION], APPLICATION_START_ADDRESS, APPLICATION_END_ADDRESS,\
+                     flash_name[MICO_FLASH_FOR_UPDATE], UPDATE_START_ADDRESS, UPDATE_END_ADDRESS,\
+                     flash_name[MICO_FLASH_FOR_DRIVER], DRIVER_START_ADDRESS, DRIVER_END_ADDRESS);
+#else
+      printf(MEMMAP, flash_name[MICO_FLASH_FOR_BOOT],BOOT_START_ADDRESS,BOOT_END_ADDRESS,\
+                     flash_name[MICO_FLASH_FOR_PARA], PARA_START_ADDRESS, PARA_END_ADDRESS,\
+                     flash_name[MICO_FLASH_FOR_APPLICATION], APPLICATION_START_ADDRESS, APPLICATION_END_ADDRESS,\
+                     flash_name[MICO_FLASH_FOR_DRIVER], DRIVER_START_ADDRESS, DRIVER_END_ADDRESS);      
+#endif 
+    }
     /***************** Command: Excute the application *************************/
-    else if(strcmp(cmdname, "BOOT") == 0 || strcmp(cmdname, "3") == 0)	{
+    else if(strcmp(cmdname, "BOOT") == 0 || strcmp(cmdname, "6") == 0)	{
       printf ("\n\rBooting.......\n\r");
       startApplication();
     }
 
    /***************** Command: Reboot *************************/
-    else if(strcmp(cmdname, "REBOOT") == 0 || strcmp(cmdname, "4") == 0)  {
+    else if(strcmp(cmdname, "REBOOT") == 0 || strcmp(cmdname, "7") == 0)  {
       printf ("\n\rReBooting.......\n\r");
       MicoSystemReboot();
     break;                              
   }
 
 	else if(strcmp(cmdname, "HELP") == 0 || strcmp(cmdname, "?") == 0)	{
-    printf ("%s", menu);                         /* display command menu        */
+    printf ( menu, MODEL, HARDWARE_REVISION );                       /* display command menu        */
 		break;
 	}
 

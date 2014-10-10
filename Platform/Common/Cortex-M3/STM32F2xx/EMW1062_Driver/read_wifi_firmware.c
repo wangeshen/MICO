@@ -45,13 +45,13 @@ static uint32_t image_size = DRIVER_FLASH_SIZE;
 uint32_t platform_get_wifi_image_size(void)
 {
     uint32_t FlashAddress = DRIVER_START_ADDRESS + DRIVER_FLASH_SIZE - 0x4;
-    uint8_t imageTail;
+    uint32_t imageTail;
 
-    MicoFlashRead(MICO_FLASH_FOR_DRIVER, &FlashAddress, &imageTail, 4);
+    MicoFlashRead(MICO_FLASH_FOR_DRIVER, &FlashAddress, (uint8_t *)&imageTail, 4);
     while(imageTail == 0xFFFFFFFF) {
         image_size-= 4;
         FlashAddress -=8;
-        MicoFlashRead(MICO_FLASH_FOR_DRIVER, &FlashAddress, &imageTail, 4);
+        MicoFlashRead(MICO_FLASH_FOR_DRIVER, &FlashAddress, (uint8_t *)&imageTail, 4);
     }
     
     return image_size;

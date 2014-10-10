@@ -219,7 +219,6 @@ int32_t Ymodem_Receive (uint8_t *buf, mico_flash_t flash, uint32_t flashdestinat
 
                   /* Write received data in Flash */
                   if (MicoFlashWrite(flash, &flashdestination, (uint8_t*) ramsource, (uint32_t) packet_length)  == 0)
-                  //if (FLASH_If_Write(&flashdestination, (uint32_t*) ramsource, (uint32_t) packet_length/4)  == 0)
                   {
                     Send_Byte(ACK);
                   }

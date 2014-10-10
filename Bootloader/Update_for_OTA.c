@@ -43,6 +43,17 @@ extern void Update_error_callback(UPDATE_ERROR_TypeDef error_code);
 #define update_log(M, ...) custom_log("UPDATE", M, ##__VA_ARGS__)
 #define update_log_trace() custom_log_trace("UPDATE")
 
+#ifndef MICO_FLASH_FOR_UPDATE
+OSStatus update(void)
+{
+  return kUnsupportedErr;
+}
+
+Log_Status updateLogCheck(boot_table_t *updateLog)
+{
+  return Log_UnkonwnERROR;
+}
+#else
 OSStatus update(void)
 {
   boot_table_t updateLog;
@@ -51,7 +62,7 @@ OSStatus update(void)
   uint32_t destStartAddress_tmp;
   uint32_t paraStartAddress;
   OSStatus err = kNoErr;
-  
+ 
   MicoFlashInitialize( (mico_flash_t)MICO_FLASH_FOR_UPDATE );
   memset(data, 0xFF, SizePerRW);
   memset(newData, 0xFF, SizePerRW);
@@ -155,6 +166,7 @@ exit:
   return err;
 }
 
+
 Log_Status updateLogCheck(boot_table_t *updateLog)
 {
   int i;
@@ -198,6 +210,7 @@ Log_Status updateLogCheck(boot_table_t *updateLog)
   else
     return Log_UpdateTagNotExist;
 }
+#endif
 
 
 

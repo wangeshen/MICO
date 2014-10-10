@@ -76,6 +76,15 @@ static OSStatus internalFlashFinalize( void );
 static OSStatus spiFlashErase(uint32_t StartAddress, uint32_t EndAddress);
 #endif
 
+
+const char* flash_name[] =
+{ 
+#ifdef USE_MICO_SPI_FLASH
+  [MICO_SPI_FLASH] = "SPI", 
+#endif
+  [MICO_INTERNAL_FLASH] = "Internal",
+};
+
 OSStatus MicoFlashInitialize( mico_flash_t flash )
 { 
   platform_log_trace();

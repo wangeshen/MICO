@@ -37,22 +37,25 @@ const char menu[] =
 "+************** (C) COPYRIGHT 2014 MXCHIP Corporation ***********+\r\n"
 "|               MICO Common Bootloader                           |\r\n"
 "+ command --------------------------------+ function ------------+\r\n"
-"| 0:BOOTUPDATE  <-r>                      | Update bootloader    |\r\n"
-"| 1:FWUPDATE    <-r>                      | Update application   |\r\n"
-"| 2:DRIVERUPDATE     <-r>                 | Update RF driver     |\r\n"
-"| 3:PARAUPDATE <-e>                       | Update MICO settings |\r\n"
-"| 4:FWUPDATE  <-i><-s><-e><-r>            |                      |\r\n"
-"|  <-start hex or dec><-end hex or dec>   | Update flash content |\r\n"
-"| 5:BOOT                                  | Excute application   |\r\n"
-"| 6:REBOOT                                | Reboot               |\r\n"
+"| 0:BOOTUPDATE    <-r>                    | Update bootloader    |\r\n"
+"| 1:FWUPDATE      <-r>                    | Update application   |\r\n"
+"| 2:DRIVERUPDATE  <-r>                    | Update RF driver     |\r\n"
+"| 3:PARAUPDATE    <-r><-e>                | Update MICO settings |\r\n"
+"| 4:FLASHUPDATE   <-i><-s><-e><-r>        |                      |\r\n"
+"|    <-start hex or dec><-end hex or dec> | Update flash content |\r\n"
+"| 5:MEMORYMAP                             | List flash memory map|\r\n"
+"| 6:BOOT                                  | Excute application   |\r\n"
+"| 7:REBOOT                                | Reboot               |\r\n"
 "| ?:HELP                                  | displays this help   |\r\n"
-"+--------------------+-------------------------------------------+\r\n"
-" -e Erase only  -r Read from flash\r\n"
-" -i internal flash  -s SPI flash -start flash start address\r\n"
-" -end flash start address\r\n"
+"+-----------------------------------------+----------------------+\r\n"
+"|                            By William Xu from MXCHIP M2M Team  |\r\n"
+"+----------------------------------------------------------------+\r\n"
+" MODULE: %s, HARDWARE_REVISION: %s\r\n"
+" Notes:\r\n"
+" -e Erase only  -r Read from flash -i internal flash  -s SPI flash\r\n"
+"  -start flash start address -end flash start address\r\n"
 " Example: Input \"4 -i -start 0x400 -end 0x800\": Update internal\r\n"
-"          flash from address 0x400 to 0x 800\r\n"
-" By William Xu from MXCHIP M2M Team\r\n";
+"          flash from address 0x400 to 0x800\r\n";
 
 int main(void)
 {
@@ -61,7 +64,9 @@ int main(void)
   init_architecture();
   init_platform_bootloader();
   
+#ifdef MICO_FLASH_FOR_UPDATE
   update();
+#endif
   
   /* BOOT_SEL = 1 => Normal start*/
   if(MicoGpioInputGet((mico_gpio_t)BOOT_SEL)==true)
@@ -69,8 +74,8 @@ int main(void)
   /* BOOT_SEL = 0, MFG_SEL = 0 => Normal start, MICO will enter MFG mode when "MicoInit" is called*/
   else if(MicoGpioInputGet((mico_gpio_t)MFG_SEL)==false)
     startApplication();
-  
-  printf ( menu );
+
+  printf ( menu, MODEL, HARDWARE_REVISION );
 
   while(1){                             
     Main_Menu ();

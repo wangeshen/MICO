@@ -35,7 +35,9 @@
 
 #define http_utils_log(M, ...) custom_log("HTTPUtils", M, ##__VA_ARGS__)
 
+#ifdef MICO_FLASH_FOR_UPDATE
 static volatile uint32_t flashStorageAddress = UPDATE_START_ADDRESS;
+#endif
 
 int SocketReadHTTPHeader( int inSock, HTTPHeader_t *inHeader )
 {
@@ -95,13 +97,21 @@ int SocketReadHTTPHeader( int inSock, HTTPHeader_t *inHeader )
   
   err = HTTPGetHeaderField( inHeader->buf, inHeader->len, "Content-Type", NULL, NULL, &value, &valueSize, NULL );
   
+
   if(err == kNoErr && strnicmpx( value, valueSize, kMIMEType_MXCHIP_OTA ) == 0){
+#ifdef MICO_FLASH_FOR_UPDATE  
     http_utils_log("Receive OTA data!");        
     err = MicoFlashInitialize( MICO_FLASH_FOR_UPDATE );
     require_noerr(err, exit);
     err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint8_t *)end, inHeader->extraDataLen);
     require_noerr(err, exit);
-  }else{
+#else
+    http_utils_log("OTA flash memory is not existed, !");
+    err = kUnsupportedErr;
+#endif
+  }
+  else{
+
     inHeader->extraDataPtr = calloc(inHeader->contentLength, sizeof(uint8_t));
     require_action(inHeader->extraDataPtr, exit, err = kNoMemoryErr);
     memcpy((uint8_t *)inHeader->extraDataPtr, end, inHeader->extraDataLen);
@@ -163,6 +173,9 @@ OSStatus SocketReadHTTPBody( int inSock, HTTPHeader_t *inHeader )
   fd_set readSet;
   const char *    value;
   size_t          valueSize;
+#ifdef MICO_FLASH_FOR_UPDATE
+  bool writeToFlash = false;
+#endif
   
   require( inHeader, exit );
   
@@ -179,6 +192,8 @@ OSStatus SocketReadHTTPBody( int inSock, HTTPHeader_t *inHeader )
     err = HTTPGetHeaderField( inHeader->buf, inHeader->len, "Content-Type", NULL, NULL, &value, &valueSize, NULL );
     require_noerr(err, exit);
     if( strnicmpx( value, valueSize, kMIMEType_MXCHIP_OTA ) == 0 ){
+#ifdef MICO_FLASH_FOR_UPDATE  
+      writeToFlash = true;
       inHeader->otaDataPtr = calloc(OTA_Data_Length_per_read, sizeof(uint8_t)); 
       require_action(inHeader->otaDataPtr, exit, err = kNoMemoryErr);
       if((inHeader->contentLength - inHeader->extraDataLen)<OTA_Data_Length_per_read){
@@ -199,6 +214,10 @@ OSStatus SocketReadHTTPBody( int inSock, HTTPHeader_t *inHeader )
       
       free(inHeader->otaDataPtr);
       inHeader->otaDataPtr = 0;
+#else
+      http_utils_log("OTA flash memory is not existed, !");
+      err = kUnsupportedErr;
+#endif
     }else{
       readResult = read( inSock,
                         (uint8_t*)( inHeader->extraDataPtr + inHeader->extraDataLen ),
@@ -216,7 +235,9 @@ exit:
     free(inHeader->otaDataPtr);
     inHeader->otaDataPtr = 0;
   }
-  MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
+#ifdef MICO_FLASH_FOR_UPDATE
+  if(writeToFlash == true) MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
+#endif
   return err;
 }
 

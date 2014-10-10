@@ -566,7 +566,7 @@ static OSStatus platform_uart_receive_bytes( mico_uart_t uart, void* data, uint3
       }
     }    
 #endif
-      return uart_interfaces[uart].rx_dma_result;
+    return uart_interfaces[uart].rx_dma_result;
   }
   
   

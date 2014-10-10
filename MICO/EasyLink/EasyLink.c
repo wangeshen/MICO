@@ -547,7 +547,9 @@ OSStatus _FTCRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico_Context
           inContext->micoStatus.sys_state = eState_Software_Reset;
           require(inContext->micoStatus.sys_state_change_sem, exit);
           mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
-        }else if(strnicmpx( value, valueSize, kMIMEType_MXCHIP_OTA ) == 0){
+        }
+#ifdef MICO_FLASH_FOR_UPDATE
+        else if(strnicmpx( value, valueSize, kMIMEType_MXCHIP_OTA ) == 0){
           easylink_log("Receive OTA data!");
           mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
           memset(&inContext->flashContentInRam.bootTable, 0, sizeof(boot_table_t));
@@ -562,7 +564,9 @@ OSStatus _FTCRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico_Context
           inContext->micoStatus.sys_state = eState_Software_Reset;
           require(inContext->micoStatus.sys_state_change_sem, exit);
           mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
-        }else{
+        }
+#endif
+        else{
           return kUnsupportedDataErr;
         }
         err = kNoErr;
