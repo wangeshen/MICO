@@ -344,3 +344,22 @@ void host_platform_power_wifi( bool power_enabled )
     MicoGpioOutputHigh( (mico_gpio_t)WL_REG ); 
   }
 }
+
+void MicoSysLed(bool onoff)
+{
+    if (onoff) {
+        MicoGpioOutputHigh( (mico_gpio_t)MICO_SYS_LED );
+    } else {
+        MicoGpioOutputLow( (mico_gpio_t)MICO_SYS_LED );
+    }
+}
+
+void MicoRfLed(bool onoff)
+{
+    if (onoff) {
+        MicoGpioOutputLow( (mico_gpio_t)MICO_RF_LED );
+    } else {
+        MicoGpioOutputHigh( (mico_gpio_t)MICO_RF_LED );
+    }
+}
+

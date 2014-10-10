@@ -107,6 +107,18 @@ void MicoMcuPowerSaveConfig( int enable );
   */
 
 
+void MicoSysLed(bool onoff);
+/**
+  * @}
+  */
+
+
+void MicoRfLed(bool onoff);
+/**
+  * @}
+  */
+
+
 /**
   * @}
   */

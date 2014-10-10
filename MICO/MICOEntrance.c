@@ -102,9 +102,11 @@ void micoNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inCont
   switch (event) {
   case NOTIFY_STATION_UP:
     mico_log("Station up");
+    MicoRfLed(true);
     break;
   case NOTIFY_STATION_DOWN:
     mico_log("Station down");
+    MicoRfLed(false);
     break;
   default:
     break;
@@ -221,6 +223,23 @@ static void _watchdog_reload_timer_handler( void* arg )
   MICOUpdateSystemMonitor(&mico_monitor, APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000-100);
 }
 
+static void mico_mfg_test(void)
+{
+    int ret;
+
+    ret = mfg_test("MXCHIP_CAGE");
+    if (ret == 0)
+        printf("MFG test success\r\n");
+    else {
+        if (ret & 1) 
+            printf("SCAN FAIL\r\n");
+        if (ret & 2)
+            printf("Connect AP FAIL\r\n");
+    }
+
+    while(1);
+}
+
 int application_start(void)
 {
   OSStatus err = kNoErr;
@@ -250,7 +269,10 @@ int application_start(void)
   
   /*wlan driver and tcpip init*/
   MicoInit();
-  
+  MicoSysLed(true);
+
+  if (0)
+    mico_mfg_test();
   /*Read current time from RTC.*/
   MicoRtcGetTime(&time);
   currentTime.tm_sec = time.sec;

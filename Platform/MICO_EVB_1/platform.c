@@ -305,7 +305,7 @@ OSStatus mico_platform_init( void )
 void init_platform( void )
 {
   MicoGpioInitialize( (mico_gpio_t)MICO_SYS_LED, OUTPUT_PUSH_PULL );
-  MicoGpioOutputLow( (mico_gpio_t)MICO_SYS_LED );
+  MicoGpioOutputHigh( (mico_gpio_t)MICO_SYS_LED );
   MicoGpioInitialize( (mico_gpio_t)MICO_RF_LED, OUTPUT_OPEN_DRAIN_NO_PULL );
   MicoGpioOutputHigh( (mico_gpio_t)MICO_RF_LED );
   
@@ -346,3 +346,22 @@ void host_platform_power_wifi( bool power_enabled )
     MicoGpioOutputHigh( (mico_gpio_t)WL_REG ); 
   }
 }
+
+void MicoSysLed(bool onoff)
+{
+    if (onoff) {
+        MicoGpioOutputLow( (mico_gpio_t)MICO_SYS_LED );
+    } else {
+        MicoGpioOutputHigh( (mico_gpio_t)MICO_SYS_LED );
+    }
+}
+
+void MicoRfLed(bool onoff)
+{
+    if (onoff) {
+        MicoGpioOutputLow( (mico_gpio_t)MICO_RF_LED );
+    } else {
+        MicoGpioOutputHigh( (mico_gpio_t)MICO_RF_LED );
+    }
+}
+
