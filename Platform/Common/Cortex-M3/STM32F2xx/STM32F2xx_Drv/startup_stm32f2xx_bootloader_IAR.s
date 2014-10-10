@@ -57,11 +57,7 @@
 
         EXTERN  SystemInit
         EXTERN  __iar_program_start
-        EXTERN  vPortSVCHandler
-        EXTERN  xPortPendSVHandler
         EXTERN  hard_fault_handler_c
-        EXTERN  xPortSysTickHandler
-        EXTERN  RTC_WKUP_irq
         PUBLIC  __vector_table
 
         DATA
@@ -113,7 +109,7 @@ __vector_table_RAM
         DCD     WWDG_IRQHandler                   ; Window WatchDog                                        
         DCD     PVD_IRQHandler                    ; PVD through EXTI Line detection                        
         DCD     TAMP_STAMP_IRQHandler             ; Tamper and TimeStamps through the EXTI line            
-        DCD     RTC_WKUP_irq                      ; RTC Wakeup through the EXTI line                       
+        DCD     RTC_WKUP_IRQHandler               ; RTC Wakeup through the EXTI line                       
         DCD     FLASH_IRQHandler                  ; FLASH                                           
         DCD     RCC_IRQHandler                    ; RCC                                             
         DCD     EXTI0_IRQHandler                  ; EXTI Line0                                             
@@ -235,7 +231,6 @@ UsageFault_Handler
         PUBWEAK SVC_Handler
         SECTION .text:CODE:REORDER(1)
 SVC_Handler
-;        B vPortSVCHandler
          B SVC_Handler
 
         PUBWEAK DebugMon_Handler
@@ -246,13 +241,11 @@ DebugMon_Handler
         PUBWEAK PendSV_Handler
         SECTION .text:CODE:REORDER(1)
 PendSV_Handler
-;        B xPortPendSVHandler
         B PendSV_Handler
 
         PUBWEAK SysTick_Handler
         SECTION .text:CODE:REORDER(1)
 SysTick_Handler
-;        B xPortSysTickHandler
         B SysTick_Handler
 
         PUBWEAK WWDG_IRQHandler

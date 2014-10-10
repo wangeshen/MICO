@@ -30,26 +30,27 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "bootloader.h"
 #include "common.h"
-#include "menu.h"
 #include "ymodem.h"
 #include "stdio.h"
 #include "string.h"
 #include "platform_common_config.h"
+#include "platformInternal.h"
 #include "StringUtils.h"
+#include "MicoRtos.h"
 #include "MicoPlatform.h"
-#include <ctype.h>                    /* character functions                 */
+#include <ctype.h>                    
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
+#define CMD_STRING_SIZE       128
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 uint8_t tab_1024[1024] =
   {
     0
   };
-uint8_t FileName[FILE_NAME_LENGTH];
+char FileName[FILE_NAME_LENGTH];
 char ERROR_STR [] = "\n\r*** ERROR: %s\n\r";    /* ERROR message string in code   */
 
 extern const char menu[];
@@ -119,37 +120,37 @@ exit:
   */
 void SerialDownload(mico_flash_t flash, uint32_t flashdestination, int32_t maxRecvSize)
 {
-  uint8_t Number[10] = "          ";
+  char Number[10] = "          ";
   int32_t Size = 0;
 
-  SerialPutString("Waiting for the file to be sent ... (press 'a' to abort)\n\r");
+  printf("Waiting for the file to be sent ... (press 'a' to abort)\n\r");
   Size = Ymodem_Receive(&tab_1024[0], flash, flashdestination, maxRecvSize);
   if (Size > 0)
   {
-    SerialPutString("\n\n\r Programming Completed Successfully!\n\r--------------------------------\r\n Name: ");
-    SerialPutString(FileName);
+    printf("\n\n\r Programming Completed Successfully!\n\r--------------------------------\r\n Name: ");
+    printf(FileName);
     
-    Int2Str(Number, Size);
-    SerialPutString("\n\r Size: ");
-    SerialPutString(Number);
-    SerialPutString(" Bytes\r\n");
-    SerialPutString("-------------------\n");
+    Int2Str((uint8_t *)Number, Size);
+    printf("\n\r Size: ");
+    printf(Number);
+    printf(" Bytes\r\n");
+    printf("-------------------\n");
   }
   else if (Size == -1)
   {
-    SerialPutString("\n\n\rThe image size is higher than the allowed space memory!\n\r");
+    printf("\n\n\rThe image size is higher than the allowed space memory!\n\r");
   }
   else if (Size == -2)
   {
-    SerialPutString("\n\n\rVerification failed!\n\r");
+    printf("\n\n\rVerification failed!\n\r");
   }
   else if (Size == -3)
   {
-    SerialPutString("\r\n\nAborted by user.\n\r");
+    printf("\r\n\nAborted by user.\n\r");
   }
   else
   {
-    SerialPutString("\n\rFailed to receive the file!\n\r");
+    printf("\n\rFailed to receive the file!\n\r");
   }
 }
 
@@ -161,21 +162,23 @@ void SerialDownload(mico_flash_t flash, uint32_t flashdestination, int32_t maxRe
 void SerialUpload(mico_flash_t flash, uint32_t flashdestination, int32_t maxRecvSize)
 {
   uint8_t status = 0;
+  uint8_t key;
 
-  SerialPutString("\n\n\rSelect Receive File\n\r");
+  printf("Select Receive File\n\r");
+  MicoUartRecv( STDIO_UART, &key, 1, MICO_NEVER_TIMEOUT );
 
-  if (GetKey() == CRC16)
+  if (key == CRC16)
   {
     /* Transmit the flash image through ymodem protocol */
     status = Ymodem_Transmit(flash, flashdestination, (const uint8_t*)"UploadedFlashImage.bin", maxRecvSize);
 
     if (status != 0)
     {
-      SerialPutString("\n\rError Occurred while Transmitting File\n\r");
+      printf("\n\rError Occurred while Transmitting File\n\r");
     }
     else
     {
-      SerialPutString("\n\rFile uploaded successfully \n\r");
+      printf("\n\rFile uploaded successfully \n\r");
     }
   }
 }
@@ -187,7 +190,7 @@ void SerialUpload(mico_flash_t flash, uint32_t flashdestination, int32_t maxRecv
   */
 void Main_Menu(void)
 {
-  char cmdbuf [200] = {0}, cmdname[15] = {0};     /* command input buffer        */
+  char cmdbuf [CMD_STRING_SIZE] = {0}, cmdname[15] = {0};     /* command input buffer        */
   int i, j;                                       /* index for command buffer    */
   int targetFlash;
   char startAddressStr[10], endAddressStr[10];
@@ -211,13 +214,20 @@ void Main_Menu(void)
 
     /***************** Command "0" or "BOOTUPDATE": Update the application  *************************/
     if(strcmp(cmdname, "BOOTUPDATE") == 0 || strcmp(cmdname, "0") == 0) {
+      if (findCommandPara(cmdbuf, "r", NULL, 0) != -1){
+        printf ("\n\rRead Bootloader only......\n\r");
+        MicoFlashInitialize(MICO_FLASH_FOR_BOOT);
+        SerialUpload(MICO_FLASH_FOR_BOOT, BOOT_START_ADDRESS, BOOT_FLASH_SIZE);
+        MicoFlashFinalize(MICO_FLASH_FOR_BOOT);
+        continue;
+      }
       printf ("\n\rUpdating Bootloader......\n\r");
       SerialDownload(MICO_FLASH_FOR_BOOT, BOOT_START_ADDRESS, BOOT_FLASH_SIZE);
     }
 
     /***************** Command "1" or "FWUPDATE": Update the MICO application  *************************/
     else if(strcmp(cmdname, "FWUPDATE") == 0 || strcmp(cmdname, "1") == 0)	{
-      if (findCommandPara(cmdbuf, "r", NULL, 200) != -1){
+      if (findCommandPara(cmdbuf, "r", NULL, 0) != -1){
         printf ("\n\rRead MICO application only......\n\r");
         MicoFlashInitialize(MICO_FLASH_FOR_APPLICATION);
         SerialUpload(MICO_FLASH_FOR_APPLICATION, APPLICATION_START_ADDRESS, APPLICATION_FLASH_SIZE);
@@ -230,13 +240,20 @@ void Main_Menu(void)
 
     /***************** Command "2" or "DRIVERUPDATE": Update the RF driver  *************************/
     else if(strcmp(cmdname, "DRIVERUPDATE") == 0 || strcmp(cmdname, "2") == 0) {
+      if (findCommandPara(cmdbuf, "r", NULL, 0) != -1){
+        printf ("\n\rRead RF driver only......\n\r");
+        MicoFlashInitialize(MICO_FLASH_FOR_DRIVER);
+        SerialUpload(MICO_FLASH_FOR_DRIVER, DRIVER_START_ADDRESS, DRIVER_FLASH_SIZE);
+        MicoFlashFinalize(MICO_FLASH_FOR_DRIVER);
+        continue;
+      }
       printf ("\n\rUpdating RF driver......\n\r");
       SerialDownload(MICO_FLASH_FOR_DRIVER, DRIVER_START_ADDRESS, DRIVER_FLASH_SIZE);                        
     }
 
     /***************** Command "3" or "PARAUPDATE": Update the application  *************************/
     else if(strcmp(cmdname, "PARAUPDATE") == 0 || strcmp(cmdname, "3") == 0)  {
-      if (findCommandPara(cmdbuf, "e", NULL, 200) != -1){
+      if (findCommandPara(cmdbuf, "e", NULL, 0) != -1){
         printf ("\n\rErasing MICO settings only......\n\r");
         MicoFlashInitialize(MICO_FLASH_FOR_PARA);
         MicoFlashErase(MICO_FLASH_FOR_PARA, PARA_START_ADDRESS, PARA_END_ADDRESS);
@@ -249,7 +266,7 @@ void Main_Menu(void)
 
     /***************** Command "4" or "FWUPDATE": : Update the Flash  *************************/
     else if(strcmp(cmdname, "FWUPDATE") == 0 || strcmp(cmdname, "4") == 0) {
-      if (findCommandPara(cmdbuf, "i", NULL, 200) != -1){
+      if (findCommandPara(cmdbuf, "i", NULL, 0) != -1){
         targetFlash = MICO_INTERNAL_FLASH;
       }else if(findCommandPara(cmdbuf, "s", NULL, 200) != -1){
         targetFlash = MICO_SPI_FLASH;
@@ -278,7 +295,7 @@ void Main_Menu(void)
         }
       }
 
-      if(endAddress<startAddress) {
+      if(endAddress<startAddress && inputFlashArea == true) {
         printf ("\n\rIllegal flash address.\n\r");
         continue;
       }
@@ -293,10 +310,18 @@ void Main_Menu(void)
         }
       }
 
-      if (findCommandPara(cmdbuf, "e", NULL, 200) != -1){
+      if (findCommandPara(cmdbuf, "e", NULL, 0) != -1){
         printf ("\n\rErasing flash content From 0x%x to 0x%x\n\r", startAddress, endAddress);
         MicoFlashInitialize((mico_flash_t)targetFlash);
         MicoFlashErase((mico_flash_t)targetFlash, startAddress, endAddress);
+        MicoFlashFinalize((mico_flash_t)targetFlash);
+        continue;
+      }
+
+      if (findCommandPara(cmdbuf, "r", NULL, 0) != -1){
+        printf ("\n\rRead flash content From 0x%x to 0x%x\n\r", startAddress, endAddress);
+        MicoFlashInitialize((mico_flash_t)targetFlash);
+        SerialUpload((mico_flash_t)targetFlash, startAddress, endAddress-startAddress+1);
         MicoFlashFinalize((mico_flash_t)targetFlash);
         continue;
       }

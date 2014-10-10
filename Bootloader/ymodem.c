@@ -30,7 +30,6 @@
 #include "string.h"
 #include "StringUtils.h"
 #include "MicoPlatform.h"
-#include "Serial.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -50,15 +49,10 @@ extern uint8_t FileName[];
   */
 static  int32_t Receive_Byte (uint8_t *c, uint32_t timeout)
 {
-  while (timeout-- > 0)
-  {
-    if (SerialKeyPressed(c) == 1)
-    {
-      return 0;
-    }
-    for(int i = 0; i<100000; i++);
-  }
-  return -1;
+  if (MicoUartRecv( STDIO_UART, c, 1, timeout )!=kNoErr)
+    return -1;
+  else
+    return 0;
 }
 
 /**
@@ -349,15 +343,8 @@ void Ymodem_PreparePacket(mico_flash_t flash, uint32_t flashdestination, uint8_t
   }
   data[1] = pktNo;
   data[2] = (~pktNo);
-  //file_ptr = SourceBuf;
-  
-  /* Filename packet has valid data */
-  // for (i = PACKET_HEADER; i < size + PACKET_HEADER;i++)
-  // {
-  //    data[i] = *file_ptr++;
-  // }
-  MicoFlashRead(flash, &flashdestination, data + PACKET_HEADER, size);
 
+  MicoFlashRead(flash, &flashdestination, data + PACKET_HEADER, size);
 
   if ( size  <= packetSize)
   {
@@ -456,7 +443,6 @@ void Ymodem_SendPacket(uint8_t *data, uint16_t length)
   */
 uint8_t Ymodem_Transmit (mico_flash_t flash, uint32_t flashdestination, const uint8_t* sendFileName, uint32_t sizeFile)
 {
-  
   uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD];
   uint8_t filename[FILE_NAME_LENGTH];
   uint8_t tempCheckSum;
@@ -564,14 +550,7 @@ uint8_t Ymodem_Transmit (mico_flash_t flash, uint32_t flashdestination, const ui
         {
            buf_ptr += pktSize;  
            size -= pktSize;
-           // if (blkNumber == (USER_FLASH_SIZE/1024))
-           // {
-           //   return 0xFF; /*  error */
-           // }
-           // else
-           // {
-              blkNumber++;
-           //}
+           blkNumber++;
         }
         else
         {

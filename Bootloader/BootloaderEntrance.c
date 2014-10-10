@@ -23,23 +23,14 @@
 #include "Mico.h"
 #include "MicoPlatform.h"
 #include "platform.h"
+#include "platformInternal.h"
 #include "platform_common_config.h"
-#include "stm32f2xx.h"
-#include "menu.h"
 #include "Update_for_OTA.h"
 
 #define boot_log(M, ...) custom_log("BOOT", M, ##__VA_ARGS__)
 #define boot_log_trace() custom_log_trace("BOOT")
 
-typedef enum
-{
-  normal,
-  chipid_error,   //chipid_error
-  RDP_error,   //undefined
-  update_error,
-} Bootloader_status;
-
-Bootloader_status bootloader_status = normal;
+extern void Main_Menu(void);
 
 const char menu[] =
 "\r\n"
@@ -63,67 +54,14 @@ const char menu[] =
 "          flash from address 0x400 to 0x 800\r\n"
 " By William Xu from MXCHIP M2M Team\r\n";
 
-#if defined ( __ICCARM__ )
-
-static inline void __jump_to( uint32_t addr )
-{
-  __asm( "MOV R1, #0x00000001" );
-  __asm( "ORR R0, R0, R1" );  /* Last bit of jump address indicates whether destination is Thumb or ARM code */
-  __asm( "BLX R0" );
-}
-
-#elif defined ( __GNUC__ )
-
-__attribute__( ( always_inline ) ) static __INLINE void __jump_to( uint32_t addr )
-{
-  addr |= 0x00000001;  /* Last bit of jump address indicates whether destination is Thumb or ARM code */
-  __ASM volatile ("BX %0" : : "r" (addr) );
-}
-
-#endif
-
-void startApplication(void)
-{
-  uint32_t text_addr = APPLICATION_START_ADDRESS;
-  
-  /* Test if user code is programmed starting from address "ApplicationAddress" */
-  if (((*(volatile uint32_t*)text_addr) & 0x2FFE0000 ) == 0x20000000)
-  { 
-    uint32_t* stack_ptr;
-    uint32_t* start_ptr;
-    
-    stack_ptr = (uint32_t*) text_addr;  /* Initial stack pointer is first 4 bytes of vector table */
-    start_ptr = ( stack_ptr + 1 );  /* Reset vector is second 4 bytes of vector table */
-    
-    __asm( "MOV LR,        #0xFFFFFFFF" );
-    __asm( "MOV R1,        #0x01000000" );
-    __asm( "MSR APSR_nzcvq,     R1" );
-    __asm( "MOV R1,        #0x00000000" );
-    __asm( "MSR PRIMASK,   R1" );
-    __asm( "MSR FAULTMASK, R1" );
-    __asm( "MSR BASEPRI,   R1" );
-    __asm( "MSR CONTROL,   R1" );
-    
-    SCB->VTOR = text_addr; /* Change the vector table to point to app vector table */
-    __set_MSP( *stack_ptr );
-    __jump_to( *start_ptr );
-  }  
-}
-
-extern void init_clocks(void);
-extern void init_memory(void);
-extern void init_architecture(void);
-
 int main(void)
 {
   init_clocks();
   init_memory();
   init_architecture();
+  init_platform_bootloader();
   
   update();
-  
-  MicoGpioInitialize((mico_gpio_t)BOOT_SEL, INPUT_PULL_UP);
-  MicoGpioInitialize((mico_gpio_t)MFG_SEL, INPUT_HIGH_IMPEDANCE);
   
   /* BOOT_SEL = 1 => Normal start*/
   if(MicoGpioInputGet((mico_gpio_t)BOOT_SEL)==true)
@@ -137,16 +75,5 @@ int main(void)
   while(1){                             
     Main_Menu ();
   }
-
-  printf("Bootloader exit with error! Rebooting...\r\n");
-  MicoSystemReboot();
 }
-
-int application_start(void)
-{
-  boot_log("Bootloader should never come here! Rebooting......");
-  MicoSystemReboot();
-  return 0;
-}
-
 

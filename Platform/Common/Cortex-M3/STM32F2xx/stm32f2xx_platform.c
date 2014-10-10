@@ -39,6 +39,7 @@
 #include "rtc.h"
 #include <string.h> // For memcmp
 #include "crt0.h"
+#include "MICODefaults.h"
 #include "MicoRTOS.h"
 
 #ifdef __GNUC__
@@ -126,6 +127,54 @@ static unsigned long rtc_timeout_start_time           = 0;
 /******************************************************
 *               Function Definitions
 ******************************************************/
+#if defined ( __ICCARM__ )
+
+static inline void __jump_to( uint32_t addr )
+{
+  __asm( "MOV R1, #0x00000001" );
+  __asm( "ORR R0, R0, R1" );  /* Last bit of jump address indicates whether destination is Thumb or ARM code */
+  __asm( "BLX R0" );
+}
+
+#elif defined ( __GNUC__ )
+
+__attribute__( ( always_inline ) ) static __INLINE void __jump_to( uint32_t addr )
+{
+  addr |= 0x00000001;  /* Last bit of jump address indicates whether destination is Thumb or ARM code */
+  __ASM volatile ("BX %0" : : "r" (addr) );
+}
+
+#endif
+
+/*Boot to mico application form APPLICATION_START_ADDRESS defined in platform_common_config.h */
+void startApplication(void)
+{
+  uint32_t text_addr = APPLICATION_START_ADDRESS;
+  
+  /* Test if user code is programmed starting from address "ApplicationAddress" */
+  if (((*(volatile uint32_t*)text_addr) & 0x2FFE0000 ) == 0x20000000)
+  { 
+    uint32_t* stack_ptr;
+    uint32_t* start_ptr;
+    
+    __asm( "MOV LR,        #0xFFFFFFFF" );
+    __asm( "MOV R1,        #0x01000000" );
+    __asm( "MSR APSR_nzcvq,     R1" );
+    __asm( "MOV R1,        #0x00000000" );
+    __asm( "MSR PRIMASK,   R1" );
+    __asm( "MSR FAULTMASK, R1" );
+    __asm( "MSR BASEPRI,   R1" );
+    __asm( "MSR CONTROL,   R1" );
+  
+   SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk; 
+    
+    stack_ptr = (uint32_t*) text_addr;  /* Initial stack pointer is first 4 bytes of vector table */
+    start_ptr = ( stack_ptr + 1 );  /* Reset vector is second 4 bytes of vector table */
+    
+    __set_MSP( *stack_ptr );
+    __jump_to( *start_ptr );
+  }  
+}
 
 /* STM32F2 common clock initialisation function
 * This brings up enough clocks to allow the processor to run quickly while initialising memory.
@@ -165,7 +214,6 @@ WEAK void init_clocks( void )
   
   /* Configure HCLK clock as SysTick clock source. */
   SysTick_CLKSourceConfig( SYSTICK_CLOCK_SOURCE );
-  
 }
 
 WEAK void init_memory( void )
@@ -207,6 +255,10 @@ void init_architecture( void )
   ring_buffer_init  ( (ring_buffer_t*)&stdio_rx_buffer, (uint8_t*)stdio_rx_data, STDIO_BUFFER_SIZE );
   MicoStdioUartInitialize( &stdio_uart_config, (ring_buffer_t*)&stdio_rx_buffer );
 #endif
+
+#ifdef NO_MICO_RTOS
+  check_string(SysTick_Config(SystemCoreClock / 1000)==0, "Systemtick initialize failed!");
+#endif
   
   /* Ensure 802.11 device is in reset. */
   host_platform_init( );
@@ -217,7 +269,6 @@ void init_architecture( void )
   MCU_CLOCKS_NEEDED();
   
   stm32_platform_inited = 1;  
-  
 }
 
 /******************************************************
@@ -468,4 +519,26 @@ void MicoMcuPowerSaveConfig( int enable )
   else
     MCU_CLOCKS_NEEDED();
 }
+
+
+
+#ifdef NO_MICO_RTOS
+static volatile uint32_t no_os_tick = 0;
+
+void SysTick_Handler(void)
+{
+  no_os_tick ++;
+}
+
+uint32_t mico_get_time_no_os(void)
+{
+  return no_os_tick;
+}
+
+void mico_thread_msleep_no_os(uint32_t milliseconds)
+{
+  int tick_delay_start = mico_get_time_no_os();
+  while(mico_get_time_no_os() < tick_delay_start+milliseconds);  
+}
+#endif
 

@@ -13,7 +13,8 @@
 
 #include <stdio.h>
 #include "common.h"                     /* global project definition file   */
-#include "Serial.h"
+#include "Mico.h"
+#include "MicoPlatform.h"
 
 #define CNTLQ      0x11
 #define CNTLS      0x13
@@ -30,7 +31,8 @@ void getline (char *line, int n)  {
   char c;
 
   do  {
-    if ((c = GetKey ()) == CR)  c = LF;     /* read character                 */
+    MicoUartRecv( STDIO_UART, &c, 1, MICO_NEVER_TIMEOUT );
+    if (c == CR)  c = LF;     /* read character                 */
     if (c == BACKSPACE  ||  c == DEL)  {    /* process backspace              */
       if (cnt != 0)  {
         cnt--;                              /* decrement count                */

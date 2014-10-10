@@ -1904,365 +1904,45 @@
       <name>$PROJ_DIR$\..\..\..\Bootloader\MicoDefaults.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Bootloader\Serial.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\Bootloader\Update_for_OTA.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Bootloader\ymodem.c</name>
-      <configuration>
-        <name>MICO_EVB_1</name>
-        <settings>
-          <name>ICCARM</name>
-          <data>
-            <version>29</version>
-            <wantNonLocal>0</wantNonLocal>
-            <debug>1</debug>
-            <option>
-              <name>CCOptimizationNoSizeConstraints</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCDefines</name>
-              <state>USE_STDPERIPH_DRIVER</state>
-              <state>BOOTLOADER</state>
-              <state>DEBUG</state>
-            </option>
-            <option>
-              <name>CCPreprocFile</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCPreprocComments</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCPreprocLine</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCListCFile</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCListCMnemonics</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCListCMessages</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCListAssFile</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCListAssSource</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCEnableRemarks</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCDiagSuppress</name>
-              <state>Pa050</state>
-            </option>
-            <option>
-              <name>CCDiagRemark</name>
-              <state></state>
-            </option>
-            <option>
-              <name>CCDiagWarning</name>
-              <state></state>
-            </option>
-            <option>
-              <name>CCDiagError</name>
-              <state></state>
-            </option>
-            <option>
-              <name>CCObjPrefix</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>CCAllowList</name>
-              <version>1</version>
-              <state>0000000</state>
-            </option>
-            <option>
-              <name>CCDebugInfo</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>IEndianMode</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>IProcessor</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>IExtraOptionsCheck</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>IExtraOptions</name>
-              <state></state>
-            </option>
-            <option>
-              <name>CCLangConformance</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCSignedPlainChar</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>CCRequirePrototypes</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCMultibyteSupport</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCDiagWarnAreErr</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCCompilerRuntimeInfo</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>IFpuProcessor</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>OutputFile</name>
-              <state>$FILE_BNAME$.o</state>
-            </option>
-            <option>
-              <name>CCLibConfigHeader</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>PreInclude</name>
-              <state></state>
-            </option>
-            <option>
-              <name>CompilerMisraOverride</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCIncludePath2</name>
-              <state>$PROJ_DIR$\..\..\..\Platform</state>
-              <state>$PROJ_DIR$\..\..\..\Library\support</state>
-              <state>$PROJ_DIR$\..\..\..\Bootloader</state>
-              <state>$PROJ_DIR$\..\..\..\Platform\MICO_EVB_1</state>
-              <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx</state>
-              <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc</state>
-              <state>$PROJ_DIR$\..\..\..\include</state>
-              <state>$PROJ_DIR$\..\..\..\Platform\include</state>
-              <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3</state>
-              <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv</state>
-              <state>$PROJ_DIR$\..\..\..\Platform\Common\Drivers\spi_flash</state>
-            </option>
-            <option>
-              <name>CCStdIncCheck</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCCodeSection</name>
-              <state>.text</state>
-            </option>
-            <option>
-              <name>IInterwork2</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>IProcessorMode2</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>CCOptLevel</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCOptStrategy</name>
-              <version>0</version>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCOptLevelSlave</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CompilerMisraRules98</name>
-              <version>0</version>
-              <state>1000111110110101101110011100111111101110011011000101110111101101100111111111111100110011111001110111001111111111111111111111111</state>
-            </option>
-            <option>
-              <name>CompilerMisraRules04</name>
-              <version>0</version>
-              <state>111101110010111111111000110111111111111111111111111110010111101111010101111111111111111111111111101111111011111001111011111011111111111111111</state>
-            </option>
-            <option>
-              <name>CCPosIndRopi</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCPosIndRwpi</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCPosIndNoDynInit</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>IccLang</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>IccCDialect</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>IccAllowVLA</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>IccCppDialect</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>IccExceptions</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>IccRTTI</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>IccStaticDestr</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>IccCppInlineSemantics</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>IccCmsis</name>
-              <state>1</state>
-            </option>
-            <option>
-              <name>IccFloatSemantics</name>
-              <state>0</state>
-            </option>
-            <option>
-              <name>CCNoLiteralPool</name>
-              <state>0</state>
-            </option>
-          </data>
-        </settings>
-      </configuration>
     </file>
-  </group>
-  <group>
-    <name>External</name>
-    <excluded>
-      <configuration>EMW3162</configuration>
-      <configuration>MICO_EVB_1</configuration>
-    </excluded>
-    <group>
-      <name>Curve25519</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\Curve25519\curve25519-donna.c</name>
-      </file>
-    </group>
-    <group>
-      <name>GladmanAES</name>
-      <excluded>
-        <configuration>EMW3162</configuration>
-        <configuration>MICO_EVB_1</configuration>
-      </excluded>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\GladmanAES\aes_modes.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\GladmanAES\aescrypt.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\GladmanAES\aeskey.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\GladmanAES\aestab.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\GladmanAES\gf128mul.c</name>
-      </file>
-    </group>
-    <group>
-      <name>JSON-C</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\JSON-C\arraylist.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\JSON-C\debug.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\JSON-C\json.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\JSON-C\json_object.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\JSON-C\json_tokener.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\JSON-C\json_util.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\JSON-C\linkhash.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\External\JSON-C\printbuf.c</name>
-      </file>
-    </group>
   </group>
   <group>
     <name>include</name>
     <group>
       <name>MicoDriver</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverAdc.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverAdc.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverFlash.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverFlash.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverGpio.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverGpio.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverI2c.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverI2c.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverPwm.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverPwm.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverRng.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverRng.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverRtc.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverRtc.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverSpi.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverSpi.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverUART.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverUart.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverWdg.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverWdg.h</name>
       </file>
     </group>
     <file>
@@ -2288,19 +1968,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\include\MicoWlan.h</name>
-    </file>
-  </group>
-  <group>
-    <name>Library</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MICOConfig.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm3_sdio.a</name>
-      <excluded>
-        <configuration>EMW3162</configuration>
-        <configuration>MICO_EVB_1</configuration>
-      </excluded>
     </file>
   </group>
   <group>

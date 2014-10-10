@@ -319,8 +319,17 @@ void init_platform( void )
   MicoGpioEnableIRQ( Standby_SEL , IRQ_TRIGGER_FALLING_EDGE, _button_STANDBY_irq_handler, NULL);
 
   MicoFlashInitialize( MICO_SPI_FLASH );
+}
 
+void init_platform_bootloader( void )
+{
+  MicoGpioInitialize( (mico_gpio_t)MICO_SYS_LED, OUTPUT_PUSH_PULL );
+  MicoGpioOutputLow( (mico_gpio_t)MICO_SYS_LED );
+  MicoGpioInitialize( (mico_gpio_t)MICO_RF_LED, OUTPUT_OPEN_DRAIN_NO_PULL );
+  MicoGpioOutputHigh( (mico_gpio_t)MICO_RF_LED );
   
+  MicoGpioInitialize((mico_gpio_t)BOOT_SEL, INPUT_PULL_UP);
+  MicoGpioInitialize((mico_gpio_t)MFG_SEL, INPUT_HIGH_IMPEDANCE);
 }
 
 void host_platform_reset_wifi( bool reset_asserted )

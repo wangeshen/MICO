@@ -193,7 +193,6 @@ bool mico_rtos_is_current_thread( mico_thread_t* thread );
   */
 void mico_thread_sleep(int seconds);
 
-
 /** @brief    Suspend current thread for a specific time
  *
  * @param     timer : A time interval (Unit: millisecond)
@@ -201,6 +200,14 @@ void mico_thread_sleep(int seconds);
  * @return    None.
  */
 void mico_thread_msleep(int milliseconds);
+
+/** @brief    Inserts a delay time in no os.
+ *
+ * @param     timer : A time interval (Unit: millisecond)
+ *
+ * @return    None.
+ */
+void mico_thread_msleep_no_os(volatile uint32_t  milliseconds);
 
 /**
   * @}
@@ -413,6 +420,14 @@ OSStatus mico_rtos_is_queue_full( mico_queue_t* queue );
   */
 uint32_t mico_get_time(void);
 
+/**
+  * @brief    Gets time in miiliseconds in no OS mode ( Used in bootloader )
+  *
+  * @note:    Since this is only 32 bits, it will roll over every 49 days, 17 hours.
+  *
+  * @returns  Time in milliseconds
+  */
+uint32_t mico_get_time_no_os(void);
 
 /** 
   * @brief     Initialize a RTOS timer
