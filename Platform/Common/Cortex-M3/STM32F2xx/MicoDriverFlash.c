@@ -113,7 +113,7 @@ OSStatus MicoFlashErase( mico_flash_t flash, uint32_t StartAddress, uint32_t End
   }
 #ifdef USE_MICO_SPI_FLASH
   else if(flash == MICO_SPI_FLASH){
-    if(StartAddress<SPI_FLASH_START_ADDRESS || EndAddress > SPI_FLASH_END_ADDRESS)
+    if(StartAddress>=EndAddress || EndAddress > SPI_FLASH_END_ADDRESS)
       return kParamErr;
     return spiFlashErase(StartAddress, EndAddress); 
   }
@@ -131,7 +131,7 @@ OSStatus MicoFlashWrite(mico_flash_t flash, volatile uint32_t* FlashAddress, uin
   }
 #ifdef USE_MICO_SPI_FLASH
   else if(flash == MICO_SPI_FLASH){
-    if( *FlashAddress<SPI_FLASH_START_ADDRESS || *FlashAddress + DataLength > SPI_FLASH_END_ADDRESS + 1)
+    if( *FlashAddress + DataLength > SPI_FLASH_END_ADDRESS + 1)
       return kParamErr;
     int returnVal = sflash_write( &sflash_handle, *FlashAddress, Data, DataLength );
     *FlashAddress += DataLength;
@@ -154,7 +154,7 @@ OSStatus MicoFlashRead(mico_flash_t flash, volatile uint32_t* FlashAddress, uint
   }
 #ifdef USE_MICO_SPI_FLASH
   else if(flash == MICO_SPI_FLASH){
-    if( *FlashAddress<SPI_FLASH_START_ADDRESS || *FlashAddress + DataLength > SPI_FLASH_END_ADDRESS + 1)
+    if( *FlashAddress + DataLength > SPI_FLASH_END_ADDRESS + 1)
       return kParamErr;
     int returnVal = sflash_read( &sflash_handle, *FlashAddress, Data, DataLength );
     *FlashAddress += DataLength;

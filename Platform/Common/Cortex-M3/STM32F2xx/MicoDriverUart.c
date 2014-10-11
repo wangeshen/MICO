@@ -220,153 +220,153 @@ OSStatus internal_uart_init( mico_uart_t uart, const mico_uart_config_t* config,
   usart_init_structure.USART_BaudRate   = config->baud_rate;
   usart_init_structure.USART_WordLength = ( ( config->data_width == DATA_WIDTH_9BIT ) ||
                                            ( ( config->data_width == DATA_WIDTH_8BIT ) && ( config->parity != NO_PARITY ) ) ) ? USART_WordLength_9b : USART_WordLength_8b;
-                                           usart_init_structure.USART_StopBits   = ( config->stop_bits == STOP_BITS_1 ) ? USART_StopBits_1 : USART_StopBits_2;
+  usart_init_structure.USART_StopBits   = ( config->stop_bits == STOP_BITS_1 ) ? USART_StopBits_1 : USART_StopBits_2;
                                            
-                                           switch ( config->parity )
-                                           {
-                                           case NO_PARITY:
-                                             usart_init_structure.USART_Parity = USART_Parity_No;
-                                             break;
-                                           case EVEN_PARITY:
-                                             usart_init_structure.USART_Parity = USART_Parity_Even;
-                                             break;
-                                           case ODD_PARITY:
-                                             usart_init_structure.USART_Parity = USART_Parity_Odd;
-                                             break;
-                                           default:
-                                             return kParamErr;
-                                           }
-                                           
-                                           switch ( config->flow_control )
-                                           {
-                                           case FLOW_CONTROL_DISABLED:
-                                             usart_init_structure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-                                             break;
-                                           case FLOW_CONTROL_CTS:
-                                             usart_init_structure.USART_HardwareFlowControl = USART_HardwareFlowControl_CTS;
-                                             break;
-                                           case FLOW_CONTROL_RTS:
-                                             usart_init_structure.USART_HardwareFlowControl = USART_HardwareFlowControl_RTS;
-                                             break;
-                                           case FLOW_CONTROL_CTS_RTS:
-                                             usart_init_structure.USART_HardwareFlowControl = USART_HardwareFlowControl_RTS_CTS;
-                                             break;
-                                           default:
-                                             return kParamErr;
-                                           }
-                                           
-                                           /* Initialise USART peripheral */
-                                           USART_Init( uart_mapping[uart].usart, &usart_init_structure );
-                                           
-                                           
-                                           /**************************************************************************
-                                           * Initialise STM32 DMA registers
-                                           * Note: If DMA is used, USART interrupt isn't enabled.
-                                           **************************************************************************/
-                                           /* Enable DMA peripheral clock */
-                                           uart_mapping[uart].tx_dma_peripheral_clock_func( uart_mapping[uart].tx_dma_peripheral_clock, ENABLE );
-                                           uart_mapping[uart].rx_dma_peripheral_clock_func( uart_mapping[uart].rx_dma_peripheral_clock, ENABLE );
-                                           
-                                           /* Fill init structure with common DMA settings */
-                                           dma_init_structure.DMA_PeripheralInc   = DMA_PeripheralInc_Disable;
-                                           dma_init_structure.DMA_MemoryInc       = DMA_MemoryInc_Enable;
-                                           dma_init_structure.DMA_Priority        = DMA_Priority_VeryHigh;
-                                           dma_init_structure.DMA_FIFOMode        = DMA_FIFOMode_Disable;
-                                           dma_init_structure.DMA_FIFOThreshold   = DMA_FIFOThreshold_Full;
-                                           dma_init_structure.DMA_MemoryBurst     = DMA_MemoryBurst_Single;
-                                           dma_init_structure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-                                           
-                                           if ( config->data_width == DATA_WIDTH_9BIT )
-                                           {
-                                             dma_init_structure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-                                             dma_init_structure.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
-                                           }
-                                           else
-                                           {
-                                             dma_init_structure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-                                             dma_init_structure.DMA_MemoryDataSize     = DMA_MemoryDataSize_Byte;
-                                           }
-                                           
-                                           /* Initialise TX DMA */
-                                           DMA_DeInit( uart_mapping[uart].tx_dma_stream );
-                                           dma_init_structure.DMA_Channel            = uart_mapping[uart].tx_dma_channel;
-                                           dma_init_structure.DMA_PeripheralBaseAddr = (uint32_t) &uart_mapping[uart].usart->DR;
-                                           dma_init_structure.DMA_Memory0BaseAddr    = (uint32_t) 0;
-                                           dma_init_structure.DMA_DIR                = DMA_DIR_MemoryToPeripheral;
-                                           dma_init_structure.DMA_BufferSize         = 0;
-                                           dma_init_structure.DMA_Mode               = DMA_Mode_Normal;
-                                           DMA_Init( uart_mapping[uart].tx_dma_stream, &dma_init_structure );
-                                           
-                                           /* Initialise RX DMA */
-                                           DMA_DeInit( uart_mapping[uart].rx_dma_stream );
-                                           dma_init_structure.DMA_Channel            = uart_mapping[uart].rx_dma_channel;
-                                           dma_init_structure.DMA_PeripheralBaseAddr = (uint32_t) &uart_mapping[uart].usart->DR;
-                                           dma_init_structure.DMA_Memory0BaseAddr    = 0;
-                                           dma_init_structure.DMA_DIR                = DMA_DIR_PeripheralToMemory;
-                                           dma_init_structure.DMA_BufferSize         = 0;
-                                           dma_init_structure.DMA_Mode               = DMA_Mode_Normal;
-                                           DMA_Init( uart_mapping[uart].rx_dma_stream, &dma_init_structure );
-                                           
-                                           /**************************************************************************
-                                           * Initialise STM32 DMA interrupts
-                                           * Note: Only TX DMA interrupt is enabled.
-                                           **************************************************************************/
-                                           
-                                           /* Configure TX DMA interrupt on Cortex-M3 */
-                                           nvic_init_structure.NVIC_IRQChannel                   = uart_mapping[uart].tx_dma_irq;
-                                           nvic_init_structure.NVIC_IRQChannelPreemptionPriority = (uint8_t) 0x5;
-                                           nvic_init_structure.NVIC_IRQChannelSubPriority        = 0x8;
-                                           nvic_init_structure.NVIC_IRQChannelCmd                = ENABLE;
-                                           NVIC_Init( &nvic_init_structure );
-                                           
-                                           /* Enable TC (transfer complete) and TE (transfer error) interrupts on source */
-                                           DMA_ITConfig( uart_mapping[uart].tx_dma_stream, DMA_IT_TC | DMA_IT_TE | DMA_IT_DME | DMA_IT_FE, ENABLE );
-                                           
-                                           /* Enable USART's RX DMA interfaces */
-                                           USART_DMACmd( uart_mapping[uart].usart, USART_DMAReq_Rx, ENABLE );
-                                           
-                                           /**************************************************************************
-                                           * Initialise STM32 USART interrupt
-                                           **************************************************************************/
-                                           nvic_init_structure.NVIC_IRQChannel                   = uart_mapping[uart].usart_irq;
-                                           nvic_init_structure.NVIC_IRQChannelPreemptionPriority = (uint8_t) 0x6;
-                                           nvic_init_structure.NVIC_IRQChannelSubPriority        = 0x7;
-                                           nvic_init_structure.NVIC_IRQChannelCmd                = ENABLE;
-                                           
-                                           /* Enable USART interrupt vector in Cortex-M3 */
-                                           NVIC_Init( &nvic_init_structure );
-                                           
-                                           /* Enable USART */
-                                           USART_Cmd( uart_mapping[uart].usart, ENABLE );
-                                           
-                                           /* Enable both transmit and receive */
-                                           uart_mapping[uart].usart->CR1 |= USART_CR1_TE;
-                                           uart_mapping[uart].usart->CR1 |= USART_CR1_RE;
-                                           
-                                           /* Setup ring buffer */
-                                           if (optional_rx_buffer != NULL)
-                                           {
-                                             /* Note that the ring_buffer should've been initialised first */
-                                             uart_interfaces[uart].rx_buffer = optional_rx_buffer;
-                                             uart_interfaces[uart].rx_size   = 0;
-                                             platform_uart_receive_bytes( uart, optional_rx_buffer->buffer, optional_rx_buffer->size, 0 );
-                                           }
-                                           else
-                                           {
-                                             /* Not using ring buffer. Configure RX DMA interrupt on Cortex-M3 */
-                                             nvic_init_structure.NVIC_IRQChannel                   = uart_mapping[uart].rx_dma_irq;
-                                             nvic_init_structure.NVIC_IRQChannelPreemptionPriority = (uint8_t) 0x5;
-                                             nvic_init_structure.NVIC_IRQChannelSubPriority        = 0x8;
-                                             nvic_init_structure.NVIC_IRQChannelCmd                = ENABLE;
-                                             NVIC_Init( &nvic_init_structure );
-                                             
-                                             /* Enable TC (transfer complete) and TE (transfer error) interrupts on source */
-                                             DMA_ITConfig( uart_mapping[uart].rx_dma_stream, DMA_IT_TC | DMA_IT_TE | DMA_IT_DME | DMA_IT_FE, ENABLE );
-                                           }
-                                           
-                                           MicoMcuPowerSaveConfig(true);
-                                           
-                                           return kNoErr;
+  switch ( config->parity )
+  {
+  case NO_PARITY:
+    usart_init_structure.USART_Parity = USART_Parity_No;
+    break;
+  case EVEN_PARITY:
+    usart_init_structure.USART_Parity = USART_Parity_Even;
+    break;
+  case ODD_PARITY:
+    usart_init_structure.USART_Parity = USART_Parity_Odd;
+    break;
+  default:
+    return kParamErr;
+  }
+  
+  switch ( config->flow_control )
+  {
+  case FLOW_CONTROL_DISABLED:
+    usart_init_structure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    break;
+  case FLOW_CONTROL_CTS:
+    usart_init_structure.USART_HardwareFlowControl = USART_HardwareFlowControl_CTS;
+    break;
+  case FLOW_CONTROL_RTS:
+    usart_init_structure.USART_HardwareFlowControl = USART_HardwareFlowControl_RTS;
+    break;
+  case FLOW_CONTROL_CTS_RTS:
+    usart_init_structure.USART_HardwareFlowControl = USART_HardwareFlowControl_RTS_CTS;
+    break;
+  default:
+    return kParamErr;
+  }
+  
+  /* Initialise USART peripheral */
+  USART_Init( uart_mapping[uart].usart, &usart_init_structure );
+  
+  
+  /**************************************************************************
+  * Initialise STM32 DMA registers
+  * Note: If DMA is used, USART interrupt isn't enabled.
+  **************************************************************************/
+  /* Enable DMA peripheral clock */
+  uart_mapping[uart].tx_dma_peripheral_clock_func( uart_mapping[uart].tx_dma_peripheral_clock, ENABLE );
+  uart_mapping[uart].rx_dma_peripheral_clock_func( uart_mapping[uart].rx_dma_peripheral_clock, ENABLE );
+  
+  /* Fill init structure with common DMA settings */
+  dma_init_structure.DMA_PeripheralInc   = DMA_PeripheralInc_Disable;
+  dma_init_structure.DMA_MemoryInc       = DMA_MemoryInc_Enable;
+  dma_init_structure.DMA_Priority        = DMA_Priority_VeryHigh;
+  dma_init_structure.DMA_FIFOMode        = DMA_FIFOMode_Disable;
+  dma_init_structure.DMA_FIFOThreshold   = DMA_FIFOThreshold_Full;
+  dma_init_structure.DMA_MemoryBurst     = DMA_MemoryBurst_Single;
+  dma_init_structure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+  
+  if ( config->data_width == DATA_WIDTH_9BIT )
+  {
+    dma_init_structure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    dma_init_structure.DMA_MemoryDataSize     = DMA_MemoryDataSize_HalfWord;
+  }
+  else
+  {
+    dma_init_structure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+    dma_init_structure.DMA_MemoryDataSize     = DMA_MemoryDataSize_Byte;
+  }
+  
+  /* Initialise TX DMA */
+  DMA_DeInit( uart_mapping[uart].tx_dma_stream );
+  dma_init_structure.DMA_Channel            = uart_mapping[uart].tx_dma_channel;
+  dma_init_structure.DMA_PeripheralBaseAddr = (uint32_t) &uart_mapping[uart].usart->DR;
+  dma_init_structure.DMA_Memory0BaseAddr    = (uint32_t) 0;
+  dma_init_structure.DMA_DIR                = DMA_DIR_MemoryToPeripheral;
+  dma_init_structure.DMA_BufferSize         = 0;
+  dma_init_structure.DMA_Mode               = DMA_Mode_Normal;
+  DMA_Init( uart_mapping[uart].tx_dma_stream, &dma_init_structure );
+  
+  /* Initialise RX DMA */
+  DMA_DeInit( uart_mapping[uart].rx_dma_stream );
+  dma_init_structure.DMA_Channel            = uart_mapping[uart].rx_dma_channel;
+  dma_init_structure.DMA_PeripheralBaseAddr = (uint32_t) &uart_mapping[uart].usart->DR;
+  dma_init_structure.DMA_Memory0BaseAddr    = 0;
+  dma_init_structure.DMA_DIR                = DMA_DIR_PeripheralToMemory;
+  dma_init_structure.DMA_BufferSize         = 0;
+  dma_init_structure.DMA_Mode               = DMA_Mode_Normal;
+  DMA_Init( uart_mapping[uart].rx_dma_stream, &dma_init_structure );
+  
+  /**************************************************************************
+  * Initialise STM32 DMA interrupts
+  * Note: Only TX DMA interrupt is enabled.
+  **************************************************************************/
+  
+  /* Configure TX DMA interrupt on Cortex-M3 */
+  nvic_init_structure.NVIC_IRQChannel                   = uart_mapping[uart].tx_dma_irq;
+  nvic_init_structure.NVIC_IRQChannelPreemptionPriority = (uint8_t) 0x5;
+  nvic_init_structure.NVIC_IRQChannelSubPriority        = 0x8;
+  nvic_init_structure.NVIC_IRQChannelCmd                = ENABLE;
+  NVIC_Init( &nvic_init_structure );
+  
+  /* Enable TC (transfer complete) and TE (transfer error) interrupts on source */
+  DMA_ITConfig( uart_mapping[uart].tx_dma_stream, DMA_IT_TC | DMA_IT_TE | DMA_IT_DME | DMA_IT_FE, ENABLE );
+  
+  /* Enable USART's RX DMA interfaces */
+  USART_DMACmd( uart_mapping[uart].usart, USART_DMAReq_Rx, ENABLE );
+  
+  /**************************************************************************
+  * Initialise STM32 USART interrupt
+  **************************************************************************/
+  nvic_init_structure.NVIC_IRQChannel                   = uart_mapping[uart].usart_irq;
+  nvic_init_structure.NVIC_IRQChannelPreemptionPriority = (uint8_t) 0x6;
+  nvic_init_structure.NVIC_IRQChannelSubPriority        = 0x7;
+  nvic_init_structure.NVIC_IRQChannelCmd                = ENABLE;
+  
+  /* Enable USART interrupt vector in Cortex-M3 */
+  NVIC_Init( &nvic_init_structure );
+  
+  /* Enable USART */
+  USART_Cmd( uart_mapping[uart].usart, ENABLE );
+  
+  /* Enable both transmit and receive */
+  uart_mapping[uart].usart->CR1 |= USART_CR1_TE;
+  uart_mapping[uart].usart->CR1 |= USART_CR1_RE;
+  
+  /* Setup ring buffer */
+  if (optional_rx_buffer != NULL)
+  {
+    /* Note that the ring_buffer should've been initialised first */
+    uart_interfaces[uart].rx_buffer = optional_rx_buffer;
+    uart_interfaces[uart].rx_size   = 0;
+    platform_uart_receive_bytes( uart, optional_rx_buffer->buffer, optional_rx_buffer->size, 0 );
+  }
+  else
+  {
+    /* Not using ring buffer. Configure RX DMA interrupt on Cortex-M3 */
+    nvic_init_structure.NVIC_IRQChannel                   = uart_mapping[uart].rx_dma_irq;
+    nvic_init_structure.NVIC_IRQChannelPreemptionPriority = (uint8_t) 0x5;
+    nvic_init_structure.NVIC_IRQChannelSubPriority        = 0x8;
+    nvic_init_structure.NVIC_IRQChannelCmd                = ENABLE;
+    NVIC_Init( &nvic_init_structure );
+    
+    /* Enable TC (transfer complete) and TE (transfer error) interrupts on source */
+    DMA_ITConfig( uart_mapping[uart].rx_dma_stream, DMA_IT_TC | DMA_IT_TE | DMA_IT_DME | DMA_IT_FE, ENABLE );
+  }
+  
+  MicoMcuPowerSaveConfig(true);
+  
+  return kNoErr;
 }
 
 OSStatus MicoUartFinalize( mico_uart_t uart )
