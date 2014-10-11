@@ -1,23 +1,34 @@
 /**
-  ******************************************************************************
-  * @file    MICOEntrance.c 
-  * @author  William Xu
-  * @version V1.0.0
-  * @date    05-May-2014
-  * @brief   MICO system main entrance.
-  ******************************************************************************
-  * @attention
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, MXCHIP Inc. SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2014 MXCHIP Inc.</center></h2>
-  ******************************************************************************
-  */ 
+******************************************************************************
+* @file    MICOEntrance.c 
+* @author  William Xu
+* @version V1.0.0
+* @date    05-May-2014
+* @brief   MICO system main entrance.
+******************************************************************************
+*
+*  The MIT License
+*  Copyright (c) 2014 MXCHIP Inc.
+*
+*  Permission is hereby granted, free of charge, to any person obtaining a copy 
+*  of this software and associated documentation files (the "Software"), to deal
+*  in the Software without restriction, including without limitation the rights 
+*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*  copies of the Software, and to permit persons to whom the Software is furnished
+*  to do so, subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in
+*  all copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+*  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+*  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+******************************************************************************
+*/
+
 #include "time.h"
 #include "MicoPlatform.h"
 #include "platform.h"
@@ -226,19 +237,20 @@ static void _watchdog_reload_timer_handler( void* arg )
 
 static void mico_mfg_test(void)
 {
-    int ret;
-
-    ret = mfg_test("MXCHIP_CAGE");
-    if (ret == 0)
-        printf("MFG test success\r\n");
-    else {
-        if (ret & 1) 
-            printf("SCAN FAIL\r\n");
-        if (ret & 2)
-            printf("Connect AP FAIL\r\n");
-    }
-
-    while(1);
+  int ret;
+  extern int mfg_test(char *);
+  
+  ret = mfg_test("MXCHIP_CAGE");
+  if (ret == 0)
+    printf("MFG test success\r\n");
+  else {
+    if (ret & 1) 
+      printf("SCAN FAIL\r\n");
+    if (ret & 2)
+      printf("Connect AP FAIL\r\n");
+  }
+  
+  mico_thread_sleep(MICO_NEVER_TIMEOUT);
 }
 
 int application_start(void)
@@ -272,8 +284,10 @@ int application_start(void)
   MicoInit();
   MicoSysLed(true);
 
-  if (0)
+  /* Enter test mode, call a build-in test function amd output on STDIO */
+  if(MicoShouldEnterMFGMode()==true)
     mico_mfg_test();
+
   /*Read current time from RTC.*/
   MicoRtcGetTime(&time);
   currentTime.tm_sec = time.sec;

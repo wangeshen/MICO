@@ -1,17 +1,36 @@
-/** @file update.c
-* @brief This file provides functions to update the target flash contents according the 
-* update tags written by OTA functions
+/**
+******************************************************************************
+* @file    update.c 
+* @author  William Xu
+* @version V2.0.0
+* @date    05-Oct-2014
+* @brief   This file provides functions to overwrite the target flash contents 
+*          using according the storeed in OTA temporary storage
+******************************************************************************
 *
-* <!-- Copyright 2012 by MXCHIP Corporation. All rights reserved.        *80*-->
+*  The MIT License
+*  Copyright (c) 2014 MXCHIP Inc.
+*
+*  Permission is hereby granted, free of charge, to any person obtaining a copy 
+*  of this software and associated documentation files (the "Software"), to deal
+*  in the Software without restriction, including without limitation the rights 
+*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*  copies of the Software, and to permit persons to whom the Software is furnished
+*  to do so, subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in
+*  all copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+*  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+*  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+******************************************************************************
 */
 
-
-#include "Update_for_OTA.h"
-#include "platform.h"
 #include "MicoPlatform.h"
-#include "stdio.h"
-#include "string.h"
-#include "stdlib.h"
 #include "debug.h"
 
 typedef int Log_Status;					
@@ -23,23 +42,26 @@ typedef int Log_Status;
 #define Log_StartAddressERROR		6
 #define Log_UnkonwnERROR			7
 
-#ifndef MIN
-#define MIN(a,b) (((a) < (b))?(a):(b))
-#endif
-
 #define SizePerRW 4096   /* Bootloader need 2xSizePerRW RAM heap size to operate, 
                             but it can boost the setup. */
 
-uint8_t data[SizePerRW];
-uint8_t newData[SizePerRW];
-uint8_t paraSaveInRam[PARA_FLASH_SIZE];
+static uint8_t data[SizePerRW];
+static uint8_t newData[SizePerRW];
+static uint8_t paraSaveInRam[PARA_FLASH_SIZE];
 
-uint32_t destStartAddress, destEndAddress;
-mico_flash_t destFlashType;
+static uint32_t destStartAddress, destEndAddress;
+static mico_flash_t destFlashType;
 
+/* Upgrade iamge should save this table to flash */
+typedef struct  _boot_table_t {
+  uint32_t start_address; // the address of the bin saved on flash.
+  uint32_t length; // file real length
+  uint8_t version[8];
+  uint8_t type; // B:bootloader, P:boot_table, A:application, D: 8782 driver
+  uint8_t upgrade_type; //u:upgrade, 
+  uint8_t reserved[6];
+}boot_table_t;
 
-int updateLogCheck(boot_table_t *updateLog);
-extern void Update_error_callback(UPDATE_ERROR_TypeDef error_code);
 #define update_log(M, ...) custom_log("UPDATE", M, ##__VA_ARGS__)
 #define update_log_trace() custom_log_trace("UPDATE")
 
@@ -48,12 +70,52 @@ OSStatus update(void)
 {
   return kUnsupportedErr;
 }
-
+#else
 Log_Status updateLogCheck(boot_table_t *updateLog)
 {
-  return Log_UnkonwnERROR;
+  uint32_t i;
+  
+  for(i=0; i<sizeof(boot_table_t); i++){
+    if(*((uint8_t *)updateLog + i) != 0xff)
+      break;
+  }
+  if(i == sizeof(boot_table_t))
+    return Log_NotExist;
+  
+  if(updateLog->upgrade_type == 'U'){
+    if(updateLog->start_address != UPDATE_START_ADDRESS)
+      return Log_StartAddressERROR;
+    if(updateLog->type == 'B'){
+      destStartAddress = BOOT_START_ADDRESS;
+      destEndAddress = BOOT_END_ADDRESS;
+      destFlashType = MICO_FLASH_FOR_BOOT;
+      if(updateLog->length > BOOT_FLASH_SIZE)
+        return Log_dataLengthOverFlow;
+    }
+    else if(updateLog->type == 'A'){
+      destStartAddress = APPLICATION_START_ADDRESS;
+      destEndAddress = APPLICATION_END_ADDRESS;
+      destFlashType = MICO_FLASH_FOR_APPLICATION;
+      if(updateLog->length > APPLICATION_FLASH_SIZE)
+        return Log_dataLengthOverFlow;
+    }
+    else if(updateLog->type == 'D'){
+      destStartAddress = DRIVER_START_ADDRESS;
+      destEndAddress = DRIVER_END_ADDRESS;
+      destFlashType = MICO_FLASH_FOR_DRIVER;
+      if(updateLog->length > DRIVER_FLASH_SIZE)
+        return Log_dataLengthOverFlow;
+    }
+    else 
+      return Log_contentTypeNotExist;
+    
+    return Log_NeedUpdate;
+  }
+  else
+    return Log_UpdateTagNotExist;
 }
-#else
+
+
 OSStatus update(void)
 {
   boot_table_t updateLog;
@@ -103,7 +165,7 @@ OSStatus update(void)
     goto exit;
   }
   
-  update_log("Write OTA data to destination, type:%d, from %d to %d, length 0x%x", destFlashType, destStartAddress, destEndAddress, updateLog.length);
+  update_log("Write OTA data to destination, type:%d, from 0x%08x to 0x%08x, length 0x%x", destFlashType, destStartAddress, destEndAddress, updateLog.length);
   
   destStartAddress_tmp = destStartAddress;
   updateStartAddress = UPDATE_START_ADDRESS;
@@ -164,51 +226,6 @@ exit:
   MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
   MicoFlashFinalize(destFlashType);
   return err;
-}
-
-
-Log_Status updateLogCheck(boot_table_t *updateLog)
-{
-  int i;
-  
-  for(i=0; i<sizeof(boot_table_t); i++){
-    if(*((uint8_t *)updateLog + i) != 0xff)
-      break;
-  }
-  if(i == sizeof(boot_table_t))
-    return Log_NotExist;
-  
-  if(updateLog->upgrade_type == 'U'){
-    if(updateLog->start_address != UPDATE_START_ADDRESS)
-      return Log_StartAddressERROR;
-    if(updateLog->type == 'B'){
-      destStartAddress = BOOT_START_ADDRESS;
-      destEndAddress = BOOT_END_ADDRESS;
-      destFlashType = MICO_FLASH_FOR_BOOT;
-      if(updateLog->length > BOOT_FLASH_SIZE)
-        return Log_dataLengthOverFlow;
-    }
-    else if(updateLog->type == 'A'){
-      destStartAddress = APPLICATION_START_ADDRESS;
-      destEndAddress = APPLICATION_END_ADDRESS;
-      destFlashType = MICO_FLASH_FOR_APPLICATION;
-      if(updateLog->length > APPLICATION_FLASH_SIZE)
-        return Log_dataLengthOverFlow;
-    }
-    else if(updateLog->type == 'D'){
-      destStartAddress = DRIVER_START_ADDRESS;
-      destEndAddress = DRIVER_END_ADDRESS;
-      destFlashType = MICO_FLASH_FOR_DRIVER;
-      if(updateLog->length > DRIVER_FLASH_SIZE)
-        return Log_dataLengthOverFlow;
-    }
-    else 
-      return Log_contentTypeNotExist;
-    
-    return Log_NeedUpdate;
-  }
-  else
-    return Log_UpdateTagNotExist;
 }
 #endif
 

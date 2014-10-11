@@ -107,10 +107,14 @@ OSStatus MicoFlashErase( mico_flash_t flash, uint32_t StartAddress, uint32_t End
 { 
   platform_log_trace();
   if(flash == MICO_INTERNAL_FLASH){
+    if(StartAddress<INTERNAL_FLASH_START_ADDRESS || EndAddress > INTERNAL_FLASH_END_ADDRESS)
+      return kParamErr;
     return internalFlashErase(StartAddress, EndAddress);    
   }
 #ifdef USE_MICO_SPI_FLASH
   else if(flash == MICO_SPI_FLASH){
+    if(StartAddress<SPI_FLASH_START_ADDRESS || EndAddress > SPI_FLASH_END_ADDRESS)
+      return kParamErr;
     return spiFlashErase(StartAddress, EndAddress); 
   }
 #endif
@@ -121,10 +125,14 @@ OSStatus MicoFlashErase( mico_flash_t flash, uint32_t StartAddress, uint32_t End
 OSStatus MicoFlashWrite(mico_flash_t flash, volatile uint32_t* FlashAddress, uint8_t* Data ,uint32_t DataLength)
 {
   if(flash == MICO_INTERNAL_FLASH){
+    if( *FlashAddress<INTERNAL_FLASH_START_ADDRESS || *FlashAddress + DataLength > INTERNAL_FLASH_END_ADDRESS + 1)
+      return kParamErr;
     return internalFlashWrite(FlashAddress, (uint32_t *)Data, DataLength);    
   }
 #ifdef USE_MICO_SPI_FLASH
   else if(flash == MICO_SPI_FLASH){
+    if( *FlashAddress<SPI_FLASH_START_ADDRESS || *FlashAddress + DataLength > SPI_FLASH_END_ADDRESS + 1)
+      return kParamErr;
     int returnVal = sflash_write( &sflash_handle, *FlashAddress, Data, DataLength );
     *FlashAddress += DataLength;
     return returnVal;
@@ -138,12 +146,16 @@ OSStatus MicoFlashRead(mico_flash_t flash, volatile uint32_t* FlashAddress, uint
 {
   
   if(flash == MICO_INTERNAL_FLASH){
+    if( *FlashAddress<INTERNAL_FLASH_START_ADDRESS || *FlashAddress + DataLength > INTERNAL_FLASH_END_ADDRESS + 1)
+      return kParamErr;
     memcpy(Data, (void *)(*FlashAddress), DataLength);
     *FlashAddress += DataLength;
     return kNoErr;
   }
 #ifdef USE_MICO_SPI_FLASH
   else if(flash == MICO_SPI_FLASH){
+    if( *FlashAddress<SPI_FLASH_START_ADDRESS || *FlashAddress + DataLength > SPI_FLASH_END_ADDRESS + 1)
+      return kParamErr;
     int returnVal = sflash_read( &sflash_handle, *FlashAddress, Data, DataLength );
     *FlashAddress += DataLength;
     return returnVal;

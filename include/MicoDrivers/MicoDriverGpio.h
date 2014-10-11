@@ -95,6 +95,16 @@ typedef void (*mico_gpio_irq_handler_t)( void* arg );
  */
 OSStatus MicoGpioInitialize( mico_gpio_t gpio, mico_gpio_config_t configuration );
 
+
+/** DeInitialises a GPIO pin
+ *
+ * Set a GPIO pin in default state.
+ *
+ * @param gpio          : the gpio pin which should be deinitialised
+ *
+ * @return    kNoErr        : on success.
+ * @return    kGeneralErr   : if an error occurred with any step
+ */
 OSStatus MicoGpioFinalize( mico_gpio_t gpio );
 
 
@@ -147,7 +157,7 @@ OSStatus MicoGpioOutputTrigger( mico_gpio_t gpio );
  * @return    true  : if high
  * @return    fasle : if low
  */
-bool   MicoGpioInputGet( mico_gpio_t gpio );
+bool MicoGpioInputGet( mico_gpio_t gpio );
 
 
 /** Enables an interrupt trigger for an input GPIO pin

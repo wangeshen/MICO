@@ -90,7 +90,6 @@ const platform_pin_mapping_t gpio_mapping[] =
   [MICO_GPIO_WLAN_POWERSAVE_CLOCK]    = {WL_32K_OUT_BANK, WL_32K_OUT_PIN, WL_32K_OUT_BANK_CLK},
   [WL_GPIO0]                          = {GPIOB,  5,  RCC_AHB1Periph_GPIOB},
   [WL_GPIO1]                          = {GPIOA,  2,  RCC_AHB1Periph_GPIOB},
-  [WL_REG_RESERVED]                   = NULL,
   [WL_RESET]                          = {GPIOA,  3,  RCC_AHB1Periph_GPIOA},
   [MICO_SYS_LED]                      = {GPIOB,  7,  RCC_AHB1Periph_GPIOB}, 
   [MICO_RF_LED]                       = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
@@ -373,4 +372,21 @@ void MicoRfLed(bool onoff)
         MicoGpioOutputHigh( (mico_gpio_t)MICO_RF_LED );
     }
 }
+
+bool MicoShouldEnterMFGMode(void)
+{
+  if(MicoGpioInputGet((mico_gpio_t)BOOT_SEL)==false && MicoGpioInputGet((mico_gpio_t)MFG_SEL)==false)
+    return true;
+  else
+    return false;
+}
+
+bool MicoShouldEnterBootloader(void)
+{
+  if(MicoGpioInputGet((mico_gpio_t)BOOT_SEL)==false && MicoGpioInputGet((mico_gpio_t)MFG_SEL)==true)
+    return true;
+  else
+    return false;
+}
+
 
