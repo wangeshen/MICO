@@ -29,6 +29,9 @@
 ******************************************************************************
 */ 
 
+#ifndef __PLATFORM_H__
+#define __PLATFORM_H__
+
 #include "platform_common_config.h"
 
 #pragma once
@@ -206,12 +209,12 @@ typedef enum
 {
     MICO_GPIO_1 = MICO_COMMON_GPIO_MAX,
     MICO_GPIO_2,
-    //MICO_GPIO_3,
+    MICO_GPIO_3,
     MICO_GPIO_4,
-    //MICO_GPIO_5,
-    //MICO_GPIO_6,
-    //MICO_GPIO_7,
-    //MICO_GPIO_8,
+    MICO_GPIO_5,
+    MICO_GPIO_6,
+    MICO_GPIO_7,
+    MICO_GPIO_8,
     //MICO_GPIO_9,
     //MICO_GPIO_10,
     //MICO_GPIO_11,
@@ -223,16 +226,16 @@ typedef enum
     //MICO_GPIO_17,
     //MICO_GPIO_18,
     //MICO_GPIO_19,
-    MICO_GPIO_20,
-    MICO_GPIO_21,
-    MICO_GPIO_22,
-    MICO_GPIO_23,
-    MICO_GPIO_24,
+    //MICO_GPIO_20,
+    //MICO_GPIO_21,
+    //MICO_GPIO_22,
+    //MICO_GPIO_23,
+    //MICO_GPIO_24,
     //MICO_GPIO_25,
     //MICO_GPIO_26,
     //MICO_GPIO_27,
     //MICO_GPIO_28,
-    MICO_GPIO_29,
+    //MICO_GPIO_29,
     //MICO_GPIO_30,
 
     MICO_GPIO_MAX, /* Denotes the total number of GPIO port aliases. Not a valid GPIO alias */
@@ -295,7 +298,7 @@ typedef enum
 /*      MICO_SPI_FLASH_CLK  MICO_GPIO_6 */
 
 /* Components connected to external I/Os*/
-#define Standby_SEL         (MICO_GPIO_29)
+
 
 /* I/O connection <-> Peripheral Connections */
 #define MICO_I2C_CP         (MICO_I2C_1)
@@ -315,4 +318,6 @@ typedef enum
 #ifdef __cplusplus
 } /*extern "C" */
 #endif
+
+#endif // __PLATFORM__H__
 

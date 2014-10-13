@@ -284,12 +284,6 @@ typedef enum
 #define STM32_UART_1 MICO_UART_1
 #define STM32_UART_6 MICO_UART_2
 
-/* #define MICO_PLATFORM_INCLUDES_SPI_FLASH */
-/* #define MICO_SPI_FLASH_CS  (MICO_GPIO_5) */
-/*      MICO_SPI_FLASH_MOSI MICO_GPIO_8 */
-/*      MICO_SPI_FLASH_MISO MICO_GPIO_7 */
-/*      MICO_SPI_FLASH_CLK  MICO_GPIO_6 */
-
 /* Components connected to external I/Os*/
 #define BOOT_SEL            (MICO_GPIO_16)
 #define Standby_SEL         (MICO_GPIO_29)

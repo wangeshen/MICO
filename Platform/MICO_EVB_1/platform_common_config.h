@@ -29,6 +29,9 @@
 ******************************************************************************
 */ 
 
+#ifndef __PLATFORM_COMMON_CONFIG_H__
+#define __PLATFORM_COMMON_CONFIG_H__
+
 #pragma once
 
 /******************************************************
@@ -95,7 +98,12 @@ typedef enum
   MICO_RF_LED,
   BOOT_SEL,
   MFG_SEL,
+  Standby_SEL,
   EasyLink_BUTTON,
+  STDIO_UART_RX,  
+  STDIO_UART_TX,  
+  STDIO_UART_CTS,  
+  STDIO_UART_RTS,  
   MICO_COMMON_GPIO_MAX,
 } mico_common_gpio_t;
 
@@ -137,10 +145,10 @@ typedef enum
 #define APPLICATION_END_ADDRESS     (uint32_t)0x0805FFFF
 #define APPLICATION_FLASH_SIZE      (APPLICATION_END_ADDRESS - APPLICATION_START_ADDRESS + 1) /* 368k bytes*/
 
-#define MICO_FLASH_FOR_UPDATE       MICO_SPI_FLASH
-#define UPDATE_START_ADDRESS        (uint32_t)0x00040000
-#define UPDATE_END_ADDRESS          (uint32_t)0x0009FFFF
-#define UPDATE_FLASH_SIZE           (UPDATE_END_ADDRESS - UPDATE_START_ADDRESS + 1) /* 384k bytes*/
+#define MICO_FLASH_FOR_UPDATE       MICO_SPI_FLASH  /* Optional */
+#define UPDATE_START_ADDRESS        (uint32_t)0x00040000 /* Optional */
+#define UPDATE_END_ADDRESS          (uint32_t)0x0009FFFF /* Optional */
+#define UPDATE_FLASH_SIZE           (UPDATE_END_ADDRESS - UPDATE_START_ADDRESS + 1) /* 384k bytes, optional*/
 
 #define MICO_FLASH_FOR_BOOT         MICO_INTERNAL_FLASH
 #define BOOT_START_ADDRESS          (uint32_t)0x08000000
@@ -181,3 +189,5 @@ typedef enum
 /******************************************************
 *               Function Declarations
 ******************************************************/
+
+#endif // __PLATFORM_COMMON_CONFIG_H__
