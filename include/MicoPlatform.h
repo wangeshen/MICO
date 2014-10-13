@@ -82,10 +82,10 @@ void MicoSystemReboot(void);
 
 /** @brief    Software reboot the MICO hardware
   *
-  * @param    none
+  * @param    timeToWakeup: MICO will wakeup after secondsToWakeup (seconds)
   * @return   none
   */
-void MicoSystemStandBy(void);
+void MicoSystemStandBy(uint32_t secondsToWakeup);
 
 /** @brief    Enables the MCU to enter deep sleep mode when all threads are suspended.
   *
