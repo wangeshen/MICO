@@ -229,11 +229,11 @@ void init_architecture( void )
   
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
   
-  /*STM32 wakeup by watchdog in standby mode, re-enter standby mode in this situation*/
+   /*STM32 wakeup by watchdog in standby mode, re-enter standby mode in this situation*/
   if ( (PWR_GetFlagStatus(PWR_FLAG_SB) != RESET) && RCC_GetFlagStatus(RCC_FLAG_IWDGRST) != RESET){
-    RCC_ClearFlag();
-    MicoSystemStandBy();
-  }
+     RCC_ClearFlag();
+     MicoSystemStandBy(MICO_WAIT_FOREVER);
+   }
   PWR_ClearFlag(PWR_FLAG_SB);
   
   if ( stm32_platform_inited == 1 )
@@ -508,9 +508,53 @@ void MicoSystemReboot(void)
   NVIC_SystemReset();
 }
 
-void MicoSystemStandBy(void)
+void MicoSystemStandBy(uint32_t secondsToWakeup)
 { 
+  mico_rtc_time_t time;
+  uint32_t currentSecond;
+
+
   PWR_WakeUpPinCmd(ENABLE);
+
+  if(secondsToWakeup == MICO_WAIT_FOREVER)
+    PWR_EnterSTANDBYMode();
+
+  platform_log("Wake up in %d seconds", secondsToWakeup);
+  
+  RTC_AlarmCmd(RTC_Alarm_A, DISABLE);
+
+  RTC_AlarmTypeDef  RTC_AlarmStructure;
+  
+  MicoRtcGetTime(&time);
+  currentSecond = time.hr*3600 + time.min*60 + time.sec;
+  currentSecond += 8;
+  /* Set the alarm to current time + 5s */
+  RTC_AlarmStructure.RTC_AlarmTime.RTC_H12     = RTC_HourFormat_24;
+  RTC_AlarmStructure.RTC_AlarmTime.RTC_Hours   = currentSecond/3600%24;
+  RTC_AlarmStructure.RTC_AlarmTime.RTC_Minutes = currentSecond/60%60;
+  RTC_AlarmStructure.RTC_AlarmTime.RTC_Seconds = currentSecond%60;
+  RTC_AlarmStructure.RTC_AlarmDateWeekDay = 0x31;
+  RTC_AlarmStructure.RTC_AlarmDateWeekDaySel = RTC_AlarmDateWeekDaySel_Date;
+  RTC_AlarmStructure.RTC_AlarmMask = RTC_AlarmMask_DateWeekDay ;
+
+  /* Disable the Alarm A */
+  RTC_ITConfig(RTC_IT_ALRA, DISABLE);
+
+  /* Clear RTC Alarm Flag */ 
+  RTC_ClearFlag(RTC_FLAG_ALRAF);
+
+  /* Clear PWR wakeup Flag */ 
+  PWR_ClearFlag(PWR_FLAG_WU);
+
+  RTC_SetAlarm(RTC_Format_BIN, RTC_Alarm_A, &RTC_AlarmStructure);
+
+  /* Enable RTC Alarm A Interrupt: this Interrupt will wake-up the system from
+     STANDBY mode (RTC Alarm IT not enabled in NVIC) */
+  RTC_ITConfig(RTC_IT_ALRA, ENABLE);
+
+  /* Enable the Alarm A */
+  RTC_AlarmCmd(RTC_Alarm_A, ENABLE);
+
   PWR_EnterSTANDBYMode();
 }
 

@@ -42,6 +42,7 @@
 #include "WPS/WPS.h"
 #include "WAC/MFi_WAC.h"
 #include "StringUtils.h"
+#include "stm32f2xx.h"
 
 #if defined (CONFIG_MODE_EASYLINK) || defined (CONFIG_MODE_EASYLINK_WITH_SOFTAP)
 #include "EasyLink/EasyLink.h"
@@ -413,7 +414,7 @@ int application_start(void)
         sendNotifySYSWillPowerOff();
         mico_thread_msleep(200);
         micoWlanPowerOff();
-        MicoSystemStandBy();
+        MicoSystemStandBy(MICO_WAIT_FOREVER);
         break;
       default:
         break;
