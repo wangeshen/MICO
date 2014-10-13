@@ -111,7 +111,6 @@ const platform_pin_mapping_t gpio_mapping[] =
   [MICO_GPIO_12] = {GPIOC,  2,  RCC_AHB1Periph_GPIOC},
   [MICO_GPIO_13] = {GPIOB, 14,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_14] = {GPIOC,  6,  RCC_AHB1Periph_GPIOC},
-  [MICO_GPIO_16] = {GPIOB,  1,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_18] = {GPIOA, 15,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_19] = {GPIOB, 11,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_20] = {GPIOA, 12,  RCC_AHB1Periph_GPIOA},
@@ -119,7 +118,6 @@ const platform_pin_mapping_t gpio_mapping[] =
   [MICO_GPIO_22] = {GPIOA,  9,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_23] = {GPIOA, 10,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_29] = {GPIOA,  0,  RCC_AHB1Periph_GPIOA},  
-
 };
 
 /*

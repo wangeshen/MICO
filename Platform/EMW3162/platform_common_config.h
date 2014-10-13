@@ -41,7 +41,6 @@
 
 /* The clock configuration utility from ST is used to calculate these values
 * http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/utility/stsw-stm32090.zip
-* The CPU Clock Frequency (CPU_CLOCK_HZ) is independently defined in <WICED-SDK>/Wiced/Platform/BCM943362WCD4/BCM943362WCD4.mk
 */
 #define HSE_SOURCE              RCC_HSE_ON               /* Use external crystal                 */
 #define AHB_CLOCK_DIVIDER       RCC_SYSCLK_Div1          /* AHB clock = System clock             */

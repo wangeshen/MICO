@@ -220,7 +220,7 @@ typedef enum
     MICO_GPIO_13,
     MICO_GPIO_14,
     //MICO_GPIO_15,
-    MICO_GPIO_16,
+    //MICO_GPIO_16,
     //MICO_GPIO_17,
     MICO_GPIO_18,
     MICO_GPIO_19,
@@ -285,7 +285,6 @@ typedef enum
 #define STM32_UART_6 MICO_UART_2
 
 /* Components connected to external I/Os*/
-#define BOOT_SEL            (MICO_GPIO_16)
 #define Standby_SEL         (MICO_GPIO_29)
 
 /* I/O connection <-> Peripheral Connections */

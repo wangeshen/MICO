@@ -46,7 +46,7 @@
 			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2XX/",
 			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2XX/STM32F2XX_Drv/",
 			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/Common/Cortex-M3/STM32F2XX/STM32F2XX_Drv/STM32F2xx_StdPeriph_Driver/inc/",
-			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/MICO_EVB_1/",
+			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Platform/EMW3162/",
 			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/include/",
 			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/MICO/",
 			"-I/Users/william/Develop/mxchipWNet Pro Demo@EMW316x/Library/support/",
