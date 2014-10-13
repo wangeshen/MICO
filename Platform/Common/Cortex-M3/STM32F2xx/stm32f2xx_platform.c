@@ -512,7 +512,7 @@ void MicoSystemStandBy(uint32_t secondsToWakeup)
 { 
   mico_rtc_time_t time;
   uint32_t currentSecond;
-
+  RTC_AlarmTypeDef  RTC_AlarmStructure;
 
   PWR_WakeUpPinCmd(ENABLE);
 
@@ -520,15 +520,10 @@ void MicoSystemStandBy(uint32_t secondsToWakeup)
     PWR_EnterSTANDBYMode();
 
   platform_log("Wake up in %d seconds", secondsToWakeup);
-  
-  RTC_AlarmCmd(RTC_Alarm_A, DISABLE);
-
-  RTC_AlarmTypeDef  RTC_AlarmStructure;
-  
+ 
   MicoRtcGetTime(&time);
   currentSecond = time.hr*3600 + time.min*60 + time.sec;
-  currentSecond += 8;
-  /* Set the alarm to current time + 5s */
+  currentSecond += secondsToWakeup;
   RTC_AlarmStructure.RTC_AlarmTime.RTC_H12     = RTC_HourFormat_24;
   RTC_AlarmStructure.RTC_AlarmTime.RTC_Hours   = currentSecond/3600%24;
   RTC_AlarmStructure.RTC_AlarmTime.RTC_Minutes = currentSecond/60%60;
@@ -537,14 +532,12 @@ void MicoSystemStandBy(uint32_t secondsToWakeup)
   RTC_AlarmStructure.RTC_AlarmDateWeekDaySel = RTC_AlarmDateWeekDaySel_Date;
   RTC_AlarmStructure.RTC_AlarmMask = RTC_AlarmMask_DateWeekDay ;
 
+  RTC_AlarmCmd(RTC_Alarm_A, DISABLE);
   /* Disable the Alarm A */
   RTC_ITConfig(RTC_IT_ALRA, DISABLE);
 
   /* Clear RTC Alarm Flag */ 
   RTC_ClearFlag(RTC_FLAG_ALRAF);
-
-  /* Clear PWR wakeup Flag */ 
-  PWR_ClearFlag(PWR_FLAG_WU);
 
   RTC_SetAlarm(RTC_Format_BIN, RTC_Alarm_A, &RTC_AlarmStructure);
 
