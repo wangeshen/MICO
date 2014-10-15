@@ -29,7 +29,7 @@
         </option>
         <option>
           <name>Variant</name>
-          <version>20</version>
+          <version>21</version>
           <state>38</state>
         </option>
         <option>
@@ -87,7 +87,7 @@
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state>6.70.1.5793</state>
+          <state>7.30.1.7765</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -137,12 +137,12 @@
         </option>
         <option>
           <name>GFPUCoreSlave</name>
-          <version>20</version>
+          <version>21</version>
           <state>38</state>
         </option>
         <option>
           <name>GBECoreSlave</name>
-          <version>20</version>
+          <version>21</version>
           <state>38</state>
         </option>
         <option>
@@ -163,7 +163,7 @@
       <name>ICCARM</name>
       <archiveVersion>2</archiveVersion>
       <data>
-        <version>29</version>
+        <version>31</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -234,7 +234,7 @@
         <option>
           <name>CCAllowList</name>
           <version>1</version>
-          <state>1111111</state>
+          <state>11111110</state>
         </option>
         <option>
           <name>CCDebugInfo</name>
@@ -410,6 +410,15 @@
         <option>
           <name>CCNoLiteralPool</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>CCOptStrategySlave</name>
+          <version>0</version>
+          <state>0</state>
+        </option>
+        <option>
+          <name>CCGuardCalls</name>
+          <state>1</state>
         </option>
       </data>
     </settings>
@@ -974,7 +983,7 @@
         </option>
         <option>
           <name>Variant</name>
-          <version>20</version>
+          <version>21</version>
           <state>38</state>
         </option>
         <option>
@@ -1082,12 +1091,12 @@
         </option>
         <option>
           <name>GFPUCoreSlave</name>
-          <version>20</version>
+          <version>21</version>
           <state>38</state>
         </option>
         <option>
           <name>GBECoreSlave</name>
-          <version>20</version>
+          <version>21</version>
           <state>38</state>
         </option>
         <option>
@@ -1108,7 +1117,7 @@
       <name>ICCARM</name>
       <archiveVersion>2</archiveVersion>
       <data>
-        <version>29</version>
+        <version>31</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -1179,7 +1188,7 @@
         <option>
           <name>CCAllowList</name>
           <version>1</version>
-          <state>1111111</state>
+          <state>11111110</state>
         </option>
         <option>
           <name>CCDebugInfo</name>
@@ -1355,6 +1364,15 @@
         <option>
           <name>CCNoLiteralPool</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>CCOptStrategySlave</name>
+          <version>0</version>
+          <state>0</state>
+        </option>
+        <option>
+          <name>CCGuardCalls</name>
+          <state>1</state>
         </option>
       </data>
     </settings>
@@ -1907,7 +1925,7 @@
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\MICOBonjour.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\MicoConfigDelegate.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\MICOConfigDelegate.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.SPP\MicoDefaults.h</name>
@@ -1985,31 +2003,31 @@
     <group>
       <name>MicoDriver</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverAdc.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverAdc.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverGpio.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverGpio.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverI2c.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverI2c.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverPwm.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverPwm.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverRng.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverRng.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverRtc.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverRtc.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverSpi.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverSpi.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverUART.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverUart.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverWdg.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverWdg.h</name>
       </file>
     </group>
     <file>
