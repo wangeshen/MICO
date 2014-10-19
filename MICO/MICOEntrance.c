@@ -42,7 +42,6 @@
 #include "WPS/WPS.h"
 #include "WAC/MFi_WAC.h"
 #include "StringUtils.h"
-#include "stm32f2xx.h"
 
 #if defined (CONFIG_MODE_EASYLINK) || defined (CONFIG_MODE_EASYLINK_WITH_SOFTAP)
 #include "EasyLink/EasyLink.h"

@@ -42,10 +42,26 @@
 *                    Constants
 ******************************************************/
 
-/* The clock configuration utility from ST is used to calculate these values
-* http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/utility/stsw-stm32090.zip
-* The CPU Clock Frequency (CPU_CLOCK_HZ) is independently defined in <WICED-SDK>/Wiced/Platform/BCM943362WCD4/BCM943362WCD4.mk
-*/
+/* MICO RTOS tick rate in Hz */
+#define MICO_DEFAULT_TICK_RATE_HZ                   (1000) 
+
+/************************************************************************
+ * Uncomment to disable watchdog. For debugging only */
+//#define MICO_DISABLE_WATCHDOG
+
+/************************************************************************
+ * Uncomment to disable standard IO, i.e. printf(), etc. */
+//#define MICO_DISABLE_STDIO
+
+/************************************************************************
+ * Uncomment to disable MCU powersave API functions */
+//#define MICO_DISABLE_MCU_POWERSAVE
+
+/************************************************************************
+ * Uncomment to enable MCU real time clock */
+#define MICO_ENABLE_MCU_RTC
+
+
 #define HSE_SOURCE              RCC_HSE_ON               /* Use external crystal                 */
 #define AHB_CLOCK_DIVIDER       RCC_SYSCLK_Div1          /* AHB clock = System clock             */
 #define APB1_CLOCK_DIVIDER      RCC_HCLK_Div4            /* APB1 clock = AHB clock / 4           */
@@ -75,13 +91,17 @@
 #define SPI_BUS_CS_PIN          12
 #define SPI_IRQ_PIN             1
 
+#define SPIX_CLK_FUNCTION       RCC_APB1PeriphClockCmd
 #define SPIX_CLK                RCC_APB1Periph_SPI2
+#define SPIX_DMA_CLK            RCC_AHB1Periph_DMA1
 #define SPIX                    SPI2
 #define SPIX_AF                 GPIO_AF_SPI2
 #define SPIX_DMA_RX_STREAM      DMA1_Stream3
 #define SPIX_DMA_TX_STREAM      DMA1_Stream4
 #define SPIX_DMA_RX_TCFLAG      DMA_FLAG_TCIF3
 #define SPIX_DMA_TX_TCFLAG      DMA_FLAG_TCIF4
+#define SPIX_DMA_RX_CHANNEL     DMA_Channel_0
+#define SPIX_DMA_TX_CHANNEL     DMA_Channel_0
 #define SPIX_DMA_RX_IRQ_CHANNEL DMA1_Stream3_IRQn
 #define SPIX_DMA_RX_TCIT        DMA_IT_TCIF3
 #define dma_irq                 DMA1_Stream3_IRQHandler
@@ -116,8 +136,18 @@ typedef enum
   MICO_COMMON_PWM_MAX,
 } mico_common_pwm_t;
 
-#define MICO_WLAN_POWERSAVE_CLOCK_IS_PWM 0
-#define MICO_WLAN_POWERSAVE_CLOCK_IS_MCO 1
+/* WLAN Powersave Clock Source
+ * The WLAN sleep clock can be driven from one of two sources:
+ * 1. Timer/PWM (default)
+ *    - With the PWM selected, the STM32 can *NOT* be put into MCU powersave mode or the PWM output will be disabled
+ * 2. MCO (MCU Clock Output). 
+ *    - Change the following directive to MICO_WLAN_POWERSAVE_CLOCK_IS_MCO
+ */
+#define MICO_WLAN_POWERSAVE_CLOCK_SOURCE MICO_WLAN_POWERSAVE_CLOCK_IS_MCO
+
+#define MICO_WLAN_POWERSAVE_CLOCK_IS_NOT_EXIST  0
+#define MICO_WLAN_POWERSAVE_CLOCK_IS_PWM        1
+#define MICO_WLAN_POWERSAVE_CLOCK_IS_MCO        2
 
 #define WLAN_POWERSAVE_CLOCK_FREQUENCY 32768 /* 32768Hz        */
 #define WLAN_POWERSAVE_CLOCK_DUTY_CYCLE   50 /* 50% duty-cycle */

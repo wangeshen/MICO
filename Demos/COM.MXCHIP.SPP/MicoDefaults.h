@@ -41,24 +41,7 @@ extern "C"
  /* Application thread stack size */
 #define MICO_DEFAULT_APPLICATION_STACK_SIZE         (1500)
 
- /* MICO RTOS tick rate in Hz */
-#define MICO_DEFAULT_TICK_RATE_HZ                   (1000) 
 
-/************************************************************************
- * Uncomment to disable watchdog. For debugging only */
-//#define MICO_DISABLE_WATCHDOG
-
-/************************************************************************
- * Uncomment to disable standard IO, i.e. printf(), etc. */
-//#define MICO_DISABLE_STDIO
-
-/************************************************************************
- * Uncomment to disable MCU powersave API functions */
-//#define MICO_DISABLE_MCU_POWERSAVE
-
-/************************************************************************
- * Uncomment to enable MCU real time clock */
-#define MICO_ENABLE_MCU_RTC
 
 #ifdef __cplusplus
 } /*extern "C" */

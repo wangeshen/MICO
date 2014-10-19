@@ -25,6 +25,7 @@
 
 #include "MicoRTOS.h"
 #include "MicoDefaults.h"
+#include "platform.h"
 #include "platform_assert.h"
 
 // ==== LOGGING ====

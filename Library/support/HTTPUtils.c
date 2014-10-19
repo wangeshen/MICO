@@ -110,13 +110,20 @@ int SocketReadHTTPHeader( int inSock, HTTPHeader_t *inHeader )
     err = kUnsupportedErr;
 #endif
   }
-  else{
-
+  else if (inHeader->contentLength != 0){ //Content length >0, create a memory buffer (Content length) and store extra data
     inHeader->extraDataPtr = calloc(inHeader->contentLength, sizeof(uint8_t));
     require_action(inHeader->extraDataPtr, exit, err = kNoMemoryErr);
     memcpy((uint8_t *)inHeader->extraDataPtr, end, inHeader->extraDataLen);
     err = kNoErr;
   }
+  else if(inHeader->extraDataLen != 0){ //Content length =0, but extra data length >0, create a memory buffer (1500)and store extra data
+    inHeader->extraDataPtr = calloc(1500, sizeof(uint8_t));
+    require_action(inHeader->extraDataPtr, exit, err = kNoMemoryErr);
+    memcpy((uint8_t *)inHeader->extraDataPtr, end, inHeader->extraDataLen);
+    err = kNoErr;
+  }
+  else
+    return kNoErr;
   
 exit:
   return err;
@@ -183,6 +190,24 @@ OSStatus SocketReadHTTPBody( int inSock, HTTPHeader_t *inHeader )
   
   FD_ZERO( &readSet );
   FD_SET( inSock, &readSet );
+  
+  /* We has extra data but total length is not clear, store them to 1500 bytes buffer 
+     return when connection is disconnected by remote */
+  if( inHeader->extraDataLen>0 && inHeader->contentLength == 0){ 
+    while(1){
+      selectResult = select( inSock + 1, &readSet, NULL, NULL, NULL );
+      require( selectResult >= 1, exit ); 
+      
+      readResult = read( inSock,
+                        (uint8_t*)( inHeader->extraDataPtr ),
+                        1500 );
+      if( readResult  > 0 ) inHeader->extraDataLen = readResult;
+      else { err = kConnectionErr; goto exit; }
+    }
+  }
+  
+  /* We has extra data and we has a predefined buffer to store the total extra data
+     return when all data has received*/
   while ( inHeader->extraDataLen < inHeader->contentLength )
   {
     selectResult = select( inSock + 1, &readSet, NULL, NULL, NULL );

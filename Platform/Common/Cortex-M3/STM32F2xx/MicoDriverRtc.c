@@ -129,6 +129,15 @@ void platform_rtc_init(void)
   RTC_InitStruct.RTC_SynchPrediv = 0xFF;
   
   RTC_Init( &RTC_InitStruct );
+
+#ifdef USE_RTC_BKP
+  /* Enable the PWR clock */
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+  /* Allow access to BKP Domain */
+  PWR_BackupAccessCmd(ENABLE);
+  PWR_BackupRegulatorCmd(ENABLE);
+#endif
+
   /* Enable the LSE OSC */
   RCC_LSEConfig(RCC_LSE_ON);
   /* Wait till LSE is ready */
@@ -152,8 +161,11 @@ void platform_rtc_init(void)
     RTC_WriteBackupRegister(RTC_BKP_DR0, USE_RTC_BKP);
   }
 #else
+  //#ifdef RTC_ENABLED
+  /* application must have wiced_application_default_time structure declared somewhere, otherwise it wont compile */
   /* write default application time inside rtc */
   MicoRtcSetTime(&mico_default_time);
+  //#endif /* RTC_ENABLED */
 #endif
   
 }
@@ -177,13 +189,13 @@ void RTC_Wakeup_init(void)
   
   RTC_Init( &RTC_InitStruct );
   
+#ifdef USE_RTC_BKP  
   /* Enable the PWR clock */
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
   
   /* RTC clock source configuration ------------------------------------------*/
   /* Allow access to BKP Domain */
   PWR_BackupAccessCmd(ENABLE);
-#ifdef USE_RTC_BKP
   PWR_BackupRegulatorCmd(ENABLE);
 #endif
   

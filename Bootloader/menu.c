@@ -53,7 +53,7 @@ uint8_t tab_1024[1024] =
     0
   };
 
-#ifdef MICO_FLASH_FOR_UPDATE
+#if defined MICO_FLASH_FOR_UPDATE && defined MICO_FLASH_FOR_DRIVER
 const char MEMMAP[] = "\r\n\
 +******************** MICO Flash Map **************+\r\n\
 +-- Content --+-- Flash ---+--- Start ---+--- End ----+\r\n\
@@ -63,7 +63,9 @@ const char MEMMAP[] = "\r\n\
 | OTA Storage | %8s   |  0x%08x | 0x%08x |\r\n\
 | RF Driver   | %8s   |  0x%08x | 0x%08x |\r\n\
 +-------------+------------+-------------+------------+\r\n";
-#else
+#endif 
+
+#if !defined MICO_FLASH_FOR_UPDATE && defined MICO_FLASH_FOR_DRIVER
 const char MEMMAP[] = "\r\n\
 +******************** MICO Flash Map *****************+\r\n\
 +-- Content --+-- Flash ---+--- Start ---+--- End ----+\r\n\
@@ -71,6 +73,16 @@ const char MEMMAP[] = "\r\n\
 | Settings    | %8s   |  0x%08x | 0x%08x |\r\n\
 | Application | %8s   |  0x%08x | 0x%08x |\r\n\
 | RF Driver   | %8s   |  0x%08x | 0x%08x |\r\n\
++-------------+------------+-------------+------------+\r\n";
+#endif
+
+#if !defined MICO_FLASH_FOR_UPDATE && !defined MICO_FLASH_FOR_DRIVER
+const char MEMMAP[] = "\r\n\
++******************** MICO Flash Map *****************+\r\n\
++-- Content --+-- Flash ---+--- Start ---+--- End ----+\r\n\
+| Bootloader  | %8s   |  0x%08x | 0x%08x |\r\n\
+| Settings    | %8s   |  0x%08x | 0x%08x |\r\n\
+| Application | %8s   |  0x%08x | 0x%08x |\r\n\
 +-------------+------------+-------------+------------+\r\n";
 #endif
 
@@ -101,7 +113,8 @@ int findCommandPara(char *commandBody, char *para, char *paraBody, int paraBodyL
   int i = 0;
   int k, j;
   int retval = -1;
-
+  if(paraBody == NULL) return retval;
+  
   for (i = 0; para[i] != 0; i++)  {                /* convert to upper characters */
     para[i] = toupper(para[i]);
   }
@@ -112,10 +125,9 @@ int findCommandPara(char *commandBody, char *para, char *paraBody, int paraBodyL
       for(j=i+1, k=0; *(para+k)!=0x0; j++, k++ ){
         if(commandBody[j] != *(para+k)){
           break;
-        }
-          
+        } 
       }
-      
+
       if(*(para+k)!=0x0 || (commandBody[j]!=' '&& commandBody[j]!=0x0)){   /* para not found!             */
         i++;
         continue;
@@ -134,7 +146,7 @@ int findCommandPara(char *commandBody, char *para, char *paraBody, int paraBodyL
   }
 
 exit:
-  paraBody[retval] = 0x0;
+  if(paraBody) paraBody[retval] = 0x0;
   return retval;
 }
 
@@ -265,7 +277,9 @@ void Main_Menu(void)
     }
 
     /***************** Command "2" or "DRIVERUPDATE": Update the RF driver  *************************/
+
     else if(strcmp(cmdname, "DRIVERUPDATE") == 0 || strcmp(cmdname, "2") == 0) {
+#ifdef MICO_FLASH_FOR_DRIVER
       if (findCommandPara(cmdbuf, "r", NULL, 0) != -1){
         printf ("\n\rRead RF driver only......\n\r");
         MicoFlashInitialize(MICO_FLASH_FOR_DRIVER);
@@ -274,7 +288,9 @@ void Main_Menu(void)
         continue;
       }
       printf ("\n\rUpdating RF driver......\n\r");
-      SerialDownload(MICO_FLASH_FOR_DRIVER, DRIVER_START_ADDRESS, DRIVER_FLASH_SIZE);                        
+      SerialDownload(MICO_FLASH_FOR_DRIVER, DRIVER_START_ADDRESS, DRIVER_FLASH_SIZE);  
+#endif
+      printf ("\n\rNo independ flash memory for RF driver, exiting...\n\r");
     }
 
     /***************** Command "3" or "PARAUPDATE": Update the application  *************************/
@@ -363,17 +379,23 @@ void Main_Menu(void)
 
     /***************** Command: Reboot *************************/
     else if(strcmp(cmdname, "MEMORYMAP") == 0 || strcmp(cmdname, "5") == 0)  {
-#ifdef MICO_FLASH_FOR_UPDATE
+#if defined MICO_FLASH_FOR_UPDATE && defined MICO_FLASH_FOR_DRIVER
       printf(MEMMAP, flash_name[MICO_FLASH_FOR_BOOT],BOOT_START_ADDRESS,BOOT_END_ADDRESS,\
                      flash_name[MICO_FLASH_FOR_PARA], PARA_START_ADDRESS, PARA_END_ADDRESS,\
                      flash_name[MICO_FLASH_FOR_APPLICATION], APPLICATION_START_ADDRESS, APPLICATION_END_ADDRESS,\
                      flash_name[MICO_FLASH_FOR_UPDATE], UPDATE_START_ADDRESS, UPDATE_END_ADDRESS,\
                      flash_name[MICO_FLASH_FOR_DRIVER], DRIVER_START_ADDRESS, DRIVER_END_ADDRESS);
-#else
+#endif
+#if !defined MICO_FLASH_FOR_UPDATE && defined MICO_FLASH_FOR_DRIVER
       printf(MEMMAP, flash_name[MICO_FLASH_FOR_BOOT],BOOT_START_ADDRESS,BOOT_END_ADDRESS,\
                      flash_name[MICO_FLASH_FOR_PARA], PARA_START_ADDRESS, PARA_END_ADDRESS,\
                      flash_name[MICO_FLASH_FOR_APPLICATION], APPLICATION_START_ADDRESS, APPLICATION_END_ADDRESS,\
-                     flash_name[MICO_FLASH_FOR_DRIVER], DRIVER_START_ADDRESS, DRIVER_END_ADDRESS);      
+                     flash_name[MICO_FLASH_FOR_DRIVER], DRIVER_START_ADDRESS, DRIVER_END_ADDRESS);
+#endif
+#if !defined MICO_FLASH_FOR_UPDATE && !defined MICO_FLASH_FOR_DRIVER
+      printf(MEMMAP, flash_name[MICO_FLASH_FOR_BOOT],BOOT_START_ADDRESS,BOOT_END_ADDRESS,\
+                     flash_name[MICO_FLASH_FOR_PARA], PARA_START_ADDRESS, PARA_END_ADDRESS,\
+                     flash_name[MICO_FLASH_FOR_APPLICATION], APPLICATION_START_ADDRESS, APPLICATION_END_ADDRESS);
 #endif 
     }
     /***************** Command: Excute the application *************************/

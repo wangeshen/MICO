@@ -46,13 +46,6 @@ static mico_semaphore_t spi_transfer_finished_semaphore;
  *             Function declarations
  ******************************************************/
 
-#ifndef MICO_DISABLE_MCU_POWERSAVE
-extern void wake_up_interrupt_notify( void );
-#define MCU_NOTIFY_WAKE_UP()        wake_up_interrupt_notify()
-#else
-#define MCU_NOTIFY_WAKE_UP()
-#endif /* ifndef MICO_DISABLE_MCU_POWERSAVE */
-
 /* Powersave functionality */
 extern void MCU_CLOCKS_NEEDED( void );
 extern void MCU_CLOCKS_NOT_NEEDED( void );
@@ -66,11 +59,6 @@ extern void wiced_platform_notify_irq( void );
 static void spi_irq_handler( void* arg )
 {
     UNUSED_PARAMETER(arg);
-
-#ifndef MICO_DISABLE_MCU_POWERSAVE
-    wake_up_interrupt_notify( );
-#endif /* ifndef MICO_DISABLE_MCU_POWERSAVE */
-
     wiced_platform_notify_irq( );
 }
 
@@ -95,10 +83,10 @@ OSStatus host_platform_bus_init( void )
     RCC_PCLK1Config( RCC_HCLK_Div2 ); /* Set clock to 18MHz (assuming 72MHz STM32 system clock) */
 
     /* Enable SPI_SLAVE DMA clock */
-    RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_DMA1, ENABLE );
+    RCC_AHB1PeriphClockCmd( SPIX_DMA_CLK, ENABLE );
 
     /* Enable SPI_SLAVE Periph clock */
-    RCC_APB1PeriphClockCmd( SPIX_CLK, ENABLE );
+    SPIX_CLK_FUNCTION( SPIX_CLK, ENABLE );
 
     /* Enable GPIO Bank B & C */
     RCC_AHB1PeriphClockCmd( SPI_BUS_CLOCK_BANK_CLK | SPI_BUS_MISO_BANK_CLK | SPI_BUS_MOSI_BANK_CLK | SPI_BUS_CS_BANK_CLK | SPI_IRQ_CLK, ENABLE );
@@ -143,7 +131,7 @@ OSStatus host_platform_bus_init( void )
 
     /* Setup DMA for SPIX RX */
     DMA_DeInit( SPIX_DMA_RX_STREAM );
-    dma_init_structure.DMA_Channel = DMA_Channel_0;
+    dma_init_structure.DMA_Channel = SPIX_DMA_RX_CHANNEL;
     dma_init_structure.DMA_PeripheralBaseAddr = (uint32_t) &SPIX->DR;
     dma_init_structure.DMA_Memory0BaseAddr = 0;
     dma_init_structure.DMA_DIR = DMA_DIR_PeripheralToMemory;
@@ -162,7 +150,7 @@ OSStatus host_platform_bus_init( void )
 
     /* Setup DMA for SPIX TX */
     DMA_DeInit( SPIX_DMA_TX_STREAM );
-    dma_init_structure.DMA_Channel = DMA_Channel_0;
+    dma_init_structure.DMA_Channel = SPIX_DMA_TX_CHANNEL;
     dma_init_structure.DMA_PeripheralBaseAddr = (uint32_t) &SPIX->DR;
     dma_init_structure.DMA_Memory0BaseAddr = 0;
     dma_init_structure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
@@ -188,6 +176,7 @@ OSStatus host_platform_bus_init( void )
     nvic_init_structure.NVIC_IRQChannelSubPriority        = 0x0;
     nvic_init_structure.NVIC_IRQChannelCmd                = ENABLE;
     NVIC_Init( &nvic_init_structure );
+    DMA_ITConfig(SPIX_DMA_RX_STREAM, DMA_IT_TC, ENABLE);
 
     /* Enable DMA for TX */
     SPI_I2S_DMACmd( SPIX, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, ENABLE );

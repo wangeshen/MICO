@@ -122,7 +122,6 @@ mico_mutex_t        stdio_tx_mutex;
 #endif /* #ifndef MICO_DISABLE_STDIO */
 
 #ifndef MICO_DISABLE_MCU_POWERSAVE
-static bool wake_up_interrupt_triggered  = false;
 static unsigned long rtc_timeout_start_time           = 0;
 #endif /* #ifndef MICO_DISABLE_MCU_POWERSAVE */
 
@@ -258,15 +257,15 @@ void init_architecture( void )
   MicoStdioUartInitialize( &stdio_uart_config, (ring_buffer_t*)&stdio_rx_buffer );
 #endif
 
-#ifdef NO_MICO_RTOS
-  check_string(SysTick_Config(SystemCoreClock / 1000)==0, "Systemtick initialize failed!");
-#endif
-  
+#ifndef NO_MICO_RTOS 
   /* Ensure 802.11 device is in reset. */
   host_platform_init( );
   
-  MicoRtcInitialize();
-  
+  MicoRtcInitialize();  
+#else //Bootloader
+  check_string(SysTick_Config(SystemCoreClock / 1000)==0, "Systemtick initialize failed!");
+#endif
+ 
   /* Disable MCU powersave at start-up. Application must explicitly enable MCU powersave if desired */
   MCU_CLOCKS_NEEDED();
   
@@ -282,16 +281,6 @@ void init_architecture( void )
 #ifndef MICO_DISABLE_MCU_POWERSAVE
 static int stm32f2_clock_needed_counter = 0;
 #endif
-
-void stm32f2xx_clocks_needed( void )
-{
-  MCU_CLOCKS_NEEDED();
-}
-
-void stm32f2xx_clocks_not_needed( void )
-{
-  MCU_CLOCKS_NOT_NEEDED();
-}
 
 void MCU_CLOCKS_NEEDED( void )
 {
@@ -387,12 +376,6 @@ static OSStatus select_wut_prescaler_calculate_wakeup_time( unsigned long* wakeu
   return kNoErr;
 }
 
-void wake_up_interrupt_notify( void )
-{
-  wake_up_interrupt_triggered = true;
-}
-
-
 static unsigned long stop_mode_power_down_hook( unsigned long delay_ms )
 {
   unsigned long retval;
@@ -458,7 +441,6 @@ static unsigned long stop_mode_power_down_hook( unsigned long delay_ms )
     /* as soon as interrupts are enabled, we will go and execute the interrupt handler */
     /* which triggered a wake up event */
     ENABLE_INTERRUPTS;
-    wake_up_interrupt_triggered = false;
     return retval;
   }
   else
@@ -567,6 +549,7 @@ static volatile uint32_t no_os_tick = 0;
 void SysTick_Handler(void)
 {
   no_os_tick ++;
+  MicoWdgReload();
 }
 
 uint32_t mico_get_time_no_os(void)

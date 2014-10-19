@@ -290,15 +290,6 @@ typedef enum
 /* I/O connection <-> Peripheral Connections */
 #define MICO_I2C_CP         (MICO_I2C_1)
 
-/* WLAN Powersave Clock Source
- * The WLAN sleep clock can be driven from one of two sources:
- * 1. Timer/PWM (default)
- *    - With the PWM selected, the STM32 can *NOT* be put into MCU powersave mode or the PWM output will be disabled
- * 2. MCO (MCU Clock Output). 
- *    - Change the following directive to MICO_WLAN_POWERSAVE_CLOCK_IS_MCO
- */
-#define MICO_WLAN_POWERSAVE_CLOCK_SOURCE MICO_WLAN_POWERSAVE_CLOCK_IS_MCO
-
 #define RestoreDefault_TimeOut          3000  /**< Restore default and start easylink after 
                                                    press down EasyLink button for 3 seconds. */
 

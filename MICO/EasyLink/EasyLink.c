@@ -77,9 +77,11 @@ void EasyLinkNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const in
   switch (event) {
   case NOTIFY_STATION_UP:
     easylink_log("Access point connected");
+    MicoRfLed(true);
     mico_rtos_set_semaphore(&easylink_sem);
     break;
   case NOTIFY_STATION_DOWN:
+    MicoRfLed(false);
     break;
   default:
     break;
@@ -417,13 +419,14 @@ void easylink_thread(void *inContext)
   easylink_log_trace();
   require_action(easylink_sem, threadexit, err = kNotPreparedErr);
   
+  easylink_log("Start easylink");
+  
   if(Context->flashContentInRam.micoSystemConfig.easyLinkEnable != false){
 #ifdef CONFIG_MODE_EASYLINK_PLUS
     micoWlanStartEasyLinkPlus(EasyLink_TimeOut/1000);
 #else
     micoWlanStartEasyLink(EasyLink_TimeOut/1000);
 #endif 
-    easylink_log("Start easylink");
     mico_rtos_get_semaphore(&easylink_sem, MICO_WAIT_FOREVER);
     if(EasylinkFailed == false)
       _easylinkConnectWiFi(Context);

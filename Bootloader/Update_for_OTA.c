@@ -45,12 +45,14 @@ typedef int Log_Status;
 #define SizePerRW 4096   /* Bootloader need 2xSizePerRW RAM heap size to operate, 
                             but it can boost the setup. */
 
+#ifdef MICO_FLASH_FOR_UPDATE
 static uint8_t data[SizePerRW];
 static uint8_t newData[SizePerRW];
 static uint8_t paraSaveInRam[PARA_FLASH_SIZE];
 
 static uint32_t destStartAddress, destEndAddress;
 static mico_flash_t destFlashType;
+#endif
 
 /* Upgrade iamge should save this table to flash */
 typedef struct  _boot_table_t {

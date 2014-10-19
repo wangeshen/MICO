@@ -41,13 +41,6 @@
 extern void MCU_CLOCKS_NEEDED( void );
 extern void MCU_CLOCKS_NOT_NEEDED( void );
 
-#ifndef MICO_DISABLE_MCU_POWERSAVE
-extern void wake_up_interrupt_notify( void );
-#define MCU_NOTIFY_WAKE_UP()        wake_up_interrupt_notify()
-#else
-#define MCU_NOTIFY_WAKE_UP()
-#endif /* ifndef MICO_DISABLE_MCU_POWERSAVE */
-
 /******************************************************
  *             Constants
  ******************************************************/
@@ -181,7 +174,6 @@ extern void wiced_platform_notify_irq( void );
 static void sdio_oob_irq_handler( void* arg )
 {
     UNUSED_PARAMETER(arg);
-    MCU_NOTIFY_WAKE_UP( );
     wiced_platform_notify_irq( );
 }
 

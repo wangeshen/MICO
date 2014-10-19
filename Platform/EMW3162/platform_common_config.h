@@ -39,9 +39,26 @@
 *                    Constants
 ******************************************************/
 
-/* The clock configuration utility from ST is used to calculate these values
-* http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/utility/stsw-stm32090.zip
-*/
+/* MICO RTOS tick rate in Hz */
+#define MICO_DEFAULT_TICK_RATE_HZ                   (1000) 
+
+/************************************************************************
+ * Uncomment to disable watchdog. For debugging only */
+//#define MICO_DISABLE_WATCHDOG
+
+/************************************************************************
+ * Uncomment to disable standard IO, i.e. printf(), etc. */
+//#define MICO_DISABLE_STDIO
+
+/************************************************************************
+ * Uncomment to disable MCU powersave API functions */
+//#define MICO_DISABLE_MCU_POWERSAVE
+
+/************************************************************************
+ * Uncomment to enable MCU real time clock */
+#define MICO_ENABLE_MCU_RTC
+
+
 #define HSE_SOURCE              RCC_HSE_ON               /* Use external crystal                 */
 #define AHB_CLOCK_DIVIDER       RCC_SYSCLK_Div1          /* AHB clock = System clock             */
 #define APB1_CLOCK_DIVIDER      RCC_HCLK_Div4            /* APB1 clock = AHB clock / 4           */
@@ -101,8 +118,18 @@ typedef enum
   MICO_COMMON_PWM_MAX,
 } mico_common_pwm_t;
 
-#define MICO_WLAN_POWERSAVE_CLOCK_IS_PWM 0
-#define MICO_WLAN_POWERSAVE_CLOCK_IS_MCO 1
+/* WLAN Powersave Clock Source
+ * The WLAN sleep clock can be driven from one of two sources:
+ * 1. Timer/PWM (default)
+ *    - With the PWM selected, the STM32 can *NOT* be put into MCU powersave mode or the PWM output will be disabled
+ * 2. MCO (MCU Clock Output). 
+ *    - Change the following directive to MICO_WLAN_POWERSAVE_CLOCK_IS_MCO
+ */
+#define MICO_WLAN_POWERSAVE_CLOCK_SOURCE MICO_WLAN_POWERSAVE_CLOCK_IS_MCO
+
+#define MICO_WLAN_POWERSAVE_CLOCK_IS_NOT_EXIST  0
+#define MICO_WLAN_POWERSAVE_CLOCK_IS_PWM        1
+#define MICO_WLAN_POWERSAVE_CLOCK_IS_MCO        2
 
 #define WLAN_POWERSAVE_CLOCK_FREQUENCY 32768 /* 32768Hz        */
 #define WLAN_POWERSAVE_CLOCK_DUTY_CYCLE   50 /* 50% duty-cycle */
