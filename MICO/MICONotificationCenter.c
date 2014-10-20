@@ -56,6 +56,7 @@ typedef void (*mico_notify_READ_APP_INFO_function)                ( char *str, i
 typedef void (*mico_notify_SYS_WILL_POWER_OFF_function)           ( mico_Context_t * inContext );
 typedef void (*mico_notify_WIFI_CONNECT_FAILED_function)          ( OSStatus err, mico_Context_t * inContext );
 typedef void (*mico_notify_WIFI_Fatal_ERROR_function)             ( mico_Context_t * inContext );
+typedef void (*mico_notify_Stack_Overflow_ERROR_function)         ( char *taskname, mico_Context_t * const inContext );
 
 /* User defined notifications */
 
@@ -224,6 +225,19 @@ void wifi_reboot_event(void)
   else{
     do{
       ((mico_notify_WIFI_Fatal_ERROR_function)(temp->function))(_Context);
+      temp = temp->next;
+    }while(temp!=NULL);
+  }    
+}
+
+void mico_rtos_stack_overflow(char *taskname)
+{
+  _Notify_list_t *temp =  Notify_list[mico_notify_Stack_Overflow_ERROR];
+  if(temp == NULL)
+    return;
+  else{
+    do{
+      ((mico_notify_Stack_Overflow_ERROR_function)(temp->function))(taskname, _Context);
       temp = temp->next;
     }while(temp!=NULL);
   }    

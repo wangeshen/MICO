@@ -549,7 +549,7 @@ static volatile uint32_t no_os_tick = 0;
 void SysTick_Handler(void)
 {
   no_os_tick ++;
-  MicoWdgReload();
+  IWDG_ReloadCounter();
 }
 
 uint32_t mico_get_time_no_os(void)

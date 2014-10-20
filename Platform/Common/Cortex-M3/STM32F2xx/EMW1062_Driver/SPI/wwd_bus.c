@@ -80,8 +80,6 @@ OSStatus host_platform_bus_init( void )
 
     mico_rtos_init_semaphore(&spi_transfer_finished_semaphore, 1);
 
-    RCC_PCLK1Config( RCC_HCLK_Div2 ); /* Set clock to 18MHz (assuming 72MHz STM32 system clock) */
-
     /* Enable SPI_SLAVE DMA clock */
     RCC_AHB1PeriphClockCmd( SPIX_DMA_CLK, ENABLE );
 

@@ -56,12 +56,12 @@ const char menu[] =
 "| 6:BOOT                           | Excute application   |\r\n"
 "| 7:REBOOT                         | Reboot               |\r\n"
 "+----------------------------------+----------------------+\r\n"
-"|           (C) COPYRIGHT 2014 MXCHIP Corporation  By William Xu |\r\n"
+"|    (C) COPYRIGHT 2014 MXCHIP Corporation  By William Xu |\r\n"
 " Notes:\r\n"
 " -e Erase only  -r Read from flash -i internal flash  -s SPI flash\r\n"
 "  -start flash start address -end flash start address\r\n"
 " Example: Input \"4 -i -start 0x400 -end 0x800\": Update internal\r\n"
-"          flash from address 0x400 to 0x800\r\n";
+"          flash from 0x400 to 0x800\r\n";
 
 int main(void)
 {

@@ -50,10 +50,11 @@
 static mico_system_monitor_t* system_monitors[MAXIMUM_NUMBER_OF_SYSTEM_MONITORS];
 void mico_system_monitor_thread_main( void* arg );
 
-
 OSStatus MICOStartSystemMonitor (mico_Context_t * const inContext)
 {
-  return mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "SYS MONITOR", mico_system_monitor_thread_main, 0x100, (void*)inContext );
+
+  
+  return mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "SYS MONITOR", mico_system_monitor_thread_main, STACK_SIZE_MICO_SYSTEM_MONITOR_THREAD, (void*)inContext );
 }
 
 void mico_system_monitor_thread_main( void* arg )

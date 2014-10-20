@@ -59,6 +59,7 @@ typedef enum{
   mico_notify_WIFI_CONNECT_FAILED,          //void join_fail(OSStatus err, mico_Context_t * const inContext);
   mico_notify_WIFI_SCAN_ADV_COMPLETED,      //void (*function)(ScanResult_adv *pApList, mico_Context_t * const inContext);
   mico_notify_WIFI_Fatal_ERROR,             //void (*function)(mico_Context_t * const inContext);
+  mico_notify_Stack_Overflow_ERROR,         //void (*function)(char *taskname, mico_Context_t * const inContext);
   
   /* User defined notifications */_
 

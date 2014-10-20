@@ -83,6 +83,12 @@ void EasyLinkNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const in
   case NOTIFY_STATION_DOWN:
     MicoRfLed(false);
     break;
+  case NOTIFY_AP_UP:
+    MicoRfLed(true);
+    break;
+  case NOTIFY_AP_DOWN:
+    MicoRfLed(false);
+    break;
   default:
     break;
   }

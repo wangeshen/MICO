@@ -51,6 +51,19 @@
 
 #define BONJOUR_SERVICE                     "_easylink._tcp.local."
 
+/* Define thread stack size */
+#ifdef DEBUG
+  #define STACK_SIZE_UART_RECV_THREAD           0x2A0
+  #define STACK_SIZE_LOCAL_TCP_SERVER_THREAD    0x300
+  #define STACK_SIZE_LOCAL_TCP_CLIENT_THREAD    0x350
+  #define STACK_SIZE_REMOTE_TCP_CLIENT_THREAD   0x500
+#else
+  #define STACK_SIZE_UART_RECV_THREAD           0x150
+  #define STACK_SIZE_LOCAL_TCP_SERVER_THREAD    0x180
+  #define STACK_SIZE_LOCAL_TCP_CLIENT_THREAD    0x200
+  #define STACK_SIZE_REMOTE_TCP_CLIENT_THREAD   0x260
+#endif
+
 /*Application's configuration stores in flash*/
 typedef struct
 {

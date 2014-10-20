@@ -200,6 +200,14 @@ void micoNotify_WlanFatalErrHandler(mico_Context_t * const inContext)
   MicoSystemReboot();
 }
 
+void micoNotify_StackOverflowErrHandler(char *taskname, mico_Context_t * const inContext)
+{
+  mico_log_trace();
+  (void)inContext;
+  mico_log("Thread %s overflow, system rebooting", taskname);
+  MicoSystemReboot(); 
+}
+
 void _ConnectToAP( mico_Context_t * const inContext)
 {
   mico_log_trace();
@@ -279,7 +287,10 @@ int application_start(void)
 
   err = MICOAddNotification( mico_notify_WIFI_Fatal_ERROR, (void *)micoNotify_WlanFatalErrHandler );
   require_noerr( err, exit ); 
-  
+
+  err = MICOAddNotification( mico_notify_Stack_Overflow_ERROR, (void *)micoNotify_StackOverflowErrHandler );
+  require_noerr( err, exit ); 
+
   /*wlan driver and tcpip init*/
   MicoInit();
   MicoSysLed(true);
@@ -392,6 +403,11 @@ int application_start(void)
 
     _ConnectToAP( context );
   }
+
+  int free_memory;
+  free_memory = MicoGetMemoryInfo()->free_memory;
+  REFERENCE_DEBUG_ONLY_VARIABLE(free_memory);
+  mico_log("Free memory %d bytes", free_memory) ; 
   
   /*System status changed*/
   while(mico_rtos_get_semaphore(&context->micoStatus.sys_state_change_sem, MICO_WAIT_FOREVER)==kNoErr){

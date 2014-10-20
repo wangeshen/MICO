@@ -1290,7 +1290,7 @@
         <option>
           <name>CCOptStrategy</name>
           <version>0</version>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>CCOptLevelSlave</name>
@@ -1365,7 +1365,7 @@
         <option>
           <name>CCOptStrategySlave</name>
           <version>0</version>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>CCGuardCalls</name>
@@ -3135,6 +3135,7 @@
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverWdg.c</name>
             <excluded>
+              <configuration>EMW3162</configuration>
               <configuration>MICO_EVB_1</configuration>
               <configuration>Nucleo_411RE</configuration>
             </excluded>
@@ -3285,9 +3286,6 @@
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M4\STM32F4xx\gpio_irq.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M4\STM32F4xx\HardFault_handler.c</name>
-          </file>
-          <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M4\STM32F4xx\MicoDriverAdc.c</name>
           </file>
           <file>
@@ -3316,6 +3314,9 @@
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M4\STM32F4xx\MicoDriverWdg.c</name>
+            <excluded>
+              <configuration>Nucleo_411RE</configuration>
+            </excluded>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M4\STM32F4xx\rtc.c</name>

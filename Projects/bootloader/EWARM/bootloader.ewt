@@ -653,9 +653,6 @@
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M4\STM32F4xx\gpio_irq.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M4\STM32F4xx\HardFault_handler.c</name>
-          </file>
-          <file>
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M4\STM32F4xx\MicoDriverAdc.c</name>
           </file>
           <file>

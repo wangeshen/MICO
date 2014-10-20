@@ -113,7 +113,6 @@ int findCommandPara(char *commandBody, char *para, char *paraBody, int paraBodyL
   int i = 0;
   int k, j;
   int retval = -1;
-  if(paraBody == NULL) return retval;
   
   for (i = 0; para[i] != 0; i++)  {                /* convert to upper characters */
     para[i] = toupper(para[i]);
@@ -136,7 +135,7 @@ int findCommandPara(char *commandBody, char *para, char *paraBody, int paraBodyL
       retval = 0;
       for (k = j+1; commandBody[k] == ' '; k++);      /* skip blanks                 */
       for(j = 0; commandBody[k] != ' ' && commandBody[k] != 0 && commandBody[k] != '-'; j++, k++){   /* para body found!             */
-        paraBody[j] = commandBody[k];
+        if(paraBody) paraBody[j] = commandBody[k];
         retval ++;
         if( retval == paraBodyLength) goto exit;
       }
@@ -289,8 +288,9 @@ void Main_Menu(void)
       }
       printf ("\n\rUpdating RF driver......\n\r");
       SerialDownload(MICO_FLASH_FOR_DRIVER, DRIVER_START_ADDRESS, DRIVER_FLASH_SIZE);  
-#endif
+#else
       printf ("\n\rNo independ flash memory for RF driver, exiting...\n\r");
+#endif
     }
 
     /***************** Command "3" or "PARAUPDATE": Update the application  *************************/

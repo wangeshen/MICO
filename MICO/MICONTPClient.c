@@ -192,6 +192,6 @@ exit:
 OSStatus MICOStartNTPClient ( mico_Context_t * const inContext )
 {
   mico_rtos_init_semaphore(&_wifiConnected_sem, 1);
-  return mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "NTP Client", NTPClient_thread, 0x500, (void*)inContext );
+  return mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "NTP Client", NTPClient_thread, STACK_SIZE_NTP_CLIENT_THREAD, (void*)inContext );
 }
 

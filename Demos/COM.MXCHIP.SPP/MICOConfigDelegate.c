@@ -37,6 +37,7 @@
 
 #define SYS_LED_TRIGGER_INTERVAL 100 
 #define SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK 500 
+  
 #define config_delegate_log(M, ...) custom_log("Config Delegate", M, ##__VA_ARGS__)
 #define config_delegate_log_trace() custom_log_trace("Config Delegate")
   
@@ -88,6 +89,11 @@ void ConfigSoftApWillStart(mico_Context_t * const inContext )
 {
   OSStatus err;
   mico_uart_config_t uart_config;
+
+  mico_stop_timer(&_Led_EL_timer);
+  mico_deinit_timer( &_Led_EL_timer );
+  mico_init_timer(&_Led_EL_timer, SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK, _led_EL_Timeout_handler, NULL);
+  mico_start_timer(&_Led_EL_timer);
   
   sppProtocolInit(inContext);
   
@@ -99,11 +105,11 @@ void ConfigSoftApWillStart(mico_Context_t * const inContext )
   uart_config.flow_control = FLOW_CONTROL_DISABLED;
   ring_buffer_init  ( (ring_buffer_t *)&rx_buffer, (uint8_t *)rx_data, UART_BUFFER_LENGTH );
   MicoUartInitialize( UART_FOR_APP, &uart_config, (ring_buffer_t *)&rx_buffer );
-  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART Recv", uartRecv_thread, 0x500, (void*)inContext );
+  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART Recv", uartRecv_thread, STACK_SIZE_UART_RECV_THREAD, (void*)inContext );
   require_noerr_action( err, exit, config_delegate_log("ERROR: Unable to start the uart recv thread.") );
 
  if(inContext->flashContentInRam.appConfig.localServerEnable == true){
-   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "Local Server", localTcpServer_thread, 0x200, (void*)inContext );
+   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "Local Server", localTcpServer_thread, STACK_SIZE_LOCAL_TCP_SERVER_THREAD, (void*)inContext );
    require_noerr_action( err, exit, config_delegate_log("ERROR: Unable to start the local server thread.") );
  }
 

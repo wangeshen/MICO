@@ -2179,7 +2179,7 @@
         </option>
         <option>
           <name>CCJLinkInterfaceRadio</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>OCJLinkAttachSlave</name>
@@ -2743,7 +2743,7 @@
         </option>
         <option>
           <name>MemFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\debugger\ST\STM32F205ZG.ddf</state>
+          <state>$TOOLKIT_DIR$\CONFIG\debugger\ST\STM32F411RE.ddf</state>
         </option>
         <option>
           <name>RunToEnable</name>
@@ -2815,7 +2815,7 @@
         </option>
         <option>
           <name>FlashLoadersV3</name>
-          <state>$TOOLKIT_DIR$\config\flashloader\ST\FlashSTM32F205xG.board</state>
+          <state>$TOOLKIT_DIR$\config\flashloader\ST\FlashSTM32F411xE.board</state>
         </option>
         <option>
           <name>OCImagesSuppressCheck1</name>
