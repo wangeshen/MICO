@@ -56,29 +56,13 @@ int SocketReadHTTPHeader( int inSock, HTTPHeader_t *inHeader )
   lim = buf + sizeof( inHeader->buf );
   for( ;; )
   {
-    // If there's data from a previous read, move it to the front to search it first.
-    len = inHeader->extraDataLen;
-    if( len > 0 )
-    {
-      require_action( len <= (size_t)( lim - dst ), exit, err = kParamErr );
-      memmove( dst, inHeader->extraDataPtr, len );
-      inHeader->extraDataLen = 0;
-    }
-    else
-    {
-      //do
-      //{
-      n = read( inSock, dst, (size_t)( lim - dst ) );
-      //    err = map_socket_value_errno( inSock, n >= 0, n );
-      //}   while( err == EINTR );
-      if(      n  > 0 ) len = (size_t) n;
-      else  { err = kConnectionErr; goto exit; }
-    }
-    dst += len;
-    inHeader->len += len;
-    
     if(findHeader( inHeader,  &end ))
       break ;
+    n = read( inSock, dst, (size_t)( lim - dst ) );
+    if(      n  > 0 ) len = (size_t) n;
+    else  { err = kConnectionErr; goto exit; }
+    dst += len;
+    inHeader->len += len;
   }
   
   inHeader->len = (size_t)( end - buf );
@@ -95,8 +79,8 @@ int SocketReadHTTPHeader( int inSock, HTTPHeader_t *inHeader )
     inHeader->otaDataPtr = 0;
   }
   
+  /* For MXCHIP OTA function, store extra data to OTA data temporary */
   err = HTTPGetHeaderField( inHeader->buf, inHeader->len, "Content-Type", NULL, NULL, &value, &valueSize, NULL );
-  
 
   if(err == kNoErr && strnicmpx( value, valueSize, kMIMEType_MXCHIP_OTA ) == 0){
 #ifdef MICO_FLASH_FOR_UPDATE  
@@ -106,17 +90,32 @@ int SocketReadHTTPHeader( int inSock, HTTPHeader_t *inHeader )
     err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint8_t *)end, inHeader->extraDataLen);
     require_noerr(err, exit);
 #else
-    http_utils_log("OTA flash memory is not existed, !");
+    http_utils_log("OTA flash memory is not existed!");
     err = kUnsupportedErr;
 #endif
+    goto exit;
   }
-  else if (inHeader->contentLength != 0){ //Content length >0, create a memory buffer (Content length) and store extra data
-    inHeader->extraDataPtr = calloc(inHeader->contentLength, sizeof(uint8_t));
+
+  /* For chunked extra data without content length */
+  if(inHeader->chunkedData == true){
+    inHeader->chunkedDataBufferLen = (inHeader->extraDataLen > 256)? inHeader->extraDataLen:256;
+    inHeader->chunkedDataBufferPtr = calloc(inHeader->chunkedDataBufferLen, sizeof(uint8_t)); //Make extra data buffer larger than chunk length
+    require_action(inHeader->chunkedDataBufferPtr, exit, err = kNoMemoryErr);
+    memcpy((uint8_t *)inHeader->chunkedDataBufferPtr, end, inHeader->extraDataLen);
+    inHeader->extraDataPtr = inHeader->chunkedDataBufferPtr;
+    return kNoErr;
+  }
+
+  /* Extra data with content length */
+  if (inHeader->contentLength != 0){ //Content length >0, create a memory buffer (Content length) and store extra data
+    size_t copyDataLen = (inHeader->contentLength >= inHeader->extraDataLen)? inHeader->contentLength:inHeader->extraDataLen;
+    inHeader->extraDataPtr = calloc(copyDataLen , sizeof(uint8_t));
     require_action(inHeader->extraDataPtr, exit, err = kNoMemoryErr);
-    memcpy((uint8_t *)inHeader->extraDataPtr, end, inHeader->extraDataLen);
+    memcpy((uint8_t *)inHeader->extraDataPtr, end, copyDataLen);
     err = kNoErr;
-  }
+  } /* Extra data without content length, data is ended by conntection close */
   else if(inHeader->extraDataLen != 0){ //Content length =0, but extra data length >0, create a memory buffer (1500)and store extra data
+    inHeader->dataEndedbyClose = true;
     inHeader->extraDataPtr = calloc(1500, sizeof(uint8_t));
     require_action(inHeader->extraDataPtr, exit, err = kNoMemoryErr);
     memcpy((uint8_t *)inHeader->extraDataPtr, end, inHeader->extraDataLen);
@@ -180,6 +179,8 @@ OSStatus SocketReadHTTPBody( int inSock, HTTPHeader_t *inHeader )
   fd_set readSet;
   const char *    value;
   size_t          valueSize;
+  size_t    lastChunkLen, chunckheaderLen; 
+  char *nextPackagePtr;
 #ifdef MICO_FLASH_FOR_UPDATE
   bool writeToFlash = false;
 #endif
@@ -190,20 +191,93 @@ OSStatus SocketReadHTTPBody( int inSock, HTTPHeader_t *inHeader )
   
   FD_ZERO( &readSet );
   FD_SET( inSock, &readSet );
-  
+
+  /* Chunked data, return after receive one chunk */
+  if( inHeader->chunkedData == true ){
+    /* Move next chunk to chunked data buffer header point */
+    lastChunkLen = inHeader->extraDataPtr - inHeader->chunkedDataBufferPtr + inHeader->contentLength;
+    if(inHeader->contentLength) lastChunkLen+=2;  //Last chunck data has a CRLF tail
+    memmove( inHeader->chunkedDataBufferPtr, inHeader->chunkedDataBufferPtr + lastChunkLen, inHeader->chunkedDataBufferLen - lastChunkLen  );
+    inHeader->extraDataLen -= lastChunkLen;
+
+    while ( findChunkedDataLength( inHeader->chunkedDataBufferPtr, inHeader->extraDataLen, &inHeader->extraDataPtr ,"%llu", &inHeader->contentLength ) == false){
+      require_action(inHeader->extraDataLen < inHeader->chunkedDataBufferLen, exit, err=kMalformedErr );
+
+      selectResult = select( inSock + 1, &readSet, NULL, NULL, NULL );
+      require( selectResult >= 1, exit ); 
+
+      readResult = read( inSock, inHeader->extraDataPtr, (size_t)( inHeader->chunkedDataBufferLen - inHeader->extraDataLen ) );
+
+      if( readResult  > 0 ) inHeader->extraDataLen += readResult;
+      else { err = kConnectionErr; goto exit; }
+    }
+
+    chunckheaderLen = inHeader->extraDataPtr - inHeader->chunkedDataBufferPtr;
+
+    if(inHeader->contentLength == 0){ //This is the last chunk
+      while( findCRLF( inHeader->extraDataPtr, inHeader->extraDataLen - chunckheaderLen, &nextPackagePtr ) == false){ //find CRLF
+        selectResult = select( inSock + 1, &readSet, NULL, NULL, NULL );
+        require( selectResult >= 1, exit ); 
+
+        readResult = read( inSock,
+                          (uint8_t *)( inHeader->extraDataPtr + inHeader->extraDataLen - chunckheaderLen ),
+                          256 - inHeader->extraDataLen ); //Assume chunk trailer length is less than 256 (256 is the min chunk buffer, maybe dangerous
+
+        if( readResult  > 0 ) inHeader->extraDataLen += readResult;
+        else { err = kConnectionErr; goto exit; }
+      }
+
+      err = kNoErr;
+      goto exit;
+
+
+    }
+    else{
+      /* Extend chunked data buffer */
+      if( inHeader->chunkedDataBufferLen < inHeader->contentLength + chunckheaderLen + 2){
+        inHeader->chunkedDataBufferLen = inHeader->contentLength + chunckheaderLen + 256;
+        inHeader->chunkedDataBufferPtr = realloc(inHeader->chunkedDataBufferPtr, inHeader->chunkedDataBufferLen);
+        require_action(inHeader->extraDataPtr, exit, err = kNoMemoryErr);
+      }
+
+      /* Read chunked data */
+      while ( inHeader->extraDataLen < inHeader->contentLength + chunckheaderLen + 2 ){
+        selectResult = select( inSock + 1, &readSet, NULL, NULL, NULL );
+        require( selectResult >= 1, exit ); 
+
+        readResult = read( inSock,
+                          (uint8_t *)( inHeader->extraDataPtr + inHeader->extraDataLen - chunckheaderLen),
+                          ( inHeader->contentLength - (inHeader->extraDataLen - chunckheaderLen) + 2 ));
+        
+        if( readResult  > 0 ) inHeader->extraDataLen += readResult;
+        else { err = kConnectionErr; goto exit; }
+      } 
+      
+      if( *(inHeader->extraDataPtr + inHeader->contentLength) != '\r' ||
+         *(inHeader->extraDataPtr + inHeader->contentLength +1 ) != '\n'){
+           err = kMalformedErr; 
+           goto exit;
+         }
+    }
+  }
+
   /* We has extra data but total length is not clear, store them to 1500 bytes buffer 
-     return when connection is disconnected by remote */
-  if( inHeader->extraDataLen>0 && inHeader->contentLength == 0){ 
-    while(1){
+     return when connection is disconnected by remote server */
+  if( inHeader->dataEndedbyClose == true){ 
+    if(inHeader->contentLength == 0) { //First read body, return using data received by SocketReadHTTPHeader
+      inHeader->contentLength = inHeader->extraDataLen;
+    }else{
       selectResult = select( inSock + 1, &readSet, NULL, NULL, NULL );
       require( selectResult >= 1, exit ); 
       
       readResult = read( inSock,
                         (uint8_t*)( inHeader->extraDataPtr ),
                         1500 );
-      if( readResult  > 0 ) inHeader->extraDataLen = readResult;
+      if( readResult  > 0 ) inHeader->contentLength = readResult;
       else { err = kConnectionErr; goto exit; }
     }
+    err = kNoErr;
+    goto exit;
   }
   
   /* We has extra data and we has a predefined buffer to store the total extra data
@@ -251,11 +325,11 @@ OSStatus SocketReadHTTPBody( int inSock, HTTPHeader_t *inHeader )
       if( readResult  > 0 ) inHeader->extraDataLen += readResult;
       else { err = kConnectionErr; goto exit; }
     }
-  }
-  
+  }  
   err = kNoErr;
   
 exit:
+  if(err != kNoErr) inHeader->len = 0;
   if(inHeader->otaDataPtr) {
     free(inHeader->otaDataPtr);
     inHeader->otaDataPtr = 0;
@@ -388,13 +462,87 @@ OSStatus HTTPHeaderParse( HTTPHeader_t *ioHeader )
   err = HTTPGetHeaderField( ioHeader->buf, ioHeader->len, "Connection", NULL, NULL, &value, &valueSize, NULL );
   if( err )   ioHeader->persistent = (Boolean)( strnicmpx( ioHeader->protocolPtr, ioHeader->protocolLen, "HTTP/1.0" ) != 0 );
   else        ioHeader->persistent = (Boolean)( strnicmpx( value, valueSize, "close" ) != 0 );
+
+  err = HTTPGetHeaderField( ioHeader->buf, ioHeader->len, "Transfer-Encoding", NULL, NULL, &value, &valueSize, NULL );
+  if( err )   ioHeader->chunkedData = false;
+  else        ioHeader->chunkedData = (Boolean)( strnicmpx( value, valueSize, kTransferrEncodingType_CHUNKED ) == 0 );
   
   // Content-Length is such a common field that we get it here during general parsing.
   HTTPScanFHeaderValue( ioHeader->buf, ioHeader->len, "Content-Length", "%llu", &ioHeader->contentLength );
+
   err = kNoErr;
   
 exit:
   return err;
+}
+
+int findCRLF( const char *inDataPtr , size_t inDataLen, char **  nextDataPtr ) //find CRLF
+{
+  char *dst = (char *)inDataPtr + inDataLen;
+  char *src = (char *)inDataPtr;
+  size_t          len;
+  
+  // Find an empty line (separates the length and data).
+  for( ;; )
+  {
+    while( ( src < dst ) && ( *src != '\r' ) ) ++src;
+    if( src >= dst ) break;
+    
+    len = (size_t)( dst - src );
+
+    if( ( len >= 2 ) && ( src[ 1 ] == '\n' ) ) // CRLF
+    {
+       *nextDataPtr = src + 2;
+      return true;
+    }
+    else if( len <= 1 )
+    {
+      break;
+    }
+    ++src;
+  }
+  return false;  
+}
+
+int findChunkedDataLength( const char *inChunkPtr , size_t inChunkLen, char **  chunkedDataPtr, const char *inFormat, ... )
+{
+  char *dst = (char *)inChunkPtr + inChunkLen;
+  char *src = (char *)inChunkPtr;
+  size_t          len;
+  va_list         args;
+  
+  // Find an empty line (separates the length and data).
+  *chunkedDataPtr = dst;
+  for( ;; )
+  {
+    while( ( src < *chunkedDataPtr ) && ( *src != '\r' ) ) ++src;
+    if( src >= *chunkedDataPtr ) break;
+    
+    len = (size_t)( *chunkedDataPtr - src );
+
+    if( ( len >= 2 ) && ( src[ 1 ] == '\n' ) ) // CRLF
+    {
+      if(*inChunkPtr == 0x30){ //last chunk
+        *chunkedDataPtr = src + 2;
+        va_start( args, inFormat );
+        VSNScanF( "0", 1, "%llu", args);
+        va_end( args );
+        return true;
+      }
+
+      *chunkedDataPtr = src + 2;
+      va_start( args, inFormat );
+      VSNScanF( inChunkPtr, src - inChunkPtr, "%x", args);
+      va_end( args );
+      return true;
+    }
+    else if( len <= 1 )
+    {
+      break;
+    }
+    ++src;
+  }
+  return false;  
 }
 
 OSStatus HTTPGetHeaderField( const char *inHeaderPtr, 
@@ -518,16 +666,50 @@ HTTPHeader_t * HTTPHeaderCreate( void )
 
 void HTTPHeaderClear( HTTPHeader_t *inHeader )
 {
-  inHeader->len = 0;
-  inHeader->extraDataLen = 0;
-  if((uint32_t *)inHeader->extraDataPtr) {
-    free((uint32_t *)inHeader->extraDataPtr);
-    inHeader->extraDataPtr = NULL;
+  char *nextPackagePtr;
+  size_t chunckheaderLen = inHeader->extraDataPtr - inHeader->chunkedDataBufferPtr;
+  if(inHeader->chunkedData && (uint32_t *)inHeader->chunkedDataBufferPtr){ //chunk data
+    /* Possible to read the header of the next http package */
+    if(findCRLF( inHeader->extraDataPtr, inHeader->extraDataLen - chunckheaderLen, &nextPackagePtr ) ){
+      if( nextPackagePtr <= inHeader->chunkedDataBufferPtr + inHeader->extraDataLen ){ //We get some data belongs to next http package
+        inHeader->len = inHeader->extraDataLen - (nextPackagePtr - inHeader->chunkedDataBufferPtr);
+        if(inHeader->len > 512)
+          inHeader->len = 0;
+        else
+          memcpy(inHeader->buf, nextPackagePtr, inHeader->len);
+      } else
+        inHeader->len = 0;
+    }
+
+    inHeader->extraDataLen = 0;
+    free((uint32_t *)inHeader->chunkedDataBufferPtr);
+    inHeader->chunkedDataBufferPtr = NULL;   
+    inHeader->extraDataPtr = NULL;   
+    inHeader->chunkedData = false;
+  }else{
+
+    /* We get some data belongs to next http package, this only could happen two or more
+      packages are received by SocketReadHTTPHeader */ 
+    if( inHeader->extraDataLen > inHeader->contentLength ){ 
+      inHeader->len = inHeader->extraDataLen - inHeader->contentLength;
+      memcpy(inHeader->buf, inHeader->extraDataPtr + inHeader->contentLength, inHeader->len);
+    } else
+      inHeader->len = 0;
+
+    inHeader->extraDataLen = 0;
+    if((uint32_t *)inHeader->extraDataPtr) {
+      free((uint32_t *)inHeader->extraDataPtr);
+      inHeader->extraDataPtr = NULL;
+    }
+    if((uint32_t *)inHeader->otaDataPtr) {
+      free((uint32_t *)inHeader->otaDataPtr);
+      inHeader->otaDataPtr = NULL;
+    }    
+    inHeader->dataEndedbyClose = false;
   }
-  if((uint32_t *)inHeader->otaDataPtr) {
-    free((uint32_t *)inHeader->otaDataPtr);
-    inHeader->otaDataPtr = NULL;
-  }
+
+
+
 }
 
 OSStatus CreateSimpleHTTPOKMessage( uint8_t **outMessage, size_t *outMessageSize )

@@ -140,6 +140,7 @@ void EasyLinkNotify_EasyLinkCompleteHandler(network_InitTypeDef_st *nwkpara, mic
   
   mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
   memcpy(inContext->flashContentInRam.micoSystemConfig.ssid, nwkpara->wifi_ssid, maxSsidLen);
+  memset(inContext->flashContentInRam.micoSystemConfig.bssid, 0x0, 6);
   memcpy(inContext->flashContentInRam.micoSystemConfig.user_key, nwkpara->wifi_key, maxKeyLen);
   inContext->flashContentInRam.micoSystemConfig.user_keyLength = strlen(nwkpara->wifi_key);
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
@@ -421,6 +422,7 @@ void easylink_thread(void *inContext)
   mico_Context_t *Context = inContext;
   fd_set readfds;
   int reConnCount = 0;
+  int clientFdIsSet;
 
   easylink_log_trace();
   require_action(easylink_sem, threadexit, err = kNotPreparedErr);
@@ -466,26 +468,32 @@ void easylink_thread(void *inContext)
       FD_ZERO(&readfds);  
       FD_SET(easylinkClient_fd, &readfds);
 
-      err = select(1, &readfds, NULL, NULL, NULL);
-      
-      require(err>=1, threadexit);
-    
-      if(FD_ISSET(easylinkClient_fd, &readfds)){
+      if(httpHeader->len == 0){
+        err = select(1, &readfds, NULL, NULL, NULL);
+        require(err>=1, threadexit);
+        clientFdIsSet = FD_ISSET(easylinkClient_fd, &readfds);
+      }
+  
+      if(clientFdIsSet||httpHeader->len){
         err = SocketReadHTTPHeader( easylinkClient_fd, httpHeader );
 
         switch ( err )
         {
           case kNoErr:
             // Read the rest of the HTTP body if necessary
-            err = SocketReadHTTPBody( easylinkClient_fd, httpHeader );
-            require_noerr(err, Reconn);
+            do{
+              err = SocketReadHTTPBody( easylinkClient_fd, httpHeader );
+              require_noerr(err, Reconn);
 
-            PrintHTTPHeader(httpHeader);
-            // Call the HTTPServer owner back with the acquired HTTP header
-            err = _FTCRespondInComingMessage( easylinkClient_fd, httpHeader, Context );
-            require_noerr( err, Reconn );
-            // Reuse HTTPHeader
-            HTTPHeaderClear( httpHeader );
+              PrintHTTPHeader(httpHeader);
+              // Call the HTTPServer owner back with the acquired HTTP header
+              err = _FTCRespondInComingMessage( easylinkClient_fd, httpHeader, Context );
+              require_noerr( err, Reconn );
+              if(httpHeader->contentLength == 0)
+                break;
+            } while( httpHeader->chunkedData == true || httpHeader->dataEndedbyClose == true);
+              // Reuse HTTPHeader
+              HTTPHeaderClear( httpHeader );
           break;
 
           case EWOULDBLOCK:

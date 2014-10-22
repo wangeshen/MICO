@@ -110,6 +110,7 @@ void localConfig_thread(void *inFd)
 {
   OSStatus err;
   int clientFd = *(int *)inFd;
+  int clientFdIsSet;
   fd_set readfds;
   struct timeval_t t;
   HTTPHeader_t *httpHeader = NULL;
@@ -125,22 +126,31 @@ void localConfig_thread(void *inFd)
   while(1){
     FD_ZERO(&readfds);
     FD_SET(clientFd, &readfds);
+    clientFdIsSet = 0;
 
-    err = select(1, &readfds, NULL, NULL, &t);
+    if(httpHeader->len == 0){
+      err = select(1, &readfds, NULL, NULL, &t);
+      clientFdIsSet = FD_ISSET(clientFd, &readfds);
+    }
   
-    if(FD_ISSET(clientFd, &readfds)){
+    if(clientFdIsSet||httpHeader->len){
       err = SocketReadHTTPHeader( clientFd, httpHeader );
 
       switch ( err )
       {
         case kNoErr:
           // Read the rest of the HTTP body if necessary
-          err = SocketReadHTTPBody( clientFd, httpHeader );
-          require_noerr(err, exit);
+          do{
+            err = SocketReadHTTPBody( clientFd, httpHeader );
+            require_noerr(err, exit);
 
-          // Call the HTTPServer owner back with the acquired HTTP header
-          err = _LocalConfigRespondInComingMessage( clientFd, httpHeader, Context );
-          require_noerr( err, exit );
+            // Call the HTTPServer owner back with the acquired HTTP header
+            err = _LocalConfigRespondInComingMessage( clientFd, httpHeader, Context );
+            require_noerr( err, exit ); 
+            if(httpHeader->contentLength == 0)
+              break;
+          } while( httpHeader->chunkedData == true || httpHeader->dataEndedbyClose == true);
+      
           // Reuse HTTPHeader
           HTTPHeaderClear( httpHeader );
         break;
@@ -183,8 +193,19 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
   uint8_t *httpResponse = NULL;
   size_t httpResponseLen = 0;
   json_object* report = NULL;
-
   config_log_trace();
+
+#if 1
+  /* This is a demo code for http package has chunked data */
+  char *tempStr;
+  if(inHeader->chunkedData == true){
+    tempStr = calloc(inHeader->contentLength+1, sizeof(uint8_t));
+    memcpy(tempStr, inHeader->extraDataPtr, inHeader->contentLength);
+    config_log("Recv==>%s", tempStr);
+    free(tempStr);
+    return kNoErr;
+  }
+#endif
 
   if(HTTPHeaderMatchURL( inHeader, kCONFIGURLRead ) == kNoErr){    
     report = ConfigCreateReportJsonMessage( inContext );
