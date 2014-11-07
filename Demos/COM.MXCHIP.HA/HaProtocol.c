@@ -83,7 +83,6 @@ static void _get_status(mxchip_state_t *cmd, mico_Context_t * const inContext)
 }
 
 
-
 void set_network_state(int state, int on)
 {
   ha_log_trace();

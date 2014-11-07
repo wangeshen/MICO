@@ -71,7 +71,7 @@ int MICO_read(Network* n, unsigned char* buffer, int len, int timeout_ms) {
   
   //read left timer
   InitTimer(&readLenTimer);
-  countdown_ms(&readLenTimer, 1000);
+  countdown_ms(&readLenTimer, timeout_ms);
   
   if (select(n->my_socket + 1, &fdset, NULL, NULL, &timeVal) == 1) {
     // by wes, 20141021, must be non blocking read.
@@ -84,7 +84,7 @@ int MICO_read(Network* n, unsigned char* buffer, int len, int timeout_ms) {
       }
       else
         recvLen += rc;
-    } while((recvLen < len) && (!expired(&readLenTimer)));
+    } while((recvLen < len) && (!expired(&readLenTimer))); // by wes, 20141021, must be non blocking read.
   }
   return recvLen;
 }
@@ -96,6 +96,12 @@ int MICO_write(Network* n, unsigned char* buffer, int len, int timeout_ms) {
   int rc = 0;
   int readySock;
   
+  //add timeout by wes 20141106
+  Timer writeTimer;
+  
+  InitTimer(&writeTimer);
+  countdown_ms(&writeTimer, timeout_ms);
+  
   FD_ZERO(&fdset);
   FD_SET(n->my_socket, &fdset);
   
@@ -103,7 +109,7 @@ int MICO_write(Network* n, unsigned char* buffer, int len, int timeout_ms) {
   timeVal.tv_usec = timeout_ms * 1000;
   do {
     readySock = select(n->my_socket + 1, NULL, &fdset, NULL, &timeVal);
-  } while(readySock != 1);
+  } while((readySock != 1) && (!expired(&writeTimer)));  //add timeout by wes 20141106
   rc = send(n->my_socket, buffer, len, 0);
   return rc;
 }

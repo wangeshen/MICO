@@ -51,20 +51,6 @@
 // in second, here set 1 minite
 #define DEFAULT_MQTT_CLLIENT_KEEPALIVE_INTERVAL    60
 
-//request type
-#define DEVICE_ACTIVATE             0
-#define DEVICE_AUTHORIZE            1
-   
-#define DEFAULT_DEVICE_ACTIVATE_URL      "/v1/device/activate"
-#define DEFAULT_DEVICE_AUTHORIZE_URL     "/v1/device/authorize"
-
-//device info
-#define DEFAULT_PRODUCT_ID               "f315fea0-50fc-11e4-b6fc-f23c9150064b"
-#define DEFAULT_PRODUCT_KEY              "41a71625-5519-11e4-ad4e-f23c9150064b"
-#define DEFAULT_USER_TOKEN               "00000000"
-#define DEFAULT_DEVICE_ID                "00000000"
-#define DEFAULT_DEVICE_KEY               "00000000"
-
 //MQTT client message recived handler prototype(can not modify).
 typedef void (*msgRecvHandler)(unsigned char* Msg, unsigned int len);
 

@@ -93,7 +93,7 @@ OSStatus sppUartCommandProcess(uint8_t *inBuf, int inLen, mico_Context_t * const
 
     
 /******************************************************************************* 
- * Mico cloud message transfer
+ * transparent transfer ( MCU <==> Cloud )
  ******************************************************************************/
 
 OSStatus sppProtocolInitForCloud(mico_Context_t * const inContext)
@@ -122,8 +122,9 @@ OSStatus sppUartCommandProcessForCloud(uint8_t *inBuf, int inLen)
 {
   spp_log_trace();
   OSStatus err = kNoErr;
-  
+
   /* upload data recived from uart to cloud */
+  spp_log("USART recved:[%d]\r\n%.*s", inLen, inLen, inBuf);
   err = MicoCloudServiceUpload(inBuf, inLen);
   
   return err;

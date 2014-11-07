@@ -37,7 +37,8 @@
 //in ms
 #define DEFAULT_MICO_MQTT_CMD_TIMEOUT         500
 //in byte
-#define DEFAULT_MICO_MQTT_READBUF_SIZE        100
+#define DEFAULT_MICO_MQTT_BUF_SIZE            (1024 + 45)
+#define DEFAULT_MICO_MQTT_READBUF_SIZE        128
 
 /*******************************************************************************
 * STRUCTURES

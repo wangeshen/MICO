@@ -41,9 +41,10 @@
 static mqtt_client_context_t mqttClientContext = {0};
 static mico_mutex_t mqtt_client_mutex = NULL;
 
-mico_thread_t mqtt_client_thread_handler;
+mico_thread_t mqtt_client_thread_handler = NULL;
 
 //low level mqtt client
+static Network n;
 static Client c;
 
 /*******************************************************************************
@@ -70,7 +71,7 @@ void MicoMQTTClientInit(mqtt_client_config_t init)
 
 OSStatus MicoMQTTClientStart(mico_Context_t* inContext)
 {
-  return mico_rtos_create_thread(&mqtt_client_thread_handler, MICO_APPLICATION_PRIORITY, "MQTT Client", _mqtt_client_thread, 0x500, (void*)inContext );
+  return mico_rtos_create_thread(&mqtt_client_thread_handler, MICO_APPLICATION_PRIORITY, "MQTT Client", _mqtt_client_thread, 0x800, (void*)inContext );
 }
 
 /* MQTT client callback function for message arrived
@@ -80,9 +81,9 @@ void messageArrived(MessageData* md)
 {
   //MQTT client msg handle
   MQTTMessage* message = md->message;
-  mico_mqtt_client_log("messageArrived: %.*s\t %.*s",
-                       md->topicName->lenstring.len, md->topicName->lenstring.data,
-                       (int)message->payloadlen, (char*)message->payload);
+//  mico_mqtt_client_log("messageArrived: %.*s\t %.*s",
+//                       md->topicName->lenstring.len, md->topicName->lenstring.data,
+//                       (int)message->payloadlen, (char*)message->payload);
   
   //call user registered handler
   mqttClientContext.client_config_info.hmsg((unsigned char*)message->payload, (unsigned int)message->payloadlen);
@@ -95,12 +96,12 @@ static void _mqtt_client_thread(void *arg)
   OSStatus err = kUnknownErr;
   
   int rc = -1;
-  unsigned char buf[100];
+  unsigned char buf[DEFAULT_MICO_MQTT_BUF_SIZE];
   unsigned char readbuf[DEFAULT_MICO_MQTT_READBUF_SIZE];
   
   MQTTPacket_connectData connectData = MQTTPacket_connectData_initializer; 
   MQTTPacket_connectData connectDataCopy = MQTTPacket_connectData_initializer; 
-  Network n;
+  //Network n;
   //Client c;
   
   mico_mqtt_client_log("_mqtt_client_thread start...");
@@ -119,7 +120,8 @@ MQTTClientRestart:
   mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_STARTED;
   mico_rtos_unlock_mutex( &mqtt_client_mutex );
 
-  while(1){
+  /* 1. socket connect */
+  while(1) {
     mico_mqtt_client_log("MQTT socket network connect...");
     rc = ConnectNetwork(&n, mqttClientContext.client_config_info.host, mqttClientContext.client_config_info.port);
     if (rc >= 0)
@@ -130,8 +132,8 @@ MQTTClientRestart:
   }
   mico_mqtt_client_log("MQTT socket network connect OK!");
 
-  /* send mqtt client connect request */
-  MQTTClient(&c, &n, DEFAULT_MICO_MQTT_CMD_TIMEOUT, buf, 100, readbuf, DEFAULT_MICO_MQTT_READBUF_SIZE);
+  /* 2. send mqtt client connect request */
+  MQTTClient(&c, &n, DEFAULT_MICO_MQTT_CMD_TIMEOUT, buf, DEFAULT_MICO_MQTT_BUF_SIZE, readbuf, DEFAULT_MICO_MQTT_READBUF_SIZE);
 
   connectData.willFlag = 0;
   connectData.MQTTVersion = 3;
@@ -152,7 +154,7 @@ MQTTClientRestart:
   }
   mico_mqtt_client_log("MQTT client connect OK!");
   
-  /* subscribe request */
+  /* 3. subscribe request */
   //mico_mqtt_client_log("subscribing to %s", mqtt_client_config.subtopic);
   while(1) {
     //mico_mqtt_client_log("MQTT client subscribe [%s]", mqttClientContext.client_config_info.subtopic);
@@ -167,13 +169,12 @@ MQTTClientRestart:
   }
   mico_mqtt_client_log("MQTT client subscribed [%s] OK!", mqttClientContext.client_config_info.subtopic);
   
-  /* set running state */
+  /* 4. set running state */
   mico_rtos_lock_mutex( &mqtt_client_mutex );
   mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_CONNECTED;
   mico_rtos_unlock_mutex( &mqtt_client_mutex );
   
-  while (1)
-  { 
+  while (1) {
     if ( MQTT_CLIENT_STATUS_STOPPED == MicoMQTTClientState()){
       goto client_stop;
     }
@@ -189,17 +190,21 @@ MQTTClientRestart:
       mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_DISCONNECTED;
       mico_rtos_unlock_mutex( &mqtt_client_mutex );
       
-      mico_mqtt_client_log("MQTT client disconnected, reconnect after 3 seconds...");
+      mico_mqtt_client_log("MQTT client disconnected,reconnect after 3 seconds...");
       mico_thread_sleep(3);
       goto MQTTClientRestart;
+      //goto client_stop;
     }
   }
   
   /* stop */
 client_stop:
-  mico_mqtt_client_log("MQTT client stopped.");
   MQTTDisconnect(&c);
   n.disconnect(&n);
+  mico_rtos_lock_mutex( &mqtt_client_mutex );
+  mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_STOPPED;
+  mico_rtos_unlock_mutex( &mqtt_client_mutex );
+  mico_mqtt_client_log("MQTT client stopped.");
   err = kNoErr;
   goto exit;
   
@@ -240,11 +245,19 @@ OSStatus MicoMQTTClientPublish(const char* pubtopic, const unsigned char* msg, i
 OSStatus MicoMQTTClientStop(void)
 {
   OSStatus err = kNoErr;
-  
+    
   mico_rtos_lock_mutex( &mqtt_client_mutex );
-  mico_mqtt_client_log("mqtt client stop.");
   mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_STOPPED;
   mico_rtos_unlock_mutex( &mqtt_client_mutex );
+  
+  MQTTDisconnect(&c);
+  n.disconnect(&n);
+  mico_mqtt_client_log("MQTT client stopped.");
+
+  if (NULL != mqtt_client_thread_handler) {
+    mico_rtos_delete_thread(&mqtt_client_thread_handler);
+    mqtt_client_thread_handler = NULL;
+  }
   
   return err;
 }

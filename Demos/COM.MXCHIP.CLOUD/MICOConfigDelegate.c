@@ -334,7 +334,7 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
   require_noerr(err, exit);
 
     // device activate status
-    err = MICOAddSwitchCellToSector(sector, "activated", inContext->flashContentInRam.appConfig.isAcitivated, "RO");
+    err = MICOAddSwitchCellToSector(sector, "activated", inContext->flashContentInRam.appConfig.isActivated, "RO");
     require_noerr(err, exit);
     // user_token cell
     err = MICOAddStringCellToSector(sector, "user token", inContext->flashContentInRam.appConfig.user_token, "RW", NULL);

@@ -19,28 +19,22 @@
   ******************************************************************************
   */ 
 
-#include "MicoCloudService.h"
-//#include "RGB.h"
-
 #include "MICOAppDefine.h"
 #include "StringUtils.h"
-#include "SppProtocol.h"
-
+#include "HaProtocol.h"
+#include "MicoCloudService.h"
 
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
 #define app_log_trace() custom_log_trace("APP")
-
-volatile ring_buffer_t  rx_buffer;
-volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
 
 //user recived data handler
 void userAppMessageArrivedHandler(unsigned char *Msg, unsigned int len)
 {
   unsigned int msglen = len;
   //note: get data just for length=len is valid, because Msg is just a buf pionter.
-  app_log("userApp send to UART: [%d]=%.*s", len, len, Msg);
+  //app_log("userApp send to UART: [%d]=%.*s", len, len, Msg);
   
-  sppWlanCommandProcessForCloud(Msg, (int*)(&msglen), UART_FOR_APP);
+  haWlanCommandProcess(Msg, (int*)(&msglen));
 }
 
 /*
@@ -59,13 +53,13 @@ void _userApp_thread(void *arg)
     if(CLOUD_SERVICE_STATUS_CONNECTED == MicoCloudServiceState()) {
       app_log("_userApp_thread running: cloud service connected, upload data...");
       sprintf(freeMemStr, "freeMem=%16d", memInfo->free_memory);
-      //MicoCloudServiceUpload((unsigned char*)freeMemStr, strlen(freeMemStr));
+      MicoCloudServiceUpload((unsigned char*)freeMemStr, strlen(freeMemStr));
     }
     else {
       app_log("_userApp_thread running: cloud service not connected!");
     }
     
-    mico_thread_sleep(10);
+    mico_thread_sleep(5);
   }
 }
 
@@ -86,7 +80,7 @@ void appRestoreDefault_callback(mico_Context_t *inContext)
   sprintf(inContext->flashContentInRam.appConfig.remoteServerDomain, DEAFULT_REMOTE_SERVER);
   inContext->flashContentInRam.appConfig.remoteServerPort = DEFAULT_REMOTE_SERVER_PORT;
   
-  inContext->flashContentInRam.appConfig.isAcitivated = false;
+  inContext->flashContentInRam.appConfig.isActivated = false;
   sprintf(inContext->flashContentInRam.appConfig.cloudServerDomain, DEFAULT_CLOUD_SERVER);
   inContext->flashContentInRam.appConfig.cloudServerPort = DEFAULT_CLOUD_PORT;
   sprintf(inContext->flashContentInRam.appConfig.mqttServerDomain, DEFAULT_MQTT_SERVER); 
@@ -103,8 +97,7 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
 {
   app_log_trace();
   OSStatus err = kNoErr;
-  mico_uart_config_t uart_config;
-  //micoMemInfo_t *memInfo = NULL;
+//  micoMemInfo_t *memInfo = NULL;
   
   //cloud service config info
   cloud_service_config_t cloud_service_config = {
@@ -115,31 +108,18 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
     inContext->flashContentInRam.appConfig.mqttServerDomain, inContext->flashContentInRam.appConfig.mqttServerPort, 
     userAppMessageArrivedHandler, inContext->flashContentInRam.appConfig.mqttkeepAliveInterval
   };
-  app_log("MAC=%s", (char*)inContext->micoStatus.mac);
   
   require_action(inContext, exit, err = kParamErr);
-  
-  sppProtocolInitForCloud( inContext );
+  app_log("MAC=%s", (char*)inContext->micoStatus.mac);
 
   /*Bonjour for service searching*/
   if(inContext->flashContentInRam.micoSystemConfig.bonjourEnable == true){
     MICOStartBonjourService( Station, inContext );
   }
   
-  /*UART receive thread*/
-  uart_config.baud_rate    = inContext->flashContentInRam.appConfig.USART_BaudRate;
-  uart_config.data_width   = DATA_WIDTH_8BIT;
-  uart_config.parity       = NO_PARITY;
-  uart_config.stop_bits    = STOP_BITS_1;
-  uart_config.flow_control = FLOW_CONTROL_DISABLED;
-  if(inContext->flashContentInRam.micoSystemConfig.mcuPowerSaveEnable == true)
-    uart_config.flags = UART_WAKEUP_ENABLE;
-  else
-    uart_config.flags = UART_WAKEUP_DISABLE;
-  ring_buffer_init  ( (ring_buffer_t *)&rx_buffer, (uint8_t *)rx_data, UART_BUFFER_LENGTH );
-  MicoUartInitialize( UART_FOR_APP, &uart_config, (ring_buffer_t *)&rx_buffer );
-  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART Recv", uartRecv_thread, 0x2A0, (void*)inContext );
-  require_noerr_action( err, exit, app_log("ERROR: Unable to start the uart recv thread.") );
+  haProtocolInit( inContext );
+  
+  app_log("Mico Cloud Service library version: %s", MicoCloudServiceVersion());
   
 //  memInfo = mico_memory_info();
 //  app_log("system free mem[no cloud service]=%d", memInfo->free_memory);
@@ -148,11 +128,9 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
   MicoCloudServiceInit(cloud_service_config);
   err = MicoCloudServiceStart(inContext);
   require_noerr_action( err, exit, app_log("ERROR: Unable to start cloud service thread.") );
-
+  
 //  memInfo = mico_memory_info();
-//  app_log("system free mem[cloud service stated]=%d", memInfo->free_memory);
-
-  app_log("Mico Cloud Service library version: %s", MicoCloudServiceVersion());
+//  app_log("system free mem[cloud service started]=%d", memInfo->free_memory);
   
   /*user app work thread*/
 //  err = userAppStart(inContext);

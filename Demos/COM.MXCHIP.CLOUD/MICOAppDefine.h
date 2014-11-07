@@ -40,8 +40,8 @@
 #define LOCAL_PORT                          8080
 #define DEAFULT_REMOTE_SERVER               "192.168.2.254"
 #define DEFAULT_REMOTE_SERVER_PORT          8080
-#define UART_RECV_TIMEOUT                   400
-#define UART_ONE_PACKAGE_LENGTH             512
+#define UART_RECV_TIMEOUT                   500
+#define UART_ONE_PACKAGE_LENGTH             1024
 #define wlanBufferLen                       1024
 #define UART_BUFFER_LENGTH                  2048
 #define UART_FOR_APP                        MICO_UART_1
@@ -51,6 +51,13 @@
 #define RECVED_UART_DATA_LOOPBACK_PORT      1003
 
 #define BONJOUR_SERVICE                     "_easylink._tcp.local."
+
+//device info
+#define DEFAULT_PRODUCT_ID               "f315fea0-50fc-11e4-b6fc-f23c9150064b"
+#define DEFAULT_PRODUCT_KEY              "41a71625-5519-11e4-ad4e-f23c9150064b"
+#define DEFAULT_USER_TOKEN               "00000000"
+#define DEFAULT_DEVICE_ID                "00000000"
+#define DEFAULT_DEVICE_KEY               "00000000"
 
 /*Application's configuration stores in flash*/
 typedef struct
@@ -77,7 +84,7 @@ typedef struct
   char product_id[MAX_PRODUCT_ID_STRLEN];
   char product_key[MAX_PRODUCT_KEY_STRLEN];
   
-  bool isAcitivated;  //device activate flag
+  bool isActivated;  //device activate flag
   char user_token[MAX_USER_TOKEN_STRLEN];  //
   char device_id[MAX_DEVICE_ID_STRLEN];  // used to mqtt client
   char master_device_key[MAX_DEVICE_KEY_STRLEN];

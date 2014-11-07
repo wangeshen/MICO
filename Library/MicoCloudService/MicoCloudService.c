@@ -46,21 +46,31 @@
 //#endif
 
 /*******************************************************************************
- * VARIABLES
+ * DEFINES
  ******************************************************************************/
 
-// cloud service info
-static cloud_servcie_context_t cloudServiceContext = {0};
-static mico_mutex_t cloud_service_context_mutex = NULL;
+//request type
+#define DEVICE_ACTIVATE                  0
+#define DEVICE_AUTHORIZE                 1
+   
+#define DEFAULT_DEVICE_ACTIVATE_URL      "/v1/device/activate"
+#define DEFAULT_DEVICE_AUTHORIZE_URL     "/v1/device/authorize"
+
+/*******************************************************************************
+ * VARIABLES
+ ******************************************************************************/
 
 //wifi connect status
 static volatile bool _wifiConnected = false;
 static mico_semaphore_t  _wifiConnected_sem = NULL;
 
+// cloud service info
+static cloud_servcie_context_t cloudServiceContext = {0};
+static mico_mutex_t cloud_service_context_mutex = NULL;
+
 //mqtt client info
 static mqtt_client_config_t mqtt_client_config_info = {0};
-
-static mico_thread_t cloud_service_thread_handler;
+static mico_thread_t cloud_service_thread_handler = NULL;
 
 /*******************************************************************************
  * STATIC FUNCTIONS
@@ -68,14 +78,13 @@ static mico_thread_t cloud_service_thread_handler;
 
 static void _cloud_service_thread(void *arg);
 
-static OSStatus _device_activate_authorize(int request_type, char *host, char *request_url, char *product_id, char *bssid, char *device_token, char *user_token, char out_device_id[MAX_DEVICE_ID_STRLEN], char out_master_device_key[MAX_DEVICE_KEY_STRLEN]);
-//static OSStatus _device_authorize( char *product_id,  char *bssid, char *device_token, char *user_token, char out_device_id[MAX_DEVICE_ID_STRLEN]);
+static OSStatus device_activate_authorize(int request_type, char *host, char *request_url, char *product_id, char *bssid, char *device_token, char *user_token, char out_device_id[MAX_DEVICE_ID_STRLEN], char out_master_device_key[MAX_DEVICE_KEY_STRLEN]);
 
 static OSStatus _parseResponseMessage(int fd, HTTPHeader_t* inHeader, char out_device_id[MAX_DEVICE_ID_STRLEN], char out_master_device_key[MAX_DEVICE_KEY_STRLEN]);
 static OSStatus _configIncommingJsonMessage( const char *input, unsigned int len, char out_device_id[MAX_DEVICE_ID_STRLEN], char out_master_device_key[MAX_DEVICE_KEY_STRLEN]);
 //static OSStatus _getHttpChunkedJsonData( const char *input, char **outHttpJsonData, int *outDataLen);
 
-static OSStatus _cal_device_token(char* bssid, char* product_key, char out_device_token[32]);
+static OSStatus calculate_device_token(char* bssid, char* product_key, char out_device_token[32]);
 //static OSStatus _cal_user_token(const char* bssid, const char* login_id, const char * login_passwd, unsigned char out_user_token[16]);
 
 /*******************************************************************************
@@ -126,10 +135,23 @@ OSStatus MicoCloudServiceStop(void)
 {
   OSStatus err = kNoErr;
   
+  MicoMQTTClientStop();
+  
+  if (NULL != mqtt_client_thread_handler)
+    mico_rtos_thread_join(&mqtt_client_thread_handler);
+
+  MICORemoveNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)cloudNotify_WifiStatusHandler );
+  if(_wifiConnected_sem) mico_rtos_deinit_semaphore(&_wifiConnected_sem);
+  
   mico_rtos_lock_mutex( &cloud_service_context_mutex );
-  mico_cloud_service_log("cloud service stop.");
   cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_STOPPED;
   mico_rtos_unlock_mutex( &cloud_service_context_mutex );
+    
+  mico_cloud_service_log("cloud service stop.");
+  if (NULL != cloud_service_thread_handler) {
+    mico_rtos_delete_thread(&cloud_service_thread_handler);
+    cloud_service_thread_handler = NULL;
+  }
   
   return err;
 }
@@ -155,6 +177,10 @@ OSStatus MicoCloudServiceUpload(const unsigned char* msg, unsigned int msglen)
   if (NULL == msg || 0 == msglen)
     return kParamErr;
   
+  if (CLOUD_SERVICE_STATUS_CONNECTED != MicoCloudServiceState()){
+    return kStateErr;
+  }
+  
   ret = MicoMQTTClientPublish(pubtopic, msg, msglen);
   return ret;
 }
@@ -164,9 +190,10 @@ void _cloud_service_thread(void *arg)
 {
   mico_Context_t* inContext = (mico_Context_t*)arg;
   OSStatus err = kUnknownErr;
+  //  micoMemInfo_t *memInfo = NULL;
   
   /* thread local var */
-  bool isAcitivated = false;
+  bool isActivated = false;
   bool isAuthorized = false;
 
   char product_id[MAX_PRODUCT_ID_STRLEN] = {0};
@@ -189,7 +216,7 @@ void _cloud_service_thread(void *arg)
   
   /* get device info in flash */
   mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
-  isAcitivated = inContext->flashContentInRam.appConfig.isAcitivated;
+  isActivated = inContext->flashContentInRam.appConfig.isActivated;
   strncpy(product_id, inContext->flashContentInRam.appConfig.product_id, MAX_PRODUCT_ID_STRLEN);
   strncpy(product_key, inContext->flashContentInRam.appConfig.product_key, MAX_PRODUCT_KEY_STRLEN);
   strncpy(user_token, inContext->flashContentInRam.appConfig.user_token, MAX_USER_TOKEN_STRLEN);
@@ -212,13 +239,13 @@ ReStartService:
    */
   //strncpy(device_token, "e52be374c47c391414ab68c971954d13", strlen("e52be374c47c391414ab68c971954d13"));
 ReActivate:
-  if (!isAcitivated) {
+  if (!isActivated) {
     //cal device_token(MD5)
-    err = _cal_device_token(inContext->micoStatus.mac, product_key, device_token);
+    err = calculate_device_token(inContext->micoStatus.mac, product_key, device_token);
     require_noerr( err, ReActivate );
     mico_cloud_service_log("calculate device_token[%d]=%s", strlen(device_token), device_token);
     //activate
-    err = _device_activate_authorize(DEVICE_ACTIVATE, 
+    err = device_activate_authorize(DEVICE_ACTIVATE, 
                                      cloudServiceContext.service_config_info.host, 
                                      (char *)DEFAULT_DEVICE_ACTIVATE_URL,
                                      product_id, inContext->micoStatus.mac,
@@ -226,10 +253,10 @@ ReActivate:
                                      device_id, master_device_key);
     require_noerr( err, ReActivate );
     
-    isAcitivated = true;
+    isActivated = true;
     //write back to flash
     mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
-    inContext->flashContentInRam.appConfig.isAcitivated = isAcitivated;
+    inContext->flashContentInRam.appConfig.isActivated = isActivated;
     strncpy(inContext->flashContentInRam.appConfig.device_id, device_id, MAX_DEVICE_ID_STRLEN);
     strncpy(inContext->flashContentInRam.appConfig.master_device_key, master_device_key, MAX_DEVICE_KEY_STRLEN);
     mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
@@ -238,7 +265,7 @@ ReActivate:
   else
   {
     mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
-    isAcitivated = inContext->flashContentInRam.appConfig.isAcitivated;
+    isActivated = inContext->flashContentInRam.appConfig.isActivated;
     strncpy(device_id, inContext->flashContentInRam.appConfig.device_id, MAX_DEVICE_ID_STRLEN);
     strncpy(master_device_key, inContext->flashContentInRam.appConfig.master_device_key, MAX_DEVICE_KEY_STRLEN);
     mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
@@ -247,10 +274,10 @@ ReActivate:
 ReAuthorize:
   if (!isAuthorized){
     //cal device_token(MD5)
-    err = _cal_device_token(inContext->micoStatus.mac, product_key, device_token);
+    err = calculate_device_token(inContext->micoStatus.mac, product_key, device_token);
     require_noerr( err, ReActivate );
     //use user_token in flash to authorize
-    err = _device_activate_authorize(DEVICE_AUTHORIZE, cloudServiceContext.service_config_info.host, (char *)DEFAULT_DEVICE_AUTHORIZE_URL,
+    err = device_activate_authorize(DEVICE_AUTHORIZE, cloudServiceContext.service_config_info.host, (char *)DEFAULT_DEVICE_AUTHORIZE_URL,
                                      product_id, inContext->micoStatus.mac,
                                      device_token, user_token,
                                      device_id, master_device_key);
@@ -306,8 +333,7 @@ ReStartMQTTClient:
   err = MicoMQTTClientStart(inContext);
   require_noerr( err, exit );
   
-  //3. cloud service started callback, notify user.
-  //wait for MQTT client start up.
+  /* 3. wait for MQTT client start up. */
   while(1){
     if(MQTT_CLIENT_STATUS_CONNECTED == MicoMQTTClientState())
       break;
@@ -320,10 +346,14 @@ ReStartMQTTClient:
   cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_CONNECTED;
   mico_rtos_unlock_mutex( &cloud_service_context_mutex );
   
+  /* 4. cloud service started callback, notify user. */
   //CloudServiceStartedCallback(NOTIFY_CLOUD_SERVICE_UP);
   
   /* service loop */
-  while(1) {  
+  while(1) {
+//    memInfo = mico_memory_info();
+//    mico_cloud_service_log("system free mem[cloud service]=%d", memInfo->free_memory);
+  
     if(CLOUD_SERVICE_STATUS_STOPPED == MicoCloudServiceState()){
       goto cloud_service_stop;
     }
@@ -347,7 +377,7 @@ ReStartMQTTClient:
         mico_rtos_unlock_mutex( &cloud_service_context_mutex );
         break;
       case MQTT_CLIENT_STATUS_CONNECTED:
-        mico_cloud_service_log("cloud service runing...");
+        //mico_cloud_service_log("cloud service runing...");
         mico_rtos_lock_mutex( &cloud_service_context_mutex );
         cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_CONNECTED;
         //CloudServiceStartedCallback(NOTIFY_CLOUD_SERVICE_DOWN);
@@ -365,10 +395,13 @@ ReStartMQTTClient:
       }
     }
     else {
-      mico_cloud_service_log("wifi disconnect! try restarting after 3 seconds...");
+      mico_cloud_service_log("wifi disconnect! restart cloud service after 5 seconds...");
+      mico_rtos_lock_mutex( &cloud_service_context_mutex );
+      cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_DISCONNECTED;
+      mico_rtos_unlock_mutex( &cloud_service_context_mutex );
       MicoMQTTClientStop();
       //CloudServiceStartedCallback(NOTIFY_CLOUD_SERVICE_DOWN);
-      mico_thread_sleep(3);
+      mico_thread_sleep(5);
       goto ReStartService;
     }
     
@@ -378,7 +411,8 @@ ReStartMQTTClient:
 cloud_service_stop:
   //CloudServiceStartedCallback(NOTIFY_CLOUD_SERVICE_DOWN);
   MicoMQTTClientStop();
-  mico_rtos_thread_join(&mqtt_client_thread_handler);
+  if (NULL != mqtt_client_thread_handler)
+    mico_rtos_thread_join(&mqtt_client_thread_handler);
   goto exit;
   
 exit:
@@ -386,6 +420,7 @@ exit:
   MICORemoveNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)cloudNotify_WifiStatusHandler );
   if(_wifiConnected_sem) mico_rtos_deinit_semaphore(&_wifiConnected_sem);
   mico_rtos_delete_thread(NULL);
+  mqtt_client_thread_handler = NULL;
   return;
 }
 
@@ -395,10 +430,11 @@ OSStatus MicoCloudServiceStart(mico_Context_t* inContext)
   return mico_rtos_create_thread(&cloud_service_thread_handler, MICO_APPLICATION_PRIORITY, "Cloud service", _cloud_service_thread, 0x800, inContext );
 }
 
-//http host: "api.easylink.io"
-//activate_url= "/v1/device/activate"
-//authorize_url = "/v1/device/authorize"
-static OSStatus _device_activate_authorize(int request_type, char *host, char *request_url, char *product_id, char *bssid, char *device_token, char *user_token, char out_device_id[MAX_DEVICE_ID_STRLEN], char out_master_device_key[MAX_DEVICE_KEY_STRLEN])
+/* http host: "api.easylink.io"
+ * activate_url= "/v1/device/activate"
+ * authorize_url = "/v1/device/authorize"
+ */
+static OSStatus device_activate_authorize(int request_type, char *host, char *request_url, char *product_id, char *bssid, char *device_token, char *user_token, char out_device_id[MAX_DEVICE_ID_STRLEN], char out_master_device_key[MAX_DEVICE_KEY_STRLEN])
 {
   mico_cloud_service_log("device activated[0] or authorize[1] start: request_type=[%d].", request_type);
   OSStatus err = kUnknownErr;
@@ -504,13 +540,13 @@ static OSStatus _device_activate_authorize(int request_type, char *host, char *r
         {
         case kNoErr:
           mico_cloud_service_log("read httpheader OK!");
-          mico_cloud_service_log("buf=%s", httpHeader->buf);
+          mico_cloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
           
           // Read the rest of the HTTP body if necessary
           err = SocketReadHTTPBody( remoteTcpClient_fd, httpHeader );
           require_noerr(err, ReConnWithDelay);
           mico_cloud_service_log("read httpBody OK!");
-          mico_cloud_service_log("buf=%s", httpHeader->buf);
+          mico_cloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
           
           // parse recived extra data to get devicd_id && master_device_key.
           err = _parseResponseMessage( remoteTcpClient_fd, httpHeader, out_device_id, out_master_device_key );
@@ -584,19 +620,6 @@ exit:
   return err;
 }
 
-//static OSStatus _device_authorize(char *product_id, char *bssid, char *device_token, char *user_token, char out_device_id[MAX_DEVICE_ID_STRLEN])
-//{
-//  OSStatus err = kUnknowErr;
-//  if (isAuthorized)
-//    return kNoErr;
-//    
-//  mico_cloud_service_log("device authorized start...");
-//  // send http request for user authorize
-//  isAuthorized = true;
-//  mico_cloud_service_log("device authorized done.");
-//
-//  return kNoErr;
-//}
 
 static OSStatus _parseResponseMessage(int fd, HTTPHeader_t* inHeader, char out_device_id[MAX_DEVICE_ID_STRLEN], char out_master_device_key[MAX_DEVICE_KEY_STRLEN])
 {
@@ -633,42 +656,6 @@ static OSStatus _parseResponseMessage(int fd, HTTPHeader_t* inHeader, char out_d
     return err;
 }
 
-//static OSStatus _getHttpChunkedJsonData( const char *input, char **outHttpJsonData, int *outDataLen)
-//{
-//  int nBytes;
-//  char* pStart = (char*)input;    // input中存放待解码的数据
-//  char* pTemp;
-//  char strlength[10];   //一个chunk块的长度
-//  int length = 0;
-//  
-//chunk:
-//  pTemp = strstr(pStart,"\r\n");
-//  if(NULL == pTemp){
-//    return kParamErr;
-//  }
-//  length = pTemp - pStart;
-//  memset(strlength, 0, sizeof(strlength));
-//  strncpy(strlength, pStart, length);
-//  pStart = pTemp + 2;  //跳过\r\n
-//  nBytes = strtol(strlength, NULL, 16); //得到一个块的长度，并转化为十进制
-//  *outDataLen += nBytes;
-//  
-//  if(nBytes == 0)//如果长度为0表明为最后一个chunk
-//  {   
-//    return kNoErr;         
-//  }
-//  if (NULL != *outHttpJsonData){
-//    *outHttpJsonData = (char *)realloc(*outHttpJsonData, nBytes);
-//  }
-//  else { 
-//    *outHttpJsonData = (char *)malloc(nBytes);  //don't forget to free *outHttpJsonData
-//    memset(*outHttpJsonData, 0, nBytes);
-//  }
-//  strncat(*outHttpJsonData, pStart, nBytes);  //将nBytes长度的数据追加到返回字符串末尾
-//  //mico_cloud_service_log("_getHttpChunkedJsonData[%d]=%s", nBytes, *outHttpJsonData);
-//  pStart = pStart + nBytes + 2;  //跳过一个块的数据以及数据之后两个字节的结束符        
-//  goto chunk;  //goto到chunk继续处理 
-//}
 
 static OSStatus _configIncommingJsonMessage( const char *input , unsigned int len, char out_device_id[MAX_DEVICE_ID_STRLEN], char out_master_device_key[MAX_DEVICE_KEY_STRLEN])
 {
@@ -714,7 +701,7 @@ exit:
  * return:
  *     return kNoErr if success
  */
-static OSStatus _cal_device_token(char *bssid, char *product_key, char out_device_token[32])
+static OSStatus calculate_device_token(char *bssid, char *product_key, char out_device_token[32])
 {
   md5_context md5;
   unsigned char *md5_input = NULL;
@@ -766,7 +753,8 @@ static OSStatus _cal_device_token(char *bssid, char *product_key, char out_devic
   
   return kNoErr;
 }
-//
+
+
 ///* brief: calculate user_token = MD5(bssid + login_id + login_passwd)
 // * input:
 // *    bssid + login_id + login_passwd
@@ -779,6 +767,44 @@ static OSStatus _cal_device_token(char *bssid, char *product_key, char out_devic
 //{
 //   OSStatus err = kNoErr;
 //   return err;
+//}
+
+
+//static OSStatus _getHttpChunkedJsonData( const char *input, char **outHttpJsonData, int *outDataLen)
+//{
+//  int nBytes;
+//  char* pStart = (char*)input;    // input中存放待解码的数据
+//  char* pTemp;
+//  char strlength[10];   //一个chunk块的长度
+//  int length = 0;
+//  
+//chunk:
+//  pTemp = strstr(pStart,"\r\n");
+//  if(NULL == pTemp){
+//    return kParamErr;
+//  }
+//  length = pTemp - pStart;
+//  memset(strlength, 0, sizeof(strlength));
+//  strncpy(strlength, pStart, length);
+//  pStart = pTemp + 2;  //跳过\r\n
+//  nBytes = strtol(strlength, NULL, 16); //得到一个块的长度，并转化为十进制
+//  *outDataLen += nBytes;
+//  
+//  if(nBytes == 0)//如果长度为0表明为最后一个chunk
+//  {   
+//    return kNoErr;         
+//  }
+//  if (NULL != *outHttpJsonData){
+//    *outHttpJsonData = (char *)realloc(*outHttpJsonData, nBytes);
+//  }
+//  else { 
+//    *outHttpJsonData = (char *)malloc(nBytes);  //don't forget to free *outHttpJsonData
+//    memset(*outHttpJsonData, 0, nBytes);
+//  }
+//  strncat(*outHttpJsonData, pStart, nBytes);  //将nBytes长度的数据追加到返回字符串末尾
+//  //mico_cloud_service_log("_getHttpChunkedJsonData[%d]=%s", nBytes, *outHttpJsonData);
+//  pStart = pStart + nBytes + 2;  //跳过一个块的数据以及数据之后两个字节的结束符        
+//  goto chunk;  //goto到chunk继续处理 
 //}
 
 

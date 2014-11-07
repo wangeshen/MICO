@@ -257,6 +257,9 @@
   <group>
     <name>Application</name>
     <file>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\HaProtocol.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MICOAppDefine.h</name>
     </file>
     <file>
@@ -270,9 +273,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MicoDefaults.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\SppProtocol.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\UartRecv.c</name>
@@ -461,6 +461,12 @@
       </group>
       <file>
         <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceDef.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceVersion.c</name>
