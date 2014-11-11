@@ -1,6 +1,6 @@
 /**
 ******************************************************************************
-* @file    CloudUtils.h 
+* @file    MicoCloudService.h 
 * @author  Eshen Wang
 * @version V1.0.0
 * @date    15-Oct-2014
@@ -24,9 +24,7 @@
 #ifndef __MICO_CLOUD_SERVICE_H_
 #define __MICO_CLOUD_SERVICE_H_
 
-//#include "Common.h"
-#include "MICODefine.h"
-
+#include "Common.h"
 #include "MicoCloudServiceDef.h"
 
 /*******************************************************************************
@@ -68,12 +66,12 @@ typedef struct _cloud_service_info_t {
 
 typedef struct _cloud_service_status_t {
   cloudServiceState state;
-} cloud_service_status_t;
-
-typedef struct _device_status_t {
   bool isActivated;
   bool isAuthorized;
-} device_status_t;
+  char device_id[MAX_DEVICE_ID_STRLEN];
+  char master_device_key[MAX_DEVICE_KEY_STRLEN];
+} cloud_service_status_t;
+
 
 typedef struct _cloud_service_context_t {
   /*cloud service config info*/
@@ -81,9 +79,6 @@ typedef struct _cloud_service_context_t {
   
   /*cloud service running status*/
   cloud_service_status_t service_status;
-  
-  /*device status*/
-  device_status_t device_status;
 } cloud_servcie_context_t;
 
 /*******************************************************************************
@@ -91,12 +86,12 @@ typedef struct _cloud_service_context_t {
  ******************************************************************************/
 
 void MicoCloudServiceInit(cloud_service_config_t init);
-OSStatus MicoCloudServiceStart(mico_Context_t *inContext);
-OSStatus MicoCloudServiceUpload(const unsigned char *msg, unsigned int msglen);
-cloudServiceState MicoCloudServiceState(void);
+OSStatus MicoCloudServiceStart(void);
 OSStatus MicoCloudServiceStop(void);
 
-char* MicoCloudServiceVersion(void);
+OSStatus MicoCloudServiceUpload(const unsigned char *msg, unsigned int msglen);
+cloudServiceState MicoCloudServiceState(void);
 
+int MicoCloudServiceVersion(void);
 
 #endif

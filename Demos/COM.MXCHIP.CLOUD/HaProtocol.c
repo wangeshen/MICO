@@ -12,6 +12,7 @@
 #define ha_log(M, ...) custom_log("HA Command", M, ##__VA_ARGS__)
 #define ha_log_trace() custom_log_trace("HA Command")
 
+static cloud_service_status_t cloudStatusInfo;
 static uint32_t network_state = 0;
 static mico_mutex_t _mutex;
 
@@ -19,10 +20,35 @@ static OSStatus check_sum(void *inData, uint32_t inLen);
 static uint16_t _calc_sum(void *data, uint32_t len);
 static mico_thread_t    _report_status_thread_handler = NULL;
 static mico_semaphore_t _report_status_sem = NULL;
-static void _report_status_thread(void *inContext);
+static void _report_status_thread(void *arg);
 
 volatile ring_buffer_t  rx_buffer;
 volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
+
+extern void uartRecv_thread(void *inContext);
+
+
+//user recived data handler
+void userAppMessageArrivedHandler(unsigned char *Msg, unsigned int len)
+{
+  unsigned int msglen = len;
+  //note: get data just for length=len is valid, because Msg is just a buf pionter.
+  //app_log("userApp send to UART: [%d]=%.*s", len, len, Msg);
+  
+  haWlanCommandProcess(Msg, (int*)(&msglen));
+}
+
+
+void CloudServiceStartedCallback(cloud_service_status_t serviceStateInfo)
+{
+  cloudStatusInfo = serviceStateInfo;
+  if (CLOUD_SERVICE_STATUS_CONNECTED == serviceStateInfo.state){
+    set_network_state(CLOUD_CONNECT, 1);
+  }
+  else
+    set_network_state(CLOUD_CONNECT, 0);
+}
+  
 
 void haNotify_WifiStatusHandler(int event, mico_Context_t * const inContext)
 {
@@ -96,9 +122,9 @@ void set_network_state(int state, int on)
       network_state &= ~CLOUD_CONNECT;
   }
   
-  //if ((state == STA_CONNECT) || (state == CLOUD_CONNECT)){
+  if ((state == STA_CONNECT) || (state == CLOUD_CONNECT)){
     mico_rtos_set_semaphore(&_report_status_sem);
-  //}  
+  }
   mico_rtos_unlock_mutex(&_mutex);
 }
 
@@ -108,6 +134,24 @@ OSStatus haProtocolInit(mico_Context_t * const inContext)
   ha_log_trace();
   OSStatus err = kUnknownErr;
   mico_uart_config_t uart_config;
+  int cloudServiceLibVersion = 0;
+
+  //cloud service config info
+  cloud_service_config_t cloud_service_config = {
+    inContext->flashContentInRam.appConfig.cloudServerDomain,
+    inContext->flashContentInRam.appConfig.cloudServerPort,
+    inContext->micoStatus.mac,
+    inContext->flashContentInRam.appConfig.product_id,
+    inContext->flashContentInRam.appConfig.product_key,
+    inContext->flashContentInRam.appConfig.user_token,
+    inContext->flashContentInRam.appConfig.mqttServerDomain,
+    inContext->flashContentInRam.appConfig.mqttServerPort,
+    userAppMessageArrivedHandler, inContext->flashContentInRam.appConfig.mqttkeepAliveInterval
+  };
+  
+  /*============================================================================
+   * init MCU interface
+   *==========================================================================*/
 
   mico_rtos_init_mutex(&_mutex);
   mico_rtos_init_semaphore(&_report_status_sem, 1);
@@ -135,17 +179,42 @@ OSStatus haProtocolInit(mico_Context_t * const inContext)
   /* Regisist notifications */
   err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)haNotify_WifiStatusHandler );
   require_noerr( err, exit ); 
+  
+  /*============================================================================
+   * init cloud interface
+   *==========================================================================*/
+
+  cloudServiceLibVersion = MicoCloudServiceVersion();
+  ha_log("Mico Cloud Service library version: %d.%d.%d", (cloudServiceLibVersion >> 16)&0xFF, (cloudServiceLibVersion >>8)&0xFF, cloudServiceLibVersion&0xFF);
+  
+  /*start cloud service*/
+  MicoCloudServiceInit(cloud_service_config);
+  err = MicoCloudServiceStart();
+  require_noerr_action( err, exit, ha_log("ERROR: Unable to start cloud service thread.") );
+  
 exit:
   return err;
 }
 
 
-void _report_status_thread(void *inContext)
+void _report_status_thread(void *arg)
 {
   mxchip_state_t cmd;
+  mico_Context_t *inContext = (mico_Context_t*)arg;
 
   while(1){
     mico_rtos_get_semaphore(&_report_status_sem, MICO_WAIT_FOREVER);
+    //write cloud info back to flash
+    ha_log("report thread: write cloud info back to flash.");
+    mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
+    inContext->appStatus.isCloudServiceConnected = is_network_state(CLOUD_CONNECT);
+    inContext->flashContentInRam.appConfig.isActivated = cloudStatusInfo.isActivated;
+    strncpy(inContext->flashContentInRam.appConfig.device_id, cloudStatusInfo.device_id, MAX_DEVICE_ID_STRLEN);
+    strncpy(inContext->flashContentInRam.appConfig.master_device_key, cloudStatusInfo.master_device_key, MAX_DEVICE_KEY_STRLEN);
+    mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+    MICOUpdateConfiguration(inContext);
+    //report to USART device
+    ha_log("report thread: report status to USART device.");
     _get_status(&cmd, inContext);
     MicoUartSend(UART_FOR_APP,(uint8_t *)&cmd, sizeof(mxchip_state_t));
   }
@@ -224,12 +293,11 @@ OSStatus haUartCommandProcess(uint8_t *inBuf, int inBufLen, mico_Context_t * con
       mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
       break;
     case 3:
-      //inContext->micoStatus.sys_state = eState_Wlan_Powerdown;
-      //require(inContext->micoStatus.sys_state_change_sem, exit);
-      //mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
+      inContext->micoStatus.sys_state = eState_Wlan_Powerdown;
+      require(inContext->micoStatus.sys_state_change_sem, exit);
+      mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
       break;
     case 4:
-      //MicoCloudServiceStop();
       break;
     case 5: 
       //micoWlanStartEasyLink(120);
@@ -240,6 +308,14 @@ OSStatus haUartCommandProcess(uint8_t *inBuf, int inBufLen, mico_Context_t * con
       inContext->micoStatus.sys_state = eState_Software_Reset;
       require(inContext->micoStatus.sys_state_change_sem, exit);
       mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
+      break;
+    case 6:
+      err = MicoCloudServiceStart();
+      require_noerr_action( err, exit, ha_log("ERROR: Unable to start cloud service thread, err=%d", err) );
+      break;
+    case 7:
+      err = MicoCloudServiceStop();
+      require_noerr_action( err, exit, ha_log("ERROR: Unable to stop cloud service thread, err=%d", err) );
       break;
     default:
       goto data_transfer;

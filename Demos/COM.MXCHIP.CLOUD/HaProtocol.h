@@ -1,4 +1,4 @@
-#include "Common.h"
+
 #include "MICODefine.h"
 
 #define CONTROL_FLAG0        0xBB
@@ -38,11 +38,11 @@ typedef struct _mxchip_cmd_head {
 
 #define  HA_CMD_HEAD_SIZE 8
 
-typedef struct _upgrade_t {
-  uint8_t md5[16];
-  uint32_t len;
-  uint8_t data[1];
-}ota_upgrate_t;
+//typedef struct _upgrade_t {
+//  uint8_t md5[16];
+//  uint32_t len;
+//  uint8_t data[1];
+//}ota_upgrate_t;
 
 typedef struct _current_state_ {
   uint32_t uap_state;
@@ -69,8 +69,7 @@ OSStatus haProtocolInit(mico_Context_t * const inContext);
 int is_network_state(int state);
 OSStatus haWlanCommandProcess(unsigned char *inBuf, int *inBufLen);
 OSStatus haUartCommandProcess(uint8_t *inBuf, int inLen, mico_Context_t * const inContext);
-OSStatus check_sum(void *inData, uint32_t inLen);  
-
+OSStatus check_sum(void *inData, uint32_t inLen);
 
 void set_network_state(int state, int on);
 

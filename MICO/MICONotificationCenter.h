@@ -61,7 +61,7 @@ typedef enum{
   mico_notify_WIFI_Fatal_ERROR,             //void (*function)(mico_Context_t * const inContext);
   mico_notify_Stack_Overflow_ERROR,         //void (*function)(char *taskname, mico_Context_t * const inContext);
   
-  /* User defined notifications */_
+  /* User defined notifications */
 
 } mico_notify_types_t;
 

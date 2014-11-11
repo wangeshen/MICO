@@ -84,10 +84,10 @@ typedef struct
   char product_id[MAX_PRODUCT_ID_STRLEN];
   char product_key[MAX_PRODUCT_KEY_STRLEN];
   
-  bool isActivated;  //device activate flag
-  char user_token[MAX_USER_TOKEN_STRLEN];  //
-  char device_id[MAX_DEVICE_ID_STRLEN];  // used to mqtt client
-  char master_device_key[MAX_DEVICE_KEY_STRLEN];
+  bool isActivated;  // device activate flag
+  char user_token[MAX_USER_TOKEN_STRLEN];  // set by user app
+  char device_id[MAX_DEVICE_ID_STRLEN];  // used for mqtt client
+  char master_device_key[MAX_DEVICE_KEY_STRLEN];  // used for mqtt client
 } application_config_t;
 
 /*Running status*/
@@ -96,12 +96,9 @@ typedef struct _current_app_status_t {
   uint32_t          loopBack_PortList[MAX_Local_Client_Num];
   /*Remote TCP client connecte*/
   bool              isRemoteConnected;
+  /* cloud service connect */
+  bool              isCloudServiceConnected;
 } current_app_status_t;
-
-
-void localTcpServer_thread(void *inContext);
-void uartRecv_thread(void *inContext);
-
 
 
 #endif

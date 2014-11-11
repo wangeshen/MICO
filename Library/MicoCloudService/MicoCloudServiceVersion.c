@@ -37,16 +37,20 @@
 /*******************************************************************************
  * DEFINES
  ******************************************************************************/
-#define MICO_CLOUD_SERVCIE_VERSION        "0.1.0"
+#define MICO_CLOUD_SERVCIE_VERSION_MAIN        0x00
+#define MICO_CLOUD_SERVCIE_VERSION_SUB         0x01
+#define MICO_CLOUD_SERVCIE_VERSION_REV         0x00
 
+#define MICO_CLOUD_SERVCIE_VERSION             (MICO_CLOUD_SERVCIE_VERSION_MAIN << 16 | \
+                                                MICO_CLOUD_SERVCIE_VERSION_SUB << 8 | \
+                                                MICO_CLOUD_SERVCIE_VERSION_REV)
 
 /*******************************************************************************
  * IMPLEMENTATIONS
  ******************************************************************************/
 
-char* MicoCloudServiceVersion(void)
+int MicoCloudServiceVersion(void)
 {
-  char *version = MICO_CLOUD_SERVCIE_VERSION;
-
+  int version = (int)MICO_CLOUD_SERVCIE_VERSION;
   return version;
 }

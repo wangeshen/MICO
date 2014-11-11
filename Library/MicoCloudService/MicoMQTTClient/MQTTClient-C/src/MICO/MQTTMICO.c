@@ -149,7 +149,7 @@ int ConnectNetwork(Network* n, char* addr, int port)
     memset(ipstr_mqtt, 0, sizeof(ipstr_mqtt));
     err = gethostbyname(addr, (uint8_t *)ipstr_mqtt, 16); // may be failed ???
     if(kNoErr == err){
-      MQTTClient_log("MQTT server address: %s",ipstr_mqtt);
+      //MQTTClient_log("MQTT server address: %s",ipstr_mqtt);
       break;
     }
     

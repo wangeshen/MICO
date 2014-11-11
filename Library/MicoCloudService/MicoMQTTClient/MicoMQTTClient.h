@@ -25,7 +25,7 @@
 #ifndef __MICO_MQTT_CLIENT_H_
 #define __MICO_MQTT_CLIENT_H_
 
-#include "MICODefine.h"
+#include "Common.h"
 #include "MQTTClient.h"
 
 /*******************************************************************************
@@ -37,8 +37,11 @@
 //in ms
 #define DEFAULT_MICO_MQTT_CMD_TIMEOUT         500
 //in byte
-#define DEFAULT_MICO_MQTT_BUF_SIZE            (1024 + 45)
+#define MAX_UPLOAD_MESSAGE_SIZE               512
+#define DEFAULT_MICO_MQTT_BUF_SIZE            (MAX_UPLOAD_MESSAGE_SIZE + 45)
 #define DEFAULT_MICO_MQTT_READBUF_SIZE        128
+
+#define STACK_SIZE_MQTT_CLIENT_THREAD         0x800
 
 /*******************************************************************************
 * STRUCTURES
@@ -88,10 +91,12 @@ typedef struct _mqtt_client_context_t {
 *******************************************************************************/
 
 void MicoMQTTClientInit(mqtt_client_config_t init);
-OSStatus MicoMQTTClientStart(mico_Context_t* inContext);
+OSStatus MicoMQTTClientStart(void);
+OSStatus MicoMQTTClientStop(void);
+
 OSStatus MicoMQTTClientPublish(const char* pubtopic, const unsigned char* msg, int msglen);
 mqttClientState MicoMQTTClientState(void);
-OSStatus MicoMQTTClientStop(void);
+
 //not implement
 //OSStatus MicoMQTTClientSubscribe(const char* subtopic, enum QoS qos, messageHandler hmsg);
 //OSStatus MicoMQTTClientUnsubscribe(const char* unsubtopic);
