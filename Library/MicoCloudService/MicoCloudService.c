@@ -230,6 +230,8 @@ void cloudServiceThread(void *arg)
   //mico_Context_t* inContext = (mico_Context_t*)arg;
   OSStatus err = kUnknownErr;
   
+  bool local_serviceConnected = false;
+  
   /* local status variable */
   bool isActivated = false;
   bool isAuthorized = false;
@@ -389,6 +391,7 @@ ReStartMQTTClient:
   mico_rtos_lock_mutex( &cloudServiceContext_mutex );
   cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_CONNECTED;
   mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
+  local_serviceConnected = true;
   
   /* 4. cloud service started callback, notify user. */
   CloudServiceStartedCallback(cloudServiceContext.service_status);
@@ -407,6 +410,7 @@ ReStartMQTTClient:
         mico_rtos_lock_mutex( &cloudServiceContext_mutex );
         cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_DISCONNECTED;
         mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
+        local_serviceConnected = false;
         CloudServiceStartedCallback(cloudServiceContext.service_status);
         mico_thread_sleep(3);
         goto ReStartMQTTClient;
@@ -415,22 +419,27 @@ ReStartMQTTClient:
         mico_cloud_service_log("cloud service: mqtt client connecting...");
         mico_rtos_lock_mutex( &cloudServiceContext_mutex );
         cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_DISCONNECTED;
-        CloudServiceStartedCallback(cloudServiceContext.service_status);
         mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
+        local_serviceConnected = false;
+        CloudServiceStartedCallback(cloudServiceContext.service_status);
         break;
       case MQTT_CLIENT_STATUS_CONNECTED:
-        //mico_cloud_service_log("cloud service runing...");
-        mico_rtos_lock_mutex( &cloudServiceContext_mutex );
-        cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_CONNECTED;
-        //CloudServiceStartedCallback(cloudServiceContext.service_status);
-        mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
+        if (!local_serviceConnected){
+          mico_rtos_lock_mutex( &cloudServiceContext_mutex );
+          cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_CONNECTED;
+          mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
+          local_serviceConnected = true;
+          mico_cloud_service_log("cloud service runing...");
+          CloudServiceStartedCallback(cloudServiceContext.service_status);
+        }
         break;
       case MQTT_CLIENT_STATUS_DISCONNECTED:
         mico_cloud_service_log("cloud service: mqtt client disconnected!");
         mico_rtos_lock_mutex( &cloudServiceContext_mutex );
         cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_DISCONNECTED;
-        CloudServiceStartedCallback(cloudServiceContext.service_status);
         mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
+        local_serviceConnected = false;
+        CloudServiceStartedCallback(cloudServiceContext.service_status);
         break;
       default:
         break;
@@ -443,7 +452,7 @@ ReStartMQTTClient:
       mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
       err = MicoMQTTClientStop();
       require_noerr( err, exit );
-      CloudServiceStartedCallback(cloudServiceContext.service_status);
+      local_serviceConnected = false;
       mico_thread_sleep(5);
       goto ReStartService;
     }
@@ -456,6 +465,10 @@ cloud_service_stop:
   MicoMQTTClientStop();
   
 exit:
+  mico_rtos_lock_mutex( &cloudServiceContext_mutex );
+  cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_STOPPED;
+  mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
+  CloudServiceStartedCallback(cloudServiceContext.service_status);
   mico_cloud_service_log("Exit: cloud thread exit with err = %d", err);
   MICORemoveNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)cloudNotify_WifiStatusHandler );
   if(_wifiConnected_sem) mico_rtos_deinit_semaphore(&_wifiConnected_sem);
