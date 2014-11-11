@@ -2,21 +2,20 @@
 
 <project>
   <fileVersion>2</fileVersion>
-  <fileChecksum>2191480854</fileChecksum>
+  <fileChecksum>4132078968</fileChecksum>
   <configuration>
     <name>EMW3162</name>
     <outputs>
-      <file>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MICOAppEntrance.c</file>
-      <file>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MICOAppDefine.h</file>
-      <file>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\HaProtocol.c</file>
-      <file>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MICOBonjour.c</file>
-      <file>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MICOConfigDelegate.c</file>
+      <file>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform_common_config.h</file>
+      <file>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform.h</file>
+      <file>$PROJ_DIR$\..\..\..\Library\support\StringUtils.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\support\SocketUtils.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\support\HTTPUtils.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\support\MDNSUtils.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\support\RingBufferUtils.c</file>
       <file>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MicoDefaults.h</file>
-      <file>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\UartRecv.c</file>
-      <file>$PROJ_DIR$\..\..\..\External\Curve25519\curve25519-donna.c</file>
       <file>$PROJ_DIR$\..\..\..\External\JSON-C\arraylist.c</file>
       <file>$PROJ_DIR$\..\..\..\External\JSON-C\debug.c</file>
-      <file>$PROJ_DIR$\..\..\..\External\JSON-C\json.h</file>
       <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_object.c</file>
       <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_tokener.c</file>
       <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_util.c</file>
@@ -31,13 +30,11 @@
       <file>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverSpi.h</file>
       <file>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverUart.h</file>
       <file>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverWdg.h</file>
-      <file>$PROJ_DIR$\..\..\..\include\MicoAES.h</file>
       <file>$PROJ_DIR$\..\..\..\include\MICO.h</file>
       <file>$PROJ_DIR$\..\..\..\include\MicoAlgorithm.h</file>
       <file>$PROJ_DIR$\..\..\..\include\MicoPlatform.h</file>
       <file>$PROJ_DIR$\..\..\..\include\MICORTOS.h</file>
       <file>$PROJ_DIR$\..\..\..\include\MicoSocket.h</file>
-      <file>$PROJ_DIR$\..\..\..\include\MicoSRPServer.h</file>
       <file>$PROJ_DIR$\..\..\..\include\MicoWlan.h</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.h</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.c</file>
@@ -55,77 +52,50 @@
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeServer.c</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.c</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MicoMQTTClient.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MicoMQTTClient.h</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.h</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceDef.h</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceVersion.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm3_sdio.a</file>
-      <file>$PROJ_DIR$\..\..\..\Library\MICOConfig.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm3_spi.a</file>
-      <file>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm4f_spi.a</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\EasyLink\EasyLink.c</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\WAC\MFi_WAC_CM3_Debug.a</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverSpi.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverUart.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverWdg.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\rtc.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\crt0_IAR.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\stm32f2xx_platform.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\hardfault.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\IAR\stdio_IAR.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform_common_config.h</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\AESUtils.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\HTTPUtils.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\MDNSUtils.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\RingBufferUtils.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\SecurityUtils.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\SHAUtils.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\SocketUtils.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\StringUtils.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\TimeUtils.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\TLVUtils.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\URLUtils.c</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverI2c.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverPwm.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverRng.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverRtc.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverSpi.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverWdg.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\MICO\MICODefine.h</file>
+      <file>$PROJ_DIR$\..\..\..\MICO\MICONotificationCenter.c</file>
+      <file>$TOOLKIT_DIR$\inc\c\errno.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\inttypes.h</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_inttypes.h</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\arraylist.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_object.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\debug.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_tokener.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_util.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\linkhash.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_object_private.h</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\printbuf.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\limits.h</file>
+      <file>$PROJ_DIR$\..\..\..\Library\support\RingBufferUtils.h</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\HTTPUtils.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICONotificationCenter.o</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\arraylist.h</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTFormat.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTPacket.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTConnectServer.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MDNSUtils.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\SocketUtils.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\HTTPUtils.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_object.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\printbuf.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICONotificationCenter.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\COM.MXCHIP.pbd</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\RingBufferUtils.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\crt0_IAR.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\hardfault.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Library\support\Debug.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_adc.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_adc.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_can.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_crc.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_cryp.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\wlan_platform.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_dcmi.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOSystemMonitor.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\read_wifi_firmware.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_dma.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_dac.o</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_util.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_dbgmcu.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\misc.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_tokener.o</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\linkhash.o</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\arraylist.o</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\StringUtils.h</file>
       <file>$TOOLKIT_DIR$\inc\c\stdarg.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_cryp_tdes.o</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\MDNSUtils.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\HaProtocol.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\HaProtocol.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\HaProtocol.h</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribe.h</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTPacket.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTFormat.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTMICO.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTMICO.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTClient.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTUnsubscribeServer.o</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTSubscribeServer.o</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTSubscribeClient.o</file>
@@ -134,43 +104,30 @@
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTSerializePublish.o</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTUnsubscribeClient.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTDeserializePublish.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTClient.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTClient.o</file>
-      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTPacket.h</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTConnectClient.o</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTPacket.h</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoMQTTClient.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribe.h</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTPublish.h</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\StackTrace.h</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTFormat.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoMQTTClient.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoMQTTClient.o</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTConnect.h</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTSerializePublish.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoMQTTClient.o</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoCloudService.o</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoCloudService.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_can.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTDeserializePublish.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_dbgmcu.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverPwm.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverRng.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverRtc.c</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTConnectClient.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_crc.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTConnectServer.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTSubscribeClient.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_dac.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdint.h</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTSubscribeServer.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoCloudServiceVersion.o</file>
-      <file>$TOOLKIT_DIR$\inc\c\stdint.h</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MDNSUtils.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\SecurityUtils.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoCloudServiceVersion.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\SHAUtils.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\SocketUtils.pbi</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\StringUtils.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\TimeUtils.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\TLVUtils.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\URLUtils.pbi</file>
       <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_util.h</file>
       <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
       <file>$TOOLKIT_DIR$\inc\c\xmtx.h</file>
@@ -182,16 +139,13 @@
       <file>$TOOLKIT_DIR$\inc\c\ctype.h</file>
       <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
       <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\Output\EMW3162\COM.MXCHIP.CLOUD.out</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\Output\EMW3162\COM.MXCHIP.CLOUD.bin</file>
       <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
       <file>$PROJ_DIR$\..\..\..\Library\support\Common.h</file>
       <file>$TOOLKIT_DIR$\inc\c\DLib_Config_Full.h</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\SocketUtils.h</file>
       <file>$TOOLKIT_DIR$\inc\c\xlocalelist.h</file>
       <file>$TOOLKIT_DIR$\inc\c\ystdio.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\platform_assert.h</file>
       <file>$TOOLKIT_DIR$\inc\c\xtls.h</file>
+      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\platform_assert.h</file>
       <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
       <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
       <file>$TOOLKIT_DIR$\inc\c\string.h</file>
@@ -199,429 +153,110 @@
       <file>$TOOLKIT_DIR$\inc\c\DLib_Product_string.h</file>
       <file>$TOOLKIT_DIR$\inc\c\xlocale.h</file>
       <file>$TOOLKIT_DIR$\inc\c\locale.h</file>
-      <file>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverFlash.h</file>
       <file>$PROJ_DIR$\..\..\..\External\JSON-C\linkhash.h</file>
+      <file>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverFlash.h</file>
       <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_tokener.h</file>
       <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_object.h</file>
       <file>$TOOLKIT_DIR$\inc\c\xlocale_lconv.h</file>
       <file>$PROJ_DIR$\..\..\..\External\JSON-C\debug.h</file>
       <file>$PROJ_DIR$\..\..\..\External\JSON-C\printbuf.h</file>
       <file>$TOOLKIT_DIR$\inc\c\stddef.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverSpi.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverRng.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverRtc.o</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\RingBufferUtils.o</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\StringUtils.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverWdg.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_platform.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\hardfault.o</file>
-      <file>$TOOLKIT_DIR$\CMSIS\Include\core_cm3.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\crt0_IAR.o</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\include\PlatformLogging.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\system_stm32f2xx.h</file>
-      <file>$TOOLKIT_DIR$\CMSIS\Include\core_cmFunc.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_i2c.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_dma.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_exti.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_flash.h</file>
       <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\debug.o</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\MICONotificationCenter.h</file>
       <file>$PROJ_DIR$\..\..\..\External\JSON-C\config.h</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\MICOConfigMenu.h</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\EasyLink\EasyLink.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_gpio.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_pwr.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_iwdg.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_rcc.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_rtc.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_spi.h</file>
-      <file>$PROJ_DIR$\..\..\..\External\Curve25519\curve25519-donna.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_sdio.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_tim.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_rng.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_iwdg.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_i2c.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_hash_md5.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_hash.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_gpio.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOConfigDelegate.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_fsmc.o</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\URLUtils.h</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\HTTPUtils.h</file>
-      <file>$TOOLKIT_DIR$\inc\c\errno.h</file>
-      <file>$TOOLKIT_DIR$\inc\c\inttypes.h</file>
-      <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_inttypes.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOBonjour.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_hash_sha1.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\curve25519-donna.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\UartRecv.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\arraylist.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_object.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\debug.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_tokener.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_util.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_object_private.h</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\WAC\MFi_WAC.h</file>
-      <file>$TOOLKIT_DIR$\inc\c\time.h</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\WPS\WPS.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\TLVUtils.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\linkhash.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOConfigDelegate.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\MICOSystemMonitor.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\URLUtils.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\printbuf.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOConfig.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\EasyLink.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOConfigMenu.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOConfigServer.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOEntrance.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOParaStorage.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICONTPClient.pbi</file>
-      <file>$TOOLKIT_DIR$\lib\rt7M_tl.a</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\WPS.pbi</file>
-      <file>$TOOLKIT_DIR$\inc\c\limits.h</file>
-      <file>$TOOLKIT_DIR$\lib\dl7M_tlf.a</file>
-      <file>$TOOLKIT_DIR$\lib\shb_l.a</file>
-      <file>$TOOLKIT_DIR$\lib\m7M_tl.a</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\misc.o</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_crc.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_dbgmcu.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_wwdg.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_hash.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_fsmc.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_cryp.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_dac.h</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\TLVUtils.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\rtc.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_dcmi.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_rtc.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_tim.o</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\EMW3162\micoLinkerForIAR.icf</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\list\COM.MXCHIP.CLOUD.map</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_wwdg.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_syscfg.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_spi.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\system_stm32f2xx.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_sdio.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_rcc.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_rng.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverFlash.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverUart.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverGpio.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_usart.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverAdc.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\platform.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stdio_IAR.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\RingBufferUtils.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICONotificationCenter.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\HTTPUtils.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\AESUtils.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\External\JSON-C\arraylist.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTFormat.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTPacket.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_platform.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\rtc.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTConnectServer.o</file>
-      <file>$TOOLKIT_DIR$\inc\c\yfuns.h</file>
-      <file>$TOOLKIT_DIR$\inc\c\intrinsics.h</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\SHAUtils.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx.h</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\SecurityUtils.h</file>
-      <file>$TOOLKIT_DIR$\inc\c\cmsis_iar.h</file>
-      <file>$TOOLKIT_DIR$\CMSIS\Include\core_cmInstr.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\crt0.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\rtc.o</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\AESUtils.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stdio_IAR.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\TimeUtils.o</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverI2c.c</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\WPS\WPS.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverGpio.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverAdc.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\gpio_irq.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\stm32f2xx_conf.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\system_stm32f2xx.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\stm32f2xx.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverFlash.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\gpio_irq.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_wwdg.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_usart.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_tim.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_syscfg.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_spi.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_sdio.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_rtc.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_rng.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_rcc.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_pwr.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_iwdg.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_i2c.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_hash_sha1.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_hash_md5.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_hash.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_gpio.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_flash.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_fsmc.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_exti.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_dma.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_dcmi.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_dbgmcu.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_dac.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_cryp_tdes.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_cryp_des.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_cryp.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_cryp_aes.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_crc.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_can.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_adc.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\startup_stm32f2xx_IAR.s</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\wlan_platform.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\read_wifi_firmware.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\misc.c</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\SDIO\wlan_bus.c</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\MICOSystemMonitor.c</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\MICOParaStorage.c</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\MICONTPClient.c</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\MICONotificationCenter.c</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\MICOConfigMenu.c</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\MICOEntrance.c</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\MICOConfigServer.c</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\MICODefine.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\platform.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\AESUtils.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverPwm.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MDNSUtils.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\SecurityUtils.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOAppEntrance.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\SHAUtils.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\SocketUtils.o</file>
-      <file>$PROJ_DIR$\..\..\..\Library\support\TimeUtils.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\HTTPUtils.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOEntrance.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_object.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\curve25519-donna.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOConfigServer.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOConfig.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOConfigMenu.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\startup_stm32f2xx_IAR.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOSystemMonitor.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\UartRecv.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\EasyLink.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICONTPClient.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOParaStorage.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\read_wifi_firmware.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverI2c.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_cryp_des.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\printbuf.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\wlan_bus.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\WPS.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_cryp_aes.o</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\misc.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\wlan_bus.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\wlan_platform.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_cryp.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_flash.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\gpio_irq.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOBonjour.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICOAppEntrance.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICONotificationCenter.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_exti.o</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_pwr.o</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_usart.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_syscfg.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_adc.h</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\inc\stm32f2xx_can.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\COM.MXCHIP.pbd</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_exti.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_dcmi.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_dma.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_flash.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_fsmc.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_gpio.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_hash.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_cryp_aes.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\stm32f2xx_platform.h</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_iwdg.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_i2c.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_cryp_des.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_cryp_tdes.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_sdio.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_pwr.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_rcc.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_rng.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_rtc.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_syscfg.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_spi.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_usart.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_tim.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_hash_md5.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_hash_sha1.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\stm32f2xx_wwdg.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\system_stm32f2xx.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverFlash.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\gpio_irq.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverAdc.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverGpio.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoDriverUart.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\Output\EMW3162\MicoCloudService.a</file>
     </outputs>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MICOAppEntrance.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\support\StringUtils.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 386</file>
+          <file> 121</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 417</file>
+          <file> 156</file>
         </tool>
       </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 187 178 167 179 165 170 186 68 306 169 168 166 16 51 172 173 174 175 180 183 185 182 26 184 69 32 22 171 114 155 188 189 190 191 192 1 5 27 17 21 193 194 195 196 197 380 90 10 29 30 28 23 19 18 24 20 198 310 199 200</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 1 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 51 114 380 90 29 5 68 69 184 26 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 10 171 198 194 310 165 196 199 195 200</file>
-        </tool>
-      </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\HaProtocol.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\support\SocketUtils.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 113</file>
+          <file> 120</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 112</file>
+          <file> 71</file>
         </tool>
       </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 187 179 69 172 186 26 32 171 114 178 51 173 166 190 191 192 184 22 68 380 169 90 50 174 175 180 170 16 306 165 1 181 28 219 183 189 155 188 185 168 182 167 5 27 17 21 193 194 195 196 197 10 29 30 23 19 18 24 20 198 310 199 200</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 169 186 187 189 180 178 174 175 166 183 1 179 155 170 172 188 190 173 191 185 167 168 192 197 182 51 114 380 90 29 5 68 69 184 26 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 10 171 198 194 310 165 196 199 195 200 181 219 50</file>
-        </tool>
-      </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MICOBonjour.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\support\HTTPUtils.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 245</file>
+          <file> 64</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 416</file>
+          <file> 72</file>
         </tool>
       </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 187 169 168 179 200 90 166 18 68 380 108 170 178 186 167 30 198 219 10 172 173 174 175 180 183 185 182 29 23 20 196 111 26 1 155 188 189 190 191 192 28 5 19 24 310 199 197 184 69 32 27 17 22 21 16 193 306 171 194 165 195 51 109</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 380 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184 26 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 10 171 198 194 310 165 196 199 195 200 1 51 219 111 108</file>
-        </tool>
-      </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MICOConfigDelegate.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\support\MDNSUtils.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 260</file>
+          <file> 118</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 238</file>
+          <file> 70</file>
         </tool>
       </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 195 166 68 186 10 179 380 187 26 221 188 190 191 192 172 197 19 32 90 1 108 155 189 5 24 194 196 28 69 222 170 169 173 174 175 180 178 183 185 168 182 167 184 23 18 20 27 171 165 29 17 22 21 16 193 306 30 198 310 199 200 51 109</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184 28 23 306 17 19 22 18 21 24 16 20 193 222 380 26 32 30 27 10 171 198 194 310 165 196 199 195 200 1 51 221 108</file>
-        </tool>
-      </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\UartRecv.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\support\RingBufferUtils.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 248</file>
+          <file> 77</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 399</file>
+          <file> 155</file>
         </tool>
       </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 175 193 173 179 10 174 68 172 180 186 183 187 185 182 5 17 195 51 114 90 170 169 178 168 167 166 197 27 21 194 196 1 28 219 26 155 188 189 190 191 192 184 69 32 22 16 306 171 165 380 29 30 23 19 18 24 20 198 310 199 200</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 380 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184 26 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 10 171 198 194 310 165 196 199 195 200 1 51 114 219</file>
-        </tool>
-      </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\External\Curve25519\curve25519-donna.c</name>
+      <name>[ROOT_NODE]</name>
       <outputs>
         <tool>
-          <name>BICOMP</name>
-          <file> 247</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 393</file>
+          <name>IARCHIVE</name>
+          <file> 159</file>
         </tool>
       </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 175 186 229 188 166 174 180 178 187 190 172 155 189</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 172 186 187 189 180 178 174 175 166 229 155 188 190</file>
-        </tool>
-      </inputs>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\External\JSON-C\arraylist.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 249</file>
+          <file> 54</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 107</file>
+          <file> 82</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 166 186 171 172 189 187 190 188 310 174 220 175 180 178</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 220 172 186 187 189 180 178 174 175 166 188 190 171 310</file>
+          <file> 123 140 128 129 143 141 144 142 66 131 158 132 135 133</file>
         </tool>
       </inputs>
     </file>
@@ -630,21 +265,17 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 251</file>
+          <file> 56</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 218</file>
+          <file> 157</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 175 187 186 172 183 180 169 188 166 174 178 220 109 189 190 198</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 220 169 186 187 189 180 178 174 175 166 183 172 188 190 198</file>
+          <file> 132 141 140 129 137 135 126 142 123 131 133 158 83 143 144 152</file>
         </tool>
       </inputs>
     </file>
@@ -653,21 +284,17 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 250</file>
+          <file> 55</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 392</file>
+          <file> 73</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 178 198 186 187 196 172 244 169 188 194 254 166 174 175 180 220 200 199 310 165 183 189 190 243 155</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 220 169 186 187 189 180 178 174 175 166 183 172 200 188 190 198 199 194 310 244 243 155 196 254 165</file>
+          <file> 133 152 140 141 150 129 53 126 142 147 60 123 131 132 135 158 154 153 66 122 137 143 144 52 115</file>
         </tool>
       </inputs>
     </file>
@@ -676,21 +303,17 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 252</file>
+          <file> 57</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 105</file>
+          <file> 80</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 188 310 187 166 172 195 190 273 198 244 186 185 182 220 169 200 173 171 199 196 165 183 189 174 168 167 197 175 180 178 191 192 243 155</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 220 169 186 187 189 180 178 174 175 166 183 172 200 173 191 185 167 168 192 197 182 188 190 273 171 198 199 310 244 243 155 196 195 165</file>
+          <file> 142 66 141 123 129 149 144 62 152 53 140 138 136 158 126 154 130 128 153 150 122 137 143 131 125 124 151 132 135 133 145 146 52 115</file>
         </tool>
       </inputs>
     </file>
@@ -699,21 +322,17 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 253</file>
+          <file> 58</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 102</file>
+          <file> 79</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 185 171 186 273 196 182 199 172 242 165 166 187 243 169 200 188 173 198 244 195 183 189 174 168 167 197 155 220 175 180 178 190 191 192</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 220 169 186 187 189 180 178 174 175 166 183 172 200 273 188 190 242 173 191 185 167 168 192 197 182 171 198 199 244 243 155 196 195 165</file>
+          <file> 138 128 140 62 150 136 153 129 51 122 123 141 52 126 154 142 130 152 53 149 137 143 131 125 124 151 115 158 132 135 133 144 145 146</file>
         </tool>
       </inputs>
     </file>
@@ -722,21 +341,17 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 259</file>
+          <file> 59</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 106</file>
+          <file> 81</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 186 187 200 178 172 194 188 109 273 166 174 175 180 169 183 189 190</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 169 186 187 189 180 178 174 175 166 183 188 190 172 200 273 194</file>
+          <file> 140 141 154 133 129 147 142 83 62 123 131 132 135 126 137 143 144</file>
         </tool>
       </inputs>
     </file>
@@ -745,21 +360,17 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 263</file>
+          <file> 61</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 406</file>
+          <file> 74</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 199 166 190 172 171 187 186 169 188 109 198 183 189 220 174 175 180 178</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 220 169 186 187 189 180 178 174 175 166 183 172 188 190 171 198 199</file>
+          <file> 153 123 144 129 128 141 140 126 142 83 152 137 143 158 131 132 135 133</file>
         </tool>
       </inputs>
     </file>
@@ -768,21 +379,17 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 118</file>
+          <file> 87</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 119</file>
+          <file> 88</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 27 155 186 179 68 189 187 166 19 26 32 29 188 190 191 192 172 5 24 90 30 28 184 170 169 173 174 175 180 178 183 185 168 182 167 197 23 18 20 33 69 17 22 21 16 193 306</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 33 26 90 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 184 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193</file>
+          <file> 25 115 140 134 1 143 141 123 18 24 29 27 142 144 145 146 129 7 23 78 28 26 139 127 126 130 131 132 135 133 137 138 125 136 124 151 22 17 19 30 0 16 21 20 15 148 63</file>
         </tool>
       </inputs>
     </file>
@@ -791,21 +398,17 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 148</file>
+          <file> 112</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 131</file>
+          <file> 99</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 132 186 188 137 135 183 189 187 190 134 133 115 130 169 166 174 175 180 178</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 130 137 133 132 115 135 134 169 186 187 189 180 178 174 175 166 183 188 190</file>
+          <file> 102 140 142 107 105 137 143 141 144 104 103 84 100 126 123 131 132 135 133</file>
         </tool>
       </inputs>
     </file>
@@ -814,21 +417,17 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 128</file>
+          <file> 89</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 129</file>
+          <file> 98</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 186 174 135 187 179 33 137 27 155 19 68 37 130 132 134 183 189 185 182 5 24 169 133 115 166 26 32 29 188 168 167 197 23 18 20 175 180 178 90 30 28 184 170 172 173 190 191 192 69 17 22 21 16 193 306</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 37 130 137 133 132 115 135 134 169 186 187 189 180 178 174 175 166 183 33 26 90 29 179 155 170 172 188 190 173 191 185 167 168 192 197 182 5 68 69 184 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193</file>
+          <file> 140 131 105 141 134 30 107 25 115 18 1 34 100 102 104 137 143 138 136 7 23 126 103 84 123 24 29 27 142 125 124 151 22 17 19 132 135 133 78 28 26 139 127 129 130 144 145 146 0 16 21 20 15 148 63</file>
         </tool>
       </inputs>
     </file>
@@ -837,21 +436,17 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 150</file>
+          <file> 113</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 315</file>
+          <file> 69</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 183 174 175 115 130 186 188 169 187 180 190 166 178 133 134 189 137 132 135</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 134 169 186 187 189 180 178 174 175 166 183 130 137 133 132 115 135 188 190</file>
+          <file> 137 131 132 84 100 140 142 126 141 135 144 123 133 103 104 143 107 102 105</file>
         </tool>
       </inputs>
     </file>
@@ -860,1475 +455,7 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 143</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 127</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 134 166 188 186 132 130 169 187 183 189 137 135 175 180 178 133 115 190</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 134 169 186 187 189 180 178 174 175 166 183 130 137 133 132 115 135 188 190</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSerializePublish.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 138</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 125</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 175 135 137 130 169 187 174 188 132 183 180 186 134 133 115 166 178 189 190</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 130 137 133 132 115 135 134 169 186 187 189 180 178 174 175 166 183 188 190</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTFormat.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 117</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 311</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 175 115 130 186 166 180 190 188 178 187 133 169 183 189 137 132 135 134</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 134 169 186 187 189 180 178 174 175 166 183 130 137 133 132 115 135 188 190</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTPacket.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 116</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 312</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 169 187 175 115 130 186 188 183 180 190 166 178 133 134 189 137 132 135</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 134 169 186 187 189 180 178 174 175 166 183 130 137 133 132 115 135 188 190</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribeClient.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 151</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 122</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 175 115 134 186 174 188 133 166 180 137 132 135 130 169 187 183 178 189 190</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 130 137 133 132 115 135 134 169 186 187 189 180 178 174 175 166 183 188 190</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribeServer.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 153</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 121</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 175 115 134 186 174 188 133 166 180 137 132 135 130 169 187 183 178 189 190</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 130 137 133 132 115 135 134 169 186 187 189 180 178 174 175 166 183 188 190</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeClient.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 126</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 123</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 175 135 137 130 169 187 174 188 132 183 180 186 134 133 115 166 178 189 190</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 130 137 133 132 115 135 134 169 186 187 189 180 178 174 175 166 183 188 190</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeServer.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 124</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 120</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 175 115 134 186 174 188 133 166 180 137 132 135 130 169 187 183 178 189 190</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 130 137 133 132 115 135 134 169 186 187 189 180 178 174 175 166 183 188 190</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 141</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 140</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 193 10 187 178 190 194 186 37 28 170 68 108 29 184 169 191 192 172 69 179 17 90 196 130 26 241 49 30 5 173 174 175 180 166 21 195 115 219 181 50 32 27 155 188 189 22 16 306 380 171 165 109 33 133 183 185 168 182 167 197 23 19 18 24 20 1 198 310 199 200 51 240 137 132 135 134</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 26 90 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 184 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 219 380 10 171 198 194 310 165 196 199 195 200 1 51 181 241 240 108 49 37 130 137 133 132 115 135 134 33 50</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MicoMQTTClient.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 136</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 139</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 179 169 199 186 24 49 29 184 187 166 182 68 28 170 178 185 5 137 219 90 30 172 173 174 175 180 190 19 26 310 135 32 27 155 188 189 183 168 167 197 23 18 20 1 198 196 200 51 132 134 191 192 69 17 22 21 16 193 306 380 10 171 194 165 195 37 130 33 133 115</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 26 90 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 184 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 219 380 10 171 198 194 310 165 196 199 195 200 1 51 49 37 130 137 133 132 115 135 134 33</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceVersion.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 158</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 154</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 192 180 188 166 155 187 175 191 179 172 174 178 186 170 169 173 189 167 197 50 183 190 185 168 182 51</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 50 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 51</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MICOConfig.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 264</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 395</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 192 166 172 178 191 155 188 187 175 180 186 170 169 173 189 167 197 179 183 190 185 168 182 5</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\EasyLink\EasyLink.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 265</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 400</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 183 179 182 90 5 186 187 1 241 172 180 185 69 17 28 30 173 174 175 193 68 195 51 26 108 222 29 184 170 169 178 168 21 194 196 380 219 181 32 27 155 188 189 166 190 191 192 22 16 306 171 165 240 167 197 23 19 18 24 20 10 198 310 199 200 109</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 26 90 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 184 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 219 380 10 171 198 194 310 165 196 199 195 200 1 51 108 241 240 181 222</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverSpi.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 85</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 201</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 182 216 90 183 179 231 29 186 187 306 69 180 185 21 68 155 317 321 230 5 174 175 17 193 215 333 225 422 319 28 434 188 178 168 167 166 197 22 16 226 224 209 212 223 410 184 170 172 169 173 189 190 191 192 23 19 18 24 20 423 227 232 322 213 217 214 228 421</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 28 5 68 69 23 306 17 19 22 18 21 24 16 20 193 434 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 423 90 184</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverUart.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 456</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 300</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 21 332 68 155 180 185 321 186 317 230 179 183 187 182 306 231 216 319 174 175 17 193 69 215 29 333 225 422 28 434 188 178 168 167 166 197 22 16 226 224 209 212 223 410 170 172 169 173 189 190 191 192 5 23 19 18 24 20 423 227 232 322 213 217 214 228 421</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 28 5 68 69 23 306 17 19 22 18 21 24 16 20 193 434 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 423 332</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverWdg.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 86</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 206</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 186 23 306 20 166 179 224 68 18 155 187 423 232 319 434 5 19 24 188 190 191 192 172 69 227 321 217 228 29 90 17 22 21 16 193 170 169 173 189 184 223 322 213 215 214 421 28 174 175 180 178 183 185 168 182 167 197 226 231 333 209 212 317 216 225 230 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 28 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 23 306 17 19 22 18 21 24 16 20 193 29 90 184 434 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 423</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\rtc.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 314</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 324</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 172 16 226 174 224 187 166 211 155 175 232 319 168 68 215 231 29 333 180 321 217 228 173 186 167 197 22 306 434 286 423 223 227 209 212 178 214 421 170 169 183 185 182 179 17 21 193 322 213 189 317 216 225 230 422 410 188 190 191 192 90 5 184 69 28 23 19 18 24 20</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 434 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 423 29 179 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 211 90 5 68 69 184 286 28 23 306 17 19 22 18 21 24 16 20 193</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\crt0_IAR.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 88</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 210</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 69 68 323</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 68 69 323</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\stm32f2xx_platform.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 313</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 207</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 179 186 68 28 319 232 226 166 90 188 223 410 168 187 21 184 286 5 423 227 189 231 155 167 197 17 193 434 69 211 323 29 215 224 333 322 213 317 321 216 225 230 422 185 182 22 16 306 209 212 174 175 180 178 217 214 228 421 170 172 169 173 183 190 191 192 23 19 18 24 20</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 434 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 423 29 179 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 68 69 28 5 23 306 17 19 22 18 21 24 16 20 193 211 90 184 286 323</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\hardfault.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 89</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 208</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 215 319 21 175 69 179 28 174 155 213 227 169 68 29 434 166 180 186 322 214 421 170 187 185 182 17 193 306 231 5 178 321 217 224 228 232 172 173 168 167 197 22 16 226 183 189 333 209 212 317 216 223 225 230 422 410 188 190 191 192 23 19 18 24 20 423</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 169 186 187 189 180 178 174 175 166 183 319 209 155 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 29 179 170 172 188 190 173 191 185 167 168 192 197 182 5 28 68 69 23 306 17 19 22 18 21 24 16 20 193 434 423</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\IAR\stdio_IAR.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 305</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 326</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 172 186 174 175 17 187 179 69 180 21 173 166 191 192 68 316 28 178 22 170 169 167 197 189 5 23 19 18 24 155 188 183 190 185 168 182 306 16 20 193</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 172 186 187 189 180 178 174 175 166 316 69 28 179 155 170 169 183 188 190 173 191 185 167 168 192 197 182 5 68 23 306 17 19 22 18 21 24 16 20 193</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 304</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 381</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 166 179 68 232 214 434 175 19 188 186 168 187 319 155 213 421 5 28 69 180 24 167 197 223 322 215 227 169 211 178 190 23 18 20 185 182 423 321 217 224 228 90 184 183 189 17 22 21 16 193 170 172 173 191 192 306 226 231 29 333 209 212 317 216 225 230 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 169 186 187 189 180 178 174 175 166 183 188 190 28 179 155 170 172 173 191 185 167 168 192 197 182 5 68 69 23 306 17 19 22 18 21 24 16 20 193 434 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 423 29 211 90 184</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\AESUtils.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 309</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 382</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 188 320 186 166 325 187 90 25 155 190 191 192 172 68 179 170 169 173 189 29 174 175 180 178 183 185 168 182 167 197 5 184 69</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 325 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184 320 25</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\HTTPUtils.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 308</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 390</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 29 186 187 108 184 240 169 68 242 28 170 178 167 197 18 179 109 90 30 5 172 173 174 175 180 183 168 166 23 20 26 241 69 32 27 155 188 189 185 182 19 24 190 191 192 17 22 21 16 193 306</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 26 90 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 184 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 241 240 242 108</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\MDNSUtils.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 156</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 384</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 186 187 189 166 179 155 32 19 68 188 190 191 192 172 29 5 24 111 26 170 169 173 174 175 180 178 183 185 168 182 167 27 23 18 20 197 90 30 28 184 69 17 22 21 16 193 306</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 111 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 26 90 29 5 68 69 184 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\RingBufferUtils.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 87</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 204</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 187 190 155 183 186 29 188 178 166 185 182 179 90 170 172 169 173 175 180 168 68 306 189 191 192 167 197 5 69 184</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 306 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\SecurityUtils.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 157</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 385</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 192 180 188 166 155 187 175 191 179 172 174 178 186 170 169 173 189 167 197 320 183 190 185 168 182</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 320 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\SHAUtils.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 159</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 387</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 183 186 174 190 188 178 187 166 185 182 184 90 155 175 180 168 5 69 179 108 170 172 169 173 189 191 192 167 197 29 68 109 318</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 318 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184 108</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\SocketUtils.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 160</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 388</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 178 187 29 167 170 186 179 169 168 166 68 19 26 172 173 174 175 180 183 185 182 28 5 24 90 155 188 189 190 191 192 30 23 18 20 181 197 184 69 32 27 17 22 21 16 193 306</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 181 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184 26 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\StringUtils.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 161</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 205</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 186 155 174 184 109 189 183 187 185 182 108 179 188 168 167 166 197 5 69 90 175 180 178 170 172 169 173 190 191 192 29 68</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 108 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\TimeUtils.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 162</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 327</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 168 179 187 155 180 166 68 175 186 5 69 27 18 26 188 174 178 183 190 185 182 184 32 17 306 90 170 172 169 173 189 191 192 167 197 29 30 28 23 19 389 242 22 21 24 16 20 193</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 389 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184 26 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 242</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\TLVUtils.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 163</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 258</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 187 190 155 183 186 29 188 178 166 185 182 179 90 170 172 169 173 175 180 168 68 285 189 191 192 167 197 5 69 184</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 285 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\URLUtils.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 164</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 262</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 186 187 183 182 172 180 185 109 173 174 175 184 69 108 170 169 178 168 167 166 197 5 90 240 155 188 189 190 191 192 29 68 179</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184 108 240</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverPwm.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 82</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 383</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 167 187 178 197 226 224 434 186 22 179 68 232 319 188 168 166 16 321 217 228 28 69 155 174 175 180 183 185 182 17 21 193 306 215 231 29 322 213 214 227 421 170 172 169 173 189 190 191 192 5 23 19 18 24 20 423 223 333 209 212 317 216 225 230 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 28 5 68 69 23 306 17 19 22 18 21 24 16 20 193 434 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 423</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverRng.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 83</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 202</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 232 172 179 68 166 319 16 186 306 69 22 173 187 224 332 17 21 193 170 169 190 191 192 321 217 228 223 29 434 5 23 19 18 24 20 155 188 189 322 213 215 214 227 421 423 28 174 175 180 178 183 185 168 182 167 197 333 209 212 317 216 225 226 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 28 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 23 306 17 19 22 18 21 24 16 20 193 29 332 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 434 423</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverRtc.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 84</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 203</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 19 68 69 169 186 179 224 29 170 423 232 319 5 172 173 189 187 166 24 227 321 217 228 28 434 155 188 190 191 192 23 18 20 223 322 213 215 214 421 174 175 180 178 183 185 168 182 167 197 17 22 21 16 193 306 226 231 333 209 212 317 216 225 230 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 28 5 68 69 23 306 17 19 22 18 21 24 16 20 193 434 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 423</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\Output\EMW3162\COM.MXCHIP.CLOUD.out</name>
-      <outputs>
-        <tool>
-          <name>ILINK</name>
-          <file> 291</file>
-        </tool>
-        <tool>
-          <name>OBJCOPY</name>
-          <file> 177</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>ILINK</name>
-          <file> 290 382 107 210 393 218 400 415 112 208 390 392 105 102 106 384 58 417 416 140 154 395 238 396 394 303 299 301 404 383 202 203 201 300 206 391 139 307 401 402 398 277 129 131 315 127 311 119 312 125 122 121 123 120 53 381 406 403 204 324 385 387 388 397 326 91 93 94 95 409 405 110 101 103 97 100 419 414 239 237 236 235 246 234 233 207 420 297 298 288 296 294 293 289 302 292 205 295 327 258 399 262 407 96 408 275 271 276 274</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverI2c.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 81</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 404</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 170 19 68 186 179 224 423 232 319 29 434 169 189 187 166 5 24 227 321 217 228 28 69 172 173 190 191 192 23 18 20 223 155 322 213 215 214 421 188 174 175 180 178 183 185 168 182 167 197 17 22 21 16 193 306 226 231 333 209 212 317 216 225 230 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 28 5 68 69 23 306 17 19 22 18 21 24 16 20 193 434 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 423</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\WPS\WPS.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 272</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 408</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 187 178 167 186 166 109 28 170 68 200 241 29 184 169 168 197 18 179 198 90 30 5 172 173 174 175 180 183 185 182 23 20 10 196 219 108 257 32 27 155 188 189 190 191 192 19 24 310 199 380 26 69 17 22 21 16 193 306 1 171 194 165 195 51 240</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 26 90 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 184 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 219 380 10 171 198 194 310 165 196 199 195 200 1 51 108 241 240 257</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverGpio.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 455</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 301</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 232 179 16 166 319 68 172 186 306 69 22 173 187 224 332 17 21 193 170 169 190 191 192 321 217 228 223 29 434 5 23 19 18 24 20 155 188 189 322 213 215 214 227 421 423 28 174 175 180 178 183 185 168 182 167 197 333 209 212 317 216 225 226 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 28 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 23 306 17 19 22 18 21 24 16 20 193 29 332 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 434 423</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverAdc.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 454</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 303</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 224 16 187 166 179 68 172 434 22 173 168 423 232 319 5 211 17 21 193 170 169 178 186 167 197 227 321 217 228 29 69 23 19 18 24 20 155 188 174 175 180 183 185 182 223 322 213 215 214 421 90 184 28 189 190 191 192 306 226 231 333 209 212 317 216 225 230 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 28 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 23 306 17 19 22 18 21 24 16 20 193 29 434 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 423 211 90 184</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\system_stm32f2xx.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 451</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 295</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 155 422 225 209 317 321 216 230 319 335 333 212 186 189 223 226 231 410 322 213 187 174 175 180 178 215 217 214 224 227 228 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 335 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 319 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\MicoDriverFlash.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 452</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 299</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 155 190 174 175 17 179 186 231 68 180 166 193 209 223 319 90 188 187 178 29 21 212 226 410 211 28 69 169 170 172 173 189 183 191 192 22 16 306 333 317 321 216 225 230 422 185 168 182 167 197 5 184 23 19 18 24 20 322 213 215 217 214 224 227 228 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 211 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184 28 23 306 17 19 22 18 21 24 16 20 193 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\gpio_irq.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 453</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 415</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 20 168 187 188 155 178 217 321 228 23 166 179 68 332 28 174 175 180 224 232 319 18 186 167 197 189 322 213 215 214 227 421 5 19 24 185 182 333 209 212 317 216 223 225 226 230 231 422 410 17 22 21 16 193 170 172 169 173 183 190 191 192 69 306</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 332 155 186 187 189 180 178 174 175 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 28 179 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 23 306 17 19 22 18 21 24 16 20 193</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_wwdg.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 450</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 292</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 319 421 212 214 280 209 187 178 215 227 226 333 155 174 175 180 321 217 224 228 232 322 213 186 189 317 216 223 225 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 280 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_usart.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 446</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 302</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 422 333 319 322 225 421 155 213 317 321 216 230 226 186 189 223 231 410 209 212 187 174 175 180 178 215 217 214 224 227 228 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 421 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_tim.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 447</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 289</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 319 189 186 223 226 231 410 333 155 322 213 317 321 216 225 230 422 209 212 187 174 175 180 178 215 217 214 224 227 228 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 231 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_syscfg.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 444</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 293</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 333 186 226 319 410 189 223 231 155 322 213 317 321 216 225 230 422 209 212 187 174 175 180 178 215 217 214 224 227 228 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 422 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_spi.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 445</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 294</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 213 216 155 317 321 230 319 322 225 422 228 226 333 186 189 223 231 410 209 212 187 174 175 180 178 215 217 214 224 227 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 228 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_sdio.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 439</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 296</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 226 214 333 212 319 421 209 187 178 215 227 230 155 174 175 180 321 217 224 228 232 322 213 186 189 317 216 223 225 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 230 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_rtc.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 443</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 288</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 186 231 227 189 223 319 333 226 410 155 322 213 317 321 216 225 230 422 209 212 187 174 175 180 178 215 217 214 224 228 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 227 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_rng.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 442</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 298</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 319 155 226 213 216 333 317 321 230 322 225 422 232 186 189 223 231 410 209 212 187 174 175 180 178 215 217 214 224 227 228 421</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 232 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_rcc.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 441</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 297</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 333 186 231 189 223 319 226 410 155 322 213 317 321 216 225 230 422 209 212 187 174 175 180 178 215 217 214 224 227 228 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 226 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_pwr.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 440</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 420</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 225 226 322 319 422 224 155 213 317 321 216 230 333 186 189 223 231 410 209 212 187 174 175 180 178 215 217 214 227 228 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 224 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_iwdg.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 435</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 233</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 421 212 214 333 209 187 178 215 227 319 155 174 175 180 321 217 224 228 232 225 322 213 186 189 317 216 223 226 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 225 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_i2c.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 436</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 234</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 333 422 319 322 225 226 155 213 317 321 216 230 214 186 189 223 231 410 209 212 187 174 175 180 178 215 217 224 227 228 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 214 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_hash_sha1.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 449</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 246</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 224 155 175 232 319 281 333 180 321 217 228 209 212 187 178 215 214 227 421 322 213 186 189 317 216 223 225 226 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 281 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_hash_md5.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 448</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 235</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 224 319 155 175 232 281 333 180 321 217 228 209 212 187 178 215 214 227 421 322 213 186 189 317 216 223 225 226 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 281 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_hash.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 432</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 236</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 224 333 155 175 232 319 281 180 321 217 228 226 209 212 187 178 215 214 227 421 322 213 186 189 317 216 223 225 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 281 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_gpio.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 431</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 237</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 319 321 333 317 230 155 213 216 226 322 225 422 223 186 189 231 410 209 212 187 174 175 180 178 215 217 214 224 227 228 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 223 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_flash.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 429</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 414</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 217 186 231 319 189 223 333 226 410 155 322 213 317 321 216 225 230 422 209 212 187 174 175 180 178 215 214 224 227 228 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 217 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_fsmc.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 430</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 239</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 421 333 212 214 282 209 187 178 215 227 319 226 155 174 175 180 321 217 224 228 232 322 213 186 189 317 216 223 225 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 282 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_exti.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 426</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 419</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 212 214 319 421 209 187 178 215 227 216 333 155 174 175 180 321 217 224 228 232 322 213 186 189 317 223 225 226 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 216 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_dma.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 428</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 100</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 321 226 319 317 230 155 213 216 322 225 422 215 333 186 189 223 231 410 209 212 187 174 175 180 178 217 214 224 227 228 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 215 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_dcmi.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 427</file>
+          <file> 111</file>
         </tool>
         <tool>
           <name>ICCARM</name>
@@ -2338,112 +465,16 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 287 421 319 212 214 209 187 178 215 227 226 333 155 174 175 180 321 217 224 228 232 322 213 186 189 317 216 223 225 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 287 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
+          <file> 131 104 123 142 140 102 100 126 141 137 143 107 105 132 135 133 103 84 144</file>
         </tool>
       </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_dbgmcu.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSerializePublish.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 144</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 103</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 333 421 212 214 319 209 187 178 215 227 155 174 175 180 321 217 224 228 232 279 322 213 186 189 317 216 223 225 226 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 279 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_dac.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 152</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 101</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 224 155 175 232 319 333 180 321 217 228 284 226 209 212 187 178 215 214 227 421 322 213 186 189 317 216 223 225 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 284 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_cryp_tdes.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 438</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 110</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 224 333 155 175 232 319 283 180 321 217 228 209 212 187 178 215 214 227 421 322 213 186 189 317 216 223 225 226 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 283 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_cryp_des.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 437</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 405</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 174 224 155 175 232 319 283 180 321 217 228 333 209 212 187 178 215 214 227 421 322 213 186 189 317 216 223 225 226 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 283 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_cryp.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 413</file>
+          <file> 108</file>
         </tool>
         <tool>
           <name>ICCARM</name>
@@ -2453,89 +484,73 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 421 212 214 319 333 209 187 178 215 227 283 226 155 174 175 180 321 217 224 228 232 322 213 186 189 317 216 223 225 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 283 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
+          <file> 132 105 107 100 126 141 131 142 102 137 135 140 104 103 84 123 133 143 144</file>
         </tool>
       </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_cryp_aes.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTFormat.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 433</file>
+          <file> 86</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 409</file>
+          <file> 67</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 421 212 214 283 319 333 209 187 178 215 227 155 174 175 180 321 217 224 228 232 322 213 186 189 317 216 223 225 226 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 283 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
+          <file> 131 132 84 100 140 123 135 144 142 133 141 103 126 137 143 107 102 105 104</file>
         </tool>
       </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_crc.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTPacket.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 149</file>
+          <file> 85</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 94</file>
+          <file> 68</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 421 212 214 209 187 178 215 227 319 333 155 174 175 180 321 217 224 228 232 278 322 213 186 189 317 216 223 225 226 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 278 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
+          <file> 131 126 141 132 84 100 140 142 137 135 144 123 133 103 104 143 107 102 105</file>
         </tool>
       </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_can.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribeClient.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 142</file>
+          <file> 114</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 93</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 421 226 319 212 214 424 209 187 178 215 227 333 155 174 175 180 321 217 224 228 232 322 213 186 189 317 216 223 225 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 424 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\stm32f2xx_adc.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
           <file> 92</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 132 84 104 140 131 142 103 123 135 107 102 105 100 126 141 137 133 143 144</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribeServer.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 116</file>
         </tool>
         <tool>
           <name>ICCARM</name>
@@ -2545,282 +560,85 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 423 421 212 214 226 209 187 178 215 227 319 333 155 174 175 180 321 217 224 228 232 322 213 186 189 317 216 223 225 230 231 422 410</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 423 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410</file>
+          <file> 132 84 104 140 131 142 103 123 135 107 102 105 100 126 141 137 133 143 144</file>
         </tool>
       </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\startup_stm32f2xx_IAR.s</name>
-      <outputs>
-        <tool>
-          <name>AARM</name>
-          <file> 397</file>
-        </tool>
-      </outputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\wlan_platform.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeClient.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 412</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
           <file> 96</file>
         </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 333 179 212 410 319 187 172 69 226 21 169 186 68 332 189 209 223 231 155 17 193 170 166 191 192 306 28 174 175 180 178 317 321 216 225 230 422 22 16 173 167 197 322 213 215 217 214 224 227 228 421 232 5 23 19 18 24 20 188 183 190 185 168 182</file>
-        </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 155 186 187 189 180 178 174 175 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 410 332 28 179 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 23 306 17 19 22 18 21 24 16 20 193</file>
+          <file> 93</file>
         </tool>
-      </inputs>
+      </outputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\read_wifi_firmware.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeServer.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 99</file>
+          <file> 94</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 403</file>
+          <file> 90</file>
         </tool>
       </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 191 179 173 18 172 186 166 192 68 170 169 187 23 20 69 28 155 188 189 174 167 197 5 19 24 306 175 180 178 183 190 185 168 182 17 22 21 16 193</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 28 5 68 69 23 306 17 19 22 18 21 24 16 20 193</file>
-        </tool>
-      </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_StdPeriph_Driver\src\misc.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 104</file>
+          <file> 110</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 277</file>
+          <file> 109</file>
         </tool>
       </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 333 226 319 186 410 189 223 231 155 322 213 317 321 216 225 230 422 209 212 187 174 175 180 178 215 217 214 224 227 228 421 232</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 410 319 209 155 186 187 189 180 178 174 175 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232</file>
-        </tool>
-      </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\EMW1062_Driver\SDIO\wlan_bus.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MicoMQTTClient.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 411</file>
+          <file> 101</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 407</file>
+          <file> 106</file>
         </tool>
       </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 319 434 23 179 68 155 174 190 333 225 232 175 191 192 172 422 20 410 180 186 183 187 317 321 216 230 18 223 5 332 188 178 166 209 212 226 231 19 24 423 227 29 69 211 170 169 173 189 185 168 182 167 197 322 213 215 217 214 224 228 421 28 17 22 21 16 193 306 90 184</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 410 319 209 322 321 317 213 212 333 215 216 217 223 214 225 224 226 227 230 228 231 421 422 232 332 28 5 68 69 23 306 17 19 22 18 21 24 16 20 193 434 423 211 90 184</file>
-        </tool>
-      </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICOSystemMonitor.c</name>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceVersion.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 98</file>
+          <file> 119</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 398</file>
+          <file> 117</file>
         </tool>
       </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 380 186 187 179 68 189 166 27 155 197 18 171 28 32 29 188 190 191 192 172 23 20 26 165 261 90 30 5 184 170 169 173 174 175 180 178 183 185 168 182 167 19 24 1 194 195 196 51 69 17 22 21 16 193 306 10 198 310 199 200</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 26 90 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 184 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 261 380 10 171 198 194 310 165 196 199 195 200 1 51</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICOParaStorage.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 269</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 402</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 168 179 169 22 187 69 68 90 166 184 170 178 186 167 32 171 10 172 173 174 175 180 183 185 182 16 306 165 26 28 1 155 188 189 190 191 192 197 5 27 17 21 193 194 195 196 51 380 29 30 23 19 18 24 20 198 310 199 200</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 380 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184 26 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 10 171 198 194 310 165 196 199 195 200 1 51</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICONTPClient.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 270</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 401</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 189 186 187 166 28 310 5 179 256 155 197 24 68 181 188 190 191 192 172 90 29 19 199 380 219 51 170 169 173 174 175 180 178 183 185 168 182 167 10 30 23 18 20 198 196 200 1 26 184 69 32 27 17 22 21 16 193 306 171 194 165 195</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 1 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 51 380 90 29 5 68 69 184 26 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 10 171 198 194 310 165 196 199 195 200 181 219 256</file>
-        </tool>
-      </inputs>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\MICO\MICONotificationCenter.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 418</file>
+          <file> 75</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 307</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 187 186 166 90 189 179 165 68 306 219 155 16 380 10 188 190 191 192 172 184 69 32 22 171 26 1 170 169 173 174 175 180 178 183 185 168 182 167 197 5 27 17 21 193 194 195 196 29 30 28 23 19 18 24 20 198 310 199 200 51</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 219 380 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 90 29 5 68 69 184 26 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 10 171 198 194 310 165 196 199 195 200 1 51</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICOConfigMenu.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 266</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 396</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 186 29 166 187 199 188 190 191 192 172 69 310 221 68 179 155 189 198 196 10 5 184 170 169 173 174 175 180 178 183 185 168 182 167 197 171 194 165 195 200 90</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 90 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 184 10 171 198 194 310 165 196 199 195 200 221</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICOEntrance.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 268</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 391</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 29 178 24 28 179 187 5 166 68 198 380 257 19 188 183 186 185 182 200 1 174 175 180 23 18 20 155 168 167 197 10 196 256 69 219 261 222 255 108 189 17 22 21 16 193 170 172 169 173 190 191 192 90 30 310 199 306 26 184 32 27 171 194 165 195 51 109</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 256 186 187 189 180 178 174 175 166 28 179 155 170 172 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 23 306 17 19 22 18 21 24 16 20 193 380 90 29 184 26 32 30 27 10 171 198 194 310 165 196 199 195 200 1 51 219 261 222 257 255 108</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICOConfigServer.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 267</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 394</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 29 186 166 20 187 179 181 32 188 190 191 192 172 23 68 199 26 69 27 155 189 197 18 90 310 380 241 30 28 5 184 170 169 173 174 175 180 178 183 185 168 182 167 19 24 10 198 196 200 240 17 22 21 16 193 306 1 171 194 165 195 51</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 26 90 29 179 155 186 187 189 180 178 174 175 170 172 166 169 183 188 190 173 191 185 167 168 192 197 182 5 68 69 184 32 30 27 28 23 306 17 19 22 18 21 24 16 20 193 380 10 171 198 194 310 165 196 199 195 200 1 51 181 241 240</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>[ROOT_NODE]</name>
-      <outputs>
-        <tool>
-          <name>ILINK</name>
-          <file> 176 291</file>
+          <file> 65</file>
         </tool>
       </outputs>
     </file>
