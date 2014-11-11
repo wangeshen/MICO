@@ -43,10 +43,13 @@ void CloudServiceStartedCallback(cloud_service_status_t serviceStateInfo)
 {
   cloudStatusInfo = serviceStateInfo;
   if (CLOUD_SERVICE_STATUS_CONNECTED == serviceStateInfo.state){
+    ha_log("cloud service connected!");
     set_network_state(CLOUD_CONNECT, 1);
   }
-  else
+  else{
+    ha_log("cloud service disconnected!");
     set_network_state(CLOUD_CONNECT, 0);
+  }
 }
   
 

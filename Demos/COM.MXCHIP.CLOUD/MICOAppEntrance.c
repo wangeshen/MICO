@@ -25,7 +25,7 @@
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
 #define app_log_trace() custom_log_trace("APP")
 
-
+/*
 void userAppThread(void *arg)
 {
   micoMemInfo_t *memInfo = NULL;
@@ -44,7 +44,7 @@ OSStatus userAppStart(mico_Context_t *inContext)
 {
   return mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "userApp", userAppThread, 0x400, inContext );
 }
-
+*/
 
 /* MICO system callback: Restore default configuration provided by application */
 void appRestoreDefault_callback(mico_Context_t *inContext)
@@ -90,8 +90,8 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
   haProtocolInit( inContext );
   
   /* user app working thread */
-  err = userAppStart(inContext);
-  require_noerr_action( err, exit, app_log("ERROR: Unable to start userApp thread.") );
+  //err = userAppStart(inContext);
+  //require_noerr_action( err, exit, app_log("ERROR: Unable to start userApp thread.") );
   
 exit:
   return err;

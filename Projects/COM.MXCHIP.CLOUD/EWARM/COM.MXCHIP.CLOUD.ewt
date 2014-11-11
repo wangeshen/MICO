@@ -394,10 +394,10 @@
     <group>
       <name>MicoCloudService</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.a</name>
+        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.h</name>
+        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService_release.a</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceDef.h</name>
