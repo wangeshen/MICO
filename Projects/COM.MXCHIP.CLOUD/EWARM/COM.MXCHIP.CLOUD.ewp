@@ -316,10 +316,6 @@
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Drivers\spi_flash</state>
           <state>$PROJ_DIR$\..\..\..\Library\MicoCloudService</state>
-          <state>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient</state>
-          <state>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src</state>
-          <state>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MICO</state>
-          <state>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -3013,83 +3009,14 @@
     <name>Library</name>
     <group>
       <name>MicoCloudService</name>
-      <group>
-        <name>MicoMQTTClient</name>
-        <group>
-          <name>MQTTClient-C</name>
-          <group>
-            <name>src</name>
-            <group>
-              <name>MICO</name>
-              <file>
-                <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.c</name>
-              </file>
-              <file>
-                <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.h</name>
-              </file>
-            </group>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MQTTClient.c</name>
-            </file>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MQTTClient.h</name>
-            </file>
-          </group>
-        </group>
-        <group>
-          <name>MQTTPacket</name>
-          <group>
-            <name>src</name>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTConnectClient.c</name>
-            </file>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTConnectServer.c</name>
-            </file>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTDeserializePublish.c</name>
-            </file>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTFormat.c</name>
-            </file>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTPacket.c</name>
-            </file>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSerializePublish.c</name>
-            </file>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribeClient.c</name>
-            </file>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribeServer.c</name>
-            </file>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeClient.c</name>
-            </file>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeServer.c</name>
-            </file>
-          </group>
-        </group>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MicoMQTTClient.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MicoMQTTClient.h</name>
-        </file>
-      </group>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.c</name>
+        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.a</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceDef.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceVersion.c</name>
       </file>
     </group>
     <file>
