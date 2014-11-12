@@ -3,11 +3,13 @@
 #include "MICOAppDefine.h"
 #include "HaProtocol.h"
 #include "SocketUtils.h"
+#include "StringUtils.h"
 #include "debug.h"
 #include "MicoPlatform.h"
 #include "platform_common_config.h"
 #include "MICONotificationCenter.h"
 #include "MicoCloudService.h"
+#include "RGB.h"
 
 #define ha_log(M, ...) custom_log("HA Command", M, ##__VA_ARGS__)
 #define ha_log_trace() custom_log_trace("HA Command")
@@ -26,6 +28,111 @@ volatile ring_buffer_t  rx_buffer;
 volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
 
 extern void uartRecv_thread(void *inContext);
+
+
+/* BRIEF: led control message handler
+ * INPUT: led control message string
+ * NOTE: must be no sapce in the input message.
+ * return:
+ *     true, if message format is correct and set led, 
+ *     false, if message format is incorrect and do nothing to led.
+ *
+ * message string format: [switch,][hues,][saturation,][brightness]
+   *  switch[0/1]
+   *  hues[0-360]
+   *  saturation[0-100]
+   *  brightness[0-100]
+   * eg (red):   1,  0,   100,  100
+   *             |   |     |     |
+   *            /    |     |     \
+   *        switch hues saturation brightness
+   * string length = 11 (no sapce)
+  */
+static bool LedControlMsgHandler(unsigned char *Msg, unsigned int len)
+{
+  bool ret = false;
+  float *color_t = NULL;
+  unsigned char *ptr = NULL;
+  unsigned char led_hues_str[4] = {0};
+  unsigned char led_saturation_str[4] = {0};
+  unsigned char led_brightness_str[4] = {0};
+  int  led_hues_value = 0;
+  int  led_saturation_value = 0;
+  int  led_brightness_value = 0;
+  
+  char delims[] = ",";
+  char *psubstr = NULL;
+  
+  //null msg
+  if ((0 == len) || (NULL == Msg)){
+    return false;
+  }
+  
+  switch(Msg[0]) {
+  case '0':{ // led off
+    if(1 != len)
+      ret = false;
+    else{
+      //app_log("CloseLED.");
+      CloseLED_RGB();
+      ret = true;
+    }
+    break;
+  }
+  case '1':{  // led on
+    if (len < 7) // strlen("1,0,0,0")
+      ret = false;
+    else{
+      // get msg data
+      ptr = (unsigned char*)malloc(len-1);
+      memset(ptr, 0, len-1);
+      memcpy(ptr, Msg+2, len-2);
+      //app_log("ptr[%d]=%s", strlen((char *)ptr), ptr);
+      
+      // get HSB data string
+      psubstr = strtok((char*)ptr, delims);
+      if ((psubstr != NULL) && (strlen(psubstr)<=3)) {
+        memcpy(led_hues_str, psubstr, strlen(psubstr)); 
+        //app_log("led_hues_str[%d]=%s", strlen((char*)led_hues_str), led_hues_str);
+        psubstr = strtok( NULL, delims );
+        if ((psubstr != NULL) && (strlen(psubstr)<=3)) {
+          memcpy(led_saturation_str, psubstr, strlen(psubstr)); 
+          //app_log("led_saturation_str[%d]=%s", strlen((char*)led_saturation_str), led_saturation_str);
+          psubstr = strtok( NULL, delims );
+          if ((psubstr != NULL) && (strlen(psubstr)<=3)) {
+            memcpy(led_brightness_str, psubstr, strlen(psubstr));
+            //app_log("led_brightness_str[%d]=%s", strlen((char*)led_brightness_str), led_brightness_str);
+            //get HSB string ok, transform to int and set LED
+            if(Str2Int(led_hues_str, &led_hues_value) && \
+              Str2Int(led_saturation_str, &led_saturation_value) \
+                && Str2Int(led_brightness_str, &led_brightness_value)){
+                  color_t = (float*)malloc(3);
+                  if (NULL != color_t){
+                    //app_log("OpenLED: H=%f, S=%f, B=%f", (float)led_hues_value, (float)led_saturation_value, (float)led_brightness_value);
+                    H2R_HSBtoRGB((float)led_hues_value, (float)led_saturation_value, (float)led_brightness_value, color_t);
+                    OpenLED_RGB(color_t);
+                    free(color_t);
+                    color_t = NULL;
+                    ret = true;
+                  }
+                }
+          }
+        }
+      }
+      if(NULL != ptr){
+        free(ptr);
+        ptr = NULL;
+      }
+    }
+    break;
+  }
+  default:
+    ret = false;
+    break;
+  }
+  
+  return ret;    
+}
 
 
 //user recived data handler
@@ -228,14 +335,26 @@ OSStatus haWlanCommandProcess(unsigned char *inBuf, int *inBufLen)
 {
   ha_log_trace();
   OSStatus err = kUnknownErr;
-  unsigned char *responseMsg = "[MICO]send to USART OK!";
-
+  unsigned char *responseMsgOK = "set OK!";
+  unsigned char *responseMsgErr = "set FAILED!";
+  bool ret = false;
+/*
   //ha_log("Cloud => MCU:[%d]\t%.*s", *inBufLen, *inBufLen, inBuf);
   err = MicoUartSend(UART_FOR_APP, inBuf, *inBufLen);
   *inBufLen = 0;
   
   //send response to cloud
-  err = MicoCloudServiceUpload(responseMsg, strlen((char*)responseMsg));
+  err = MicoCloudServiceUpload(responseMsg, strlen((char*)responseMsgOK));
+*/  
+  ret = LedControlMsgHandler(inBuf, (int)(*inBufLen));
+  
+  if (ret){
+    err = MicoCloudServiceUpload(responseMsgOK, strlen((const char*)responseMsgOK));
+  }
+  else
+  {
+    err = MicoCloudServiceUpload(responseMsgErr, strlen((const char*)responseMsgErr));
+  }
   
   return err;
 }

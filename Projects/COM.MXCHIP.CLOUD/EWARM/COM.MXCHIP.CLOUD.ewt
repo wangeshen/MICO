@@ -867,6 +867,9 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform_common_config.h</name>
       </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\RGB.c</name>
+      </file>
     </group>
     <group>
       <name>MICO_EVB_1</name>
