@@ -79,7 +79,7 @@
         </option>
         <option>
           <name>RTDescription</name>
-          <state>Use the full configuration of the C/C++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
+          <state>To be used with the full configuration of the C/C++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
         </option>
         <option>
           <name>OGProductVersion</name>
@@ -3022,12 +3022,6 @@
     <name>Support</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\HTTPUtils.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\MDNSUtils.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\RingBufferUtils.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\SocketUtils.c</name>

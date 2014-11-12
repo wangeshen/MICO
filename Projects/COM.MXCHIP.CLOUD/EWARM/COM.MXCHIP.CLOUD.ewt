@@ -410,12 +410,6 @@
       <name>$PROJ_DIR$\..\..\..\Library\support\HTTPUtils.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\MDNSUtils.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\RingBufferUtils.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\SocketUtils.c</name>
     </file>
     <file>
