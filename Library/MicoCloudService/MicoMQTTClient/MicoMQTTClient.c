@@ -211,7 +211,7 @@ MQTTClientRestart:
       mico_rtos_unlock_mutex( &mqttClientContext_mutex );
       
       mico_mqtt_client_log("MQTT client disconnected,reconnect after 3 seconds...");
-      mico_thread_sleep(3);
+      mico_thread_sleep(5);
       goto MQTTClientRestart;
     }
   }

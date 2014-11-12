@@ -457,11 +457,10 @@ ReStartMQTTClient:
       goto ReStartService;
     }
     
-    mico_thread_sleep(5);
+    mico_thread_sleep(3);
   }
   
 cloud_service_stop:
-  MicoCloudServiceStatusChangedCallback(cloudServiceContext.service_status);
   MicoMQTTClientStop();
   
 exit:
