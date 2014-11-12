@@ -39,7 +39,7 @@ void userAppMessageArrivedHandler(unsigned char *Msg, unsigned int len)
 }
 
 
-void CloudServiceStartedCallback(cloud_service_status_t serviceStateInfo)
+void MicoCloudServiceStatusChangedCallback(cloud_service_status_t serviceStateInfo)
 {
   cloudStatusInfo = serviceStateInfo;
   if (CLOUD_SERVICE_STATUS_CONNECTED == serviceStateInfo.state){
