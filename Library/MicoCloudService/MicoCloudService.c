@@ -434,12 +434,14 @@ ReStartMQTTClient:
         }
         break;
       case MQTT_CLIENT_STATUS_DISCONNECTED:
-        mico_cloud_service_log("cloud service: mqtt client disconnected!");
-        mico_rtos_lock_mutex( &cloudServiceContext_mutex );
-        cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_DISCONNECTED;
-        mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
-        local_serviceConnected = false;
-        MicoCloudServiceStatusChangedCallback(cloudServiceContext.service_status);
+        if (local_serviceConnected){
+          mico_cloud_service_log("cloud service: mqtt client disconnected!");
+          mico_rtos_lock_mutex( &cloudServiceContext_mutex );
+          cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_DISCONNECTED;
+          mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
+          local_serviceConnected = false;
+          MicoCloudServiceStatusChangedCallback(cloudServiceContext.service_status);
+        }
         break;
       default:
         break;
