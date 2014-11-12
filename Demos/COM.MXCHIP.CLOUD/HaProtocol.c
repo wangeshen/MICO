@@ -208,7 +208,7 @@ void _report_status_thread(void *arg)
   while(1){
     mico_rtos_get_semaphore(&_report_status_sem, MICO_WAIT_FOREVER);
     //write cloud info back to flash
-    ha_log("report thread: write cloud info back to flash.");
+    ha_log("report thread: cloud service status changed.");
     mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
     inContext->appStatus.isCloudServiceConnected = is_network_state(CLOUD_CONNECT);
     inContext->flashContentInRam.appConfig.isActivated = cloudStatusInfo.isActivated;
@@ -217,7 +217,7 @@ void _report_status_thread(void *arg)
     mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
     MICOUpdateConfiguration(inContext);
     //report to USART device
-    ha_log("report thread: report status to USART device.");
+    ha_log("report thread: send cloud service status info to USART device.");
     _get_status(&cmd, inContext);
     MicoUartSend(UART_FOR_APP,(uint8_t *)&cmd, sizeof(mxchip_state_t));
   }
@@ -228,10 +228,15 @@ OSStatus haWlanCommandProcess(unsigned char *inBuf, int *inBufLen)
 {
   ha_log_trace();
   OSStatus err = kUnknownErr;
+  unsigned char *responseMsg = "[MICO]send to USART OK!";
 
   //ha_log("Cloud => MCU:[%d]\t%.*s", *inBufLen, *inBufLen, inBuf);
   err = MicoUartSend(UART_FOR_APP, inBuf, *inBufLen);
   *inBufLen = 0;
+  
+  //send response to cloud
+  err = MicoCloudServiceUpload(responseMsg, strlen((char*)responseMsg));
+  
   return err;
 }
 
