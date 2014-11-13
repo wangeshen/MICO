@@ -6,15 +6,467 @@
   <configuration>
     <name>EMW3162</name>
     <outputs>
-      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceVersion.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MicoMQTTClient.c</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_util.o</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\debug.c</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\arraylist.c</file>
+      <file>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MicoDefaults.h</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_object.c</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_tokener.c</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\json_util.c</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\linkhash.c</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\printbuf.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTConnectClient.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MQTTClient.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTConnectServer.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTDeserializePublish.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSerializePublish.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTFormat.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTPacket.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribeClient.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribeServer.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeClient.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeServer.c</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MicoMQTTClient.c</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.h</file>
       <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceDef.h</file>
-      <file>$PROJ_DIR$\..\..\..\MICO\MICODefine.h</file>
+      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceVersion.c</file>
       <file>$PROJ_DIR$\..\..\..\MICO\MICONotificationCenter.c</file>
-      <file>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MicoMQTTClient.h</file>
+      <file>$PROJ_DIR$\..\..\..\Library\support\SocketUtils.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\support\HTTPUtils.c</file>
+      <file>$PROJ_DIR$\..\..\..\Library\support\StringUtils.c</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\printbuf.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTClient.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTMICO.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTConnectClient.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\linkhash.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTConnectServer.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_object.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\debug.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_tokener.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\arraylist.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTDeserializePublish.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTSubscribeClient.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTPacket.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTUnsubscribeClient.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTSubscribeServer.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTSerializePublish.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTFormat.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoMQTTClient.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTUnsubscribeServer.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoCloudServiceVersion.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\arraylist.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICONotificationCenter.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoCloudService.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\HTTPUtils.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\SocketUtils.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\StringUtils.o</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\debug.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_tokener.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_object.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\json_util.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\linkhash.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\printbuf.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTConnectClient.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTClient.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTMICO.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTConnectServer.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTDeserializePublish.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTSerializePublish.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTFormat.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTPacket.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTSubscribeClient.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTSubscribeServer.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTUnsubscribeClient.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MQTTUnsubscribeServer.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoMQTTClient.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoCloudService.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MicoCloudServiceVersion.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\MICONotificationCenter.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\Output\EMW3162\MicoCloudService.a</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\HTTPUtils.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\SocketUtils.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\StringUtils.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\Build\COM.MXCHIP.CLOUD\EMW3162\Obj\COM.MXCHIP.pbd</file>
+      <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdio.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdlib.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Config_Full.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ystdio.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\string.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product_string.h</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\debug.h</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\bits.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdarg.h</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\arraylist.h</file>
+      <file>$PROJ_DIR$\..\..\..\External\JSON-C\config.h</file>
     </outputs>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\External\JSON-C\debug.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 56</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 37</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 90 83 88 87 92 91 84 94 85 89 86 100 98 93 95 96</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\External\JSON-C\arraylist.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 50</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 39</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 85 88 97 87 93 83 95 94 99 89 100 90 91 86</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\External\JSON-C\json_object.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 58</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 36</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\External\JSON-C\json_tokener.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 57</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 38</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\External\JSON-C\json_util.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 59</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 0</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\External\JSON-C\linkhash.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 60</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 34</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\External\JSON-C\printbuf.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 61</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 30</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 64</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 32</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTConnectClient.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 62</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 33</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MQTTClient.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 63</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 31</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTConnectServer.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 65</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 35</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTDeserializePublish.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 66</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 40</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSerializePublish.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 67</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 45</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTFormat.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 68</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 46</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTPacket.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 69</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 42</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribeClient.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 70</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 41</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribeServer.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 71</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 44</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeClient.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 72</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 43</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeServer.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 73</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 48</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 75</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 52</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MicoMQTTClient.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 74</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 47</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceVersion.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 76</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 49</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\MICO\MICONotificationCenter.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 77</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 51</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\support\SocketUtils.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 80</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 54</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\support\HTTPUtils.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 79</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 53</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\support\StringUtils.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 81</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 55</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>IARCHIVE</name>
+          <file> 78</file>
+        </tool>
+      </outputs>
+    </file>
   </configuration>
   <configuration>
     <name>MICO_EVB_1</name>

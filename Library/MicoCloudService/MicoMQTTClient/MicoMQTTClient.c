@@ -200,7 +200,7 @@ MQTTClientRestart:
     }
     
     /* subscribe read */
-    //mico_mqtt_client_log("MQTT client running...");
+    mico_mqtt_client_log("MQTT client running...");
     rc = MQTTYield(&c, (int)DEFAULT_MICO_MQTT_YIELD_TMIE);  //keepalive failed will return FAILURE
     if (SUCCESS != rc) {
       MQTTDisconnect(&c);
@@ -249,7 +249,9 @@ OSStatus MicoMQTTClientPublish(const char* pubtopic, const unsigned char* msg, i
   publishData.payload = (void*)msg;
   publishData.payloadlen = msglen;
   
+  mico_rtos_lock_mutex( &mqttClientContext_mutex );
   ret = MQTTPublish(&c, mqttClientContext.client_config_info.pubtopic, &publishData);
+  mico_rtos_unlock_mutex( &mqttClientContext_mutex );
   
   if (SUCCESS == ret)
     err = kNoErr;

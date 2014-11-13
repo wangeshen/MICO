@@ -75,6 +75,7 @@ static mico_mutex_t cloudServiceContext_mutex = NULL;
 
 //mqtt client info
 static mqtt_client_config_t mqtt_client_config_info = {0};
+
 static mico_thread_t cloudServiceThreadHandle = NULL;
 
 /*******************************************************************************
@@ -429,7 +430,7 @@ ReStartMQTTClient:
           cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_CONNECTED;
           mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
           local_serviceConnected = true;
-          mico_cloud_service_log("cloud service runing...");
+          mico_cloud_service_log("cloud service: mqtt client connected!");
           MicoCloudServiceStatusChangedCallback(cloudServiceContext.service_status);
         }
         break;
@@ -459,6 +460,7 @@ ReStartMQTTClient:
       goto ReStartService;
     }
     
+    mico_cloud_service_log("cloud service runing...");
     mico_thread_sleep(3);
   }
   
