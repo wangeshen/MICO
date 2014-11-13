@@ -371,9 +371,6 @@
       <name>$PROJ_DIR$\..\..\..\include\MICO.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\include\MicoAES.h</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\include\MicoAlgorithm.h</name>
     </file>
     <file>
@@ -897,9 +894,6 @@
     <name>Support</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\MDNSUtils.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\TLVUtils.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\URLUtils.c</name>
