@@ -348,13 +348,13 @@ OSStatus haWlanCommandProcess(unsigned char *inBuf, int *inBufLen)
 */  
   ret = LedControlMsgHandler(inBuf, (int)(*inBufLen));
   
-  if (ret){
-    err = MicoCloudServiceUpload(responseMsgOK, strlen((const char*)responseMsgOK));
-  }
-  else
-  {
-    err = MicoCloudServiceUpload(responseMsgErr, strlen((const char*)responseMsgErr));
-  }
+//  if (ret){
+//    err = MicoCloudServiceUpload(responseMsgOK, strlen((const char*)responseMsgOK));
+//  }
+//  else
+//  {
+//    err = MicoCloudServiceUpload(responseMsgErr, strlen((const char*)responseMsgErr));
+//  }
   
   return err;
 }
