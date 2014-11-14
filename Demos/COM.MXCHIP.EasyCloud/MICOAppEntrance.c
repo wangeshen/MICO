@@ -36,7 +36,7 @@ void userAppThread(void *arg)
     memInfo = mico_memory_info();
     app_log("system free mem[userApp]=%d", memInfo->free_memory);
     
-    mico_thread_sleep(1);
+    mico_thread_sleep(3);
   }
 }
 

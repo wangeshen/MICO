@@ -3013,7 +3013,7 @@
   <group>
     <name>Library</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService_debug.a</name>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService_release.a</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\MICOConfig.c</name>
@@ -3556,6 +3556,9 @@
     <name>Support</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\MDNSUtils.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\support\RingBufferUtils.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\URLUtils.c</name>

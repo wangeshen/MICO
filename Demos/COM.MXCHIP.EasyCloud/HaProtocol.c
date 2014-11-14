@@ -4,6 +4,7 @@
 #include "HaProtocol.h"
 #include "SocketUtils.h"
 #include "StringUtils.h"
+#include "RingBufferUtils.h"
 #include "debug.h"
 #include "MicoPlatform.h"
 #include "platform_common_config.h"
