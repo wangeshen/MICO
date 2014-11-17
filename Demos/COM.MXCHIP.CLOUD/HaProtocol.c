@@ -73,8 +73,8 @@ static bool LedControlMsgHandler(unsigned char *Msg, unsigned int len)
     if(1 != len)
       ret = false;
     else{
-      //app_log("CloseLED.");
-      CloseLED_RGB();
+      ha_log("CloseLED.");
+      //CloseLED_RGB();
       ret = true;
     }
     break;
@@ -108,9 +108,9 @@ static bool LedControlMsgHandler(unsigned char *Msg, unsigned int len)
                 && Str2Int(led_brightness_str, &led_brightness_value)){
                   color_t = (float*)malloc(3);
                   if (NULL != color_t){
-                    //app_log("OpenLED: H=%f, S=%f, B=%f", (float)led_hues_value, (float)led_saturation_value, (float)led_brightness_value);
+                    ha_log("OpenLED: H=%f, S=%f, B=%f", (float)led_hues_value, (float)led_saturation_value, (float)led_brightness_value);
                     H2R_HSBtoRGB((float)led_hues_value, (float)led_saturation_value, (float)led_brightness_value, color_t);
-                    OpenLED_RGB(color_t);
+                    //OpenLED_RGB(color_t);
                     free(color_t);
                     color_t = NULL;
                     ret = true;
