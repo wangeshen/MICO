@@ -87,7 +87,8 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
   app_log("system free mem[MICO]=%d", memInfo->free_memory);
   
   /* start virtual device */
-  haProtocolInit( inContext );
+  err = haProtocolInit( inContext );
+  require_noerr_action( err, exit, app_log("ERROR: haProtocolInit failed!") );
   
   /* user app working thread */
   err = userAppStart(inContext);

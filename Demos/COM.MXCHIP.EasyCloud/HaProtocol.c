@@ -261,7 +261,7 @@ OSStatus haProtocolInit(mico_Context_t * const inContext)
   };
   
   /*============================================================================
-   * init MCU interface
+   * init MCU USART interface
    *==========================================================================*/
 
   mico_rtos_init_mutex(&_mutex);
@@ -292,7 +292,7 @@ OSStatus haProtocolInit(mico_Context_t * const inContext)
   require_noerr( err, exit ); 
   
   /*============================================================================
-   * init cloud interface
+   * init cloud service interface
    *==========================================================================*/
 
   cloudServiceLibVersion = MicoCloudServiceVersion();
