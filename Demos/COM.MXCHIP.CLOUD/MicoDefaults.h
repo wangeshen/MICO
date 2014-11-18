@@ -50,7 +50,7 @@ extern "C"
 
 /************************************************************************
  * Uncomment to disable standard IO, i.e. printf(), etc. */
-//#define MICO_DISABLE_STDIO
+#define MICO_DISABLE_STDIO
 
 /************************************************************************
  * Uncomment to disable MCU powersave API functions */

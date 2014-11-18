@@ -3024,9 +3024,6 @@
       <name>$PROJ_DIR$\..\..\..\Library\support\HTTPUtils.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\SocketUtils.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\StringUtils.c</name>
     </file>
   </group>
