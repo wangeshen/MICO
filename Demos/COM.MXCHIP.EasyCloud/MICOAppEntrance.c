@@ -26,26 +26,6 @@
 #define app_log_trace() custom_log_trace("APP")
 
 
-void userAppThread(void *arg)
-{
-  micoMemInfo_t *memInfo = NULL;
-  app_log("userApp working thread start.");
-  
-  while(1)
-  {    
-    memInfo = mico_memory_info();
-    app_log("system free mem[userApp]=%d", memInfo->free_memory);
-    
-    mico_thread_sleep(3);
-  }
-}
-
-OSStatus userAppStart(mico_Context_t *inContext)
-{
-  return mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "userApp", userAppThread, 0x400, inContext );
-}
-
-
 /* MICO system callback: Restore default configuration provided by application */
 void appRestoreDefault_callback(mico_Context_t *inContext)
 {
@@ -74,7 +54,6 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
 {
   app_log_trace();
   OSStatus err = kNoErr;
-  micoMemInfo_t *memInfo = NULL;
   
   require_action(inContext, exit, err = kParamErr);
 
@@ -83,16 +62,9 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
     MICOStartBonjourService( Station, inContext );
   }
   
-  memInfo = mico_memory_info();
-  app_log("system free mem[MICO]=%d", memInfo->free_memory);
-  
   /* start virtual device */
   err = haProtocolInit( inContext );
   require_noerr_action( err, exit, app_log("ERROR: haProtocolInit failed!") );
-  
-  /* user app working thread */
-  err = userAppStart(inContext);
-  require_noerr_action( err, exit, app_log("ERROR: Unable to start userApp thread.") );
   
 exit:
   return err;

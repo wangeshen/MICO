@@ -10,7 +10,6 @@
 #include "platform_common_config.h"
 #include "MICONotificationCenter.h"
 #include "MicoCloudService.h"
-#include "RGB.h"
 
 #define ha_log(M, ...) custom_log("HA Command", M, ##__VA_ARGS__)
 #define ha_log_trace() custom_log_trace("HA Command")
@@ -31,117 +30,10 @@ volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
 extern void uartRecv_thread(void *inContext);
 
 
-/* BRIEF: led control message handler
- * INPUT: led control message string
- * NOTE: must be no sapce in the input message.
- * return:
- *     true, if message format is correct and set led, 
- *     false, if message format is incorrect and do nothing to led.
- *
- * message string format: [switch,][hues,][saturation,][brightness]
-   *  switch[0/1]
-   *  hues[0-360]
-   *  saturation[0-100]
-   *  brightness[0-100]
-   * eg (red):   1,  0,   100,  100
-   *             |   |     |     |
-   *            /    |     |     \
-   *        switch hues saturation brightness
-   * string length = 11 (no sapce)
-  */
-static bool LedControlMsgHandler(unsigned char *Msg, unsigned int len)
-{
-  bool ret = false;
-  float *color_t = NULL;
-  unsigned char *ptr = NULL;
-  unsigned char led_hues_str[4] = {0};
-  unsigned char led_saturation_str[4] = {0};
-  unsigned char led_brightness_str[4] = {0};
-  int  led_hues_value = 0;
-  int  led_saturation_value = 0;
-  int  led_brightness_value = 0;
-  
-  char delims[] = ",";
-  char *psubstr = NULL;
-  
-  //null msg
-  if ((0 == len) || (NULL == Msg)){
-    return false;
-  }
-  
-  switch(Msg[0]) {
-  case '0':{ // led off
-    if(1 != len)
-      ret = false;
-    else{
-      ha_log("CloseLED.");
-      //CloseLED_RGB();
-      ret = true;
-    }
-    break;
-  }
-  case '1':{  // led on
-    if (len < 7) // strlen("1,0,0,0")
-      ret = false;
-    else{
-      // get msg data
-      ptr = (unsigned char*)malloc(len-1);
-      memset(ptr, 0, len-1);
-      memcpy(ptr, Msg+2, len-2);
-      //app_log("ptr[%d]=%s", strlen((char *)ptr), ptr);
-      
-      // get HSB data string
-      psubstr = strtok((char*)ptr, delims);
-      if ((psubstr != NULL) && (strlen(psubstr)<=3)) {
-        memcpy(led_hues_str, psubstr, strlen(psubstr)); 
-        //app_log("led_hues_str[%d]=%s", strlen((char*)led_hues_str), led_hues_str);
-        psubstr = strtok( NULL, delims );
-        if ((psubstr != NULL) && (strlen(psubstr)<=3)) {
-          memcpy(led_saturation_str, psubstr, strlen(psubstr)); 
-          //app_log("led_saturation_str[%d]=%s", strlen((char*)led_saturation_str), led_saturation_str);
-          psubstr = strtok( NULL, delims );
-          if ((psubstr != NULL) && (strlen(psubstr)<=3)) {
-            memcpy(led_brightness_str, psubstr, strlen(psubstr));
-            //app_log("led_brightness_str[%d]=%s", strlen((char*)led_brightness_str), led_brightness_str);
-            //get HSB string ok, transform to int and set LED
-            if(Str2Int(led_hues_str, &led_hues_value) && \
-              Str2Int(led_saturation_str, &led_saturation_value) \
-                && Str2Int(led_brightness_str, &led_brightness_value)){
-                  color_t = (float*)malloc(3);
-                  if (NULL != color_t){
-                    ha_log("OpenLED: H=%f, S=%f, B=%f", (float)led_hues_value, (float)led_saturation_value, (float)led_brightness_value);
-                    H2R_HSBtoRGB((float)led_hues_value, (float)led_saturation_value, (float)led_brightness_value, color_t);
-                    //OpenLED_RGB(color_t);
-                    free(color_t);
-                    color_t = NULL;
-                    ret = true;
-                  }
-                }
-          }
-        }
-      }
-      if(NULL != ptr){
-        free(ptr);
-        ptr = NULL;
-      }
-    }
-    break;
-  }
-  default:
-    ret = false;
-    break;
-  }
-  
-  return ret;    
-}
-
-
 //user recived data handler
 void userAppMessageArrivedHandler(unsigned char *Msg, unsigned int len)
 {
   unsigned int msglen = len;
-  //note: get data just for length=len is valid, because Msg is just a buf pionter.
-  //app_log("userApp send to UART: [%d]=%.*s", len, len, Msg);
   
   haWlanCommandProcess(Msg, (int*)(&msglen));
 }
@@ -278,7 +170,7 @@ OSStatus haProtocolInit(mico_Context_t * const inContext)
   else
     uart_config.flags = UART_WAKEUP_DISABLE;
   ring_buffer_init  ( (ring_buffer_t *)&rx_buffer, (uint8_t *)rx_data, UART_BUFFER_LENGTH );
-  //??? maybe failed ??? WES 20141105
+
   MicoUartInitialize( UART_FOR_APP, &uart_config, (ring_buffer_t *)&rx_buffer );
   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART Recv", uartRecv_thread, 0x500, (void*)inContext );
   require_noerr_action( err, exit, ha_log("ERROR: Unable to start the uart recv thread.") );
@@ -289,7 +181,7 @@ OSStatus haProtocolInit(mico_Context_t * const inContext)
 
   /* Regisist notifications */
   err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)haNotify_WifiStatusHandler );
-  require_noerr( err, exit ); 
+  require_noerr( err, exit );
   
   /*============================================================================
    * init cloud service interface
@@ -325,7 +217,7 @@ void _report_status_thread(void *arg)
     mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
     MICOUpdateConfiguration(inContext);
     //report to USART device
-    ha_log("report thread: send cloud service status info to USART device.");
+    ha_log("report thread: send cloud service status to USART device.");
     _get_status(&cmd, inContext);
     MicoUartSend(UART_FOR_APP,(uint8_t *)&cmd, sizeof(mxchip_state_t));
   }
@@ -336,26 +228,10 @@ OSStatus haWlanCommandProcess(unsigned char *inBuf, int *inBufLen)
 {
   ha_log_trace();
   OSStatus err = kUnknownErr;
-  unsigned char *responseMsgOK = "set OK!";
-  unsigned char *responseMsgErr = "set FAILED!";
-  bool ret = false;
-/*
-  //ha_log("Cloud => MCU:[%d]\t%.*s", *inBufLen, *inBufLen, inBuf);
+
+  ha_log("Cloud => MCU:[%d]\t%.*s", *inBufLen, *inBufLen, inBuf);
   err = MicoUartSend(UART_FOR_APP, inBuf, *inBufLen);
   *inBufLen = 0;
-  
-  //send response to cloud
-  err = MicoCloudServiceUpload(responseMsg, strlen((char*)responseMsgOK));
-*/  
-  ret = LedControlMsgHandler(inBuf, (int)(*inBufLen));
-  
-  if (ret){
-    err = MicoCloudServiceUpload(responseMsgOK, strlen((const char*)responseMsgOK));
-  }
-  else
-  {
-    err = MicoCloudServiceUpload(responseMsgErr, strlen((const char*)responseMsgErr));
-  }
   
   return err;
 }
@@ -374,28 +250,23 @@ OSStatus haUartCommandProcess(uint8_t *inBuf, int inBufLen, mico_Context_t * con
   int datalen = 0;
   
   cmd_header = (mxchip_cmd_head_t *)inBuf;
-  
-  /* control cmd or data transfer */
   p = inBuf;
   
   datalen = p[6] + (p[7]<<8);
   if ((p[0] != 0xBB) || (p[1] != 0x00) ||
       ((datalen + HA_CMD_HEAD_SIZE + 2) != inBufLen) ||
       kNoErr != check_sum(inBuf, HA_CMD_HEAD_SIZE + datalen + 2)){
+        //just transfer raw data to cloud
         goto data_transfer;
   }
   
-  /* is a control cmd */
-  
-  //uint16_t cmd = cmd_header->cmd;
-  //ha_log("cmd=%d",cmd);
-  
+  /* process format package */
   switch(cmd_header->cmd) {
   case CMD_COM2NET:
     cmd_header->cmd |= 0x8000;
     com2net_data_len = cmd_header->datalen;
     com2net_data = inBuf + HA_CMD_HEAD_SIZE;
-    /* upload data recived from uart to cloud */
+    /* upload format data recived from uart to cloud */
     //ha_log("MCU => Cloud:[%d]\r\n%.*s", com2net_data_len, com2net_data_len, com2net_data);
     err = MicoCloudServiceUpload(com2net_data, com2net_data_len);
     break;
@@ -404,6 +275,7 @@ OSStatus haUartCommandProcess(uint8_t *inBuf, int inBufLen, mico_Context_t * con
     //ha_log("get status: [%d]\r\n%.*s",  sizeof(mxchip_state_t),  sizeof(mxchip_state_t), inBuf);
     err = MicoUartSend(UART_FOR_APP, inBuf, sizeof(mxchip_state_t));
     break;
+  //module control cmd
   case CMD_CONTROL:
     if (cmd_header->datalen != 1)
       break;
@@ -449,6 +321,7 @@ OSStatus haUartCommandProcess(uint8_t *inBuf, int inBufLen, mico_Context_t * con
       goto data_transfer;
       break;
     }
+    // response
     cmd_header->cmd |= 0x8000;
     cmd_header->cmd_status = CMD_OK;
     cmd_header->datalen = 0;
@@ -466,7 +339,7 @@ exit:
     return err;
     
 data_transfer:
-  //ha_log("MCU => Cloud:[%d]\t%.*s", inBufLen, inBufLen, inBuf);
+  ha_log("MCU => Cloud:[%d]\t%.*s", inBufLen, inBufLen, inBuf);
   err = MicoCloudServiceUpload(inBuf, inBufLen);
   return err;
 }
@@ -481,16 +354,16 @@ OSStatus check_sum(void *inData, uint32_t inLen)
   
   uint16_t checksum = 0;
 
-  return kNoErr;
+  //return kNoErr;
   
   // TODO: real cksum
   p += inLen - 2;
 
   sum = (uint16_t *)p;
-  ha_log("sum=%d", *sum);
+  //ha_log("sum=%d", *sum);
 
   checksum = _calc_sum(inData, inLen - 2);
-  ha_log("checksum=%d", checksum);
+  //ha_log("checksum=%d", checksum);
   
   if (checksum != *sum) {  // check sum error    
     return kChecksumErr;

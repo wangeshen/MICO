@@ -275,9 +275,6 @@
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EasyCloud\MicoDefaults.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EasyCloud\RGB.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EasyCloud\UartRecv.c</name>
     </file>
   </group>
@@ -380,7 +377,7 @@
       <name>$PROJ_DIR$\..\..\..\include\MicoCloudServiceDef.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\include\MICOPlatform.h</name>
+      <name>$PROJ_DIR$\..\..\..\include\MicoPlatform.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\include\MICORTOS.h</name>
