@@ -400,9 +400,6 @@
     <file>
       <name>$PROJ_DIR$\..\..\..\MICO\MICODefine.h</name>
     </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MICONotificationCenter.c</name>
-    </file>
   </group>
   <group>
     <name>Support</name>

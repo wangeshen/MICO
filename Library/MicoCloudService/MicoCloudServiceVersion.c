@@ -39,7 +39,7 @@
  ******************************************************************************/
 #define MICO_CLOUD_SERVCIE_VERSION_MAIN        0x00
 #define MICO_CLOUD_SERVCIE_VERSION_SUB         0x01
-#define MICO_CLOUD_SERVCIE_VERSION_REV         0x00
+#define MICO_CLOUD_SERVCIE_VERSION_REV         0x01
 
 #define MICO_CLOUD_SERVCIE_VERSION             (MICO_CLOUD_SERVCIE_VERSION_MAIN << 16 | \
                                                 MICO_CLOUD_SERVCIE_VERSION_SUB << 8 | \
