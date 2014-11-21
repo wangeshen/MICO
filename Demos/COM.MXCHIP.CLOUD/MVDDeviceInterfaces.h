@@ -1,11 +1,11 @@
 /**
 ******************************************************************************
-* @file    MicoCloudService.h 
+* @file    MVDDeviceInterfaces.h 
 * @author  Eshen Wang
-* @version V1.0.0
-* @date    15-Oct-2014
-* @brief   This header contains function prototypes of cloud service based
-           on MICO platform. 
+* @version V0.2.0
+* @date    21-Nov-2014
+* @brief   This header contains the lower device interfaces 
+*          for MICO virtual device. 
   operation
 ******************************************************************************
 * @attention
@@ -21,25 +21,23 @@
 ******************************************************************************
 */ 
 
-#ifndef __MICO_CLOUD_SERVICE_H_
-#define __MICO_CLOUD_SERVICE_H_
+
+#ifndef __MICO_MVDDEVICEINTERFACES_H_
+#define __MICO_MVDDEVICEINTERFACES_H_
 
 #include "Common.h"
-#include "MicoCloudServiceDef.h"
+
+/*******************************************************************************
+ * DEFINES
+ ******************************************************************************/
+
 
 /*******************************************************************************
  * INTERFACES
  ******************************************************************************/
 
-//old interfaces
-void MicoCloudServiceInit(cloud_service_config_t init);
-OSStatus MicoCloudServiceStart(void);
-OSStatus MicoCloudServiceStop(void);
-
-OSStatus MicoCloudServiceUpload(const unsigned char *msg, unsigned int msglen);
-cloudServiceState MicoCloudServiceState(void);
-
-int MicoCloudServiceVersion(void);
+OSStatus MVDDevInterfaceInit(mico_Context_t* const inContext);
+OSStatus MVDDevInterfaceSend(unsigned char *inBuf, unsigned int inBufLen);
 
 
 #endif

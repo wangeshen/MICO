@@ -25,13 +25,13 @@
 #define __MICOAPPDEFINE_H
 
 #include "Common.h"
-#include "MicoCloudServiceDef.h"
+#include "MicoVirtualDevice.h"
 
 #define APP_INFO   "mxchipWNet cloud Demo based on MICO OS"
 
-#define FIRMWARE_REVISION   "MICO_CLOUD_0_1"
+#define FIRMWARE_REVISION   "MICO_CLOUD_1_0"
 #define MANUFACTURER        "MXCHIP Inc."
-#define SERIAL_NUMBER       "20141031"
+#define SERIAL_NUMBER       "20141120"
 #define PROTOCOL            "com.mxchip.cloud"
 
 /*User provided configurations*/
@@ -52,12 +52,6 @@
 
 #define BONJOUR_SERVICE                     "_easylink._tcp.local."
 
-//device info
-#define DEFAULT_PRODUCT_ID               "f315fea0-50fc-11e4-b6fc-f23c9150064b"
-#define DEFAULT_PRODUCT_KEY              "41a71625-5519-11e4-ad4e-f23c9150064b"
-#define DEFAULT_USER_TOKEN               "00000000"
-#define DEFAULT_DEVICE_ID                "00000000"
-#define DEFAULT_DEVICE_KEY               "00000000"
 
 /*Application's configuration stores in flash*/
 typedef struct
@@ -71,23 +65,9 @@ typedef struct
   char              remoteServerDomain[64];
   int               remoteServerPort;
   
-  /*IO settings*/
-  uint32_t          USART_BaudRate;
-  
-  /* cloud setting */
-  char              cloudServerDomain[64];
-  int               cloudServerPort;
-  char              mqttServerDomain[64];
-  int               mqttServerPort;
-  uint16_t          mqttkeepAliveInterval;
-
-  char product_id[MAX_PRODUCT_ID_STRLEN];
-  char product_key[MAX_PRODUCT_KEY_STRLEN];
-  
-  bool isActivated;  // device activate flag
-  char user_token[MAX_USER_TOKEN_STRLEN];  // set by user app
-  char device_id[MAX_DEVICE_ID_STRLEN];  // used for mqtt client
-  char master_device_key[MAX_DEVICE_KEY_STRLEN];  // used for mqtt client
+  /*virtual device settings*/
+  virtual_device_config_t virtualDevConfig;
+ 
 } application_config_t;
 
 /*Running status*/
@@ -96,8 +76,9 @@ typedef struct _current_app_status_t {
   uint32_t          loopBack_PortList[MAX_Local_Client_Num];
   /*Remote TCP client connecte*/
   bool              isRemoteConnected;
-  /* cloud service connect */
-  bool              isCloudServiceConnected;
+  
+  /*virtual device status*/
+  virtual_device_status_t virtualDevStatus;
 } current_app_status_t;
 
 

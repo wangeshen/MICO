@@ -1,11 +1,11 @@
 /**
 ******************************************************************************
-* @file    MicoCloudService.c
+* @file    EasyCloudService.c
 * @author  Eshen Wang
-* @version V1.0.0
-* @date    15-Oct-2014
-* @brief   This file contains implementation of cloud services based on 
-           MICO platform.
+* @version V0.1.0
+* @date    21-Nov-2014
+* @brief   This file contains implementation of EasyCloud service based on 
+           EASYCLOUD platform.
   operation
 ******************************************************************************
 * @attention
@@ -21,16 +21,16 @@
 ******************************************************************************
 */ 
 
-#include "MICO.h"
-#include "MICONotificationCenter.h"
+#include "EASYCLOUD.h"
+#include "EASYCLOUDNotificationCenter.h"
 
 #include "JSON-C/json.h"
 #include "SocketUtils.h"
 #include "HTTPUtils.h"
 #include "StringUtils.h"
 
-#include "MicoMQTTClient.h"
-#include "MicoCloudService.h"
+#include "EasyCloudService.h"
+#include "EasyCloudMQTTClient.h"
 
 
 //#define  debug_out 
@@ -40,8 +40,8 @@
 //#else
 #define _debug_out(format, ...) do {;}while(0)
 
-#define mico_cloud_service_log(M, ...) custom_log("CloudService", M, ##__VA_ARGS__)
-#define mico_cloud_service_log_trace() custom_log_trace("CloudService")
+#define easycloud_service_log(M, ...) custom_log("EasyCloudService", M, ##__VA_ARGS__)
+#define easycloud_service_log_trace() custom_log_trace("EasyCloudService")
 //#endif
 
 /*******************************************************************************
@@ -51,13 +51,17 @@
 //cloud request type
 typedef enum {
   DEVICE_ACTIVATE = 0,
-  DEVICE_AUTHORIZE
+  DEVICE_AUTHORIZE,
+  DEVICE_RESET,
 } service_request_type_t;
-   
+
+//cloud request url
 #define DEFAULT_DEVICE_ACTIVATE_URL             "/v1/device/activate"
 #define DEFAULT_DEVICE_AUTHORIZE_URL            "/v1/device/authorize"
+#define DEFAULT_DEVICE_AUTHORIZE_URL            "/v1/device/reset"
+#define DEFAULT_ROM_GET_VERSION_URL             "/v1/rom/lastversion"
 
-#define MICO_CLOUD_WAIT_WIFI_TIMEOUT_MS         1000
+#define EASYCLOUD_CLOUD_WAIT_WIFI_TIMEOUT_MS         1000
 
 #define STACK_SIZE_CLOUD_SERVICE_MAIN_THREAD    0x800
 
@@ -105,7 +109,7 @@ static OSStatus calculate_device_token(char* bssid, char* product_key, char out_
  * EXTERNS
  ******************************************************************************/
 
-//__weak void MicoCloudServiceStatusChangedCallback(void* inContext, cloud_service_status_t serviceStateInfo)
+//__weak void EasyCloudServiceStatusChangedCallback(void* inContext, cloud_service_status_t serviceStateInfo)
 //{
 //}
 
@@ -115,7 +119,7 @@ static OSStatus calculate_device_token(char* bssid, char* product_key, char out_
 
 void cloudNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inContext)
 {
-  mico_cloud_service_log_trace();
+  easycloud_service_log_trace();
   (void)inContext;
   switch (event) {
   case NOTIFY_STATION_UP:
@@ -132,7 +136,7 @@ void cloudNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inCon
 }
 
 
-void MicoCloudServiceInit(cloud_service_config_t init)
+void EasyCloudServiceInit(cloud_service_config_t init)
 {
   if(cloudServiceContext_mutex == NULL)
     mico_rtos_init_mutex( &cloudServiceContext_mutex );
@@ -145,29 +149,29 @@ void MicoCloudServiceInit(cloud_service_config_t init)
 }
 
 
-OSStatus MicoCloudServiceStart(void)
+OSStatus EasyCloudServiceStart(void)
 {
-  if (CLOUD_SERVICE_STATUS_STOPPED != MicoCloudServiceState()){
+  if (CLOUD_SERVICE_STATUS_STOPPED != EasyCloudServiceState()){
     return kNoErr;
   }
  
   mico_rtos_init_semaphore(&_wifiConnected_sem, 1);
   return mico_rtos_create_thread(&cloudServiceThreadHandle, 
-                                 MICO_APPLICATION_PRIORITY, 
+                                 EASYCLOUD_APPLICATION_PRIORITY, 
                                  "Cloud service", cloudServiceThread, 
                                  STACK_SIZE_CLOUD_SERVICE_MAIN_THREAD, cloudServiceContext.service_config_info.context );
 }
 
 
-OSStatus MicoCloudServiceStop(void)
+OSStatus EasyCloudServiceStop(void)
 {
   OSStatus err = kNoErr;
   
-  if (CLOUD_SERVICE_STATUS_STOPPED == MicoCloudServiceState()){
+  if (CLOUD_SERVICE_STATUS_STOPPED == EasyCloudServiceState()){
     return kNoErr;
   }
 
-  //MICORemoveNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)cloudNotify_WifiStatusHandler );
+  //EASYCLOUDRemoveNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)cloudNotify_WifiStatusHandler );
   if(_wifiConnected_sem) mico_rtos_deinit_semaphore(&_wifiConnected_sem);
   
   mico_rtos_lock_mutex( &cloudServiceContext_mutex );
@@ -188,13 +192,13 @@ OSStatus MicoCloudServiceStop(void)
     cloudServiceThreadHandle = NULL;
   }
   
-  mico_cloud_service_log("cloud service stopped.");
+  easycloud_service_log("cloud service stopped.");
   
   return err;
 }
 
 
-cloudServiceState MicoCloudServiceState(void)
+cloudServiceState EasyCloudServiceState(void)
 {
   cloudServiceState state = CLOUD_SERVICE_STATUS_STOPPED;
   
@@ -206,7 +210,7 @@ cloudServiceState MicoCloudServiceState(void)
 }
 
 
-OSStatus MicoCloudServiceUpload(const unsigned char* msg, unsigned int msglen)
+OSStatus EasyCloudServiceUpload(const unsigned char* msg, unsigned int msglen)
 {
   int ret = kUnknownErr;
   mico_rtos_lock_mutex( &cloudServiceContext_mutex );
@@ -216,7 +220,7 @@ OSStatus MicoCloudServiceUpload(const unsigned char* msg, unsigned int msglen)
   if (NULL == msg || 0 == msglen)
     return kParamErr;
   
-  if (CLOUD_SERVICE_STATUS_CONNECTED != MicoCloudServiceState()){
+  if (CLOUD_SERVICE_STATUS_CONNECTED != EasyCloudServiceState()){
     return kStateErr;
   }
   
@@ -253,7 +257,7 @@ void cloudServiceThread(void *arg)
   cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_STARTED;
   mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
   
-  mico_cloud_service_log("cloudServiceThread start...");
+  easycloud_service_log("cloudServiceThread start...");
   
   /* get device info */
   mico_rtos_lock_mutex(&cloudServiceContext_mutex);
@@ -264,19 +268,19 @@ void cloudServiceThread(void *arg)
   mico_rtos_unlock_mutex(&cloudServiceContext_mutex);
   
   /* Regisist wifi connect notifications */
-  err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)cloudNotify_WifiStatusHandler );
+  err = EASYCLOUDAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)cloudNotify_WifiStatusHandler );
   require_noerr( err, exit );
   
 ReStartService:
   /* wait for wifi connect */
   if(_wifiConnected == false) {
-    mico_cloud_service_log("cloud service wait for wifi connect...");
+    easycloud_service_log("cloud service wait for wifi connect...");
     while(1){
-      if(CLOUD_SERVICE_STATUS_STOPPED == MicoCloudServiceState()){
+      if(CLOUD_SERVICE_STATUS_STOPPED == EasyCloudServiceState()){
         goto cloud_service_stop;
       }
       
-      err = mico_rtos_get_semaphore(&_wifiConnected_sem, MICO_CLOUD_WAIT_WIFI_TIMEOUT_MS);
+      err = mico_rtos_get_semaphore(&_wifiConnected_sem, EASYCLOUD_CLOUD_WAIT_WIFI_TIMEOUT_MS);
       if (kNoErr == err)
         break;
     }
@@ -289,14 +293,14 @@ ReStartService:
 
 ReActivate:
   if (!isActivated) {
-    if(CLOUD_SERVICE_STATUS_STOPPED == MicoCloudServiceState()){
+    if(CLOUD_SERVICE_STATUS_STOPPED == EasyCloudServiceState()){
       goto cloud_service_stop;
     }
     
     //cal device_token(MD5)
     err = calculate_device_token(cloudServiceContext.service_config_info.bssid, product_key, device_token);
     require_noerr( err, ReActivate );
-    mico_cloud_service_log("calculate device_token[%d]=%s", strlen(device_token), device_token);
+    easycloud_service_log("calculate device_token[%d]=%s", strlen(device_token), device_token);
     //activate
     err = device_activate_authorize(DEVICE_ACTIVATE, 
                                      cloudServiceContext.service_config_info.host, 
@@ -317,7 +321,7 @@ ReActivate:
 
 ReAuthorize:
   if (!isAuthorized){
-    if(CLOUD_SERVICE_STATUS_STOPPED == MicoCloudServiceState()){
+    if(CLOUD_SERVICE_STATUS_STOPPED == EasyCloudServiceState()){
       goto cloud_service_stop;
     }
     
@@ -355,7 +359,7 @@ ReAuthorize:
   strncpy(publish_topic, device_id, strlen(device_id));
   strncat(publish_topic, "/out", 4);
   
-  mico_cloud_service_log("subscribe_topic=%s, publish_topic=%s", subscribe_topic, publish_topic);
+  easycloud_service_log("subscribe_topic=%s, publish_topic=%s", subscribe_topic, publish_topic);
 
    /* 2. start MQTT client */
 ReStartMQTTClient:
@@ -380,14 +384,14 @@ ReStartMQTTClient:
   
   /* 3. wait for MQTT client start up. */
   while(1){
-    if(CLOUD_SERVICE_STATUS_STOPPED == MicoCloudServiceState()){
+    if(CLOUD_SERVICE_STATUS_STOPPED == EasyCloudServiceState()){
       goto cloud_service_stop;
     }
     
     if(MQTT_CLIENT_STATUS_CONNECTED == MicoMQTTClientState())
       break;
     else {
-      mico_cloud_service_log("wait for mqtt client start up...");
+      easycloud_service_log("wait for mqtt client start up...");
       mico_thread_sleep(1);
     }
   }
@@ -398,18 +402,18 @@ ReStartMQTTClient:
   
   /* 4. cloud service started callback, notify user. */
   cloudServiceContext.service_config_info.statusNotify(inContext, cloudServiceContext.service_status);
-  mico_cloud_service_log("cloud service started.");
+  easycloud_service_log("cloud service started.");
   
   /* service loop */
   while(1) {
-    if(CLOUD_SERVICE_STATUS_STOPPED == MicoCloudServiceState()){
+    if(CLOUD_SERVICE_STATUS_STOPPED == EasyCloudServiceState()){
       goto cloud_service_stop;
     }
     
     if(_wifiConnected){
       switch(MicoMQTTClientState()){
       case MQTT_CLIENT_STATUS_STOPPED:
-        mico_cloud_service_log("mqtt client stopped! try restarting it after 3 seconds...");
+        easycloud_service_log("mqtt client stopped! try restarting it after 3 seconds...");
         mico_rtos_lock_mutex( &cloudServiceContext_mutex );
         cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_DISCONNECTED;
         mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
@@ -419,7 +423,7 @@ ReStartMQTTClient:
         goto ReStartMQTTClient;
         break;
       case MQTT_CLIENT_STATUS_STARTED:
-        mico_cloud_service_log("cloud service: mqtt client connecting...");
+        easycloud_service_log("cloud service: mqtt client connecting...");
         mico_rtos_lock_mutex( &cloudServiceContext_mutex );
         cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_DISCONNECTED;
         mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
@@ -432,13 +436,13 @@ ReStartMQTTClient:
           cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_CONNECTED;
           mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
           local_serviceConnected = true;
-          mico_cloud_service_log("cloud service: mqtt client connected!");
+          easycloud_service_log("cloud service: mqtt client connected!");
           cloudServiceContext.service_config_info.statusNotify(inContext, cloudServiceContext.service_status);
         }
         break;
       case MQTT_CLIENT_STATUS_DISCONNECTED:
         if (local_serviceConnected){
-          mico_cloud_service_log("cloud service: mqtt client disconnected!");
+          easycloud_service_log("cloud service: mqtt client disconnected!");
           mico_rtos_lock_mutex( &cloudServiceContext_mutex );
           cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_DISCONNECTED;
           mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
@@ -451,7 +455,7 @@ ReStartMQTTClient:
       }
     }
     else {
-      mico_cloud_service_log("wifi disconnect! restart cloud service after 5 seconds...");
+      easycloud_service_log("wifi disconnect! restart cloud service after 5 seconds...");
       mico_rtos_lock_mutex( &cloudServiceContext_mutex );
       cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_DISCONNECTED;
       mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
@@ -462,7 +466,7 @@ ReStartMQTTClient:
       goto ReStartService;
     }
     
-    //mico_cloud_service_log("cloud service runing...");
+    //easycloud_service_log("cloud service runing...");
     mico_thread_sleep(3);
   }
   
@@ -474,8 +478,8 @@ exit:
   cloudServiceContext.service_status.state = CLOUD_SERVICE_STATUS_STOPPED;
   mico_rtos_unlock_mutex( &cloudServiceContext_mutex );
   cloudServiceContext.service_config_info.statusNotify(inContext, cloudServiceContext.service_status);
-  mico_cloud_service_log("Exit: cloud thread exit with err = %d", err);
-  MICORemoveNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)cloudNotify_WifiStatusHandler );
+  easycloud_service_log("Exit: cloud thread exit with err = %d", err);
+  EASYCLOUDRemoveNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)cloudNotify_WifiStatusHandler );
   //if(_wifiConnected_sem) mico_rtos_deinit_semaphore(&_wifiConnected_sem);
   mico_rtos_delete_thread(NULL);
   cloudServiceThreadHandle = NULL;
@@ -515,17 +519,17 @@ static OSStatus device_activate_authorize(service_request_type_t request_type, c
   json_str = (char*)json_object_to_json_string(object);
   json_str_len = strlen(json_str);
   
-  mico_cloud_service_log("request type(activated=0, authorize=1) = [%d].", request_type);
+  easycloud_service_log("request type(activated=0, authorize=1) = [%d].", request_type);
   
   httpHeader = HTTPHeaderCreate();
   require_action( httpHeader, exit, err = kNoMemoryErr );
   HTTPHeaderClear( httpHeader );
   
   //create tcp connect
-  mico_cloud_service_log("tcp client start to connect...");
+  easycloud_service_log("tcp client start to connect...");
   err = gethostbyname((char *)cloudServiceContext.service_config_info.host, (uint8_t *)ipstr, 16);
   require_noerr(err, exit);
-  mico_cloud_service_log("cloud service host:%s, ip: %s", cloudServiceContext.service_config_info.host, ipstr);
+  easycloud_service_log("cloud service host:%s, ip: %s", cloudServiceContext.service_config_info.host, ipstr);
   
   remoteTcpClient_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   require(remoteTcpClient_fd != -1, exit);
@@ -536,19 +540,19 @@ static OSStatus device_activate_authorize(service_request_type_t request_type, c
   err = connect(remoteTcpClient_fd, &addr, sizeof(addr));
   require_noerr_quiet(err, exit);
   
-  mico_cloud_service_log("cloud server connected at port=%d, fd=%d", 
+  easycloud_service_log("cloud server connected at port=%d, fd=%d", 
                          cloudServiceContext.service_config_info.port,
                          remoteTcpClient_fd);
   
   // send request data
-  mico_cloud_service_log("tcp client send activate request...");
+  easycloud_service_log("tcp client send activate request...");
   err = CreateHTTPMessageEx(kHTTPPostMethod, 
                             host, request_url,
                             kMIMEType_JSON, 
                             (uint8_t*)json_str, json_str_len,
                             &httpRequestData, &httpRequestDataLen);
   require_noerr( err, exit );
-  mico_cloud_service_log("send http package: len=%d,\r\n%s", httpRequestDataLen, httpRequestData);
+  easycloud_service_log("send http package: len=%d,\r\n%s", httpRequestDataLen, httpRequestData);
   
   err = SocketSend( remoteTcpClient_fd, httpRequestData, httpRequestDataLen );
   if (httpRequestData != NULL) {
@@ -562,50 +566,50 @@ static OSStatus device_activate_authorize(service_request_type_t request_type, c
   FD_SET(remoteTcpClient_fd, &readfds);
   err = select(1, &readfds, NULL, NULL, &t);
   require(err >= 1, exit);
-  //mico_cloud_service_log("select return ok.");
+  //easycloud_service_log("select return ok.");
   
   if (FD_ISSET(remoteTcpClient_fd, &readfds)) {
     err = SocketReadHTTPHeader( remoteTcpClient_fd, httpHeader );             
     switch ( err )
     {
     case kNoErr:
-      //mico_cloud_service_log("read httpheader OK!");
-      //mico_cloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
+      //easycloud_service_log("read httpheader OK!");
+      //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
       // Read the rest of the HTTP body if necessary
       err = SocketReadHTTPBody( remoteTcpClient_fd, httpHeader );
       require_noerr(err, exit);
-      mico_cloud_service_log("read httpBody OK!");
-      mico_cloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
+      easycloud_service_log("read httpBody OK!");
+      easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
       // parse recived extra data to get devicd_id && master_device_key.
       err = _parseResponseMessage( remoteTcpClient_fd, httpHeader, out_device_id, out_master_device_key );
       HTTPHeaderClear(httpHeader);  // Reuse HTTPHeader
       require_noerr( err, exit );
       
-      mico_cloud_service_log("device (activated=0, authorize=1) [%d] done!", request_type);
+      easycloud_service_log("device (activated=0, authorize=1) [%d] done!", request_type);
       goto exit_success;
       break;
       
     case EWOULDBLOCK:
-      mico_cloud_service_log("ERROR: read blocked!");
+      easycloud_service_log("ERROR: read blocked!");
       // NO-OP, keep reading
       goto exit;
       break;
       
     case kNoSpaceErr:
-      mico_cloud_service_log("ERROR: Cannot fit HTTPHeader.");
+      easycloud_service_log("ERROR: Cannot fit HTTPHeader.");
       goto exit;
       break;
       
     case kConnectionErr:
       // NOTE: kConnectionErr from SocketReadHTTPHeader means it's closed
-      mico_cloud_service_log("ERROR: Connection closed.");
+      easycloud_service_log("ERROR: Connection closed.");
       goto exit;
       break;
       
     default:
-      mico_cloud_service_log("ERROR: HTTP Header parse internal error: %d", err);
+      easycloud_service_log("ERROR: HTTP Header parse internal error: %d", err);
       goto exit; 
     }    
   }
@@ -624,7 +628,7 @@ exit_success:
   return kNoErr;
   
 exit:
-  mico_cloud_service_log("Exit: cloud tcp client exit with err = %d", err);
+  easycloud_service_log("Exit: cloud tcp client exit with err = %d", err);
   HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
   if(remoteTcpClient_fd != -1){
@@ -646,17 +650,17 @@ static OSStatus _parseResponseMessage(int fd, HTTPHeader_t* inHeader, char out_d
     const char *        value;
     size_t              valueSize;
 
-    mico_cloud_service_log_trace();
+    easycloud_service_log_trace();
 
     switch(inHeader->statusCode){
       case kStatusOK:
-        //mico_cloud_service_log("cloud server respond activate status OK!");
+        //easycloud_service_log("cloud server respond activate status OK!");
         //get content-type for json format data
         err = HTTPGetHeaderField( inHeader->buf, inHeader->len, "Content-Type", NULL, NULL, &value, &valueSize, NULL );
         require_noerr(err, exit);
           
         if( strnicmpx( value, strlen(kMIMEType_JSON), kMIMEType_JSON ) == 0 ){
-          //mico_cloud_service_log("JSON data received!");
+          //easycloud_service_log("JSON data received!");
           // parse json data
           err = _configIncommingJsonMessage( inHeader->extraDataPtr, inHeader->extraDataLen, out_device_id, out_master_device_key);
           require_noerr( err, exit );
@@ -678,26 +682,26 @@ static OSStatus _parseResponseMessage(int fd, HTTPHeader_t* inHeader, char out_d
 
 static OSStatus _configIncommingJsonMessage( const char *input , unsigned int len, char out_device_id[MAX_SIZE_DEVICE_ID], char out_master_device_key[MAX_SIZE_DEVICE_KEY])
 {
-  mico_cloud_service_log_trace();
+  easycloud_service_log_trace();
   OSStatus err = kUnknownErr;
   json_object *new_obj = NULL;
 
-  //mico_cloud_service_log("Recv json data input=%s", input);
+  //easycloud_service_log("Recv json data input=%s", input);
   new_obj = json_tokener_parse(input);
-  //mico_cloud_service_log("Recv json data=%s", json_object_to_json_string(new_obj));
+  //easycloud_service_log("Recv json data=%s", json_object_to_json_string(new_obj));
   require_action(new_obj, exit, err = kUnknownErr);
-  //mico_cloud_service_log("Recv json config object=%s", json_object_to_json_string(new_obj));
+  //easycloud_service_log("Recv json config object=%s", json_object_to_json_string(new_obj));
 
   //save each key-value in json data for system.
   json_object_object_foreach(new_obj, key, val) {
     if(!strcmp(key, "device_id")){
       memset((char *)out_device_id, 0, strlen(out_device_id));
       strncpy((char*)out_device_id, json_object_get_string(val), MAX_SIZE_DEVICE_ID);
-      //mico_cloud_service_log("get out_device_id[%d]=%s", strlen(out_device_id), out_device_id);
+      //easycloud_service_log("get out_device_id[%d]=%s", strlen(out_device_id), out_device_id);
     }else if(!strcmp(key, "master_device_key")){
       memset((char *)out_master_device_key, 0, strlen(out_master_device_key));
       strncpy(out_master_device_key, json_object_get_string(val), MAX_SIZE_DEVICE_KEY);
-      //mico_cloud_service_log("get out_master_device_key[%d]=%s", strlen(out_master_device_key), out_master_device_key);
+      //easycloud_service_log("get out_master_device_key[%d]=%s", strlen(out_master_device_key), out_master_device_key);
     }
     else {
     }
@@ -731,8 +735,8 @@ static OSStatus calculate_device_token(char *bssid, char *product_key, char out_
     return kParamErr;
   memset(out_device_token, 0, strlen(out_device_token));
   
-  //mico_cloud_service_log("bssid[%d]=%s", strlen(bssid), bssid);
-  //mico_cloud_service_log("product_key[%d]=%s", strlen(product_key), product_key);
+  //easycloud_service_log("bssid[%d]=%s", strlen(bssid), bssid);
+  //easycloud_service_log("product_key[%d]=%s", strlen(product_key), product_key);
 
   input_len = strlen(bssid) + strlen(product_key) + 1;
   md5_input = (unsigned char *)malloc(input_len);
@@ -743,15 +747,15 @@ static OSStatus calculate_device_token(char *bssid, char *product_key, char out_
   
   memcpy(md5_input, bssid, strlen(bssid));
   memcpy((md5_input + strlen(bssid)), product_key, strlen(product_key));
-  //mico_cloud_service_log("md5_input[%d]=%s", strlen((char*)md5_input), (unsigned char*)md5_input);
+  //easycloud_service_log("md5_input[%d]=%s", strlen((char*)md5_input), (unsigned char*)md5_input);
   
   InitMd5(&md5);
   Md5Update(&md5, md5_input, strlen((char*)md5_input));
   Md5Final(&md5, device_token_16);
-  //mico_cloud_service_log("device_token_16[%d]=%s", sizeof(device_token_16), device_token_16);
+  //easycloud_service_log("device_token_16[%d]=%s", sizeof(device_token_16), device_token_16);
   //convert hex data to hex string
   ptoken32 = DataToHexStringLowercase(device_token_16,  sizeof(device_token_16));
-  //mico_cloud_service_log("out_device_token[%d]=%s", strlen(ptoken32), ptoken32);
+  //easycloud_service_log("out_device_token[%d]=%s", strlen(ptoken32), ptoken32);
   
   if (NULL != ptoken32){
     strncpy(out_device_token, ptoken32, strlen(ptoken32));
@@ -766,7 +770,7 @@ static OSStatus calculate_device_token(char *bssid, char *product_key, char out_
     md5_input = NULL;
   }
   
-  //mico_cloud_service_log("out_device_token[%d]=%s", strlen(out_device_token), out_device_token);
+  //easycloud_service_log("out_device_token[%d]=%s", strlen(out_device_token), out_device_token);
   
   return kNoErr;
 }

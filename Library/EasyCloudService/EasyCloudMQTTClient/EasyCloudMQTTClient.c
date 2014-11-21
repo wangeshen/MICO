@@ -1,11 +1,11 @@
 /**
 ******************************************************************************
-* @file    MicoMQTTClient.c
+* @file    EasyCloudMQTTClient.c
 * @author  Eshen Wang
-* @version V1.0.0
-* @date    14-Oct-2014
+* @version V0.1.0
+* @date    21-Nov-2014
 * @brief   This file contains functions implementation of MQTT client based
-               on MICO platform. 
+           on MICO platform. 
   operation
 ******************************************************************************
 * @attention
@@ -23,7 +23,7 @@
 
 #include "MICO.h"
 #include "MICONotificationCenter.h"
-#include "MicoMQTTClient.h"
+#include "EasyCloudMQTTClient.h"
 
 //#ifdef debug_out
 //#define  _debug_out debug_out
@@ -57,7 +57,7 @@ static void mqttClientThread(void *arg);
 * IMPLEMENTATIONS
 *******************************************************************************/
 
-void MicoMQTTClientInit(mqtt_client_config_t init)
+void EasyCloudMQTTClientInit(mqtt_client_config_t init)
 {
   mico_mqtt_client_log("mqtt client init");
   if(mqttClientContext_mutex == NULL)
@@ -69,7 +69,7 @@ void MicoMQTTClientInit(mqtt_client_config_t init)
   mico_rtos_unlock_mutex( &mqttClientContext_mutex );
 }
 
-OSStatus MicoMQTTClientStart(void)
+OSStatus EasyCloudMQTTClientStart(void)
 {
   return mico_rtos_create_thread(&mqttClientThreadHandle, 
                                  MICO_APPLICATION_PRIORITY, 
@@ -127,7 +127,7 @@ MQTTClientRestart:
 
   /* 1. socket connect */
   while(1) {
-    if ( MQTT_CLIENT_STATUS_STOPPED == MicoMQTTClientState()){
+    if ( MQTT_CLIENT_STATUS_STOPPED == EasyCloudMQTTClientState()){
       goto client_stop;
     }
     
@@ -156,7 +156,7 @@ MQTTClientRestart:
   connectData.cleansession = 1;
   
   while(1) {
-    if ( MQTT_CLIENT_STATUS_STOPPED == MicoMQTTClientState()){
+    if ( MQTT_CLIENT_STATUS_STOPPED == EasyCloudMQTTClientState()){
       goto client_stop;
     }
     
@@ -173,7 +173,7 @@ MQTTClientRestart:
   /* 3. subscribe request */
   //mico_mqtt_client_log("subscribing to %s", mqtt_client_config.subtopic);
   while(1) {
-    if ( MQTT_CLIENT_STATUS_STOPPED == MicoMQTTClientState()){
+    if ( MQTT_CLIENT_STATUS_STOPPED == EasyCloudMQTTClientState()){
       goto client_stop;
     }
     
@@ -196,7 +196,7 @@ MQTTClientRestart:
   mico_rtos_unlock_mutex( &mqttClientContext_mutex );
   
   while (1) {
-    if ( MQTT_CLIENT_STATUS_STOPPED == MicoMQTTClientState()){
+    if ( MQTT_CLIENT_STATUS_STOPPED == EasyCloudMQTTClientState()){
       goto client_stop;
     }
     
@@ -234,7 +234,7 @@ client_stop:
 }
 
 
-OSStatus MicoMQTTClientPublish(const char* pubtopic, const unsigned char* msg, int msglen)
+OSStatus EasyCloudMQTTClientPublish(const char* pubtopic, const unsigned char* msg, int msglen)
 {
   OSStatus err = kUnknownErr;
   int ret = 0;
@@ -264,7 +264,7 @@ OSStatus MicoMQTTClientPublish(const char* pubtopic, const unsigned char* msg, i
   return err;
 }
 
-OSStatus MicoMQTTClientStop(void)
+OSStatus EasyCloudMQTTClientStop(void)
 {
   OSStatus err = kNoErr;
     
@@ -295,7 +295,7 @@ OSStatus MicoMQTTClientStop(void)
   return err;
 }
 
-mqttClientState MicoMQTTClientState(void)
+mqttClientState EasyCloudMQTTClientState(void)
 {
   mqttClientState state = MQTT_CLIENT_STATUS_STOPPED;
   
@@ -309,14 +309,14 @@ mqttClientState MicoMQTTClientState(void)
 
 //TODO ???
 
-//OSStatus MicoMQTTClientSubscribe(const char* subtopic, enum QoS qos, messageHandler hmsg)
+//OSStatus EasyCloudMQTTClientSubscribe(const char* subtopic, enum QoS qos, messageHandler hmsg)
 //{
 //  OSStatus err = kUnknownErr;
 //  
 //  return err;
 //}
 //
-//OSStatus MicoMQTTClientUnsubscribe (const char* unsubtopic)
+//OSStatus EasyCloudMQTTClientUnsubscribe (const char* unsubtopic)
 //{
 //  OSStatus err = kUnknownErr;
 //  

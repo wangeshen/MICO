@@ -333,14 +333,23 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
   err = MICOAddSector(sectors, "Cloud info",           sector);
   require_noerr(err, exit);
 
-    // device activate status
-    err = MICOAddSwitchCellToSector(sector, "activated", inContext->flashContentInRam.appConfig.isActivated, "RO");
+    // cloud connect status
+    err = MICOAddSwitchCellToSector(sector, "connect", inContext->appStatus.virtualDevStatus.isCloudConnected, "RO");
     require_noerr(err, exit);
-    // user_token cell
-    err = MICOAddStringCellToSector(sector, "user token", inContext->flashContentInRam.appConfig.user_token, "RW", NULL);
+    // device activate status
+    err = MICOAddSwitchCellToSector(sector, "activated", inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated, "RO");
     require_noerr(err, exit);
     // device_id cell, is RO in fact, we set RW is convenient for read full string.
-    err = MICOAddStringCellToSector(sector, "device_id", inContext->flashContentInRam.appConfig.device_id, "RW", NULL);
+    err = MICOAddStringCellToSector(sector, "device_id", inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId, "RW", NULL);
+    require_noerr(err, exit);
+    // login_id cell
+    err = MICOAddStringCellToSector(sector, "login_id", "input login id", "RW", NULL);
+    require_noerr(err, exit);
+    // device password cell
+    err = MICOAddStringCellToSector(sector, "dev_passwd", "input dev passwd", "RW", NULL);
+    require_noerr(err, exit);
+    // user_token cell
+    err = MICOAddStringCellToSector(sector, "user_token", "input user token", "RW", NULL);
     require_noerr(err, exit);
 
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
@@ -394,13 +403,19 @@ OSStatus ConfigIncommingJsonMessage( const char *input, mico_Context_t * const i
 //      inContext->flashContentInRam.appConfig.remoteServerPort = json_object_get_int(val);
 //    }
     else if(!strcmp(key, "Baurdrate")){
-      inContext->flashContentInRam.appConfig.USART_BaudRate = json_object_get_int(val);
+      inContext->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate = json_object_get_int(val);
     }
 //    else if(!strcmp(key, "activated")){
 //      inContext->flashContentInRam.appConfig.isAcitivated = json_object_get_int(val);
 //    }
-    else if(!strcmp(key, "user token")){
-      strncpy(inContext->flashContentInRam.appConfig.user_token, json_object_get_string(val), MAX_USER_TOKEN_STRLEN);
+    else if(!strcmp(key, "login_id")){
+      strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
+    }
+    else if(!strcmp(key, "dev_passwd")){
+      strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD);
+    }
+    else if(!strcmp(key, "user_token")){
+      strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, json_object_get_string(val), MAX_SIZE_USER_TOKEN);
     }
   }
   json_object_put(new_obj);

@@ -1,9 +1,9 @@
 /**
 ******************************************************************************
-* @file    MicoCloudServiceDef.h 
+* @file    EasyCloudServiceDef.h 
 * @author  Eshen Wang
-* @version V1.0.0
-* @date    20-Nov-2014
+* @version V0.1.0
+* @date    21-Nov-2014
 * @brief   This header contains the public defines for EasyCloud service. 
   operation
 ******************************************************************************
@@ -21,8 +21,8 @@
 */ 
 
 
-#ifndef __MICO_CLOUD_SERVICE_DEF_H_
-#define __MICO_CLOUD_SERVICE_DEF_H_
+#ifndef __EASYEASYCLOUD_SERVICE_DEF_H_
+#define __EASYEASYCLOUD_SERVICE_DEF_H_
 
 
 /*******************************************************************************
@@ -47,9 +47,9 @@
 #define MAX_SIZE_SUBSCRIBE_TOPIC        256
 #define MAX_SIZE_PUBLISH_TOPIC          256
 
-// default values for cloud server
-#define DEFAULT_CLOUD_SERVER            "api.easylink.io"
-#define DEFAULT_CLOUD_PORT              80
+// default values for easycloud server
+#define DEFAULT_EASYCLOUD_SERVER            "api.easylink.io"
+#define DEFAULT_EASYCLOUD_PORT              80
 
 // default values for MQTT server
 #define DEFAULT_MQTT_SERVER             "api.easylink.io"
@@ -64,26 +64,26 @@
  ******************************************************************************/
 
 typedef enum {
-  CLOUD_SERVICE_STATUS_STOPPED = 1, //service stopped
-  CLOUD_SERVICE_STATUS_STARTED = 2, //service start up
-  CLOUD_SERVICE_STATUS_CONNECTED = 3, //service work ok
-  CLOUD_SERVICE_STATUS_DISCONNECTED = 4 //service diconnected from server
-} cloudServiceState;
+  EASYCLOUD_SERVICE_STATUS_STOPPED = 1, //service stopped
+  EASYCLOUD_SERVICE_STATUS_STARTED = 2, //service start up
+  EASYCLOUD_SERVICE_STATUS_CONNECTED = 3, //service work ok
+  EASYCLOUD_SERVICE_STATUS_DISCONNECTED = 4 //service diconnected from server
+} easycloudServiceState;
 
-typedef struct _cloud_service_status_t {
-  cloudServiceState state;
+typedef struct _easycloud_service_status_t {
+  easycloudServiceState state;
   bool isActivated;
   //bool isAuthorized;
   char deviceId[MAX_SIZE_DEVICE_ID];
   char masterDeviceKey[MAX_SIZE_DEVICE_KEY];
-} cloud_service_status_t;
+} easycloud_service_status_t;
  
 //message recived callback function prototype
-typedef void (*cloudMsgRecvCallBack)(void* const context, unsigned char* msg, unsigned int msgLen);
-typedef void (*cloudStatusChangedCallback)(void* const context, cloud_service_status_t serviceStateInfo);
+typedef void (*easycloudMsgRecvCallBack)(void* const context, unsigned char* msg, unsigned int msgLen);
+typedef void (*easycloudStatusChangedCallback)(void* const context, easycloud_service_status_t serviceStateInfo);
 
-typedef struct _cloud_service_info_t {
-  //cloud server info
+typedef struct _easycloud_service_info_t {
+  //easycloud server info
   char                 *host;
   uint16_t              port;
   
@@ -101,19 +101,19 @@ typedef struct _cloud_service_info_t {
   char                 *mqttServerHost;
   uint16_t              mqttServerPort;
   uint16_t              mqttKeepAliveInterval;
-  cloudMsgRecvCallBack  msgRecvhandler;  // message received callback
+  easycloudMsgRecvCallBack  msgRecvhandler;  // message received callback
   
-  cloudStatusChangedCallback statusNotify;  // cloud servie status changed callback
+  easycloudStatusChangedCallback statusNotify;  // cloud servie status changed callback
   void                 *context;  // app context
-} cloud_service_config_t;
+} easycloud_service_config_t;
 
-typedef struct _cloud_service_context_t {
-  /*cloud service config info*/
-  cloud_service_config_t service_config_info;
+typedef struct _easycloud_service_context_t {
+  /*easycloud service config info*/
+  easycloud_service_config_t service_config_info;
   
-  /*cloud service running status*/
-  cloud_service_status_t service_status;
-} cloud_servcie_context_t;
+  /*easycloud service running status*/
+  easycloud_service_status_t service_status;
+} easycloud_service_context_t;
 
 
 #endif

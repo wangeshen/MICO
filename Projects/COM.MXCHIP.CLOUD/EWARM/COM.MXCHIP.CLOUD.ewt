@@ -257,9 +257,6 @@
   <group>
     <name>Application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\HaProtocol.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MICOAppDefine.h</name>
     </file>
     <file>
@@ -273,6 +270,15 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MicoDefaults.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MicoVirtualDevice.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MVDCloudInterfaces.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\MVDDeviceInterfaces.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.CLOUD\UartRecv.c</name>
@@ -392,96 +398,75 @@
   <group>
     <name>Library</name>
     <group>
-      <name>MicoCloudService</name>
+      <name>EasyCloudService</name>
       <group>
-        <name>MicoMQTTClient</name>
+        <name>EasyCloudMQTTClient</name>
         <group>
           <name>MQTTClient-C</name>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MQTTClient.c</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MQTTClient.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MQTTClient.h</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MQTTClient.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.c</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.h</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.h</name>
           </file>
         </group>
         <group>
           <name>MQTTPacket</name>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTConnect.h</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTConnectClient.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTConnectClient.c</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTConnectServer.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTConnectServer.c</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTDeserializePublish.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTDeserializePublish.c</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTFormat.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTFormat.c</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTPacket.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTFormat.h</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTSerializePublish.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTPacket.c</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTSubscribeClient.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTPacket.h</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTSubscribeServer.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTPublish.h</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTUnsubscribeClient.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSerializePublish.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribe.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribeClient.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTSubscribeServer.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribe.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeClient.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\MQTTUnsubscribeServer.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MQTTPacket\src\StackTrace.h</name>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTUnsubscribeServer.c</name>
           </file>
         </group>
         <file>
-          <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MicoMQTTClient.c</name>
+          <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\EasyCloudMQTTClient.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoMQTTClient\MicoMQTTClient.h</name>
+          <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\EasyCloudMQTTClient.h</name>
         </file>
       </group>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.c</name>
+        <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudService.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudService.h</name>
+        <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudService.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceDef.h</name>
+        <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudServiceDef.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Library\MicoCloudService\MicoCloudServiceVersion.c</name>
+        <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudServiceVersion.c</name>
       </file>
     </group>
     <file>
@@ -947,9 +932,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\platform_common_config.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\Platform\EMW3162\RGB.c</name>
       </file>
     </group>
     <group>

@@ -1,11 +1,11 @@
 /**
 ******************************************************************************
-* @file    MicoMQTTClient.h 
+* @file    EasyCloudMQTTClient.h 
 * @author  EShen Wang
 * @version V1.0.0
-* @date    14-Oct-2014
+* @date    21-Nov-2014
 * @brief   This header contains function prototypes for MQTT client. based
-                on MICO platform
+           on MICO platform
   operation
 ******************************************************************************
 * @attention
@@ -22,8 +22,8 @@
 */ 
 
 
-#ifndef __MICO_MQTT_CLIENT_H_
-#define __MICO_MQTT_CLIENT_H_
+#ifndef __EASYCLOUD_MQTT_CLIENT_H_
+#define __EASYCLOUD_MQTT_CLIENT_H_
 
 #include "Common.h"
 #include "MQTTClient.h"
@@ -92,15 +92,15 @@ typedef struct _mqtt_client_context_t {
 * USER INTERFACES
 *******************************************************************************/
 
-void MicoMQTTClientInit(mqtt_client_config_t init);
-OSStatus MicoMQTTClientStart(void);
-OSStatus MicoMQTTClientStop(void);
+void EasyCloudMQTTClientInit(mqtt_client_config_t init);
+OSStatus EasyCloudMQTTClientStart(void);
+OSStatus EasyCloudMQTTClientStop(void);
 
-OSStatus MicoMQTTClientPublish(const char* pubtopic, const unsigned char* msg, int msglen);
-mqttClientState MicoMQTTClientState(void);
+OSStatus EasyCloudMQTTClientPublish(const char* pubtopic, const unsigned char* msg, int msglen);
+mqttClientState EasyCloudMQTTClientState(void);
 
 //not implement
-//OSStatus MicoMQTTClientSubscribe(const char* subtopic, enum QoS qos, messageHandler hmsg);
-//OSStatus MicoMQTTClientUnsubscribe(const char* unsubtopic);
+//OSStatus EasyCloudMQTTClientSubscribe(const char* subtopic, enum QoS qos, messageHandler hmsg);
+//OSStatus EasyCloudMQTTClientUnsubscribe(const char* unsubtopic);
 
 #endif

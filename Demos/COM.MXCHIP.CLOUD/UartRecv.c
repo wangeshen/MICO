@@ -1,16 +1,16 @@
 
 #include "MICODefine.h"
-#include "MICOAppDefine.h"
-
-#include "haProtocol.h"
 #include "MicoPlatform.h"
-#include "platform.h"
-#include "MICONotificationCenter.h"
+
+#include "MicoVirtualDevice.h"
+
 
 #define uart_recv_log(M, ...) custom_log("UART RECV", M, ##__VA_ARGS__)
 #define uart_recv_log_trace() custom_log_trace("UART RECV")
 
+
 static int _uart_get_one_packet(uint8_t* buf, int maxlen);
+
 
 void uartRecv_thread(void *inContext)
 {
@@ -28,7 +28,8 @@ void uartRecv_thread(void *inContext)
     if (recvlen <= 0)
       continue;
     
-    haUartCommandProcess(inDataBuffer, recvlen, Context);
+    uart_recv_log("MCU => DEVICE: [%d]=%.*s", recvlen, recvlen, inDataBuffer);
+    MVDDeviceMsgProcess(Context, inDataBuffer, recvlen);
   }
   
 exit:
