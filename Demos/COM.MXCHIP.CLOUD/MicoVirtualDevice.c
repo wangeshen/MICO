@@ -140,15 +140,9 @@ OSStatus MVDActivate(void* context)
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = (mico_Context_t *)context;
   
-  //login_id/dev_passwd exit ?
-  //login_id/dev_passwd ok ?
-
-  //ok
   err = MVDCloudInterfaceDevActivate(inContext);
   require_noerr_action( err, exit, mvd_log("ERROR: device activate failed! err=%d", err) );
   return kNoErr;
-  
-  //err
   
 exit:
   return err;

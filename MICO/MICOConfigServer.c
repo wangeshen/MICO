@@ -36,6 +36,8 @@
 #include "Platform_common_config.h"
 #include "HTTPUtils.h"
 
+#include "MicoVirtualDevice.h"
+
 
 #define config_log(M, ...) custom_log("CONFIG SERVER", M, ##__VA_ARGS__)
 #define config_log_trace() custom_log_trace("CONFIG SERVER")
@@ -43,6 +45,11 @@
 #define kCONFIGURLRead    "/config-read"
 #define kCONFIGURLWrite   "/config-write"
 #define kCONFIGURLOTA     "/OTA"
+
+//for temp config by WES at 20141123
+#define kCONFIGURLDevActivate    "/dev-activate"
+#define kCONFIGURLDevAuthorzie   "/dev-authorize"
+#define kCONFIGURLDevFWUpdate    "/dev-fw_update"
 
 extern OSStatus     ConfigIncommingJsonMessage( const char *input, mico_Context_t * const inContext );
 extern json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext );
@@ -235,9 +242,31 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
       require( httpResponse, exit );
       err = SocketSend( fd, httpResponse, httpResponseLen );
       SocketClose(&fd);
+      
+      //test by WES
+      err = MVDActivate((void*)inContext);
+      require_noerr( err, exit );
+      
       inContext->micoStatus.sys_state = eState_Software_Reset;
       require(inContext->micoStatus.sys_state_change_sem, exit);
       mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
+    }
+    goto exit;
+  }
+  else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLDevActivate ) == kNoErr){
+    if(inHeader->contentLength > 0){
+      config_log("Recv activate data.");
+      err = ConfigIncommingJsonMessage( inHeader->extraDataPtr, inContext);
+      require_noerr( err, exit );
+      
+      err = MVDActivate((void*)inContext);
+      require_noerr( err, exit );
+      
+      err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
+      require_noerr( err, exit );
+      require( httpResponse, exit );
+      err = SocketSend( fd, httpResponse, httpResponseLen );
+      SocketClose(&fd);
     }
     goto exit;
   }

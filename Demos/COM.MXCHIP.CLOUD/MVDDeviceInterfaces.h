@@ -25,7 +25,8 @@
 #ifndef __MICO_MVDDEVICEINTERFACES_H_
 #define __MICO_MVDDEVICEINTERFACES_H_
 
-#include "Common.h"
+//#include "Common.h"
+#include "MICODefine.h"
 
 /*******************************************************************************
  * DEFINES

@@ -2,8 +2,8 @@
 ******************************************************************************
 * @file    EasyCloudServiceDef.h 
 * @author  Eshen Wang
-* @version V0.1.0
-* @date    21-Nov-2014
+* @version V0.2.0
+* @date    23-Nov-2014
 * @brief   This header contains the public defines for EasyCloud service. 
   operation
 ******************************************************************************
@@ -48,8 +48,8 @@
 #define MAX_SIZE_PUBLISH_TOPIC          256
 
 // default values for easycloud server
-#define DEFAULT_EASYCLOUD_SERVER            "api.easylink.io"
-#define DEFAULT_EASYCLOUD_PORT              80
+#define DEFAULT_CLOUD_SERVER            "api.easylink.io"
+#define DEFAULT_CLOUD_PORT              80
 
 // default values for MQTT server
 #define DEFAULT_MQTT_SERVER             "api.easylink.io"
@@ -57,6 +57,9 @@
 #define DEFAULT_MQTT_PORT_SSL           8883
 // in seconds, here set 60s
 #define DEFAULT_MQTT_CLLIENT_KEEPALIVE_INTERVAL    60
+   
+#define DEFAULT_DEVICE_ID               "none"
+#define DEFAULT_DEVICE_KEY              "none"
  
 
  /*******************************************************************************
@@ -64,25 +67,26 @@
  ******************************************************************************/
 
 typedef enum {
-  EASYCLOUD_SERVICE_STATUS_STOPPED = 1, //service stopped
-  EASYCLOUD_SERVICE_STATUS_STARTED = 2, //service start up
-  EASYCLOUD_SERVICE_STATUS_CONNECTED = 3, //service work ok
-  EASYCLOUD_SERVICE_STATUS_DISCONNECTED = 4 //service diconnected from server
+  EASYCLOUD_STOPPED = 1,      //service stopped
+  EASYCLOUD_STARTED = 2,      //service start up
+  EASYCLOUD_CONNECTED = 3,    //service work ok
+  EASYCLOUD_DISCONNECTED = 4  //service diconnected from server
 } easycloudServiceState;
 
 typedef struct _easycloud_service_status_t {
   easycloudServiceState state;
   bool isActivated;
-  //bool isAuthorized;
   char deviceId[MAX_SIZE_DEVICE_ID];
   char masterDeviceKey[MAX_SIZE_DEVICE_KEY];
 } easycloud_service_status_t;
  
 //message recived callback function prototype
-typedef void (*easycloudMsgRecvCallBack)(void* const context, unsigned char* msg, unsigned int msgLen);
-typedef void (*easycloudStatusChangedCallback)(void* const context, easycloud_service_status_t serviceStateInfo);
+typedef void (*easycloudMsgRecvCallBack)(void* const context, 
+                                         unsigned char* msg, unsigned int msgLen);
+typedef void (*easycloudStatusChangedCallback)(void* const context,
+                                               easycloud_service_status_t serviceStateInfo);
 
-typedef struct _easycloud_service_info_t {
+typedef struct _easycloud_service_config_t {
   //easycloud server info
   char                 *host;
   uint16_t              port;
@@ -90,9 +94,9 @@ typedef struct _easycloud_service_info_t {
   //device info
   char                 *bssid;
   char                 *productId;
-  char                 *priductKey;
+  char                 *productKey;
   
-  //user info, not check now
+  //user info
   char                 *loginId;
   char                 *password;
   char                 *userToken;

@@ -340,7 +340,9 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
     err = MICOAddSwitchCellToSector(sector, "activated", inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated, "RO");
     require_noerr(err, exit);
     // device_id cell, is RO in fact, we set RW is convenient for read full string.
-    err = MICOAddStringCellToSector(sector, "device_id", inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId, "RW", NULL);
+    err = MICOAddStringCellToSector(sector, "device_id", 
+                                    inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
+                                    "RW", NULL);
     require_noerr(err, exit);
     // login_id cell
     err = MICOAddStringCellToSector(sector, "login_id", "input login id", "RW", NULL);

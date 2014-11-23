@@ -26,8 +26,8 @@
 #define __MICO_MVDCLOUDINTERFACES_H_
 
 
-#include "Common.h"
-#include "MicoCloudServiceDef.h"
+//#include "Common.h"
+#include "MICODefine.h"
 
 /*******************************************************************************
  * DEFINES

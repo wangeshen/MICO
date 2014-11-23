@@ -32,7 +32,7 @@
 #define cloud_if_log_trace() custom_log_trace("MVD_CLOUD_IF")
 
 
-easycloud_service_context_t *pEasyCloudContext = NULL;
+easycloud_service_context_t easyCloudContext;
 
 
 /*******************************************************************************
@@ -51,20 +51,11 @@ void cloudMsgArrivedHandler(void* context, unsigned char *msg, unsigned int msgL
 //cloud service status changed handler
 void cloudServiceStatusChangedHandler(void* context, easycloud_service_status_t serviceStateInfo)
 {
-  easycloud_service_status_t cloudStatusInfo = serviceStateInfo;
   mico_Context_t *inContext = (mico_Context_t*)context;
-  
-  if (CLOUD_SERVICE_STATUS_CONNECTED == serviceStateInfo.state){
+
+  if (EASYCLOUD_CONNECTED == serviceStateInfo.state){
     cloud_if_log("cloud service connected!");
     inContext->appStatus.virtualDevStatus.isCloudConnected = true;
-    mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
-    inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated = cloudStatusInfo.isActivated;
-    sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId, 
-            cloudStatusInfo.deviceId, MAX_SIZE_DEVICE_ID);
-    sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey, 
-            cloudStatusInfo.masterDeviceKey, MAX_SIZE_DEVICE_KEY);
-    MICOUpdateConfiguration(context);
-    mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   }
   else{
     cloud_if_log("cloud service disconnected!");
@@ -97,6 +88,15 @@ OSStatus MVDCloudInterfaceInit(mico_Context_t* const inContext)
     (void*)inContext
   };
   
+  easycloud_service_status_t cloud_service_init_status;
+  cloud_service_init_status.isActivated = inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated;
+  strncpy(cloud_service_init_status.deviceId, 
+          inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
+          MAX_SIZE_DEVICE_ID);
+  strncpy(cloud_service_init_status.masterDeviceKey, 
+          inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey,
+          MAX_SIZE_DEVICE_KEY);
+  
   err = EasyCloudServiceVersion(&cloudServiceLibVersion);
   require_noerr_action( err, exit, cloud_if_log("ERROR: Get EasyCloud service version failed.") );
   cloud_if_log("EasyCloud Service library version: %d.%d.%d", 
@@ -105,17 +105,13 @@ OSStatus MVDCloudInterfaceInit(mico_Context_t* const inContext)
          cloudServiceLibVersion & 0xFF );
   
   //start cloud service
-  err = EasyCloudServiceInit(pEasyCloudContext, cloud_service_config);
+  err = EasyCloudServiceInit(&easyCloudContext, cloud_service_config, cloud_service_init_status);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloud service init failed.") );
-  err = EasyCloudServiceStart(pEasyCloudContext);
+  err = EasyCloudServiceStart(&easyCloudContext);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloud service start failed.") );
   return kNoErr;
   
 exit:
-  if(pEasyCloudContext){
-    free(pEasyCloudContext);
-    pEasyCloudContext = NULL;
-  }
   return err;
 }
 
@@ -125,7 +121,7 @@ OSStatus MVDCloudInterfaceSend(unsigned char *inBuf, unsigned int inBufLen)
   OSStatus err = kUnknownErr;
 
   cloud_if_log("DEVICE => Cloud:[%d]=%.*s", inBufLen, inBufLen, inBuf);
-  err = EasyCloudUpload(pEasyCloudContext, inBuf, inBufLen);
+  err = EasyCloudUpload(&easyCloudContext, inBuf, inBufLen);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloud upload failed! err=%d", err) );
   return kNoErr;
   
@@ -137,10 +133,30 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext)
 {
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
+//  easycloudServiceState cloudServiceState;
+  
+  //login_id/dev_passwd exist ?
+  //login_id/dev_passwd ok ?
 
   cloud_if_log("Device activate...");
-  err = EasyCloudActivate(pEasyCloudContext);
+/*  err = EasyCloudServiceState(&easyCloudContext, &cloudServiceState);
+  require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloud get status failed! err=%d", err) );
+  if (EASYCLOUD_STOPPED == cloudServiceState){
+    return kStateErr;
+  }
+*/
+  err = EasyCloudActivate(&easyCloudContext);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloud activate failed! err=%d", err) );
+  
+  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
+  inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated = true;
+  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
+          easyCloudContext.service_status.deviceId, MAX_SIZE_DEVICE_ID);
+  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey,
+          easyCloudContext.service_status.masterDeviceKey, MAX_SIZE_DEVICE_KEY);
+  MICOUpdateConfiguration(inContext);
+  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+  
   return kNoErr;
   
 exit:
@@ -151,9 +167,19 @@ OSStatus MVDCloudInterfaceDevAuthorize(mico_Context_t* const inContext)
 {
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
+//  easycloudServiceState cloudServiceState;
+  
+  //login_id/dev_passwd exist ?
+  //login_id/dev_passwd ok ?
 
   cloud_if_log("Device authorize...");
-  err = EasyCloudAuthorize(pEasyCloudContext);
+/*  err = EasyCloudServiceState(&easyCloudContext, &cloudServiceState);
+  require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloud get status failed! err=%d", err) );
+  if (EASYCLOUD_STOPPED == cloudServiceState){
+    return kStateErr;
+  }
+*/
+  err = EasyCloudAuthorize(&easyCloudContext);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloud authorize failed! err=%d", err) );
   return kNoErr;
   
@@ -167,7 +193,7 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext)
   OSStatus err = kUnknownErr;
 
   cloud_if_log("Update firmware...");
-  err = EasyCloudFirmwareUpdate(pEasyCloudContext);
+  err = EasyCloudFirmwareUpdate(&easyCloudContext);
   require_noerr_action( err, exit, cloud_if_log("ERROR: Firmware update failed! err=%d", err) );
   return kNoErr;
   

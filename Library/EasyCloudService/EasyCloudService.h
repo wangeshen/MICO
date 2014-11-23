@@ -2,10 +2,9 @@
 ******************************************************************************
 * @file    EasyCloudService.h 
 * @author  Eshen Wang
-* @version V0.1.0
-* @date    21-Nov-2014
-* @brief   This header contains function prototypes of EasyCloud service based
-           on MICO platform. 
+* @version V0.2.0
+* @date    23-Nov-2014
+* @brief   This header contains interfaces of EasyCloud service.
   operation
 ******************************************************************************
 * @attention
@@ -31,7 +30,9 @@
  * INTERFACES
  ******************************************************************************/
 
-OSStatus EasyCloudServiceInit(easycloud_service_context_t *context, easycloud_service_config_t config);  //malloc
+OSStatus EasyCloudServiceInit(easycloud_service_context_t *context,
+                              easycloud_service_config_t config,
+                              easycloud_service_status_t initStauts);
 OSStatus EasyCloudServiceStart(easycloud_service_context_t *context);  //start thread
 
 OSStatus EasyCloudServiceState(easycloud_service_context_t *context, easycloudServiceState *outState);

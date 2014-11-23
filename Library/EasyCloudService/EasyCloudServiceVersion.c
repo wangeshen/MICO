@@ -2,10 +2,9 @@
 ******************************************************************************
 * @file    EasyCloudServiceVersion.c
 * @author  Eshen Wang
-* @version V0.1.0
-* @date    21-Nov-2014
-* @brief   This file contains the release version of the Easycloud service 
-           library based on MICO platform. 
+* @version V0.2.0
+* @date    23-Nov-2014
+* @brief   This file contains the release version of the Easycloud service. 
   operation
 ******************************************************************************
 * @attention

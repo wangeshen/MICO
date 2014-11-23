@@ -24,7 +24,7 @@
 #ifndef __HAPROTOCOL_H_
 #define __HAPROTOCOL_H_
 
-#include "MicoCloudServiceDef.h"
+#include "EasyCloudServiceDef.h"
 
 
 /*******************************************************************************
@@ -38,9 +38,6 @@
 #define DEFAULT_LOGIN_ID                 "none"
 #define DEFAULT_DEV_PASSWD               "none"
 #define DEFAULT_USER_TOKEN               "none"
-
-#define DEFAULT_DEVICE_ID                "none"
-#define DEFAULT_DEVICE_KEY               "none"
 
 #define STACK_SIZE_USART_RECV_THREAD     0x500
 
