@@ -24,61 +24,38 @@
 #ifndef __MICOAPPDEFINE_H
 #define __MICOAPPDEFINE_H
 
+
 #include "Common.h"
-#include "MicoVirtualDevice.h"
+#include "MicoVirtualDeviceDef.h"
 
-#define APP_INFO   "mxchipWNet cloud Demo based on MICO OS"
 
-#define FIRMWARE_REVISION   "MICO_CLOUD_1_0"
+#define APP_INFO            "mxchipWNet cloud Demo based on MICO OS"
+#define FIRMWARE_REVISION   "MICO_CLOUD_0_2_0"
 #define MANUFACTURER        "MXCHIP Inc."
 #define SERIAL_NUMBER       "20141120"
 #define PROTOCOL            "com.mxchip.cloud"
 
 /*User provided configurations*/
-#define CONFIGURATION_VERSION               0x00000001 // if default configuration is changed, update this number
-#define MAX_Local_Client_Num                8
-#define LOCAL_PORT                          8080
-#define DEAFULT_REMOTE_SERVER               "192.168.2.254"
-#define DEFAULT_REMOTE_SERVER_PORT          8080
-#define UART_RECV_TIMEOUT                   500
-#define UART_ONE_PACKAGE_LENGTH             1024
-#define wlanBufferLen                       1024
-#define UART_BUFFER_LENGTH                  2048
-#define UART_FOR_APP                        MICO_UART_1
+#define CONFIGURATION_VERSION           0x00000001 // if default configuration is changed, update this number
+#define BONJOUR_SERVICE                 "_easylink._tcp.local."
 
-#define LOCAL_TCP_SERVER_LOOPBACK_PORT      1000
-#define REMOTE_TCP_CLIENT_LOOPBACK_PORT     1002
-#define RECVED_UART_DATA_LOOPBACK_PORT      1003
-
-#define BONJOUR_SERVICE                     "_easylink._tcp.local."
-
+/* product type */
+#define DEFAULT_PRODUCT_ID              "f315fea0-50fc-11e4-b6fc-f23c9150064b"
+#define DEFAULT_PRODUCT_KEY             "41a71625-5519-11e4-ad4e-f23c9150064b"
+#define DEFAULT_ROM_VERSION              "v0.1.0"
 
 /*Application's configuration stores in flash*/
 typedef struct
 {
   uint32_t          configDataVer;
-  uint32_t          localServerPort;
-
-  /*local services*/
-  bool              localServerEnable;
-  bool              remoteServerEnable;
-  char              remoteServerDomain[64];
-  int               remoteServerPort;
+  uint32_t          localServerPort;  //bonjour service
   
-  /*virtual device settings*/
-  virtual_device_config_t virtualDevConfig;
- 
+  virtual_device_config_t virtualDevConfig;  //virtual device settings
 } application_config_t;
 
 /*Running status*/
 typedef struct _current_app_status_t {
-  /*Local clients port list*/
-  uint32_t          loopBack_PortList[MAX_Local_Client_Num];
-  /*Remote TCP client connecte*/
-  bool              isRemoteConnected;
-  
-  /*virtual device status*/
-  virtual_device_status_t virtualDevStatus;
+  virtual_device_status_t virtualDevStatus;  //virtual device status
 } current_app_status_t;
 
 

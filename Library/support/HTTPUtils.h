@@ -29,6 +29,7 @@
 #include "URLUtils.h"
 #include "stdbool.h"
 
+#define kHTTPGetMethod     "GET"
 #define kHTTPPostMethod     "POST"
 
       // Status-Code    =
@@ -74,6 +75,7 @@
 #define kMIMEType_TLV8                  "application/x-tlv8" // 8-bit type, 8-bit length, N-byte value.
 #define kMIMEType_Pairing_TLV8          "application/pairing+tlv8" // 8-bit type, 8-bit length, N-byte value.
 #define kMIMEType_MXCHIP_OTA            "application/ota-stream"
+#define kMIMEType_EASYCLOUD_OTA         "application/octet-stream"
 
 #define kTransferrEncodingType_CHUNKED  "chunked"
 

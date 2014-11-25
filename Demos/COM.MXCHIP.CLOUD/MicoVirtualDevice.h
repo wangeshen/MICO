@@ -21,84 +21,40 @@
 ******************************************************************************
 */
 
-#ifndef __HAPROTOCOL_H_
-#define __HAPROTOCOL_H_
+#ifndef __MICO_MVD_H_
+#define __MICO_MVD_H_
 
+#include "MicoVirtualDeviceDef.h"
+#include "MICODefine.h"
 #include "EasyCloudServiceDef.h"
-
-
-/*******************************************************************************
- * DEFINES
- ******************************************************************************/
-
-// default device settings
-#define DEFAULT_PRODUCT_ID               "f315fea0-50fc-11e4-b6fc-f23c9150064b"
-#define DEFAULT_PRODUCT_KEY              "41a71625-5519-11e4-ad4e-f23c9150064b"
-
-#define DEFAULT_LOGIN_ID                 "none"
-#define DEFAULT_DEV_PASSWD               "none"
-#define DEFAULT_USER_TOKEN               "none"
-
-#define STACK_SIZE_USART_RECV_THREAD     0x500
-
-
-/*******************************************************************************
- * STRUCTURES
- ******************************************************************************/
-
-/* device configuretion stores in flash */
-typedef struct
-{
-  /*IO settings*/
-  uint32_t          USART_BaudRate;
-  
-  /* EasyCloud settings (opt) */
-  char              cloudServerDomain[MAX_SIZE_DOMAIN_NAME];
-  int               cloudServerPort;
-  char              mqttServerDomain[MAX_SIZE_DOMAIN_NAME];
-  int               mqttServerPort;
-  uint16_t          mqttkeepAliveInterval;
-  
-  /* product properties */
-  char              productId[MAX_SIZE_PRODUCT_ID];
-  char              productKey[MAX_SIZE_PRODUCT_KEY];
-  
-  /* device settings */
-  char              loginId[MAX_SIZE_LOGIN_ID];            // user login id
-  char              devPasswd[MAX_SIZE_DEV_PASSWD];        // master device password set by user
-  char              userToken[MAX_SIZE_USER_TOKEN];        // user token
-  /* device properties stored in flash */
-  bool              isActivated;                           // device activate status, RO
-  char              deviceId[MAX_SIZE_DEVICE_ID];          // get from cloud server, RO
-  char              masterDeviceKey[MAX_SIZE_DEVICE_KEY];  // get from cloud server, RO
-} virtual_device_config_t;
-
-/* device status */
-typedef struct 
-{
-  /* cloud service connect */
-  bool              isCloudConnected;
-} virtual_device_status_t;
 
 
 /*******************************************************************************
  * INTERFACES
  ******************************************************************************/
 
-//MICO APP interfaces
-OSStatus MVDInit(void* const context);
+/* init */
+OSStatus MVDInit(mico_Context_t* const context);
+void MVDRestoreDefault(mico_Context_t* const context);
+
+/* message exchage protocol */
 
 //device interfaces
-OSStatus MVDDeviceMsgProcess(void* context, uint8_t *inBuf, unsigned int inBufLen);
-
+OSStatus MVDDeviceMsgProcess(mico_Context_t* const context, 
+                             unsigned char *inBuf, unsigned int inBufLen);
 //Cloud service interfaces
-OSStatus MVDCloudMsgProcess(void* context, unsigned char *inBuf, unsigned int inBufLen);
+OSStatus MVDCloudMsgProcess(mico_Context_t* const context, 
+                            unsigned char *inBuf, unsigned int inBufLen);
+
+/* device control */
 
 //OTA
-OSStatus MVDFirmwareUpdate(void* context);
+OSStatus MVDFirmwareUpdate(mico_Context_t* const context);
 //activate
-OSStatus MVDActivate(void* context);
+OSStatus MVDActivate(mico_Context_t* const context, 
+                     MVDActivateRequestData_t activateData);
 //authorize
-OSStatus MVDAuthorize(void* context);
+OSStatus MVDAuthorize(mico_Context_t* const context,
+                      MVDAuthorizeRequestData_t authorizeData);
 
 #endif

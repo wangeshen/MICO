@@ -74,7 +74,7 @@ typedef struct _mqtt_client_config_t {
   
   /*message arrived callback*/
   mqttMsgArrivedHandler hmsg;
-  /* user context */
+  //user context
   void* context;
 } mqtt_client_config_t;
 
@@ -96,7 +96,7 @@ void EasyCloudMQTTClientInit(mqtt_client_config_t init);
 OSStatus EasyCloudMQTTClientStart(void);
 OSStatus EasyCloudMQTTClientStop(void);
 
-OSStatus EasyCloudMQTTClientPublish(const char* pubtopic, const unsigned char* msg, int msglen);
+OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen);
 mqttClientState EasyCloudMQTTClientState(void);
 
 //not implement

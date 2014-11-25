@@ -41,15 +41,17 @@
 #define EASYCLOUD_SERVCIE_VERSION_REV         0x00
 
 #define EASYCLOUD_SERVCIE_VERSION             (EASYCLOUD_SERVCIE_VERSION_MAIN << 16 | \
-                                                EASYCLOUD_SERVCIE_VERSION_SUB << 8 | \
-                                                EASYCLOUD_SERVCIE_VERSION_REV)
+                                               EASYCLOUD_SERVCIE_VERSION_SUB << 8 | \
+                                               EASYCLOUD_SERVCIE_VERSION_REV)
 
 /*******************************************************************************
  * IMPLEMENTATIONS
  ******************************************************************************/
 
-OSStatus EasyCloudServiceVersion(int *version)
+int EasyCloudServiceVersion(easycloud_service_context_t* const context)
 {
-  *version = (int)EASYCLOUD_SERVCIE_VERSION;
-  return kNoErr;
+  if (NULL == context){
+    return kParamErr;
+  }
+  return (int)EASYCLOUD_SERVCIE_VERSION;
 }

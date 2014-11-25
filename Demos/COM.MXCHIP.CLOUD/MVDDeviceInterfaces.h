@@ -25,12 +25,15 @@
 #ifndef __MICO_MVDDEVICEINTERFACES_H_
 #define __MICO_MVDDEVICEINTERFACES_H_
 
-//#include "Common.h"
 #include "MICODefine.h"
 
 /*******************************************************************************
  * DEFINES
  ******************************************************************************/
+#define UART_FOR_APP                        MICO_UART_1
+#define UART_RECV_TIMEOUT                   500
+#define UART_ONE_PACKAGE_LENGTH             1024
+#define UART_BUFFER_LENGTH                  2048
 
 
 /*******************************************************************************

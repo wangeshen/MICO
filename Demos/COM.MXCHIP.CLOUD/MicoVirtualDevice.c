@@ -23,82 +23,72 @@
 
 #include <stdio.h>
 
-#include "MICODefine.h"
-//#include "MICONotificationCenter.h"
-
 #include "MicoVirtualDevice.h"
 #include "MVDDeviceInterfaces.h"
 #include "MVDCloudInterfaces.h"
+
+#include "MICODefine.h"
+//#include "MICONotificationCenter.h"
 
 
 #define mvd_log(M, ...) custom_log("MVD", M, ##__VA_ARGS__)
 #define mvd_log_trace() custom_log_trace("MVD")
 
 
-static OSStatus deviceInterfaceInit(mico_Context_t * const inContext);
-static OSStatus cloudInterfaceInit(mico_Context_t * const inContext);
-
-
 /*******************************************************************************
- * virtual device interface init
+ * virtual device interfaces init
  ******************************************************************************/
 
-OSStatus MVDInit(void* const context)
+void MVDRestoreDefault(mico_Context_t* const context)
+{
+  context->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate = 115200;
+  
+  context->flashContentInRam.appConfig.virtualDevConfig.isActivated = false;
+  sprintf(context->flashContentInRam.appConfig.virtualDevConfig.deviceId, DEFAULT_DEVICE_ID);
+  sprintf(context->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey, DEFAULT_DEVICE_KEY);
+  sprintf(context->flashContentInRam.appConfig.virtualDevConfig.romVersion, DEFAULT_ROM_VERSION);
+  
+  sprintf(context->flashContentInRam.appConfig.virtualDevConfig.loginId, DEFAULT_LOGIN_ID);
+  sprintf(context->flashContentInRam.appConfig.virtualDevConfig.devPasswd, DEFAULT_DEV_PASSWD);
+  sprintf(context->flashContentInRam.appConfig.virtualDevConfig.userToken, DEFAULT_USER_TOKEN);
+}
+
+OSStatus MVDInit(mico_Context_t* const inContext)
 {
   OSStatus err = kUnknownErr;
-  mico_Context_t* const inContext = (mico_Context_t *)context;
+  
+  //init status
+  inContext->appStatus.virtualDevStatus.isCloudConnected = false;
+  inContext->appStatus.virtualDevStatus.RecvRomFileSize = 0;
   
   //init MCU connect interface
-  err = deviceInterfaceInit(inContext);
-  require_noerr_action( err, exit, mvd_log("ERROR: virtual device mcu interface init failed!") );
+  err = MVDDevInterfaceInit(inContext);
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: virtual device mcu interface init failed!") );
   
   //init cloud service interface
-  err = cloudInterfaceInit(inContext);
-  require_noerr_action( err, exit, mvd_log("ERROR: virtual device cloud interface init failed!") );
-  
-exit:
-  return err;
-}
-
-//MCU connect
-OSStatus deviceInterfaceInit(mico_Context_t * const inContext)
-{
-  OSStatus err = kUnknownErr;
-  
-  err = MVDDevInterfaceInit(inContext);
-  require_noerr_action( err, exit, mvd_log("ERROR: init device interface failed.") );
-  return kNoErr;
-  
-exit:
-  return err;
-}
-
-//cloud service connect
-OSStatus cloudInterfaceInit(mico_Context_t * const inContext)
-{
-  OSStatus err = kUnknownErr;
-
   err = MVDCloudInterfaceInit(inContext);
-  require_noerr_action( err, exit, mvd_log("ERROR: init cloud interface failed.") );
-  return kNoErr;
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: virtual device cloud interface init failed!") );
   
 exit:
   return err;
 }
 
 /*******************************************************************************
- * data tranfer protocol
+ * MVD message exchange protocol
  ******************************************************************************/
 
 // Cloud => MCU
-OSStatus MVDCloudMsgProcess(void* context, unsigned char *inBuf, unsigned int inBufLen)
+OSStatus MVDCloudMsgProcess(mico_Context_t* context, 
+                            unsigned char *inBuf, unsigned int inBufLen)
 {
   mvd_log_trace();
   OSStatus err = kUnknownErr;
-  //mico_Context_t *inContext = (mico_Context_t *)context;
+  //mico_Context_t *inContext = context;
 
   err = MVDDevInterfaceSend(inBuf, inBufLen);
-  require_noerr_action( err, exit, mvd_log("ERROR: send to USART error! err=%d", err) );
+  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
   return kNoErr;
   
 exit:
@@ -106,11 +96,12 @@ exit:
 }
 
 // MCU => Cloud
-OSStatus MVDDeviceMsgProcess(void* const context, uint8_t *inBuf, unsigned int inBufLen)
+OSStatus MVDDeviceMsgProcess(mico_Context_t* const context, 
+                             uint8_t *inBuf, unsigned int inBufLen)
 {
   mvd_log_trace();
   OSStatus err = kUnknownErr;
-  //mico_Context_t *inContext = (mico_Context_t *)context;
+  //mico_Context_t *inContext = context;
 
   err = MVDCloudInterfaceSend(inBuf, inBufLen);
   require_noerr_action( err, exit, mvd_log("ERROR: send to cloud error! err=%d", err) );
@@ -120,28 +111,20 @@ exit:
   return err;
 }
 
-//OTA
-OSStatus MVDFirmwareUpdate(void* context)
-{
-  OSStatus err = kUnknownErr;
-  mico_Context_t *inContext = (mico_Context_t *)context;
-  
-  err = MVDCloudInterfaceDevFirmwareUpdate(inContext);
-  require_noerr_action( err, exit, mvd_log("ERROR: Firmware Update error! err=%d", err) );
-  return kNoErr;
-  
-exit:
-  return err;
-}
+
+/*******************************************************************************
+ * MVD cloud control interfaces
+ ******************************************************************************/
 
 //activate
-OSStatus MVDActivate(void* context)
+OSStatus MVDActivate(mico_Context_t* const context, 
+                     MVDActivateRequestData_t activateData)
 {
   OSStatus err = kUnknownErr;
-  mico_Context_t *inContext = (mico_Context_t *)context;
   
-  err = MVDCloudInterfaceDevActivate(inContext);
-  require_noerr_action( err, exit, mvd_log("ERROR: device activate failed! err=%d", err) );
+  err = MVDCloudInterfaceDevActivate(context, activateData);
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: device activate failed! err=%d", err) );
   return kNoErr;
   
 exit:
@@ -149,15 +132,33 @@ exit:
 }
   
 //authorize
-OSStatus MVDAuthorize(void* context)
+OSStatus MVDAuthorize(mico_Context_t* const context,
+                      MVDAuthorizeRequestData_t authorizeData)
 {
   OSStatus err = kUnknownErr;
-  mico_Context_t *inContext = (mico_Context_t *)context;
+  mico_Context_t *inContext = context;
 
-  err = MVDCloudInterfaceDevAuthorize(inContext);
-  require_noerr_action( err, exit, mvd_log("ERROR: device authorize failed! err=%d", err) );
+  err = MVDCloudInterfaceDevAuthorize(inContext, authorizeData);
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: device authorize failed! err=%d", err) );
   return kNoErr;
   
 exit:
   return err;
 }
+
+//OTA
+OSStatus MVDFirmwareUpdate(mico_Context_t* const context)
+{
+  OSStatus err = kUnknownErr;
+  mico_Context_t *inContext = context;
+  
+  err = MVDCloudInterfaceDevFirmwareUpdate(inContext);
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: Firmware Update error! err=%d", err) );
+  return kNoErr;
+  
+exit:
+  return err;
+}
+

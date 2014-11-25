@@ -2,6 +2,7 @@
 #include "MICODefine.h"
 #include "MicoPlatform.h"
 
+#include "MVDDeviceInterfaces.h"
 #include "MicoVirtualDevice.h"
 
 
@@ -15,7 +16,7 @@ static int _uart_get_one_packet(uint8_t* buf, int maxlen);
 void uartRecv_thread(void *inContext)
 {
   uart_recv_log_trace();
-  mico_Context_t *Context = inContext;
+  mico_Context_t *Context = (mico_Context_t*)inContext;
   int recvlen;
   uint8_t *inDataBuffer;
   

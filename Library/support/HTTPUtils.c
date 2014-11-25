@@ -82,7 +82,8 @@ int SocketReadHTTPHeader( int inSock, HTTPHeader_t *inHeader )
   /* For MXCHIP OTA function, store extra data to OTA data temporary */
   err = HTTPGetHeaderField( inHeader->buf, inHeader->len, "Content-Type", NULL, NULL, &value, &valueSize, NULL );
 
-  if(err == kNoErr && strnicmpx( value, valueSize, kMIMEType_MXCHIP_OTA ) == 0){
+  if(err == kNoErr && ((strnicmpx( value, valueSize, kMIMEType_MXCHIP_OTA ) == 0)
+                       || (strnicmpx( value, valueSize, kMIMEType_EASYCLOUD_OTA ) == 0))){
 #ifdef MICO_FLASH_FOR_UPDATE  
     http_utils_log("Receive OTA data!");        
     err = MicoFlashInitialize( MICO_FLASH_FOR_UPDATE );
@@ -290,7 +291,8 @@ OSStatus SocketReadHTTPBody( int inSock, HTTPHeader_t *inHeader )
     
     err = HTTPGetHeaderField( inHeader->buf, inHeader->len, "Content-Type", NULL, NULL, &value, &valueSize, NULL );
     require_noerr(err, exit);
-    if( strnicmpx( value, valueSize, kMIMEType_MXCHIP_OTA ) == 0 ){
+    if( (strnicmpx( value, valueSize, kMIMEType_MXCHIP_OTA ) == 0) 
+       || (strnicmpx( value, valueSize, kMIMEType_EASYCLOUD_OTA ) == 0) ){
 #ifdef MICO_FLASH_FOR_UPDATE  
       writeToFlash = true;
       inHeader->otaDataPtr = calloc(OTA_Data_Length_per_read, sizeof(uint8_t)); 
@@ -888,8 +890,8 @@ OSStatus CreateHTTPMessageEx( const char *methold, const char * host, const char
   OSStatus err = kParamErr;
 
   require( contentType, exit );
-  require( inData, exit );
-  require( inDataLen, exit );
+  //require( inData, exit );
+  //require( inDataLen, exit );
 
   err = kNoMemoryErr;
   *outMessage = malloc( inDataLen + 500 );
@@ -908,7 +910,9 @@ OSStatus CreateHTTPMessageEx( const char *methold, const char * host, const char
   *outMessageSize = strlen( (char*)*outMessage ) + inDataLen;
 
   endOfHTTPHeader = *outMessage + strlen( (char*)*outMessage );
-  memcpy( endOfHTTPHeader, inData, inDataLen );
+  if ((NULL != inData) && (inDataLen > 0)){
+    memcpy( endOfHTTPHeader, inData, inDataLen );
+  }
   err = kNoErr;
 
 exit:

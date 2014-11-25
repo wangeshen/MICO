@@ -26,8 +26,8 @@
 #define __MICO_MVDCLOUDINTERFACES_H_
 
 
-//#include "Common.h"
 #include "MICODefine.h"
+#include "EasyCloudServiceDef.h"
 
 /*******************************************************************************
  * DEFINES
@@ -43,8 +43,10 @@ OSStatus MVDCloudInterfaceInit(mico_Context_t* const inContext);
 OSStatus MVDCloudInterfaceSend(unsigned char *inBuf, unsigned int inBufLen);
 
 // cloud specifical interfaces
-OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext);
-OSStatus MVDCloudInterfaceDevAuthorize(mico_Context_t* const inContext);
+OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
+                                      MVDActivateRequestData_t devActivateReqData);
+OSStatus MVDCloudInterfaceDevAuthorize(mico_Context_t* const inContext,
+                                       MVDAuthorizeRequestData_t devAuthorizeReqData);
 
 OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext);
 

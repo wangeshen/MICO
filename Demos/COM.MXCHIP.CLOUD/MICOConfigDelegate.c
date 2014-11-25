@@ -31,7 +31,6 @@
 #include "MICO.h"
 #include "MICODefine.h"
 #include "MICOAppDefine.h"
-//#include "SppProtocol.h"  
 #include "MICOConfigMenu.h"
 #include "StringUtils.h"
 
@@ -40,8 +39,8 @@
 #define config_delegate_log(M, ...) custom_log("Config Delegate", M, ##__VA_ARGS__)
 #define config_delegate_log_trace() custom_log_trace("Config Delegate")
   
-extern volatile ring_buffer_t  rx_buffer;
-extern volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
+//extern volatile ring_buffer_t  rx_buffer;
+//extern volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
 
 static mico_timer_t _Led_EL_timer = NULL;
 
@@ -291,23 +290,6 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
     require_noerr(err, exit);
 
   /*Sector 4*/
-//  sector = json_object_new_array();
-//  require( sector, exit );
-//  err = MICOAddSector(sectors, "SPP Remote Server",           sector);
-//  require_noerr(err, exit);
-//
-//
-//    // SPP protocol remote server connection enable
-//    err = MICOAddSwitchCellToSector(sector, "Connect SPP Server",   inContext->flashContentInRam.appConfig.remoteServerEnable,   "RW");
-//    require_noerr(err, exit);
-//
-//    //Seerver address cell
-//    err = MICOAddStringCellToSector(sector, "SPP Server",           inContext->flashContentInRam.appConfig.remoteServerDomain,   "RW", NULL);
-//    require_noerr(err, exit);
-//
-//    //Seerver port cell
-//    err = MICOAddNumberCellToSector(sector, "SPP Server Port",      inContext->flashContentInRam.appConfig.remoteServerPort,   "RW", NULL);
-//    require_noerr(err, exit);
 
   /*Sector 5*/
   sector = json_object_new_array();
@@ -330,29 +312,41 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
   /*Sector 6: cloud settings*/
   sector = json_object_new_array();
   require( sector, exit );
-  err = MICOAddSector(sectors, "Cloud info",           sector);
+  err = MICOAddSector(sectors, "ClOUD",           sector);
   require_noerr(err, exit);
-
-    // cloud connect status
-    err = MICOAddSwitchCellToSector(sector, "connect", inContext->appStatus.virtualDevStatus.isCloudConnected, "RO");
-    require_noerr(err, exit);
-    // device activate status
-    err = MICOAddSwitchCellToSector(sector, "activated", inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated, "RO");
-    require_noerr(err, exit);
-    // device_id cell, is RO in fact, we set RW is convenient for read full string.
-    err = MICOAddStringCellToSector(sector, "device_id", 
-                                    inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
-                                    "RW", NULL);
-    require_noerr(err, exit);
-    // login_id cell
-    err = MICOAddStringCellToSector(sector, "login_id", "input login id", "RW", NULL);
-    require_noerr(err, exit);
-    // device password cell
-    err = MICOAddStringCellToSector(sector, "dev_passwd", "input dev passwd", "RW", NULL);
-    require_noerr(err, exit);
-    // user_token cell
-    err = MICOAddStringCellToSector(sector, "user_token", "input user token", "RW", NULL);
-    require_noerr(err, exit);
+  
+  // device activate status
+  err = MICOAddSwitchCellToSector(sector, "activated", inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated, "RO");
+  require_noerr(err, exit);
+  // cloud connect status
+  err = MICOAddSwitchCellToSector(sector, "connected", inContext->appStatus.virtualDevStatus.isCloudConnected, "RO");
+  require_noerr(err, exit);
+  // rom version cell
+  err = MICOAddStringCellToSector(sector, "rom version", 
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
+                                  "RO", NULL);
+  require_noerr(err, exit);
+  // device_id cell, is RO in fact, we set RW is convenient for read full string.
+  err = MICOAddStringCellToSector(sector, "device_id", 
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
+                                  "RW", NULL);
+  require_noerr(err, exit);
+  /* these info is not show to user later*/
+  // login_id cell
+  err = MICOAddStringCellToSector(sector, "login_id", 
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, 
+                                  "RW", NULL);
+  require_noerr(err, exit);
+  // device password cell
+  err = MICOAddStringCellToSector(sector, "dev_passwd", 
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
+                                  "RW", NULL);
+  require_noerr(err, exit);
+  // user_token cell
+  err = MICOAddStringCellToSector(sector, "user_token", 
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, 
+                                  "RW", NULL);
+  require_noerr(err, exit);
 
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   
@@ -397,19 +391,9 @@ OSStatus ConfigIncommingJsonMessage( const char *input, mico_Context_t * const i
       inContext->flashContentInRam.micoSystemConfig.keyLength = strlen(inContext->flashContentInRam.micoSystemConfig.key);
       inContext->flashContentInRam.micoSystemConfig.user_keyLength = strlen(inContext->flashContentInRam.micoSystemConfig.key);
     }
-//    else if(!strcmp(key, "Connect SPP Server")){
-//      inContext->flashContentInRam.appConfig.remoteServerEnable = json_object_get_boolean(val);
-//    }else if(!strcmp(key, "SPP Server")){
-//      strncpy(inContext->flashContentInRam.appConfig.remoteServerDomain, json_object_get_string(val), 64);
-//    }else if(!strcmp(key, "SPP Server Port")){
-//      inContext->flashContentInRam.appConfig.remoteServerPort = json_object_get_int(val);
-//    }
     else if(!strcmp(key, "Baurdrate")){
       inContext->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate = json_object_get_int(val);
     }
-//    else if(!strcmp(key, "activated")){
-//      inContext->flashContentInRam.appConfig.isAcitivated = json_object_get_int(val);
-//    }
     else if(!strcmp(key, "login_id")){
       strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
     }
@@ -428,4 +412,62 @@ OSStatus ConfigIncommingJsonMessage( const char *input, mico_Context_t * const i
 
 exit:
   return err; 
+}
+
+OSStatus getMVDActivateRequestData(const char *input, MVDActivateRequestData_t *activateData)
+{
+  OSStatus err = kUnknownErr;
+  json_object *new_obj;
+  config_delegate_log_trace();
+  
+  new_obj = json_tokener_parse(input);
+  require_action(new_obj, exit, err = kUnknownErr);
+  
+  config_delegate_log("Recv activate object=%s", json_object_to_json_string(new_obj));
+  
+  json_object_object_foreach(new_obj, key, val) {
+    if(!strcmp(key, "login_id")){
+      strncpy(activateData->loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
+    }
+    else if(!strcmp(key, "dev_passwd")){
+      strncpy(activateData->devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD);
+    }
+    else if(!strcmp(key, "user_token")){
+      strncpy(activateData->user_token, json_object_get_string(val), MAX_SIZE_USER_TOKEN);
+    }
+  }
+  json_object_put(new_obj);
+  err = kNoErr;
+  
+exit:  
+  return err;
+}
+
+OSStatus getMVDAuthorizeRequestData(const char *input, MVDAuthorizeRequestData_t *authorizeData)
+{
+  OSStatus err = kUnknownErr;
+  json_object *new_obj;
+  config_delegate_log_trace();
+  
+  new_obj = json_tokener_parse(input);
+  require_action(new_obj, exit, err = kUnknownErr);
+  
+  config_delegate_log("Recv activate object=%s", json_object_to_json_string(new_obj));
+  
+  json_object_object_foreach(new_obj, key, val) {
+    if(!strcmp(key, "login_id")){
+      strncpy(authorizeData->loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
+    }
+    else if(!strcmp(key, "dev_passwd")){
+      strncpy(authorizeData->devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD);
+    }
+    else if(!strcmp(key, "user_token")){
+      strncpy(authorizeData->user_token, json_object_get_string(val), MAX_SIZE_USER_TOKEN);
+    }
+  }
+  json_object_put(new_obj);
+  err = kNoErr;
+  
+exit:  
+  return err;
 }

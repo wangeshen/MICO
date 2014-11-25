@@ -234,7 +234,7 @@ client_stop:
 }
 
 
-OSStatus EasyCloudMQTTClientPublish(const char* pubtopic, const unsigned char* msg, int msglen)
+OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
 {
   OSStatus err = kUnknownErr;
   int ret = 0;

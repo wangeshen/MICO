@@ -23,30 +23,30 @@
 #ifndef __EASYCLOUD_SERVICE_H_
 #define __EASYCLOUD_SERVICE_H_
 
-#include "Common.h"
+//#include "MICODefine.h"
 #include "EasyCloudServiceDef.h"
 
 /*******************************************************************************
  * INTERFACES
  ******************************************************************************/
 
-OSStatus EasyCloudServiceInit(easycloud_service_context_t *context,
-                              easycloud_service_config_t config,
-                              easycloud_service_status_t initStauts);
-OSStatus EasyCloudServiceStart(easycloud_service_context_t *context);  //start thread
+OSStatus EasyCloudServiceInit(easycloud_service_context_t* const context);
+OSStatus EasyCloudServiceStart(easycloud_service_context_t* const context);  //start thread
 
-OSStatus EasyCloudServiceState(easycloud_service_context_t *context, easycloudServiceState *outState);
+EasycCloudServiceState EasyCloudServiceState(easycloud_service_context_t* const context);
 
-OSStatus EasyCloudActivate(easycloud_service_context_t *context);
-OSStatus EasyCloudAuthorize(easycloud_service_context_t *context);
+OSStatus EasyCloudActivate(easycloud_service_context_t* const context);
+OSStatus EasyCloudAuthorize(easycloud_service_context_t* const context);
 
-OSStatus EasyCloudUpload(easycloud_service_context_t *context, const unsigned char *msg, unsigned int msgLen);
+OSStatus EasyCloudUpload(easycloud_service_context_t* const context, const unsigned char *msg, unsigned int msgLen);
 
-OSStatus EasyCloudFirmwareUpdate(easycloud_service_context_t *context);  //get version, update
+//OSStatus EasyCloudFirmwareUpdate(easycloud_service_context_t* const context); //get rom data
+OSStatus EasyCloudGetLatestRomVersion(easycloud_service_context_t* const context); //get rom version
+OSStatus EasyCloudGetRomData(easycloud_service_context_t* const context); //get rom data
 
-OSStatus EasyCloudServiceStop(easycloud_service_context_t *context);
-OSStatus EasyCloudServiceDeInit(easycloud_service_context_t *context);
+OSStatus EasyCloudServiceStop(easycloud_service_context_t* const context);
+OSStatus EasyCloudServiceDeInit(easycloud_service_context_t* const context);
 
-OSStatus EasyCloudServiceVersion(int *outVersion);
+int EasyCloudServiceVersion(easycloud_service_context_t* const context);
 
 #endif

@@ -25,13 +25,18 @@
 #define __EASYEASYCLOUD_SERVICE_DEF_H_
 
 
+//#include "MICO.h"
+#include "Common.h"
+
 /*******************************************************************************
  * DEFINES
  ******************************************************************************/
 
 // string length in bytes
 #define MAX_SIZE_DOMAIN_NAME            64
-   
+
+#define MAX_SIZE_BSSID                  18
+
 #define MAX_SIZE_PRODUCT_ID             37
 #define MAX_SIZE_PRODUCT_KEY            37
 
@@ -43,6 +48,10 @@
    
 #define MAX_SIZE_DEVICE_ID              37
 #define MAX_SIZE_DEVICE_KEY             37
+
+#define MAX_SIZE_FW_VERSION             32
+#define MAX_SIZE_FILE_PATH              256
+#define MAX_SIZE_FILE_MD5               64
    
 #define MAX_SIZE_SUBSCRIBE_TOPIC        256
 #define MAX_SIZE_PUBLISH_TOPIC          256
@@ -58,9 +67,8 @@
 // in seconds, here set 60s
 #define DEFAULT_MQTT_CLLIENT_KEEPALIVE_INTERVAL    60
    
-#define DEFAULT_DEVICE_ID               "none"
-#define DEFAULT_DEVICE_KEY              "none"
- 
+//#define DEFAULT_DEVICE_ID               "none"
+//#define DEFAULT_DEVICE_KEY              "none"
 
  /*******************************************************************************
  * STRUCTURES
@@ -71,13 +79,20 @@ typedef enum {
   EASYCLOUD_STARTED = 2,      //service start up
   EASYCLOUD_CONNECTED = 3,    //service work ok
   EASYCLOUD_DISCONNECTED = 4  //service diconnected from server
-} easycloudServiceState;
+} EasycCloudServiceState;
 
 typedef struct _easycloud_service_status_t {
-  easycloudServiceState state;
-  bool isActivated;
-  char deviceId[MAX_SIZE_DEVICE_ID];
-  char masterDeviceKey[MAX_SIZE_DEVICE_KEY];
+  //service running status
+  EasycCloudServiceState  state;
+  //device status info
+  bool                    isActivated;
+  char                    deviceId[MAX_SIZE_DEVICE_ID];
+  char                    masterDeviceKey[MAX_SIZE_DEVICE_KEY];
+  
+  char                    latestRomVersion[MAX_SIZE_FW_VERSION];
+  char                    bin_file[MAX_SIZE_FILE_PATH];
+  char                    bin_md5[MAX_SIZE_FILE_MD5];
+  uint64_t                bin_file_size;
 } easycloud_service_status_t;
  
 //message recived callback function prototype
@@ -87,37 +102,46 @@ typedef void (*easycloudStatusChangedCallback)(void* const context,
                                                easycloud_service_status_t serviceStateInfo);
 
 typedef struct _easycloud_service_config_t {
-  //easycloud server info
-  char                 *host;
-  uint16_t              port;
+  /* product properties */
+  char                    bssid[MAX_SIZE_BSSID];
+  char                    productId[MAX_SIZE_PRODUCT_ID];
+  char                    productKey[MAX_SIZE_PRODUCT_KEY];
+  //bool                    devActivatedStatus;
   
-  //device info
-  char                 *bssid;
-  char                 *productId;
-  char                 *productKey;
+  /* easycloud server info */
+  char                    cloudServerDomain[MAX_SIZE_DOMAIN_NAME];
+  int                     cloudServerPort;
+  char                    mqttServerDomain[MAX_SIZE_DOMAIN_NAME];
+  int                     mqttServerPort;
+  uint16_t                mqttKeepAliveInterval;
   
-  //user info
-  char                 *loginId;
-  char                 *password;
-  char                 *userToken;
+  /* device settings */
+  char                    loginId[MAX_SIZE_LOGIN_ID];            // user login id
+  char                    devPasswd[MAX_SIZE_DEV_PASSWD];        // master device password set by user
+  char                    userToken[MAX_SIZE_USER_TOKEN];        // user token
   
-  //mqtt client info
-  char                 *mqttServerHost;
-  uint16_t              mqttServerPort;
-  uint16_t              mqttKeepAliveInterval;
-  easycloudMsgRecvCallBack  msgRecvhandler;  // message received callback
-  
-  easycloudStatusChangedCallback statusNotify;  // cloud servie status changed callback
-  void                 *context;  // app context
+  /* callback */
+  easycloudMsgRecvCallBack  msgRecvhandler;                // message received callback
+  easycloudStatusChangedCallback statusNotify;             // cloud servie status changed callback
+  //user context
+  void* context;
 } easycloud_service_config_t;
 
 typedef struct _easycloud_service_context_t {
   /*easycloud service config info*/
   easycloud_service_config_t service_config_info;
+  //mico_mutex_t service_config_info_mutex;
   
   /*easycloud service running status*/
   easycloud_service_status_t service_status;
 } easycloud_service_context_t;
+
+/* dev activate or authorize request data */
+typedef struct _dev_activate_data_t {
+  char                   loginId[MAX_SIZE_LOGIN_ID];
+  char                   devPasswd[MAX_SIZE_DEV_PASSWD];
+  char                   user_token[MAX_SIZE_USER_TOKEN];
+} MVDActivateRequestData_t, MVDAuthorizeRequestData_t;
 
 
 #endif

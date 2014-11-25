@@ -20,7 +20,9 @@
   */ 
 
     
+#include "MICOAppDefine.h"
 #include "MICODefine.h"
+#include "MicoVirtualDevice.h"
 
 
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
@@ -61,27 +63,9 @@ OSStatus userAppStart(mico_Context_t *inContext)
 void appRestoreDefault_callback(mico_Context_t *inContext)
 {
   inContext->flashContentInRam.appConfig.configDataVer = CONFIGURATION_VERSION;
-  inContext->flashContentInRam.appConfig.localServerPort = LOCAL_PORT;
-  inContext->flashContentInRam.appConfig.localServerEnable = true;
-  inContext->flashContentInRam.appConfig.remoteServerEnable = true;
-  sprintf(inContext->flashContentInRam.appConfig.remoteServerDomain, DEAFULT_REMOTE_SERVER);
-  inContext->flashContentInRam.appConfig.remoteServerPort = DEFAULT_REMOTE_SERVER_PORT;
   
-  //restore virtual device info
-  inContext->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate = 115200;
-  inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated = false;
-  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.cloudServerDomain, DEFAULT_CLOUD_SERVER);
-  inContext->flashContentInRam.appConfig.virtualDevConfig.cloudServerPort = DEFAULT_CLOUD_PORT;
-  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.mqttServerDomain, DEFAULT_MQTT_SERVER); 
-  inContext->flashContentInRam.appConfig.virtualDevConfig.mqttServerPort = DEFAULT_MQTT_PORT;
-  inContext->flashContentInRam.appConfig.virtualDevConfig.mqttkeepAliveInterval = DEFAULT_MQTT_CLLIENT_KEEPALIVE_INTERVAL;
-  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.productId, DEFAULT_PRODUCT_ID);
-  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.productKey, DEFAULT_PRODUCT_KEY);
-  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, DEFAULT_LOGIN_ID);
-  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, DEFAULT_DEV_PASSWD);
-  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, DEFAULT_USER_TOKEN);
-  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId, DEFAULT_DEVICE_ID);
-  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey, DEFAULT_DEVICE_KEY);
+  //restore virtual device config
+  MVDRestoreDefault(inContext);
 }
 
 OSStatus MICOStartApplication( mico_Context_t * const inContext )
