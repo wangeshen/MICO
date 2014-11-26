@@ -38,11 +38,12 @@
 /*User provided configurations*/
 #define CONFIGURATION_VERSION           0x00000001 // if default configuration is changed, update this number
 #define BONJOUR_SERVICE                 "_easylink._tcp.local."
+#define LOCAL_PORT                      8080
 
 /* product type */
-#define DEFAULT_PRODUCT_ID              "f315fea0-50fc-11e4-b6fc-f23c9150064b"
-#define DEFAULT_PRODUCT_KEY             "41a71625-5519-11e4-ad4e-f23c9150064b"
-#define DEFAULT_ROM_VERSION              "v0.1.0"
+#define DEFAULT_PRODUCT_ID              "d7d5fb56-cdb9-45d7-af8c-9a9a880a674a"
+#define DEFAULT_PRODUCT_KEY             "c1272927-e573-4ff8-a62b-08f358d46571"
+#define DEFAULT_ROM_VERSION             "v0.0.1"
 
 /*Application's configuration stores in flash*/
 typedef struct

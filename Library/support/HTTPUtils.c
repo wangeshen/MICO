@@ -39,6 +39,9 @@
 static volatile uint32_t flashStorageAddress = UPDATE_START_ADDRESS;
 #endif
 
+// OTA test by WES
+unsigned int rom_cnt = 0;
+
 int SocketReadHTTPHeader( int inSock, HTTPHeader_t *inHeader )
 {
   int        err =0;
@@ -90,6 +93,11 @@ int SocketReadHTTPHeader( int inSock, HTTPHeader_t *inHeader )
     require_noerr(err, exit);
     err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint8_t *)end, inHeader->extraDataLen);
     require_noerr(err, exit);
+    
+    // OTA test by WES
+    rom_cnt += inHeader->extraDataLen;
+    http_utils_log("[total=%d][Header]Flash writed[%d]:\r\n%*.s", rom_cnt,
+                   inHeader->extraDataLen, inHeader->extraDataLen, (uint8_t *)end);  
 #else
     http_utils_log("OTA flash memory is not existed!");
     err = kUnsupportedErr;
@@ -312,6 +320,11 @@ OSStatus SocketReadHTTPBody( int inSock, HTTPHeader_t *inHeader )
       
       err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint8_t *)inHeader->otaDataPtr, readResult);
       require_noerr(err, exit);
+         
+      // OTA test by WES
+      rom_cnt += readResult;
+      http_utils_log("[total=%d][Body]Flash writed[%d]:\r\n%*.s", rom_cnt,
+                   readResult, readResult, (uint8_t *)inHeader->otaDataPtr);
       
       free(inHeader->otaDataPtr);
       inHeader->otaDataPtr = 0;
@@ -723,6 +736,23 @@ OSStatus CreateSimpleHTTPOKMessage( uint8_t **outMessage, size_t *outMessageSize
   sprintf( (char*)*outMessage,
           "%s %s %s%s",
           "HTTP/1.1", "200", "OK", kCRLFLineEnding );
+  *outMessageSize = strlen( (char*)*outMessage );
+  
+  err = kNoErr;
+  
+exit:
+  return err;
+}
+
+OSStatus CreateSimpleHTTPFailedMessage( uint8_t **outMessage, size_t *outMessageSize )
+{
+  OSStatus err = kNoMemoryErr;
+  *outMessage = malloc( 200 );
+  require( *outMessage, exit );
+  
+  sprintf( (char*)*outMessage,
+          "%s %s %s%s",
+          "HTTP/1.1", "500", "FAILED", kCRLFLineEnding );
   *outMessageSize = strlen( (char*)*outMessage );
   
   err = kNoErr;

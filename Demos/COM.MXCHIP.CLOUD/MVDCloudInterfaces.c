@@ -221,19 +221,26 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext)
 
   cloud_if_log("Update firmware...");
   
-  //get latest rom version
+  //get latest rom version, file_path, md5
   err = EasyCloudGetLatestRomVersion(&easyCloudContext);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloudGetLatestRomVersion failed! err=%d", err) );
   
-  //compare version
-  // current:  inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion 
-  // latest:   easyCloudContext.service_status.latestRomVersion
+  //FW version compare
   cloud_if_log("currnt_version=%s", inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion);
   cloud_if_log("latestRomVersion=%s", easyCloudContext.service_status.latestRomVersion);
   cloud_if_log("bin_file=%s", easyCloudContext.service_status.bin_file);
   cloud_if_log("bin_md5=%s", easyCloudContext.service_status.bin_md5);
   
-  // new ???
+  if(0 == strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
+                  easyCloudContext.service_status.latestRomVersion, MAX_SIZE_FW_VERSION)){
+                    cloud_if_log("the current firmware version[%s] is up to date!", 
+                                 inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion);
+                    return kNoErr;
+                  }
+  
+  cloud_if_log("new firmware[%s] found on server, update...",
+               easyCloudContext.service_status.latestRomVersion);
+  
   //get rom data
   err = EasyCloudGetRomData(&easyCloudContext);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloudGetRomData failed! err=%d", err) );
@@ -247,6 +254,17 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext)
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   
   return kNoErr;
+  
+exit:
+  return err;
+}
+
+OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext)
+{
+  OSStatus err = kUnknownErr;
+  
+  err = EasyCloudDeviceReset(&easyCloudContext);
+  require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloudDeviceReset failed! err=%d", err) );
   
 exit:
   return err;

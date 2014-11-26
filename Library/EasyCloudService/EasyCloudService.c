@@ -380,6 +380,178 @@ OSStatus EasyCloudGetRomData(easycloud_service_context_t* const context)
   return err;
 }
 
+OSStatus EasyCloudDeviceReset(easycloud_service_context_t* const context)
+{
+  OSStatus err = kUnknownErr;
+  char device_token[MAX_SIZE_DEVICE_TOKEN] = {0};
+  
+  if (NULL == context){
+    return kParamErr;
+  }
+  
+  int remoteTcpClient_fd = -1;
+  char ipstr[16];
+  struct sockaddr_t addr;
+  fd_set readfds;
+  
+  struct timeval_t t;
+  t.tv_sec = 3;
+  t.tv_usec = 0;
+  
+  /* create device reset http request data */
+  uint8_t *httpRequestData = NULL;
+  size_t httpRequestDataLen = 0;
+  HTTPHeader_t *httpHeader = NULL;
+  
+  char *json_str = NULL;
+  size_t json_str_len = 0;
+  json_object *object;
+  
+  //cal device_token = MD5(bssid + product_key)
+  err = calculate_device_token(context->service_config_info.bssid,
+                               context->service_config_info.productKey,
+                               device_token);
+  require_noerr(err, exit);
+  easycloud_service_log("authorize: device_token[%d]=%s",
+                        strlen(device_token), device_token);
+  
+  object = json_object_new_object();
+  require_action(object, exit, err = kNoMemoryErr);
+  json_object_object_add(object, "product_id", 
+                         json_object_new_string(context->service_config_info.productId)); 
+  json_object_object_add(object, "bssid", 
+                         json_object_new_string(context->service_config_info.bssid)); 
+  json_object_object_add(object, "device_token",
+                         json_object_new_string(device_token)); 
+  //json_object_object_add(object, "encrypt_method", json_object_new_string(encrypt_method));
+  
+  json_str = (char*)json_object_to_json_string(object);
+  json_str_len = strlen(json_str);
+  easycloud_service_log("json_str=%s", json_str);
+  
+  httpHeader = HTTPHeaderCreate();
+  require_action( httpHeader, exit, err = kNoMemoryErr );
+  HTTPHeaderClear( httpHeader );
+  
+  //create tcp connect
+  easycloud_service_log("tcp client start to connect...");
+  err = gethostbyname(context->service_config_info.cloudServerDomain, (uint8_t *)ipstr, 16);
+  require_noerr(err, exit);
+  easycloud_service_log("cloud service host:%s, ip: %s", context->service_config_info.cloudServerDomain, ipstr);
+  
+  remoteTcpClient_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  require(remoteTcpClient_fd != -1, exit);
+  
+  addr.s_ip = inet_addr(ipstr); 
+  addr.s_port = context->service_config_info.cloudServerPort;
+  
+  err = connect(remoteTcpClient_fd, &addr, sizeof(addr));
+  require_noerr_quiet(err, exit);
+  
+  easycloud_service_log("EasyCloud server connected at port=%d, fd=%d", 
+                         context->service_config_info.cloudServerPort,
+                         remoteTcpClient_fd);
+  
+  // send request data
+  easycloud_service_log("tcp client send activate request...");
+  err = CreateHTTPMessageEx(kHTTPPostMethod, 
+                            context->service_config_info.cloudServerDomain,
+                            (char*)DEFAULT_DEVICE_RESET_URL,
+                            kMIMEType_JSON, 
+                            (uint8_t*)json_str, json_str_len,
+                            &httpRequestData, &httpRequestDataLen);
+  require_noerr( err, exit );
+  easycloud_service_log("send http package: len=%d,\r\n%s", httpRequestDataLen, httpRequestData);
+  
+  err = SocketSend( remoteTcpClient_fd, httpRequestData, httpRequestDataLen );
+  if (httpRequestData != NULL) {
+    free(httpRequestData);
+    httpRequestDataLen = 0;
+  }
+  require_noerr( err, exit );
+  
+  // get http response
+  FD_ZERO(&readfds);
+  FD_SET(remoteTcpClient_fd, &readfds);
+  err = select(1, &readfds, NULL, NULL, &t);
+  require(err >= 1, exit);
+  //easycloud_service_log("select return ok.");
+  
+  if (FD_ISSET(remoteTcpClient_fd, &readfds)) {
+    err = SocketReadHTTPHeader( remoteTcpClient_fd, httpHeader );             
+    switch ( err )
+    {
+    case kNoErr:
+      //easycloud_service_log("read httpheader OK!");
+      //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
+      
+      // Read the rest of the HTTP body if necessary
+      err = SocketReadHTTPBody( remoteTcpClient_fd, httpHeader );
+      require_noerr(err, exit);
+      easycloud_service_log("read httpBody OK!");
+      easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
+      
+      // parse response status
+      if (kStatusOK != httpHeader->statusCode){
+        err = kResponseErr;
+        goto exit;
+      }
+      
+      goto exit_success;
+      break;
+      
+    case EWOULDBLOCK:
+      easycloud_service_log("ERROR: read blocked!");
+      // NO-OP, keep reading
+      goto exit;
+      break;
+      
+    case kNoSpaceErr:
+      easycloud_service_log("ERROR: Cannot fit HTTPHeader.");
+      goto exit;
+      break;
+      
+    case kConnectionErr:
+      // NOTE: kConnectionErr from SocketReadHTTPHeader means it's closed
+      easycloud_service_log("ERROR: Connection closed.");
+      goto exit;
+      break;
+      
+    default:
+      easycloud_service_log("ERROR: HTTP Header parse internal error: %d", err);
+      goto exit; 
+    }    
+  }
+
+exit_success:
+  HTTPHeaderClear( httpHeader );
+  if(httpHeader) free(httpHeader);
+  if(remoteTcpClient_fd != -1){
+    close(remoteTcpClient_fd);
+    remoteTcpClient_fd = -1;
+  }
+  if(NULL != object){
+    json_object_put(object);
+    object = NULL;
+  }
+  return kNoErr;
+  
+exit:
+  easycloud_service_log("Exit: EasyCloud tcp client exit with err = %d", err);
+  HTTPHeaderClear( httpHeader );
+  if(httpHeader) free(httpHeader);
+  if(remoteTcpClient_fd != -1){
+    close(remoteTcpClient_fd);
+    remoteTcpClient_fd = -1;
+  }
+  if(NULL != object){
+    json_object_put(object);
+    object = NULL;
+  }
+  
+  return err;
+}
+
 
 /* cloud service main thread */
 void easyCloudServiceThread(void *arg)
@@ -786,13 +958,13 @@ static OSStatus get_rom_data(char *host, uint16_t port,
     {
     case kNoErr:
       //easycloud_service_log("read httpheader OK!");
-      //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
+      easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
       // Read the rest of the HTTP body if necessary
       err = SocketReadHTTPBody( tcpClient_fd, httpHeader );
       require_noerr(err, exit);
       easycloud_service_log("read httpBody OK!");
-      easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
+      //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
       //return file size
       *out_bin_file_size = httpHeader->contentLength;
@@ -1242,3 +1414,5 @@ static OSStatus calculate_device_token(char *bssid, char *product_key,
 //   OSStatus err = kNoErr;
 //   return err;
 //}
+
+

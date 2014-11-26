@@ -162,3 +162,18 @@ exit:
   return err;
 }
 
+//reset device info on cloud
+OSStatus MVDResetCloudDevInfo(mico_Context_t* const context)
+{
+  OSStatus err = kUnknownErr;
+  mico_Context_t *inContext = context;
+  
+  err = MVDCloudInterfaceResetCloudDevInfo(inContext);
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: reset device info on cloud error! err=%d", err) );
+  return kNoErr;
+  
+exit:
+  return err;
+}
+

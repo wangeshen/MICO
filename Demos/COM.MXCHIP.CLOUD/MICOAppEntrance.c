@@ -33,6 +33,11 @@ void userAppThread(void *arg)
 {
   mico_Context_t *inContext = (mico_Context_t *)arg;
   micoMemInfo_t *memInfo = NULL;
+  
+  int wait_time = 6;  //auto activate after 60s (10*6)
+  MVDActivateRequestData_t devDefaultActivateData;
+  OSStatus err = kUnknownErr;
+  
   app_log("userApp working thread start.");
   
   while(1)
@@ -47,6 +52,32 @@ void userAppThread(void *arg)
     else
     {
       app_log("cloud service stopped.");
+      
+      if (wait_time > 0){
+        wait_time--;
+      }
+      else if(0 == wait_time){
+        // auto activate, using default login_id/dev_pass/user_token
+        memset((void*)&devDefaultActivateData, 0, sizeof(devDefaultActivateData));
+        strncpy(devDefaultActivateData.loginId,
+                inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
+                MAX_SIZE_LOGIN_ID);
+        strncpy(devDefaultActivateData.devPasswd,
+                inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+                MAX_SIZE_DEV_PASSWD);
+        strncpy(devDefaultActivateData.user_token,
+                inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
+                MAX_SIZE_USER_TOKEN);
+        err = MVDActivate(inContext, devDefaultActivateData);
+        if(kNoErr == err){
+          wait_time = -1;  //activate ok, never do activate again.
+        }
+        else{
+          wait_time = 1;  //reactivate after 10 (10*1) seconds
+        }
+      }
+      else{
+      }
     }
     
     mico_thread_sleep(10);
@@ -55,7 +86,7 @@ void userAppThread(void *arg)
 
 OSStatus userAppStart(mico_Context_t *inContext)
 {
-  return mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "userApp", userAppThread, 0x400, inContext );
+  return mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "userApp", userAppThread, 0x500, inContext );
 }
 
 
@@ -63,6 +94,7 @@ OSStatus userAppStart(mico_Context_t *inContext)
 void appRestoreDefault_callback(mico_Context_t *inContext)
 {
   inContext->flashContentInRam.appConfig.configDataVer = CONFIGURATION_VERSION;
+  inContext->flashContentInRam.appConfig.localServerPort = LOCAL_PORT;
   
   //restore virtual device config
   MVDRestoreDefault(inContext);

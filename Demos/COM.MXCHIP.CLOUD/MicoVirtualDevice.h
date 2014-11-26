@@ -56,5 +56,7 @@ OSStatus MVDActivate(mico_Context_t* const context,
 //authorize
 OSStatus MVDAuthorize(mico_Context_t* const context,
                       MVDAuthorizeRequestData_t authorizeData);
+//reset device info on cloud
+OSStatus MVDResetCloudDevInfo(mico_Context_t* const context);
 
 #endif
