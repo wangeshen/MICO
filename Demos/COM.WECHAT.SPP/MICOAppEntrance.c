@@ -26,6 +26,7 @@
 
 #include "MicoPlatform.h"
 
+#include "MVDCloudInterfaces.h"
 #include "MicoVirtualDevice.h"
 
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
@@ -52,8 +53,11 @@ void userAppThread(void *arg)
     if(inContext->appStatus.virtualDevStatus.isCloudConnected){
       if (!connected){
         app_log("[userApp]cloud service working...");
-        MVDDeviceMsgProcess(inContext, "device connect ok!", 
-                            strlen("device connect ok!"));
+        //MVDDeviceMsgProcess(inContext, "device connect ok!", 
+        //                    strlen("device connect ok!"));
+        MVDCloudInterfaceSend("device connect ok!", 
+                              strlen("device connect ok!"));
+        
         connected = true;
         wait_time = 2;  //recovery value;
       }

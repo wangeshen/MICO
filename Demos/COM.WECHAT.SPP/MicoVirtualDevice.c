@@ -28,7 +28,7 @@
 #include "MVDCloudInterfaces.h"
 
 #include "MICODefine.h"
-//#include "MICONotificationCenter.h"
+#include "LM_LEDCmd.h"
 
 
 #define mvd_log(M, ...) custom_log("MVD", M, ##__VA_ARGS__)
@@ -41,7 +41,7 @@
 
 void MVDRestoreDefault(mico_Context_t* const context)
 {
-  context->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate = 115200;
+  context->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate = 2400;
   
   context->flashContentInRam.appConfig.virtualDevConfig.isActivated = false;
   sprintf(context->flashContentInRam.appConfig.virtualDevConfig.deviceId, DEFAULT_DEVICE_ID);
@@ -86,8 +86,21 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   mvd_log_trace();
   OSStatus err = kUnknownErr;
   //mico_Context_t *inContext = context;
+  unsigned char* usartCmd = NULL;
+  unsigned int usartCmdLen = 0;
+  
+  // translate cloud json message to usart protocol format
+  err = LM_LED_FormatUsartCmd(inBuf, inBufLen, &usartCmd, &usartCmdLen);
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: message translate error! err=%d", err));
 
-  err = MVDDevInterfaceSend(inBuf, inBufLen);
+  // send data
+  err = MVDDevInterfaceSend(usartCmd, usartCmdLen);
+  if(NULL != usartCmd){
+    free(usartCmd);
+    usartCmd = NULL;
+    usartCmdLen = 0;
+  }
   require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
   return kNoErr;
   
@@ -102,8 +115,21 @@ OSStatus MVDDeviceMsgProcess(mico_Context_t* const context,
   mvd_log_trace();
   OSStatus err = kUnknownErr;
   //mico_Context_t *inContext = context;
+  unsigned char* cloudMsg = NULL;
+  unsigned int cloudMsgLen = 0;
+  
+  // translate mcu usart message to json for cloud
+  err = LM_LED_ParseResponse(inBuf, inBufLen, &cloudMsg, &cloudMsgLen);
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: message translate error! err=%d", err));
 
-  err = MVDCloudInterfaceSend(inBuf, inBufLen);
+  // send data
+  err = MVDCloudInterfaceSend(cloudMsg, cloudMsgLen);
+  if(NULL != cloudMsg){
+    free(cloudMsg);
+    cloudMsg = NULL;
+    cloudMsgLen = 0;
+  }
   require_noerr_action( err, exit, mvd_log("ERROR: send to cloud error! err=%d", err) );
   return kNoErr;
   

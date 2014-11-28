@@ -173,7 +173,6 @@
         <option>
           <name>CCDefines</name>
           <state>USE_STDPERIPH_DRIVER</state>
-          <state>DEBUG</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -3831,6 +3830,9 @@
   </configuration>
   <group>
     <name>Application</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\LM_LEDCmd.c</name>
+    </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOAppDefine.h</name>
     </file>
