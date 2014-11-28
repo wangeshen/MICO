@@ -892,3 +892,41 @@ void PrintHTTPHeader( HTTPHeader_t *inHeader )
   //http_utils_log("contentlength: %d", inHeader->contentLength );
 }
 
+OSStatus CreateHTTPMessageEx( const char *methold, const char * host, 
+                             const char *url, const char *contentType, 
+                             uint8_t *inData, size_t inDataLen, 
+                             uint8_t **outMessage, size_t *outMessageSize )
+{
+  uint8_t *endOfHTTPHeader;
+  OSStatus err = kParamErr;
+
+  require( contentType, exit );
+  //require( inData, exit );
+  //require( inDataLen, exit );
+
+  err = kNoMemoryErr;
+  *outMessage = malloc( inDataLen + 500 );
+  require( *outMessage, exit );
+  memset(*outMessage, 0, inDataLen + 500);
+
+  // Create HTTP Response
+  sprintf( (char*)*outMessage,
+          "%s %s %s %s%s %s%s%s %s%s%s %d%s",
+          methold, url, "HTTP/1.1", kCRLFNewLine,
+          "Host:", host, kCRLFNewLine,
+          "Content-Type:", contentType, kCRLFNewLine,
+          "Content-Length:", (int)inDataLen, kCRLFLineEnding );
+
+  // outMessageSize will be the length of the HTTP Header plus the data length
+  *outMessageSize = strlen( (char*)*outMessage ) + inDataLen;
+
+  endOfHTTPHeader = *outMessage + strlen( (char*)*outMessage );
+  if ((NULL != inData) && (inDataLen > 0)){
+    memcpy( endOfHTTPHeader, inData, inDataLen );
+  }
+  err = kNoErr;
+
+exit:
+  return err;
+}
+

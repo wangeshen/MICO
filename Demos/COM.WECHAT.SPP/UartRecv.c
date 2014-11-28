@@ -21,9 +21,9 @@
 
 #include "MICOAppDefine.h"
 #include "MICODefine.h"
-#include "SppProtocol.h"
 #include "MicoPlatform.h"
-#include "MICONotificationCenter.h"
+
+#include "MicoVirtualDevice.h"
 
 #define uart_recv_log(M, ...) custom_log("UART RECV", M, ##__VA_ARGS__)
 #define uart_recv_log_trace() custom_log_trace("UART RECV")
@@ -44,7 +44,7 @@ void uartRecv_thread(void *inContext)
     recvlen = _uart_get_one_packet(inDataBuffer, UART_ONE_PACKAGE_LENGTH);
     if (recvlen <= 0)
       continue; 
-    sppUartCommandProcess(inDataBuffer, recvlen, Context);
+    MVDDeviceMsgProcess(Context, inDataBuffer, recvlen);
   }
   
 exit:
@@ -70,10 +70,8 @@ size_t _uart_get_one_packet(uint8_t* inBuf, int inBufLen)
        MicoUartRecv(UART_FOR_APP, inBuf, datalen, UART_RECV_TIMEOUT);
        return datalen;
      }
-   }
-    
-  }
-  
+   }  
+  } 
 }
 
 

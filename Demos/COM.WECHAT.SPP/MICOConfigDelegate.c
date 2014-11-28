@@ -41,8 +41,8 @@
 #define config_delegate_log(M, ...) custom_log("Config Delegate", M, ##__VA_ARGS__)
 #define config_delegate_log_trace() custom_log_trace("Config Delegate")
   
-extern volatile ring_buffer_t  rx_buffer;
-extern volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
+//extern volatile ring_buffer_t  rx_buffer;
+//extern volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
 
 static mico_timer_t _Led_EL_timer = NULL;
 
@@ -263,23 +263,6 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
     require_noerr(err, exit);
 
   /*Sector 4*/
-  sector = json_object_new_array();
-  require( sector, exit );
-  err = MICOAddSector(sectors, "SPP Remote Server",           sector);
-  require_noerr(err, exit);
-
-
-    // SPP protocol remote server connection enable
-    err = MICOAddSwitchCellToSector(sector, "Connect SPP Server",   inContext->flashContentInRam.appConfig.remoteServerEnable,   "RW");
-    require_noerr(err, exit);
-
-    //Seerver address cell
-    err = MICOAddStringCellToSector(sector, "SPP Server",           inContext->flashContentInRam.appConfig.remoteServerDomain,   "RW", NULL);
-    require_noerr(err, exit);
-
-    //Seerver port cell
-    err = MICOAddNumberCellToSector(sector, "SPP Server Port",      inContext->flashContentInRam.appConfig.remoteServerPort,   "RW", NULL);
-    require_noerr(err, exit);
 
   /*Sector 5*/
   sector = json_object_new_array();
@@ -298,6 +281,33 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
     json_object_array_add(selectArray, json_object_new_int(115200));
     err = MICOAddNumberCellToSector(sector, "Baurdrate", 115200, "RW", selectArray);
     require_noerr(err, exit);
+    
+  /*Sector 6: cloud settings*/
+  sector = json_object_new_array();
+  require( sector, exit );
+  err = MICOAddSector(sectors, "ClOUD", sector);
+  require_noerr(err, exit);
+  
+  // device activate status
+  err = MICOAddSwitchCellToSector(sector, "activated", 
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated, 
+                                  "RO");
+  require_noerr(err, exit);
+  // cloud connect status
+  err = MICOAddSwitchCellToSector(sector, "connected", 
+                                  inContext->appStatus.virtualDevStatus.isCloudConnected, 
+                                  "RO");
+  require_noerr(err, exit);
+  // rom version cell
+  err = MICOAddStringCellToSector(sector, "rom version", 
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
+                                  "RO", NULL);
+  require_noerr(err, exit);
+  // device_id cell, is RO in fact, we set RW is convenient for read full string.
+  err = MICOAddStringCellToSector(sector, "device_id", 
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
+                                  "RW", NULL);
+  require_noerr(err, exit);
 
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   
@@ -351,12 +361,6 @@ OSStatus ConfigIncommingJsonMessage( const char *input, mico_Context_t * const i
       strncpy(inContext->flashContentInRam.micoSystemConfig.gateWay, json_object_get_string(val), maxIpLen);
     }else if(!strcmp(key, "DNS Server")){
       strncpy(inContext->flashContentInRam.micoSystemConfig.dnsServer, json_object_get_string(val), maxIpLen);
-    }else if(!strcmp(key, "Connect SPP Server")){
-      inContext->flashContentInRam.appConfig.remoteServerEnable = json_object_get_boolean(val);
-    }else if(!strcmp(key, "SPP Server")){
-      strncpy(inContext->flashContentInRam.appConfig.remoteServerDomain, json_object_get_string(val), 64);
-    }else if(!strcmp(key, "SPP Server Port")){
-      inContext->flashContentInRam.appConfig.remoteServerPort = json_object_get_int(val);
     }else if(!strcmp(key, "Baurdrate")){
       inContext->flashContentInRam.appConfig.USART_BaudRate = json_object_get_int(val);
     }

@@ -23,69 +23,118 @@
 #include "MICOAppDefine.h"
 
 #include "StringUtils.h"
-#include "SppProtocol.h"
 
 #include "MicoPlatform.h"
+
+#include "MicoVirtualDevice.h"
 
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
 #define app_log_trace() custom_log_trace("APP")
 
-volatile ring_buffer_t  rx_buffer;
-volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
+
+void userAppThread(void *arg)
+{
+  mico_Context_t *inContext = (mico_Context_t *)arg;
+  micoMemInfo_t *memInfo = NULL;
+  
+  int wait_time = 2;  //auto activate after 10s (5*2)
+  MVDActivateRequestData_t devDefaultActivateData;
+  OSStatus err = kUnknownErr;
+  bool connected = false;
+  
+  app_log("userApp working thread start.");
+      
+  memInfo = mico_memory_info();
+  app_log("[userApp]system free mem=%d", memInfo->free_memory);
+  
+  while(1)
+  {    
+    if(inContext->appStatus.virtualDevStatus.isCloudConnected){
+      if (!connected){
+        app_log("[userApp]cloud service working...");
+        MVDDeviceMsgProcess(inContext, "device connect ok!", 
+                            strlen("device connect ok!"));
+        connected = true;
+        wait_time = 2;  //recovery value;
+      }
+    }
+    else{
+      connected = false; //recovery value;
+      if (wait_time > 0){
+        app_log("cloud service disconnected, will activate device after %ds...", wait_time*5);
+        wait_time--;
+      }
+      else if(0 == wait_time){
+        // auto activate, using default login_id/dev_pass/user_token
+        app_log("activate device by userApp...");
+        memset((void*)&devDefaultActivateData, 0, sizeof(devDefaultActivateData));
+        strncpy(devDefaultActivateData.loginId,
+                inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
+                MAX_SIZE_LOGIN_ID);
+        strncpy(devDefaultActivateData.devPasswd,
+                inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+                MAX_SIZE_DEV_PASSWD);
+        strncpy(devDefaultActivateData.user_token,
+                inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
+                MAX_SIZE_USER_TOKEN);
+        err = MVDActivate(inContext, devDefaultActivateData);
+        if(kNoErr == err){
+          app_log("device activate success!");
+          wait_time = -1;  //activate ok, never do activate again.
+        }
+        else{
+          wait_time = 1;  //reactivate after 5 (5*1) seconds
+          app_log("device activate failed, will retry in 5s...");
+        }
+      }
+      else{
+      }
+    }
+    
+    mico_thread_sleep(5);
+  }
+}
+
+OSStatus userAppStart(mico_Context_t *inContext)
+{
+  return mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "userApp", userAppThread, 0x500, inContext );
+}
+
 
 /* MICO system callback: Restore default configuration provided by application */
 void appRestoreDefault_callback(mico_Context_t *inContext)
 {
   inContext->flashContentInRam.appConfig.configDataVer = CONFIGURATION_VERSION;
   inContext->flashContentInRam.appConfig.localServerPort = LOCAL_PORT;
-  inContext->flashContentInRam.appConfig.localServerEnable = true;
   inContext->flashContentInRam.appConfig.USART_BaudRate = 115200;
-  inContext->flashContentInRam.appConfig.remoteServerEnable = true;
-  sprintf(inContext->flashContentInRam.appConfig.remoteServerDomain, DEAFULT_REMOTE_SERVER);
-  inContext->flashContentInRam.appConfig.remoteServerPort = DEFAULT_REMOTE_SERVER_PORT;
+
+  //restore virtual device config
+  MVDRestoreDefault(inContext);
 }
 
 OSStatus MICOStartApplication( mico_Context_t * const inContext )
 {
   app_log_trace();
   OSStatus err = kNoErr;
-  mico_uart_config_t uart_config;
+  micoMemInfo_t *memInfo = NULL;
   
   require_action(inContext, exit, err = kParamErr);
-  
-  sppProtocolInit( inContext );
 
-  /*Bonjour for service searching*/
+  /* Bonjour for service searching */
   if(inContext->flashContentInRam.micoSystemConfig.bonjourEnable == true)
     MICOStartBonjourService( Station, inContext );
 
-  /*UART receive thread*/
-  uart_config.baud_rate    = inContext->flashContentInRam.appConfig.USART_BaudRate;
-  uart_config.data_width   = DATA_WIDTH_8BIT;
-  uart_config.parity       = NO_PARITY;
-  uart_config.stop_bits    = STOP_BITS_1;
-  uart_config.flow_control = FLOW_CONTROL_DISABLED;
-  if(inContext->flashContentInRam.micoSystemConfig.mcuPowerSaveEnable == true)
-    uart_config.flags = UART_WAKEUP_ENABLE;
-  else
-    uart_config.flags = UART_WAKEUP_DISABLE;
-  ring_buffer_init  ( (ring_buffer_t *)&rx_buffer, (uint8_t *)rx_data, UART_BUFFER_LENGTH );
-  MicoUartInitialize( UART_FOR_APP, &uart_config, (ring_buffer_t *)&rx_buffer );
-  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART Recv", uartRecv_thread, STACK_SIZE_UART_RECV_THREAD, (void*)inContext );
-  require_noerr_action( err, exit, app_log("ERROR: Unable to start the uart recv thread.") );
-
- /*Local TCP server thread*/
- if(inContext->flashContentInRam.appConfig.localServerEnable == true){
-   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "Local Server", localTcpServer_thread, STACK_SIZE_LOCAL_TCP_SERVER_THREAD, (void*)inContext );
-   require_noerr_action( err, exit, app_log("ERROR: Unable to start the local server thread.") );
- }
-
-  /*Remote TCP client thread*/
- if(inContext->flashContentInRam.appConfig.remoteServerEnable == true){
-   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "Remote Client", remoteTcpClient_thread, STACK_SIZE_REMOTE_TCP_CLIENT_THREAD, (void*)inContext );
-   require_noerr_action( err, exit, app_log("ERROR: Unable to start the remote client thread.") );
- }
-
+  memInfo = mico_memory_info();
+  app_log("system free mem[MICO]=%d", memInfo->free_memory);
+  
+  /* start virtual device */
+  err = MVDInit(inContext);
+  require_noerr_action( err, exit, app_log("ERROR: virtual device start failed!") );
+  
+  /* user app working thread */
+  err = userAppStart(inContext);
+  require_noerr_action( err, exit, app_log("ERROR: Unable to start userApp thread.") );
+  
 exit:
   return err;
 }

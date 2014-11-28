@@ -83,6 +83,7 @@ int TextToHardwareAddress( const void *inText, size_t inTextSize, size_t inAddrS
 char* DataToCString( const uint8_t *inBuf, size_t inBufLen );
 
 char* DataToHexString( const uint8_t *inBuf, size_t inBufLen );
+char* DataToHexStringLowercase( const uint8_t *inBuf, size_t inBufLen );
 
 char* DataToHexStringWithSpaces( const uint8_t *inBuf, size_t inBufLen );
 

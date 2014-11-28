@@ -25,6 +25,7 @@
 #define __MICOAPPDEFINE_H
 
 #include "Common.h"
+#include "MicoVirtualDeviceDef.h"
 
 #define APP_INFO   "mxchipWNet SPP Demo based on MICO OS"
 
@@ -67,35 +68,26 @@
   #define STACK_SIZE_REMOTE_TCP_CLIENT_THREAD   0x260
 #endif
 
+/* product type */
+#define DEFAULT_PRODUCT_ID        "d7d5fb56-cdb9-45d7-af8c-9a9a880a674a"
+#define DEFAULT_PRODUCT_KEY       "c1272927-e573-4ff8-a62b-08f358d46571"
+#define DEFAULT_ROM_VERSION       "v0.1.0"
+
 /*Application's configuration stores in flash*/
 typedef struct
 {
   uint32_t          configDataVer;
-  uint32_t          localServerPort;
-
-  /*local services*/
-  bool              localServerEnable;
-  bool              remoteServerEnable;
-  char              remoteServerDomain[64];
-  int               remoteServerPort;
-
-  /*IO settings*/
+  uint32_t          localServerPort;  //bonjour service
   uint32_t          USART_BaudRate;
+  
+  virtual_device_config_t virtualDevConfig;  //virtual device settings
 } application_config_t;
 
 /*Running status*/
 typedef struct _current_app_status_t {
-  /*Local clients port list*/
-  uint32_t          loopBack_PortList[MAX_Local_Client_Num];
-  /*Remote TCP client connecte*/
-  bool              isRemoteConnected;
+  virtual_device_status_t virtualDevStatus;  //virtual device status
+  bool status;
 } current_app_status_t;
-
-
-void localTcpServer_thread(void *inContext);
-void remoteTcpClient_thread(void *inContext);
-void uartRecv_thread(void *inContext);
-
 
 
 #endif

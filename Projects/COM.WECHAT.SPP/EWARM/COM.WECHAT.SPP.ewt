@@ -341,9 +341,6 @@
   <group>
     <name>Application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\LocalTcpServer.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOAppDefine.h</name>
     </file>
     <file>
@@ -359,13 +356,25 @@
       <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoDefaults.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\RemoteTcpClient.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoVirtualDevice.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\SppProtocol.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoVirtualDevice.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\UartRecv.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoVirtualDeviceDef.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDCloudInterfaces.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDCloudInterfaces.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDDeviceInterfaces.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDDeviceInterfaces.h</name>
     </file>
   </group>
   <group>
@@ -457,34 +466,34 @@
     <group>
       <name>MicoDriver</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverAdc.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverAdc.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverGpio.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverGpio.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverI2c.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverI2c.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverMFiAuth.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverMFiAuth.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverPwm.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverPwm.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverRng.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverRng.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverRtc.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverRtc.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverSpi.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverSpi.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverUart.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverUART.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MicoDriverWdg.h</name>
+        <name>$PROJ_DIR$\..\..\..\include\MicoDrivers\MICODriverWdg.h</name>
       </file>
     </group>
     <file>
@@ -514,6 +523,81 @@
   </group>
   <group>
     <name>Library</name>
+    <group>
+      <name>EasyCloudService</name>
+      <group>
+        <name>EasyCloudMQTTClient</name>
+        <group>
+          <name>MQTTClient-C</name>
+          <group>
+            <name>MICO</name>
+            <file>
+              <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.c</name>
+            </file>
+            <file>
+              <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.h</name>
+            </file>
+          </group>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MQTTClient.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MQTTClient.h</name>
+          </file>
+        </group>
+        <group>
+          <name>MQTTPacket</name>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTConnectClient.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTConnectServer.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTDeserializePublish.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTFormat.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTPacket.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTSerializePublish.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTSubscribeClient.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTSubscribeServer.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTUnsubscribeClient.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTUnsubscribeServer.c</name>
+          </file>
+        </group>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\EasyCloudMQTTClient.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\EasyCloudMQTTClient.h</name>
+        </file>
+      </group>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudService.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudService.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudServiceDef.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudServiceVersion.c</name>
+      </file>
+    </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\MICOConfig.c</name>
     </file>
@@ -534,6 +618,12 @@
     <name>MICO</name>
     <group>
       <name>AIRKISS</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\MICO\Airkiss\Airkiss.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\MICO\Airkiss\Airkiss.h</name>
+      </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\MICO\Airkiss\Airkiss_CM3_Debug.a</name>
       </file>

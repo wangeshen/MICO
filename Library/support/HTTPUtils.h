@@ -30,6 +30,7 @@
 #include "stdbool.h"
 
 #define kHTTPPostMethod     "POST"
+#define kHTTPGetMethod      "GET"
 
       // Status-Code    =
       //       "100"  ; Section 10.1.1: Continue
@@ -164,5 +165,9 @@ OSStatus CreateHTTPRespondMessageNoCopy( int status, const char *contentType, si
 
 OSStatus CreateHTTPMessage( const char *methold, const char *url, const char *contentType, uint8_t *inData, size_t inDataLen, uint8_t **outMessage, size_t *outMessageSize );
 
+OSStatus CreateHTTPMessageEx( const char *methold, const char * host, 
+                             const char *url, const char *contentType, 
+                             uint8_t *inData, size_t inDataLen, 
+                             uint8_t **outMessage, size_t *outMessageSize );
 #endif // __HTTPUtils_h__
 
