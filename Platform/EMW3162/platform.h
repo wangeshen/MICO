@@ -47,7 +47,7 @@ extern "C"
  ******************************************************/
   
 #define HARDWARE_REVISION   "3162"
-#define DEFAULT_NAME        "EMW3162 Module"
+#define DEFAULT_NAME        "EMW3162 WECHAT"
 #define MODEL               "EMW3162"
 
    

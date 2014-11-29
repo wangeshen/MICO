@@ -22,8 +22,8 @@
 */
 
 #include "MICODefine.h"
-#include "LM_LEDCmd.h"
 #include "JSON-C/json.h"
+#include "LM_LEDCmd.h"
 
 #define led_log(M, ...) custom_log("LED", M, ##__VA_ARGS__)
 #define led_log_trace() custom_log_trace("LED")
@@ -184,7 +184,8 @@ OSStatus LM_LED_ParseResponse(unsigned char* inUsartString, unsigned int inUsart
   *outJsonLen = strlen((char*)(json_str));
   *outJson = (unsigned char*)malloc(*outJsonLen);
   memcpy(*outJson, json_str, *outJsonLen);
-  led_log("outJson=%s", *outJson);
+  led_log("outJson=%*.s", *outJsonLen, *outJson);
+  return kNoErr;
   
 exit:
   if(NULL != object){

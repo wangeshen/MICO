@@ -41,7 +41,7 @@
 
 void MVDRestoreDefault(mico_Context_t* const context)
 {
-  context->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate = 2400;
+  context->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate = 115200;
   
   context->flashContentInRam.appConfig.virtualDevConfig.isActivated = false;
   sprintf(context->flashContentInRam.appConfig.virtualDevConfig.deviceId, DEFAULT_DEVICE_ID);

@@ -43,7 +43,7 @@
 
 //response code
 #define LED_RESP_SET_OK      0xB0
-#define LED_RESP_STATUS      0xA8
+#define LED_RESP_STATUS      0xB2
 
 //response value
 #define LED_RESP_CMD_VALUE_OK       "OK"

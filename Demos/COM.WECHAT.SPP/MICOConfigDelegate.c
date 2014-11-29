@@ -274,12 +274,15 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
     json_object *selectArray;
     selectArray = json_object_new_array();
     require( selectArray, exit );
+    json_object_array_add(selectArray, json_object_new_int(2400));
     json_object_array_add(selectArray, json_object_new_int(9600));
     json_object_array_add(selectArray, json_object_new_int(19200));
     json_object_array_add(selectArray, json_object_new_int(38400));
     json_object_array_add(selectArray, json_object_new_int(57600));
     json_object_array_add(selectArray, json_object_new_int(115200));
-    err = MICOAddNumberCellToSector(sector, "Baurdrate", 115200, "RW", selectArray);
+    err = MICOAddNumberCellToSector(sector, "Baurdrate", 
+              inContext->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate, 
+              "RW", selectArray);
     require_noerr(err, exit);
     
   /*Sector 6: cloud settings*/
@@ -362,7 +365,7 @@ OSStatus ConfigIncommingJsonMessage( const char *input, mico_Context_t * const i
     }else if(!strcmp(key, "DNS Server")){
       strncpy(inContext->flashContentInRam.micoSystemConfig.dnsServer, json_object_get_string(val), maxIpLen);
     }else if(!strcmp(key, "Baurdrate")){
-      inContext->flashContentInRam.appConfig.USART_BaudRate = json_object_get_int(val);
+      inContext->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate = json_object_get_int(val);
     }
   }
   json_object_put(new_obj);

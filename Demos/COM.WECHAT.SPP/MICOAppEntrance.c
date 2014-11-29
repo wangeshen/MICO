@@ -110,7 +110,6 @@ void appRestoreDefault_callback(mico_Context_t *inContext)
 {
   inContext->flashContentInRam.appConfig.configDataVer = CONFIGURATION_VERSION;
   inContext->flashContentInRam.appConfig.localServerPort = LOCAL_PORT;
-  inContext->flashContentInRam.appConfig.USART_BaudRate = 115200;
 
   //restore virtual device config
   MVDRestoreDefault(inContext);

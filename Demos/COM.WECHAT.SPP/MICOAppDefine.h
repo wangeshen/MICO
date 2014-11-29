@@ -78,7 +78,6 @@ typedef struct
 {
   uint32_t          configDataVer;
   uint32_t          localServerPort;  //bonjour service
-  uint32_t          USART_BaudRate;
   
   virtual_device_config_t virtualDevConfig;  //virtual device settings
 } application_config_t;
