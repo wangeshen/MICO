@@ -48,7 +48,7 @@
  ******************************************************************************/
 
 /* device configurations stored in flash */
-typedef struct
+typedef struct _virtual_device_config_t
 {
   /* MCU connect settings */
   uint32_t          USART_BaudRate;
@@ -65,7 +65,7 @@ typedef struct
 } virtual_device_config_t;
 
 /* device status */
-typedef struct 
+typedef struct _virtual_device_status_t
 {
   bool              isCloudConnected;   // cloud service connect
   uint64_t          RecvRomFileSize;    // return OTA data size for bootTable.length
