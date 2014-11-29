@@ -34,6 +34,8 @@
 #define UART_RECV_TIMEOUT                   500
 #define UART_ONE_PACKAGE_LENGTH             1024
 #define UART_BUFFER_LENGTH                  2048
+   
+#define STACK_SIZE_USART_RECV_THREAD        0x500
 
 
 /*******************************************************************************

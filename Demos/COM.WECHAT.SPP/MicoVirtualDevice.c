@@ -23,16 +23,97 @@
 
 #include <stdio.h>
 
+#include "MICODefine.h"
+
 #include "MicoVirtualDevice.h"
 #include "MVDDeviceInterfaces.h"
 #include "MVDCloudInterfaces.h"
 
-#include "MICODefine.h"
 #include "LM_LEDCmd.h"
 
 
 #define mvd_log(M, ...) custom_log("MVD", M, ##__VA_ARGS__)
 #define mvd_log_trace() custom_log_trace("MVD")
+
+
+// default device info
+#define DEFAULT_DEVICE_ID                "none"
+#define DEFAULT_DEVICE_KEY               "none"
+
+
+void MVDMainThread(void *arg)
+{
+  mico_Context_t *inContext = (mico_Context_t *)arg;
+  micoMemInfo_t *memInfo = NULL;
+  bool connected = false;
+#ifdef DEVICE_AUTO_ACTIVATE_ENABLE
+  OSStatus err = kUnknownErr;
+  int wait_time = DEVICE_AUTO_ACTIVATE_TIME/5;  //auto activate after 10s (5*2)
+  MVDActivateRequestData_t devDefaultActivateData;
+#endif
+  
+  mvd_log("MVD main thread start.");
+      
+  memInfo = mico_memory_info();
+  mvd_log("[MVD]system free mem=%d", memInfo->free_memory);
+  
+  while(1)
+  {
+    if(inContext->appStatus.virtualDevStatus.isCloudConnected){
+      if (!connected){
+        mvd_log("[MVD]cloud service connected!");
+        MVDCloudInterfaceSend("device connect ok!", strlen("device connect ok!"));
+        
+        connected = true;
+#ifdef DEVICE_AUTO_ACTIVATE_ENABLE
+        wait_time = DEVICE_AUTO_ACTIVATE_TIME/5;  //recovery value;
+#endif
+      }
+    }
+    else{
+      if (connected){
+        connected = false; //recovery value;
+        mvd_log("[MVD]cloud service disconnected!");
+        MVDCloudInterfaceSend("device disconnected!", strlen("device disconnected!"));
+      }
+      
+#ifdef DEVICE_AUTO_ACTIVATE_ENABLE
+      if (wait_time > 0){
+        mvd_log("cloud service disconnected, will activate device after %ds...", 
+                wait_time*5);
+        wait_time--;
+      }
+      else if(0 == wait_time){
+        // auto activate, using default login_id/dev_pass/user_token
+        mvd_log("auto activate device by MVD...");
+        memset((void*)&devDefaultActivateData, 0, sizeof(devDefaultActivateData));
+        strncpy(devDefaultActivateData.loginId,
+                inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
+                MAX_SIZE_LOGIN_ID);
+        strncpy(devDefaultActivateData.devPasswd,
+                inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+                MAX_SIZE_DEV_PASSWD);
+        strncpy(devDefaultActivateData.user_token,
+                inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
+                MAX_SIZE_USER_TOKEN);
+        err = MVDCloudInterfaceDevActivate(inContext, devDefaultActivateData);
+        if(kNoErr == err){
+          mvd_log("device activate success!");
+          wait_time = -1;  //activate ok, never do activate again.
+        }
+        else{
+          wait_time = 1;  //reactivate after 5 (5*1) seconds
+          mvd_log("device activate failed, will retry in 5s...");
+        }
+      }
+      else{
+      }
+#endif
+    }
+    
+    mico_thread_sleep(5);
+  }
+}
 
 
 /*******************************************************************************
@@ -57,7 +138,7 @@ OSStatus MVDInit(mico_Context_t* const inContext)
 {
   OSStatus err = kUnknownErr;
   
-  //init status
+  //init MVD status
   inContext->appStatus.virtualDevStatus.isCloudConnected = false;
   inContext->appStatus.virtualDevStatus.RecvRomFileSize = 0;
   
@@ -70,6 +151,11 @@ OSStatus MVDInit(mico_Context_t* const inContext)
   err = MVDCloudInterfaceInit(inContext);
   require_noerr_action(err, exit, 
                        mvd_log("ERROR: virtual device cloud interface init failed!") );
+  
+  // start MVD monitor thread
+  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "MVD main", 
+                                MVDMainThread, STACK_SIZE_MVD_MAIN_THREAD, 
+                                inContext );
   
 exit:
   return err;
@@ -122,7 +208,8 @@ OSStatus MVDDeviceMsgProcess(mico_Context_t* const context,
   err = LM_LED_ParseResponse(inBuf, inBufLen, &cloudMsg, &cloudMsgLen);
   require_noerr_action(err, exit, 
                        mvd_log("ERROR: message translate error! err=%d", err));
-
+  //mvd_log("send[%d]=%.*s", cloudMsgLen, cloudMsgLen, cloudMsg);
+  
   // send data
   err = MVDCloudInterfaceSend(cloudMsg, cloudMsgLen);
   if(NULL != cloudMsg){

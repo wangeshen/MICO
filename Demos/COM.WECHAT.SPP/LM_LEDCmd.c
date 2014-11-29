@@ -183,8 +183,11 @@ OSStatus LM_LED_ParseResponse(unsigned char* inUsartString, unsigned int inUsart
   json_str = (unsigned char*)json_object_to_json_string(object);
   *outJsonLen = strlen((char*)(json_str));
   *outJson = (unsigned char*)malloc(*outJsonLen);
+  if(NULL == (*outJson)){
+    return kNoMemoryErr;
+  }
   memcpy(*outJson, json_str, *outJsonLen);
-  led_log("outJson=%*.s", *outJsonLen, *outJson);
+  //led_log("outJson[%d]=%.*s", *outJsonLen, *outJsonLen, *outJson);
   return kNoErr;
   
 exit:

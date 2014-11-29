@@ -23,9 +23,9 @@
 
 #include "MICODefine.h"
 
-#include "MicoVirtualDevice.h"
 #include "MVDCloudInterfaces.h"   
 #include "EasyCloudService.h"
+#include "MicoVirtualDevice.h"
 
 
 #define cloud_if_log(M, ...) custom_log("MVD_CLOUD_IF", M, ##__VA_ARGS__)

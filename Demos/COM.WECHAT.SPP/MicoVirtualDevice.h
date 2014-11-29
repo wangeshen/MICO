@@ -24,9 +24,8 @@
 #ifndef __MICO_MVD_H_
 #define __MICO_MVD_H_
 
-#include "MicoVirtualDeviceDef.h"
 #include "MICODefine.h"
-#include "EasyCloudServiceDef.h"
+#include "MicoVirtualDeviceDef.h"
 
 
 /*******************************************************************************
