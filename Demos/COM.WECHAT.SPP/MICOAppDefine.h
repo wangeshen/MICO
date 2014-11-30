@@ -27,6 +27,7 @@
 #include "Common.h"
 #include "MicoVirtualDeviceDef.h"
 
+
 #define APP_INFO   "mxchipWNet SPP Demo based on MICO OS"
 
 #define FIRMWARE_REVISION   "MICO_WECHAT_1"
@@ -77,15 +78,14 @@
 typedef struct
 {
   uint32_t          configDataVer;
-  uint32_t          localServerPort;  //bonjour service
-  
+  uint32_t          localServerPort;
+
   virtual_device_config_t virtualDevConfig;  //virtual device settings
 } application_config_t;
 
 /*Running status*/
 typedef struct _current_app_status_t {
   virtual_device_status_t virtualDevStatus;  //virtual device status
-  bool status;
 } current_app_status_t;
 
 

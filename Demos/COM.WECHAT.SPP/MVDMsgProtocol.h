@@ -3,7 +3,7 @@
 * @file    LM_LEDCmd.h 
 * @author  Eshen Wang
 * @version V0.0.1
-* @date    28-Nov-2014
+* @date    29-Nov-2014
 * @brief   This header contains the cmd interfaces 
 *          of LiMu smart LED USART protocol. 
   operation
@@ -24,9 +24,13 @@
 #ifndef __LM_LED_CMD_H_
 #define __LM_LED_CMD_H_
 
-//#include "MicoVirtualDeviceDef.h"
+
 #include "MICODefine.h"
-//#include "EasyCloudServiceDef.h"
+
+
+/*******************************************************************************
+ * USER CODE
+ ******************************************************************************/
 
 // cmd string len for json
 #define MAX_SIZE_CMD         16
@@ -66,14 +70,15 @@ typedef struct _lm_usart_message_t {
 #define LED_PARAM_YELLOW        "yellow"
 #define LED_PARAM_BRIGHTNESS    "brightness"
 
+
 /*******************************************************************************
- * INTERFACES
+ * INTERFACES PROTOTYPE
  ******************************************************************************/
 
-OSStatus LM_LED_FormatUsartCmd(unsigned char* inJsonString, unsigned int inJsonStringLen, 
+OSStatus MVDMsgTransformCloud2Device(unsigned char* inJsonString, unsigned int inJsonStringLen, 
                                unsigned char** outUsartCmd, unsigned int* outUsartCmdLen);
  
-OSStatus LM_LED_ParseResponse(unsigned char* inUsartString, unsigned int inUsartStringLen, 
+OSStatus MVDMsgTransformDevice2Cloud(unsigned char* inUsartString, unsigned int inUsartStringLen, 
                               unsigned char** outJson, unsigned int* outJsonLen);
 
 #endif

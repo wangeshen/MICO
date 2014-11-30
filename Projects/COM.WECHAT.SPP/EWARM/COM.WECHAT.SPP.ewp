@@ -316,11 +316,7 @@
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Drivers\spi_flash</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_HAL_Driver\Inc</state>
-          <state>$PROJ_DIR$\..\..\..\Library\EasyCloudService</state>
-          <state>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient</state>
-          <state>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src</state>
-          <state>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MICO</state>
-          <state>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src</state>
+          <state>$PROJ_DIR$\..\..\..\Library\MVD</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -3832,9 +3828,6 @@
   <group>
     <name>Application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\LM_LEDCmd.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOAppDefine.h</name>
     </file>
     <file>
@@ -3850,25 +3843,7 @@
       <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoDefaults.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoVirtualDevice.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoVirtualDevice.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoVirtualDeviceDef.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDCloudInterfaces.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDCloudInterfaces.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDDeviceInterfaces.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDDeviceInterfaces.h</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDMsgProtocol.c</name>
     </file>
   </group>
   <group>
@@ -4029,78 +4004,24 @@
   <group>
     <name>Library</name>
     <group>
-      <name>EasyCloudService</name>
-      <group>
-        <name>EasyCloudMQTTClient</name>
-        <group>
-          <name>MQTTClient-C</name>
-          <group>
-            <name>MICO</name>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.c</name>
-            </file>
-            <file>
-              <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.h</name>
-            </file>
-          </group>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MQTTClient.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTClient-C\src\MQTTClient.h</name>
-          </file>
-        </group>
-        <group>
-          <name>MQTTPacket</name>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTConnectClient.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTConnectServer.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTDeserializePublish.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTFormat.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTPacket.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTSerializePublish.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTSubscribeClient.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTSubscribeServer.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTUnsubscribeClient.c</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\MQTTPacket\src\MQTTUnsubscribeServer.c</name>
-          </file>
-        </group>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\EasyCloudMQTTClient.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudMQTTClient\EasyCloudMQTTClient.h</name>
-        </file>
-      </group>
+      <name>MVD</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudService.c</name>
+        <name>$PROJ_DIR$\..\..\..\Library\MVD\EasyCloudServiceDef.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudService.h</name>
+        <name>$PROJ_DIR$\..\..\..\Library\MVD\MicoVirtualDevice.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudServiceDef.h</name>
+        <name>$PROJ_DIR$\..\..\..\Library\MVD\MicoVirtualDevice_debug_20141129_002.a</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Library\EasyCloudService\EasyCloudServiceVersion.c</name>
+        <name>$PROJ_DIR$\..\..\..\Library\MVD\MicoVirtualDevice_release_20141129_002.a</name>
+        <excluded>
+          <configuration>EMW3162</configuration>
+        </excluded>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Library\MVD\MicoVirtualDeviceDef.h</name>
       </file>
     </group>
     <file>

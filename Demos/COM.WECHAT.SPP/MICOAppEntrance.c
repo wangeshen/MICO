@@ -21,9 +21,11 @@
 
 #include "MICODefine.h"
 #include "MICOAppDefine.h"
+
 #include "MicoPlatform.h"
 
 #include "MicoVirtualDevice.h"
+
 
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
 #define app_log_trace() custom_log_trace("APP")
@@ -43,21 +45,17 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
 {
   app_log_trace();
   OSStatus err = kNoErr;
-  micoMemInfo_t *memInfo = NULL;
-  
+    
   require_action(inContext, exit, err = kParamErr);
-
-  /* Bonjour for service searching */
+  
+  /*Bonjour for service searching*/
   if(inContext->flashContentInRam.micoSystemConfig.bonjourEnable == true)
     MICOStartBonjourService( Station, inContext );
 
-  memInfo = mico_memory_info();
-  app_log("system free mem[MICO]=%d", memInfo->free_memory);
-  
   /* start virtual device */
   err = MVDInit(inContext);
   require_noerr_action( err, exit, app_log("ERROR: virtual device start failed!") );
-  
+
 exit:
   return err;
 }

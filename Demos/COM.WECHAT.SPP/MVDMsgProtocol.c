@@ -3,7 +3,7 @@
 * @file    LM_LEDCmd.c 
 * @author  Eshen Wang
 * @version V0.0.1
-* @date    28-Nov-2014
+* @date    29-Nov-2014
 * @brief   This file contains the usart cmd  
 *          of LiMu smart LED USART protocol.
   operation
@@ -23,10 +23,15 @@
 
 #include "MICODefine.h"
 #include "JSON-C/json.h"
-#include "LM_LEDCmd.h"
+#include "MVDMsgProtocol.h"
 
 #define led_log(M, ...) custom_log("LED", M, ##__VA_ARGS__)
 #define led_log_trace() custom_log_trace("LED")
+
+
+/*******************************************************************************
+ * USER CODE
+ ******************************************************************************/
 
 static int getCmdNum(char* cmd, unsigned int len)
 {
@@ -51,7 +56,12 @@ static uint8_t checksum(lm_usart_message_t msg)
   return result;
 }
 
-OSStatus LM_LED_FormatUsartCmd(unsigned char* inJsonString, unsigned int inJsonStringLen, 
+/*******************************************************************************
+ * rewrite MVD Msg transform protocol API
+ ******************************************************************************/
+
+// rewrite this function by user
+OSStatus MVDMsgTransformCloud2Device(unsigned char* inJsonString, unsigned int inJsonStringLen, 
                                unsigned char** outUsartMsg, unsigned int* outUsartMsgLen)
 {
   led_log_trace();
@@ -134,8 +144,8 @@ exit:
   return err; 
 }
 
-
-OSStatus LM_LED_ParseResponse(unsigned char* inUsartString, unsigned int inUsartStringLen, 
+// rewrite this interface by user
+OSStatus MVDMsgTransformDevice2Cloud(unsigned char* inUsartString, unsigned int inUsartStringLen, 
                               unsigned char** outJson, unsigned int* outJsonLen)
 {
   led_log_trace();
@@ -197,4 +207,3 @@ exit:
   }
   return err;
 }
-

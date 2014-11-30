@@ -30,8 +30,7 @@
 #include "JSON-C/json.h"
 #include "MICO.h"
 #include "MICODefine.h"
-#include "MICOAppDefine.h"
-#include "SppProtocol.h"  
+#include "MICOAppDefine.h" 
 #include "MICOConfigMenu.h"
 #include "StringUtils.h"
 
@@ -41,8 +40,6 @@
 #define config_delegate_log(M, ...) custom_log("Config Delegate", M, ##__VA_ARGS__)
 #define config_delegate_log_trace() custom_log_trace("Config Delegate")
   
-//extern volatile ring_buffer_t  rx_buffer;
-//extern volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
 
 static mico_timer_t _Led_EL_timer = NULL;
 
@@ -275,6 +272,7 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
     selectArray = json_object_new_array();
     require( selectArray, exit );
     json_object_array_add(selectArray, json_object_new_int(2400));
+    json_object_array_add(selectArray, json_object_new_int(4800));
     json_object_array_add(selectArray, json_object_new_int(9600));
     json_object_array_add(selectArray, json_object_new_int(19200));
     json_object_array_add(selectArray, json_object_new_int(38400));
@@ -306,7 +304,7 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
                                   inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
                                   "RO", NULL);
   require_noerr(err, exit);
-  // device_id cell, is RO in fact, we set RW is convenient for read full string.
+  // device_id cell, is RO in fact, we set RW is convenient for copy this string.
   err = MICOAddStringCellToSector(sector, "device_id", 
                                   inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
                                   "RW", NULL);
