@@ -38,7 +38,8 @@
 
 #include "MICONotificationCenter.h"
 #include "MICOSystemMonitor.h"
-#include "EasyLink/EasyLink.h"
+//#include "EasyLink/EasyLink.h"
+#include "AIRKISS/Airkiss.h"
 #include "WPS/WPS.h"
 #include "WAC/MFi_WAC.h"
 #include "StringUtils.h"

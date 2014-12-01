@@ -53,12 +53,12 @@ OSStatus MICORestoreDefault(mico_Context_t *inContext)
 
   /*wlan configration is not need to change to a default state, use easylink to do that*/
   sprintf(inContext->flashContentInRam.micoSystemConfig.name, DEFAULT_NAME);
-  //inContext->flashContentInRam.micoSystemConfig.configured = unConfigured;
-  inContext->flashContentInRam.micoSystemConfig.configured = allConfigured;
-  memset(inContext->flashContentInRam.micoSystemConfig.ssid, 0, maxSsidLen);
-  strncpy(inContext->flashContentInRam.micoSystemConfig.ssid, "WES", strlen("WES"));
-  strncpy(inContext->flashContentInRam.micoSystemConfig.user_key, "9517530000", strlen("9517530000"));
-  inContext->flashContentInRam.micoSystemConfig.user_keyLength = strlen("9517530000");
+  inContext->flashContentInRam.micoSystemConfig.configured = unConfigured;
+  //inContext->flashContentInRam.micoSystemConfig.configured = allConfigured;
+  //memset(inContext->flashContentInRam.micoSystemConfig.ssid, 0, maxSsidLen);
+  //strncpy(inContext->flashContentInRam.micoSystemConfig.ssid, "Xiaomi.Router", strlen("Xiaomi.Router"));
+  //strncpy(inContext->flashContentInRam.micoSystemConfig.user_key, "stm32f215", strlen("stm32f215"));
+  //inContext->flashContentInRam.micoSystemConfig.user_keyLength = strlen("stm32f215");
   
   inContext->flashContentInRam.micoSystemConfig.rfPowerSaveEnable = false;
   inContext->flashContentInRam.micoSystemConfig.mcuPowerSaveEnable = false;
