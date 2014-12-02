@@ -287,26 +287,6 @@ error:
     if ( buf_str ) free( buf_str );
     return NULL;
 }
-           
-char* DataToHexStringLowercase( const uint8_t *inBuf, size_t inBufLen )
-{
-    char* buf_str = NULL;
-    char* buf_ptr;
-    require_quiet(inBuf, error);
-    require_quiet(inBufLen > 0, error);
-
-    buf_str = (char*) malloc (2*inBufLen + 1);
-    require(buf_str, error);
-    buf_ptr = buf_str;
-    uint32_t i;
-    for (i = 0; i < inBufLen; i++) buf_ptr += sprintf(buf_ptr, "%02x", inBuf[i]);
-    *buf_ptr = '\0';
-    return buf_str;
-
-error:
-    if ( buf_str ) free( buf_str );
-    return NULL;
-}
 
 char* DataToHexStringWithSpaces( const uint8_t *inBuf, size_t inBufLen )
 {

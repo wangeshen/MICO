@@ -21,7 +21,6 @@
 
 #include "MICODefine.h"
 #include "MICOAppDefine.h"
-
 #include "MicoPlatform.h"
 
 #include "MicoVirtualDevice.h"
@@ -30,13 +29,12 @@
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
 #define app_log_trace() custom_log_trace("APP")
 
-
 /* MICO system callback: Restore default configuration provided by application */
 void appRestoreDefault_callback(mico_Context_t *inContext)
 {
   inContext->flashContentInRam.appConfig.configDataVer = CONFIGURATION_VERSION;
   inContext->flashContentInRam.appConfig.localServerPort = LOCAL_PORT;
-
+  
   // restore virtual device config
   MVDRestoreDefault(inContext);
 }

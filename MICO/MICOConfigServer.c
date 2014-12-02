@@ -35,6 +35,9 @@
 #include "Platform.h"
 #include "Platform_common_config.h"
 #include "HTTPUtils.h"
+#include "EasyCloudUtils.h"
+
+#include "MicoVirtualDevice.h"
 
 
 #define config_log(M, ...) custom_log("CONFIG SERVER", M, ##__VA_ARGS__)
@@ -44,8 +47,16 @@
 #define kCONFIGURLWrite   "/config-write"
 #define kCONFIGURLOTA     "/OTA"
 
+//for temp config by WES at 20141123
+#define kCONFIGURLDevActivate          "/dev-activate"
+#define kCONFIGURLDevAuthorize         "/dev-authorize"
+#define kCONFIGURLResetCloudDevInfo    "/dev-cloud_reset"
+#define kCONFIGURLDevFWUpdate          "/dev-fw_update"
+
 extern OSStatus     ConfigIncommingJsonMessage( const char *input, mico_Context_t * const inContext );
 extern json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext );
+extern OSStatus getMVDActivateRequestData(const char *input, MVDActivateRequestData_t *activateData);
+extern OSStatus getMVDAuthorizeRequestData(const char *input, MVDAuthorizeRequestData_t *authorizeData);
 
 static void localConfiglistener_thread(void *inContext);
 static void localConfig_thread(void *inFd);
@@ -194,6 +205,9 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
   size_t httpResponseLen = 0;
   json_object* report = NULL;
   config_log_trace();
+  
+  MVDActivateRequestData_t devActivateRequestData;
+  MVDAuthorizeRequestData_t devAuthorizeRequestData;
 
 #if 1
   /* This is a demo code for http package has chunked data */
@@ -207,6 +221,7 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
   }
 #endif
 
+  config_log("recv=%s", inHeader->buf);
   if(HTTPHeaderMatchURL( inHeader, kCONFIGURLRead ) == kNoErr){    
     report = ConfigCreateReportJsonMessage( inContext );
     require( report, exit );
@@ -230,18 +245,119 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
       config_log("Recv new configuration, apply and reset");
       err = ConfigIncommingJsonMessage( inHeader->extraDataPtr, inContext);
       require_noerr( err, exit );
+      /*test by WES
+      memset((void*)&devActivateRequestData, '\0', sizeof(devActivateRequestData));
+      strncpy(devActivateRequestData.loginId,
+              inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
+              MAX_SIZE_LOGIN_ID);
+      strncpy(devActivateRequestData.devPasswd,
+              inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+              MAX_SIZE_DEV_PASSWD);
+      strncpy(devActivateRequestData.user_token,
+              inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
+              MAX_SIZE_USER_TOKEN);
+      err = MVDActivate(inContext, devActivateRequestData);
+      require_noerr( err, exit );
+      */    
       err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
       require_noerr( err, exit );
       require( httpResponse, exit );
       err = SocketSend( fd, httpResponse, httpResponseLen );
       SocketClose(&fd);
+      
       inContext->micoStatus.sys_state = eState_Software_Reset;
       require(inContext->micoStatus.sys_state_change_sem, exit);
       mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
     }
     goto exit;
   }
+  else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLDevActivate ) == kNoErr){
+    if(inHeader->contentLength > 0){
+      config_log("Recv device activate request.");
+      memset((void*)&devActivateRequestData, '\0', sizeof(devActivateRequestData));
+      err = getMVDActivateRequestData(inHeader->extraDataPtr, &devActivateRequestData);
+      require_noerr( err, exit );
+      
+      err = MVDActivate(inContext, devActivateRequestData);
+      require_noerr( err, exit );
+      
+      err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
+      require_noerr( err, exit );
+      require( httpResponse, exit );
+      err = SocketSend( fd, httpResponse, httpResponseLen );
+      SocketClose(&fd);
+    }
+    goto exit;
+  }
+  else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLDevAuthorize ) == kNoErr){
+    if(inHeader->contentLength > 0){
+      config_log("Recv device authorize request.");
+      memset((void*)&devAuthorizeRequestData, '\0', sizeof(devAuthorizeRequestData));
+      err = getMVDAuthorizeRequestData( inHeader->extraDataPtr, &devAuthorizeRequestData);
+      require_noerr( err, exit );
+      
+      err = MVDAuthorize(inContext, devAuthorizeRequestData);
+      require_noerr( err, exit );
+      
+      err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
+      require_noerr( err, exit );
+      require( httpResponse, exit );
+      err = SocketSend( fd, httpResponse, httpResponseLen );
+      SocketClose(&fd);
+    }
+    goto exit;
+  }
+  else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLResetCloudDevInfo ) == kNoErr){
+    config_log("Recv cloud device info reset request.");
+    
+    err = MVDResetCloudDevInfo(inContext);
+    require_noerr( err, exit );
+    
+    err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
+    require_noerr( err, exit );
+    require( httpResponse, exit );
+    err = SocketSend( fd, httpResponse, httpResponseLen );
+    SocketClose(&fd);
+    
+    goto exit;
+  }
 #ifdef MICO_FLASH_FOR_UPDATE
+  else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLDevFWUpdate ) == kNoErr){
+      config_log("Recv device fw_update request.");
+      
+      err = MVDFirmwareUpdate(inContext);
+      require_noerr( err, exit );
+      
+      err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
+      require_noerr( err, exit );
+      require( httpResponse, exit );
+      err = SocketSend( fd, httpResponse, httpResponseLen );
+      SocketClose(&fd);
+      
+      config_log("OTA bin_size=%lld, bin_version=%s", 
+                 inContext->appStatus.virtualDevStatus.RecvRomFileSize,
+                 inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion );
+      if(0 == inContext->appStatus.virtualDevStatus.RecvRomFileSize){
+        //no need to update, return size = 0, no need to boot bootloader
+        err = kNoErr;
+        goto exit;
+      }
+      
+      mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
+      memset(&inContext->flashContentInRam.bootTable, 0, sizeof(boot_table_t));
+      inContext->flashContentInRam.bootTable.length = inContext->appStatus.virtualDevStatus.RecvRomFileSize;
+      inContext->flashContentInRam.bootTable.start_address = UPDATE_START_ADDRESS;
+      inContext->flashContentInRam.bootTable.type = 'A';
+      inContext->flashContentInRam.bootTable.upgrade_type = 'U';
+      MICOUpdateConfiguration(inContext);
+      mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+      
+      inContext->micoStatus.sys_state = eState_Software_Reset;
+      require(inContext->micoStatus.sys_state_change_sem, exit);
+      mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
+      
+    goto exit;
+  }
   else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLOTA ) == kNoErr){
     if(inHeader->contentLength > 0){
       config_log("Receive OTA data!");
@@ -265,7 +381,15 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
     return kNotFoundErr;
   };
 
- exit:
+exit:
+  if(kNoErr != err){
+    err =  CreateSimpleHTTPFailedMessage( &httpResponse, &httpResponseLen );
+    require_noerr( err, exit );
+    require( httpResponse, exit );
+    err = SocketSend( fd, httpResponse, httpResponseLen );
+    SocketClose(&fd);
+  }
+      
   if(httpResponse)  free(httpResponse);
   if(report)        json_object_put(report);
 

@@ -36,24 +36,12 @@
 #define PROTOCOL            "com.wechat.spp"
 
 /* Wi-Fi configuration mode */
-#define MICO_CONFIG_MODE CONFIG_MODE_AIRKISS
+//#define MICO_CONFIG_MODE CONFIG_MODE_AIRKISS
+#define MICO_CONFIG_MODE CONFIG_MODE_EASYLINK_PLUS
 
 /*User provided configurations*/
 #define CONFIGURATION_VERSION               0x00000001 // if default configuration is changed, update this number
-#define MAX_Local_Client_Num                8
 #define LOCAL_PORT                          8080
-#define DEAFULT_REMOTE_SERVER               "192.168.2.254"
-#define DEFAULT_REMOTE_SERVER_PORT          8080
-#define UART_RECV_TIMEOUT                   500
-#define UART_ONE_PACKAGE_LENGTH             1024
-#define wlanBufferLen                       1024
-#define UART_BUFFER_LENGTH                  2048
-#define UART_FOR_APP                        MICO_UART_1
-
-#define LOCAL_TCP_SERVER_LOOPBACK_PORT      1000
-#define REMOTE_TCP_CLIENT_LOOPBACK_PORT     1002
-#define RECVED_UART_DATA_LOOPBACK_PORT      1003
-
 #define BONJOUR_SERVICE                     "_easylink._tcp.local."
 
 /* Define thread stack size */
@@ -72,7 +60,7 @@
 /* product type */
 #define DEFAULT_PRODUCT_ID        "d7d5fb56-cdb9-45d7-af8c-9a9a880a674a"
 #define DEFAULT_PRODUCT_KEY       "c1272927-e573-4ff8-a62b-08f358d46571"
-#define DEFAULT_ROM_VERSION       "v0.1.0"
+#define DEFAULT_ROM_VERSION       "v0.0.9"
 
 /*Application's configuration stores in flash*/
 typedef struct

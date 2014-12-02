@@ -30,9 +30,12 @@
 #include "JSON-C/json.h"
 #include "MICO.h"
 #include "MICODefine.h"
-#include "MICOAppDefine.h" 
+#include "MICOAppDefine.h"
+//#include "SppProtocol.h"  
 #include "MICOConfigMenu.h"
 #include "StringUtils.h"
+
+#include "MicoVirtualDevice.h"
 
 #define SYS_LED_TRIGGER_INTERVAL 100 
 #define SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK 500 
@@ -40,6 +43,8 @@
 #define config_delegate_log(M, ...) custom_log("Config Delegate", M, ##__VA_ARGS__)
 #define config_delegate_log_trace() custom_log_trace("Config Delegate")
   
+//extern volatile ring_buffer_t  rx_buffer;
+//extern volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
 
 static mico_timer_t _Led_EL_timer = NULL;
 
@@ -70,7 +75,19 @@ void ConfigWillStop( mico_Context_t * const inContext )
   return;
 }
 
-void ConfigAirkissIsSuccess( mico_Context_t * const inContext )
+//void ConfigAirkissIsSuccess( mico_Context_t * const inContext )
+//{
+//  (void)(inContext); 
+//  config_delegate_log_trace();
+//
+//  mico_stop_timer(&_Led_EL_timer);
+//  mico_deinit_timer( &_Led_EL_timer );
+//  mico_init_timer(&_Led_EL_timer, SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK, _led_EL_Timeout_handler, NULL);
+//  mico_start_timer(&_Led_EL_timer);
+//  return;
+//}
+
+void ConfigEasyLinkIsSuccess( mico_Context_t * const inContext )
 {
   (void)(inContext); 
   config_delegate_log_trace();
@@ -79,6 +96,38 @@ void ConfigAirkissIsSuccess( mico_Context_t * const inContext )
   mico_deinit_timer( &_Led_EL_timer );
   mico_init_timer(&_Led_EL_timer, SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK, _led_EL_Timeout_handler, NULL);
   mico_start_timer(&_Led_EL_timer);
+  return;
+}
+
+void ConfigSoftApWillStart(mico_Context_t * const inContext )
+{
+  //OSStatus err;
+  //mico_uart_config_t uart_config;
+
+  mico_stop_timer(&_Led_EL_timer);
+  mico_deinit_timer( &_Led_EL_timer );
+  mico_init_timer(&_Led_EL_timer, SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK, _led_EL_Timeout_handler, NULL);
+  mico_start_timer(&_Led_EL_timer);
+  
+//  sppProtocolInit(inContext);
+//  
+//   /*UART receive thread*/
+//  uart_config.baud_rate    = inContext->flashContentInRam.appConfig.USART_BaudRate;
+//  uart_config.data_width   = DATA_WIDTH_8BIT;
+//  uart_config.parity       = NO_PARITY;
+//  uart_config.stop_bits    = STOP_BITS_1;
+//  uart_config.flow_control = FLOW_CONTROL_DISABLED;
+//  ring_buffer_init  ( (ring_buffer_t *)&rx_buffer, (uint8_t *)rx_data, UART_BUFFER_LENGTH );
+//  MicoUartInitialize( UART_FOR_APP, &uart_config, (ring_buffer_t *)&rx_buffer );
+//  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART Recv", uartRecv_thread, STACK_SIZE_UART_RECV_THREAD, (void*)inContext );
+//  require_noerr_action( err, exit, config_delegate_log("ERROR: Unable to start the uart recv thread.") );
+//
+// if(inContext->flashContentInRam.appConfig.localServerEnable == true){
+//   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "Local Server", localTcpServer_thread, STACK_SIZE_LOCAL_TCP_SERVER_THREAD, (void*)inContext );
+//   require_noerr_action( err, exit, config_delegate_log("ERROR: Unable to start the local server thread.") );
+// }
+
+//exit:
   return;
 }
 
@@ -278,6 +327,7 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
     json_object_array_add(selectArray, json_object_new_int(38400));
     json_object_array_add(selectArray, json_object_new_int(57600));
     json_object_array_add(selectArray, json_object_new_int(115200));
+    //err = MICOAddNumberCellToSector(sector, "Baurdrate", 115200, "RW", selectArray);
     err = MICOAddNumberCellToSector(sector, "Baurdrate", 
               inContext->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate, 
               "RW", selectArray);
@@ -304,11 +354,10 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
                                   inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
                                   "RO", NULL);
   require_noerr(err, exit);
-  // device_id cell, is RO in fact, we set RW is convenient for copy this string.
+  // device_id cell, is RO in fact, we set RW is convenient for read full string.
   err = MICOAddStringCellToSector(sector, "device_id", 
                                   inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
                                   "RW", NULL);
-  require_noerr(err, exit);
 
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   
@@ -361,7 +410,7 @@ OSStatus ConfigIncommingJsonMessage( const char *input, mico_Context_t * const i
     }else if(!strcmp(key, "Gateway")){
       strncpy(inContext->flashContentInRam.micoSystemConfig.gateWay, json_object_get_string(val), maxIpLen);
     }else if(!strcmp(key, "DNS Server")){
-      strncpy(inContext->flashContentInRam.micoSystemConfig.dnsServer, json_object_get_string(val), maxIpLen);
+      strncpy(inContext->flashContentInRam.micoSystemConfig.dnsServer, json_object_get_string(val), maxIpLen);   
     }else if(!strcmp(key, "Baurdrate")){
       inContext->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate = json_object_get_int(val);
     }
@@ -374,4 +423,62 @@ OSStatus ConfigIncommingJsonMessage( const char *input, mico_Context_t * const i
 
 exit:
   return err; 
+}
+
+OSStatus getMVDActivateRequestData(const char *input, MVDActivateRequestData_t *activateData)
+{
+  OSStatus err = kUnknownErr;
+  json_object *new_obj;
+  config_delegate_log_trace();
+  
+  new_obj = json_tokener_parse(input);
+  require_action(new_obj, exit, err = kUnknownErr);
+  
+  config_delegate_log("Recv activate object=%s", json_object_to_json_string(new_obj));
+  
+  json_object_object_foreach(new_obj, key, val) {
+    if(!strcmp(key, "login_id")){
+      strncpy(activateData->loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
+    }
+    else if(!strcmp(key, "dev_passwd")){
+      strncpy(activateData->devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD);
+    }
+    else if(!strcmp(key, "user_token")){
+      strncpy(activateData->user_token, json_object_get_string(val), MAX_SIZE_USER_TOKEN);
+    }
+  }
+  json_object_put(new_obj);
+  err = kNoErr;
+  
+exit:  
+  return err;
+}
+
+OSStatus getMVDAuthorizeRequestData(const char *input, MVDAuthorizeRequestData_t *authorizeData)
+{
+  OSStatus err = kUnknownErr;
+  json_object *new_obj;
+  config_delegate_log_trace();
+  
+  new_obj = json_tokener_parse(input);
+  require_action(new_obj, exit, err = kUnknownErr);
+  
+  config_delegate_log("Recv activate object=%s", json_object_to_json_string(new_obj));
+  
+  json_object_object_foreach(new_obj, key, val) {
+    if(!strcmp(key, "login_id")){
+      strncpy(authorizeData->loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
+    }
+    else if(!strcmp(key, "dev_passwd")){
+      strncpy(authorizeData->devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD);
+    }
+    else if(!strcmp(key, "user_token")){
+      strncpy(authorizeData->user_token, json_object_get_string(val), MAX_SIZE_USER_TOKEN);
+    }
+  }
+  json_object_put(new_obj);
+  err = kNoErr;
+  
+exit:  
+  return err;
 }
