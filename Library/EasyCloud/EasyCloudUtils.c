@@ -209,6 +209,11 @@ OSStatus SocketReadHTTPBodyEx( int inSock, HTTPHeader_t *inHeader )
   bool writeToFlash = false;
 #endif
   
+  // select timeout
+  struct timeval_t to;
+  to.tv_sec = 10;
+  to.tv_usec = 0;
+  
   require( inHeader, exit );
   
   err = kNotReadableErr;
@@ -308,7 +313,7 @@ OSStatus SocketReadHTTPBodyEx( int inSock, HTTPHeader_t *inHeader )
      return when all data has received*/
   while ( inHeader->extraDataLen < inHeader->contentLength )
   {
-    selectResult = select( inSock + 1, &readSet, NULL, NULL, NULL );
+    selectResult = select( inSock + 1, &readSet, NULL, NULL, &to );
     require( selectResult >= 1, exit );
     
     
@@ -370,8 +375,10 @@ OSStatus SocketReadHTTPBodyEx( int inSock, HTTPHeader_t *inHeader )
     free(pmd5_32);
     pmd5_32 = NULL;
   }
-  else
-    return kNoMemoryErr;
+  else{
+    err = kNoMemoryErr;
+    goto exit;
+  }
   
   err = kNoErr;
   

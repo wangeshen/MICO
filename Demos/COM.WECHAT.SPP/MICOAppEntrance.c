@@ -32,6 +32,7 @@
 /* MICO system callback: Restore default configuration provided by application */
 void appRestoreDefault_callback(mico_Context_t *inContext)
 {
+  //app_log("[APP] appRestoreDefault_callback!");
   inContext->flashContentInRam.appConfig.configDataVer = CONFIGURATION_VERSION;
   inContext->flashContentInRam.appConfig.localServerPort = LOCAL_PORT;
   

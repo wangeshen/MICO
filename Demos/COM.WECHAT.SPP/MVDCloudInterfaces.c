@@ -252,7 +252,8 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext)
   memset(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
          0, MAX_SIZE_FW_VERSION);
   strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
-          easyCloudContext.service_status.latestRomVersion, MAX_SIZE_FW_VERSION);
+          easyCloudContext.service_status.latestRomVersion, 
+          strlen(easyCloudContext.service_status.latestRomVersion));
   inContext->appStatus.virtualDevStatus.RecvRomFileSize = easyCloudContext.service_status.bin_file_size;
   MICOUpdateConfiguration(inContext);
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);

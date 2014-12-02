@@ -126,6 +126,7 @@ void MVDMainThread(void *arg)
 
 void MVDRestoreDefault(mico_Context_t* const context)
 {
+  //mvd_log("[MVD] appRestoreDefault_callback!");
   // clean all config buffer
   memset((void*)&(context->flashContentInRam.appConfig.virtualDevConfig), 
          0, sizeof(virtual_device_config_t));
