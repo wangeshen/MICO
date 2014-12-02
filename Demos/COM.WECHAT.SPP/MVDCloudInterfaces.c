@@ -232,7 +232,8 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext)
   cloud_if_log("bin_md5=%s", easyCloudContext.service_status.bin_md5);
   
   if(0 == strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
-                  easyCloudContext.service_status.latestRomVersion, MAX_SIZE_FW_VERSION)){
+                  easyCloudContext.service_status.latestRomVersion, 
+                  strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion))){
      cloud_if_log("the current firmware version[%s] is up to date!", 
                   inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion);
      inContext->appStatus.virtualDevStatus.RecvRomFileSize = 0;
