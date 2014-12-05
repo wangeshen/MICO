@@ -44,19 +44,6 @@
 #define LOCAL_PORT                          8080
 #define BONJOUR_SERVICE                     "_easylink._tcp.local."
 
-/* Define thread stack size */
-#ifdef DEBUG
-  #define STACK_SIZE_UART_RECV_THREAD           0x2A0
-  #define STACK_SIZE_LOCAL_TCP_SERVER_THREAD    0x300
-  #define STACK_SIZE_LOCAL_TCP_CLIENT_THREAD    0x350
-  #define STACK_SIZE_REMOTE_TCP_CLIENT_THREAD   0x500
-#else
-  #define STACK_SIZE_UART_RECV_THREAD           0x150
-  #define STACK_SIZE_LOCAL_TCP_SERVER_THREAD    0x180
-  #define STACK_SIZE_LOCAL_TCP_CLIENT_THREAD    0x200
-  #define STACK_SIZE_REMOTE_TCP_CLIENT_THREAD   0x260
-#endif
-
 /* product type */
 #define DEFAULT_PRODUCT_ID        "d7d5fb56-cdb9-45d7-af8c-9a9a880a674a"
 #define DEFAULT_PRODUCT_KEY       "c1272927-e573-4ff8-a62b-08f358d46571"
@@ -66,7 +53,7 @@
 typedef struct
 {
   uint32_t          configDataVer;
-  uint32_t          localServerPort;
+  uint32_t          localServerPort;  // for bonjour service port
 
   virtual_device_config_t virtualDevConfig;  //virtual device settings
 } application_config_t;
