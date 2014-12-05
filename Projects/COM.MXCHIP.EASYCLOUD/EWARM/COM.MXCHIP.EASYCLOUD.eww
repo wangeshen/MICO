@@ -2,7 +2,7 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\COM.WECHAT.SPP.ewp</path>
+    <path>$WS_DIR$\COM.MXCHIP.EASYCLOUD.ewp</path>
   </project>
   <batchBuild/>
 </workspace>

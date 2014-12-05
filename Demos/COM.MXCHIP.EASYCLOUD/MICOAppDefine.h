@@ -28,12 +28,12 @@
 #include "MicoVirtualDeviceDef.h"
 
 
-#define APP_INFO   "mxchipWNet SPP Demo based on MICO OS"
+#define APP_INFO   "mxchipWNet Easycloud Demo based on MICO OS"
 
-#define FIRMWARE_REVISION   "MICO_WECHAT_1"
+#define FIRMWARE_REVISION   "MICO_EASYCLOUD_1"
 #define MANUFACTURER        "MXCHIP Inc."
-#define SERIAL_NUMBER       "201411202"
-#define PROTOCOL            "com.wechat.spp"
+#define SERIAL_NUMBER       "201411205"
+#define PROTOCOL            "com.mxchip.easycloud"
 
 /* Wi-Fi configuration mode */
 //#define MICO_CONFIG_MODE CONFIG_MODE_AIRKISS

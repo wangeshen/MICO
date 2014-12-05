@@ -341,31 +341,31 @@
   <group>
     <name>Application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOAppDefine.h</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EASYCLOUD\MICOAppDefine.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOAppEntrance.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EASYCLOUD\MICOAppEntrance.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOBonjour.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EASYCLOUD\MICOBonjour.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOConfigDelegate.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EASYCLOUD\MICOConfigDelegate.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoDefaults.h</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EASYCLOUD\MicoDefaults.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoVirtualDevice.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EASYCLOUD\MicoVirtualDevice.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDCloudInterfaces.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EASYCLOUD\MVDCloudInterfaces.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDDeviceInterfaces.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EASYCLOUD\MVDDeviceInterfaces.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDMsgProtocol.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EASYCLOUD\MVDMsgProtocol.c</name>
     </file>
   </group>
   <group>

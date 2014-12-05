@@ -68,7 +68,7 @@ void cloudServiceStatusChangedHandler(void* context, easycloud_service_status_t 
 OSStatus MVDCloudInterfaceInit(mico_Context_t* const inContext)
 {
   OSStatus err = kUnknownErr;
-  //int cloudServiceLibVersion = 0;
+  int cloudServiceLibVersion = 0;
   
   // set cloud service config
   strncpy(easyCloudContext.service_config_info.bssid, 
@@ -88,6 +88,12 @@ OSStatus MVDCloudInterfaceInit(mico_Context_t* const inContext)
           inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId, MAX_SIZE_DEVICE_ID);
   strncpy(easyCloudContext.service_status.masterDeviceKey, 
           inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey, MAX_SIZE_DEVICE_KEY);
+  
+  cloudServiceLibVersion = EasyCloudServiceVersion(&easyCloudContext);
+  cloud_if_log("EasyCloud library version: %d.%d.%d", 
+               (cloudServiceLibVersion & 0x00FF0000) >> 16,
+               (cloudServiceLibVersion & 0x0000FF00) >> 8,
+               (cloudServiceLibVersion & 0x000000FF));
   
   err = EasyCloudServiceInit(&easyCloudContext);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloud service init failed.") );
