@@ -34,7 +34,7 @@ static volatile uint32_t flashStorageAddress = UPDATE_START_ADDRESS;
 #endif
 
 // OTA test by WES
-unsigned int rom_wrote_size = 0;
+uint64_t rom_wrote_size = 0;
 md5_context md5;
 //unsigned char *md5_input = NULL;
 unsigned char md5_16[16] = {0};
@@ -145,13 +145,14 @@ int SocketReadHTTPHeaderEx( int inSock, HTTPHeader_t *inHeader )
     easycloud_utils_log("Receive OTA data!");        
     err = MicoFlashInitialize( MICO_FLASH_FOR_UPDATE );
     require_noerr(err, exit);
+    flashStorageAddress = UPDATE_START_ADDRESS;   //flash write from beginning
     err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint8_t *)end, inHeader->extraDataLen);
     require_noerr(err, exit);
     
     // OTA test by WES
     rom_wrote_size = inHeader->extraDataLen;
-    easycloud_utils_log("[total=%d][Header]Flash writed[%d]:\r\n%*.s", rom_wrote_size,
-                   inHeader->extraDataLen, inHeader->extraDataLen, (uint8_t *)end);  
+    easycloud_utils_log("OTA[%lld/%lld][Header][%d]", rom_wrote_size,
+                   inHeader->contentLength, inHeader->extraDataLen);  
     // update MD5
     InitMd5(&md5);
     Md5Update(&md5, (uint8_t *)end, inHeader->extraDataLen);
@@ -343,8 +344,8 @@ OSStatus SocketReadHTTPBodyEx( int inSock, HTTPHeader_t *inHeader )
          
       // OTA test by WES
       rom_wrote_size += readResult;
-      easycloud_utils_log("[total=%d][Body]Flash writed[%d]:\r\n%*.s", rom_wrote_size,
-                   readResult, readResult, (uint8_t *)inHeader->otaDataPtr);
+      easycloud_utils_log("OTA[%lld/%lld][Body][%d]", rom_wrote_size,
+                          inHeader->contentLength, readResult);
       
       // update MD5
       Md5Update(&md5, (uint8_t *)inHeader->otaDataPtr, readResult);
