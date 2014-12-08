@@ -52,6 +52,8 @@
 #define micoWlanStopWPS           CloseConfigmodeWPS
 #define micoWlanEnablePowerSave   ps_enable
 #define micoWlanDisablePowerSave  ps_disable
+#define micoWlanStartAirkiss      OpenAirkiss
+#define micoWlanStopAirkiss       CloseAirkiss
 
 #define WiFi_Interface  wlanInterfaceTypedef
 #define net_para_st     IPStatusTypedef
@@ -452,6 +454,14 @@ void micoWlanEnablePowerSave(void);
  * @brief  Disable IEEE power save mode
  */
 void micoWlanDisablePowerSave(void); 
+
+/**
+ * @brief  Enable debug info output on stdio
+ *
+ * @param  enable: Enable or disable this function
+ *
+ */
+void wifimgr_debug_enable(bool enable);
 
 /**
   * @}

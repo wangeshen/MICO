@@ -35,13 +35,16 @@
 #include "MICOConfigMenu.h"
 #include "StringUtils.h"
 
+#include "MicoVirtualDevice.h"
+
 #define SYS_LED_TRIGGER_INTERVAL 100 
 #define SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK 500 
+  
 #define config_delegate_log(M, ...) custom_log("Config Delegate", M, ##__VA_ARGS__)
 #define config_delegate_log_trace() custom_log_trace("Config Delegate")
   
-extern volatile ring_buffer_t  rx_buffer;
-extern volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
+//extern volatile ring_buffer_t  rx_buffer;
+//extern volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
 
 static mico_timer_t _Led_EL_timer = NULL;
 
@@ -72,6 +75,18 @@ void ConfigWillStop( mico_Context_t * const inContext )
   return;
 }
 
+//void ConfigAirkissIsSuccess( mico_Context_t * const inContext )
+//{
+//  (void)(inContext); 
+//  config_delegate_log_trace();
+//
+//  mico_stop_timer(&_Led_EL_timer);
+//  mico_deinit_timer( &_Led_EL_timer );
+//  mico_init_timer(&_Led_EL_timer, SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK, _led_EL_Timeout_handler, NULL);
+//  mico_start_timer(&_Led_EL_timer);
+//  return;
+//}
+
 void ConfigEasyLinkIsSuccess( mico_Context_t * const inContext )
 {
   (void)(inContext); 
@@ -86,9 +101,14 @@ void ConfigEasyLinkIsSuccess( mico_Context_t * const inContext )
 
 void ConfigSoftApWillStart(mico_Context_t * const inContext )
 {
-//  OSStatus err;
-//  mico_uart_config_t uart_config;
-//  
+  //OSStatus err;
+  //mico_uart_config_t uart_config;
+
+  mico_stop_timer(&_Led_EL_timer);
+  mico_deinit_timer( &_Led_EL_timer );
+  mico_init_timer(&_Led_EL_timer, SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK, _led_EL_Timeout_handler, NULL);
+  mico_start_timer(&_Led_EL_timer);
+  
 //  sppProtocolInit(inContext);
 //  
 //   /*UART receive thread*/
@@ -99,18 +119,17 @@ void ConfigSoftApWillStart(mico_Context_t * const inContext )
 //  uart_config.flow_control = FLOW_CONTROL_DISABLED;
 //  ring_buffer_init  ( (ring_buffer_t *)&rx_buffer, (uint8_t *)rx_data, UART_BUFFER_LENGTH );
 //  MicoUartInitialize( UART_FOR_APP, &uart_config, (ring_buffer_t *)&rx_buffer );
-//  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART Recv", uartRecv_thread, 0x500, (void*)inContext );
+//  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART Recv", uartRecv_thread, STACK_SIZE_UART_RECV_THREAD, (void*)inContext );
 //  require_noerr_action( err, exit, config_delegate_log("ERROR: Unable to start the uart recv thread.") );
 //
 // if(inContext->flashContentInRam.appConfig.localServerEnable == true){
-//   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "Local Server", localTcpServer_thread, 0x200, (void*)inContext );
+//   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "Local Server", localTcpServer_thread, STACK_SIZE_LOCAL_TCP_SERVER_THREAD, (void*)inContext );
 //   require_noerr_action( err, exit, config_delegate_log("ERROR: Unable to start the local server thread.") );
 // }
-//
+
 //exit:
   return;
 }
-
 
 OSStatus ConfigELRecvAuthData(char * anthData, mico_Context_t * const inContext )
 {
@@ -262,52 +281,34 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
           require_noerr(err, exit);
         }
 
-        /*DHCP cell*/
-        err = MICOAddSwitchCellToSector(subMenuSector, "DHCP",        inContext->flashContentInRam.micoSystemConfig.dhcpEnable,   "RO");
-        require_noerr(err, exit);
-        /*Local cell*/
-        err = MICOAddStringCellToSector(subMenuSector, "IP address",  inContext->micoStatus.localIp,   "RO", NULL);
-        require_noerr(err, exit);
-        /*Netmask cell*/
-        err = MICOAddStringCellToSector(subMenuSector, "Net Mask",    inContext->micoStatus.netMask,   "RO", NULL);
-        require_noerr(err, exit);
-        /*Gateway cell*/
-        err = MICOAddStringCellToSector(subMenuSector, "Gateway",     inContext->micoStatus.gateWay,   "RO", NULL);
-        require_noerr(err, exit);
-        /*DNS server cell*/
-        err = MICOAddStringCellToSector(subMenuSector, "DNS Server",  inContext->micoStatus.dnsServer, "RO", NULL);
-        require_noerr(err, exit);
-
   /*Sector 3*/
   sector = json_object_new_array();
   require( sector, exit );
   err = MICOAddSector(sectors, "WLAN",           sector);
   require_noerr(err, exit);
-
+    /*SSID cell*/
     err = MICOAddStringCellToSector(sector, "Wi-Fi",        inContext->flashContentInRam.micoSystemConfig.ssid,     "RW", NULL);
     require_noerr(err, exit);
-
+    /*PASSWORD cell*/
     err = MICOAddStringCellToSector(sector, "Password",     inContext->flashContentInRam.micoSystemConfig.user_key, "RW", NULL);
+    require_noerr(err, exit);
+    /*DHCP cell*/
+    err = MICOAddSwitchCellToSector(sector, "DHCP",        inContext->flashContentInRam.micoSystemConfig.dhcpEnable,   "RW");
+    require_noerr(err, exit);
+    /*Local cell*/
+    err = MICOAddStringCellToSector(sector, "IP address",  inContext->micoStatus.localIp,   "RW", NULL);
+    require_noerr(err, exit);
+    /*Netmask cell*/
+    err = MICOAddStringCellToSector(sector, "Net Mask",    inContext->micoStatus.netMask,   "RW", NULL);
+    require_noerr(err, exit);
+    /*Gateway cell*/
+    err = MICOAddStringCellToSector(sector, "Gateway",     inContext->micoStatus.gateWay,   "RW", NULL);
+    require_noerr(err, exit);
+    /*DNS server cell*/
+    err = MICOAddStringCellToSector(sector, "DNS Server",  inContext->micoStatus.dnsServer, "RW", NULL);
     require_noerr(err, exit);
 
   /*Sector 4*/
-//  sector = json_object_new_array();
-//  require( sector, exit );
-//  err = MICOAddSector(sectors, "SPP Remote Server",           sector);
-//  require_noerr(err, exit);
-//
-//
-//    // SPP protocol remote server connection enable
-//    err = MICOAddSwitchCellToSector(sector, "Connect SPP Server",   inContext->flashContentInRam.appConfig.remoteServerEnable,   "RW");
-//    require_noerr(err, exit);
-//
-//    //Seerver address cell
-//    err = MICOAddStringCellToSector(sector, "SPP Server",           inContext->flashContentInRam.appConfig.remoteServerDomain,   "RW", NULL);
-//    require_noerr(err, exit);
-//
-//    //Seerver port cell
-//    err = MICOAddNumberCellToSector(sector, "SPP Server Port",      inContext->flashContentInRam.appConfig.remoteServerPort,   "RW", NULL);
-//    require_noerr(err, exit);
 
   /*Sector 5*/
   sector = json_object_new_array();
@@ -319,29 +320,44 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
     json_object *selectArray;
     selectArray = json_object_new_array();
     require( selectArray, exit );
+    json_object_array_add(selectArray, json_object_new_int(2400));
+    json_object_array_add(selectArray, json_object_new_int(4800));
     json_object_array_add(selectArray, json_object_new_int(9600));
     json_object_array_add(selectArray, json_object_new_int(19200));
     json_object_array_add(selectArray, json_object_new_int(38400));
     json_object_array_add(selectArray, json_object_new_int(57600));
     json_object_array_add(selectArray, json_object_new_int(115200));
-    err = MICOAddNumberCellToSector(sector, "Baurdrate", 115200, "RW", selectArray);
+    //err = MICOAddNumberCellToSector(sector, "Baurdrate", 115200, "RW", selectArray);
+    err = MICOAddNumberCellToSector(sector, "Baurdrate", 
+              inContext->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate, 
+              "RW", selectArray);
     require_noerr(err, exit);
     
   /*Sector 6: cloud settings*/
   sector = json_object_new_array();
   require( sector, exit );
-  err = MICOAddSector(sectors, "Cloud info",           sector);
+  err = MICOAddSector(sectors, "ClOUD", sector);
   require_noerr(err, exit);
-
-    // device activate status
-    err = MICOAddSwitchCellToSector(sector, "activated", inContext->flashContentInRam.appConfig.isActivated, "RO");
-    require_noerr(err, exit);
-    // user_token cell
-    err = MICOAddStringCellToSector(sector, "user token", inContext->flashContentInRam.appConfig.user_token, "RW", NULL);
-    require_noerr(err, exit);
-    // device_id cell, is RO in fact, we set RW is convenient for read full string.
-    err = MICOAddStringCellToSector(sector, "device_id", inContext->flashContentInRam.appConfig.device_id, "RW", NULL);
-    require_noerr(err, exit);
+  
+  // device activate status
+  err = MICOAddSwitchCellToSector(sector, "activated", 
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated, 
+                                  "RO");
+  require_noerr(err, exit);
+  // cloud connect status
+  err = MICOAddSwitchCellToSector(sector, "connected", 
+                                  inContext->appStatus.virtualDevStatus.isCloudConnected, 
+                                  "RO");
+  require_noerr(err, exit);
+  // rom version cell
+  err = MICOAddStringCellToSector(sector, "rom version", 
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
+                                  "RO", NULL);
+  require_noerr(err, exit);
+  // device_id cell, is RO in fact, we set RW is convenient for read full string.
+  err = MICOAddStringCellToSector(sector, "device_id", 
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
+                                  "RW", NULL);
 
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   
@@ -385,22 +401,18 @@ OSStatus ConfigIncommingJsonMessage( const char *input, mico_Context_t * const i
       strncpy(inContext->flashContentInRam.micoSystemConfig.user_key, json_object_get_string(val), maxKeyLen);
       inContext->flashContentInRam.micoSystemConfig.keyLength = strlen(inContext->flashContentInRam.micoSystemConfig.key);
       inContext->flashContentInRam.micoSystemConfig.user_keyLength = strlen(inContext->flashContentInRam.micoSystemConfig.key);
-    }
-//    else if(!strcmp(key, "Connect SPP Server")){
-//      inContext->flashContentInRam.appConfig.remoteServerEnable = json_object_get_boolean(val);
-//    }else if(!strcmp(key, "SPP Server")){
-//      strncpy(inContext->flashContentInRam.appConfig.remoteServerDomain, json_object_get_string(val), 64);
-//    }else if(!strcmp(key, "SPP Server Port")){
-//      inContext->flashContentInRam.appConfig.remoteServerPort = json_object_get_int(val);
-//    }
-    else if(!strcmp(key, "Baurdrate")){
-      inContext->flashContentInRam.appConfig.USART_BaudRate = json_object_get_int(val);
-    }
-//    else if(!strcmp(key, "activated")){
-//      inContext->flashContentInRam.appConfig.isAcitivated = json_object_get_int(val);
-//    }
-    else if(!strcmp(key, "user token")){
-      strncpy(inContext->flashContentInRam.appConfig.user_token, json_object_get_string(val), MAX_USER_TOKEN_STRLEN);
+    }else if(!strcmp(key, "DHCP")){
+      inContext->flashContentInRam.micoSystemConfig.dhcpEnable   = json_object_get_boolean(val);
+    }else if(!strcmp(key, "IP address")){
+      strncpy(inContext->flashContentInRam.micoSystemConfig.localIp, json_object_get_string(val), maxIpLen);
+    }else if(!strcmp(key, "Net Mask")){
+      strncpy(inContext->flashContentInRam.micoSystemConfig.netMask, json_object_get_string(val), maxIpLen);
+    }else if(!strcmp(key, "Gateway")){
+      strncpy(inContext->flashContentInRam.micoSystemConfig.gateWay, json_object_get_string(val), maxIpLen);
+    }else if(!strcmp(key, "DNS Server")){
+      strncpy(inContext->flashContentInRam.micoSystemConfig.dnsServer, json_object_get_string(val), maxIpLen);   
+    }else if(!strcmp(key, "Baurdrate")){
+      inContext->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate = json_object_get_int(val);
     }
   }
   json_object_put(new_obj);
@@ -411,4 +423,62 @@ OSStatus ConfigIncommingJsonMessage( const char *input, mico_Context_t * const i
 
 exit:
   return err; 
+}
+
+OSStatus getMVDActivateRequestData(const char *input, MVDActivateRequestData_t *activateData)
+{
+  OSStatus err = kUnknownErr;
+  json_object *new_obj;
+  config_delegate_log_trace();
+  
+  new_obj = json_tokener_parse(input);
+  require_action(new_obj, exit, err = kUnknownErr);
+  
+  config_delegate_log("Recv activate object=%s", json_object_to_json_string(new_obj));
+  
+  json_object_object_foreach(new_obj, key, val) {
+    if(!strcmp(key, "login_id")){
+      strncpy(activateData->loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
+    }
+    else if(!strcmp(key, "dev_passwd")){
+      strncpy(activateData->devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD);
+    }
+    else if(!strcmp(key, "user_token")){
+      strncpy(activateData->user_token, json_object_get_string(val), MAX_SIZE_USER_TOKEN);
+    }
+  }
+  json_object_put(new_obj);
+  err = kNoErr;
+  
+exit:  
+  return err;
+}
+
+OSStatus getMVDAuthorizeRequestData(const char *input, MVDAuthorizeRequestData_t *authorizeData)
+{
+  OSStatus err = kUnknownErr;
+  json_object *new_obj;
+  config_delegate_log_trace();
+  
+  new_obj = json_tokener_parse(input);
+  require_action(new_obj, exit, err = kUnknownErr);
+  
+  config_delegate_log("Recv activate object=%s", json_object_to_json_string(new_obj));
+  
+  json_object_object_foreach(new_obj, key, val) {
+    if(!strcmp(key, "login_id")){
+      strncpy(authorizeData->loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
+    }
+    else if(!strcmp(key, "dev_passwd")){
+      strncpy(authorizeData->devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD);
+    }
+    else if(!strcmp(key, "user_token")){
+      strncpy(authorizeData->user_token, json_object_get_string(val), MAX_SIZE_USER_TOKEN);
+    }
+  }
+  json_object_put(new_obj);
+  err = kNoErr;
+  
+exit:  
+  return err;
 }

@@ -87,7 +87,7 @@
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state>6.70.1.5793</state>
+          <state>7.30.1.7765</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -1913,16 +1913,19 @@
   <group>
     <name>Application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.Apple.HomeKit\HomeKitHTTPUtils.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.Apple.HomeKit\HomeKitPairlist.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.Apple.HomeKit\HomeKitPairProtocol.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.Apple.HomeKit\HomekitProfiles.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.Apple.HomeKit\HomekitProfiles.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.Apple.HomeKit\HomeKitSecurity_Debug.a</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.Apple.HomeKit\HomeKitSecurity_Release.a</name>
+      <excluded>
+        <configuration>EMW3162</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.Apple.HomeKit\HomeKitServer.c</name>
@@ -2494,24 +2497,24 @@
       </file>
     </group>
     <group>
-      <name>HMAC_HKDF</name>
+      <name>SHAUtils</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\External\HMAC_HKDF\hkdf.c</name>
+        <name>$PROJ_DIR$\..\..\..\External\SHAUtils\hkdf.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\External\HMAC_HKDF\hmac.c</name>
+        <name>$PROJ_DIR$\..\..\..\External\SHAUtils\hmac.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\External\HMAC_HKDF\sha1.c</name>
+        <name>$PROJ_DIR$\..\..\..\External\SHAUtils\sha1.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\External\HMAC_HKDF\sha224-256.c</name>
+        <name>$PROJ_DIR$\..\..\..\External\SHAUtils\sha224-256.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\External\HMAC_HKDF\sha384-512.c</name>
+        <name>$PROJ_DIR$\..\..\..\External\SHAUtils\sha384-512.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\External\HMAC_HKDF\usha.c</name>
+        <name>$PROJ_DIR$\..\..\..\External\SHAUtils\usha.c</name>
       </file>
     </group>
     <group>
@@ -2548,10 +2551,10 @@
       <name>$PROJ_DIR$\..\..\..\Library\MICOConfig.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MICOCrypto_CortexM3.a</name>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoCrypto.a</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Library\MICOSRPServer_CortexM3.a</name>
+      <name>$PROJ_DIR$\..\..\..\Library\MicoSrpServer.a</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm3_sdio.a</name>
@@ -2822,6 +2825,9 @@
             <name>$PROJ_DIR$\..\..\..\Platform\Common\Drivers\spi_flash\spi_flash.c</name>
           </file>
         </group>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\Platform\Common\Drivers\MicoDriverMFiAuth.a</name>
+        </file>
       </group>
       <group>
         <name>IAR</name>
@@ -2877,9 +2883,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\SecurityUtils.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\Library\support\SHAUtils.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\SocketUtils.c</name>

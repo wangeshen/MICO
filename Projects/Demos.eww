@@ -13,8 +13,8 @@
   <project>
     <path>$WS_DIR$\COM.MXCHIP.SPP\EWARM\COM.MXCHIP.SPP.ewp</path>
   </project>
-    <project>
-    <path>$WS_DIR$\COM.MXCHIP.EasyCloud\EWARM\COM.MXCHIP.EasyCloud.ewp</path>
+  <project>
+    <path>$WS_DIR$\COM.MXCHIP.EASYCLOUD\EWARM\COM.MXCHIP.EASYCLOUD.ewp</path>
   </project>
   <batchBuild/>
 </workspace>

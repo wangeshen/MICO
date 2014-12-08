@@ -47,7 +47,7 @@ extern "C"
  ******************************************************/
   
 #define HARDWARE_REVISION   "3162"
-#define DEFAULT_NAME        "EMW3162 Module"
+#define DEFAULT_NAME        "EMW3162 EASYCLOUD"
 #define MODEL               "EMW3162"
 
    
@@ -234,7 +234,7 @@ typedef enum
     //MICO_GPIO_27,
     //MICO_GPIO_28,
     MICO_GPIO_29,
-    MICO_GPIO_30,
+    //MICO_GPIO_30,
 
     MICO_GPIO_MAX, /* Denotes the total number of GPIO port aliases. Not a valid GPIO alias */
 } mico_gpio_t;
@@ -253,11 +253,9 @@ typedef enum
 
 typedef enum
 {
-    MICO_PWM_R = MICO_COMMON_PWM_MAX,
-    MICO_PWM_G,
-    MICO_PWM_B,
-    MICO_PWM_W,
-    MICO_PWM_C,
+    MICO_PWM_1 = MICO_COMMON_PWM_MAX,
+    MICO_PWM_2,
+    MICO_PWM_3,
     MICO_PWM_MAX, /* Denotes the total number of PWM port aliases. Not a valid PWM alias */
 } mico_pwm_t;
 

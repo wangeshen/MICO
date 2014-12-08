@@ -39,6 +39,7 @@
 #include "MICONotificationCenter.h"
 #include "MICOSystemMonitor.h"
 #include "EasyLink/EasyLink.h"
+//#include "Airkiss/Airkiss.h"
 #include "WPS/WPS.h"
 #include "WAC/MFi_WAC.h"
 #include "StringUtils.h"
@@ -294,6 +295,7 @@ int application_start(void)
   /*wlan driver and tcpip init*/
   MicoInit();
   MicoSysLed(true);
+  mico_log("Free memory %d bytes", MicoGetMemoryInfo()->free_memory) ; 
 
   /* Enter test mode, call a build-in test function amd output on STDIO */
   if(MicoShouldEnterMFGMode()==true)
@@ -328,17 +330,16 @@ int application_start(void)
   if(context->flashContentInRam.micoSystemConfig.configured != allConfigured){
     mico_log("Empty configuration. Starting configuration mode...");
 
-#if defined (CONFIG_MODE_EASYLINK) || defined (CONFIG_MODE_EASYLINK_WITH_SOFTAP) || defined (CONFIG_MODE_EASYLINK_PLUS)
+#if (MICO_CONFIG_MODE == CONFIG_MODE_EASYLINK) || (MICO_CONFIG_MODE == CONFIG_MODE_EASYLINK_WITH_SOFTAP) || (MICO_CONFIG_MODE == CONFIG_MODE_EASYLINK_PLUS)
   err = startEasyLink( context );
   require_noerr( err, exit );
-#endif
-
-#if defined (CONFIG_MODE_WPS) || defined (CONFIG_MODE_WPS_WITH_SOFTAP)
+#elif (MICO_CONFIG_MODE == CONFIG_MODE_AIRKISS)
+  err = startAirkiss( context );
+  require_noerr( err, exit );
+#elif (MICO_CONFIG_MODE == CONFIG_MODE_WPS) || MICO_CONFIG_MODE == defined (CONFIG_MODE_WPS_WITH_SOFTAP)
   err = startWPS( context );
   require_noerr( err, exit );
-#endif
-
-#ifdef CONFIG_MODE_WAC
+#elif ( MICO_CONFIG_MODE == CONFIG_MODE_WAC)
   WACPlatformParameters_t* WAC_Params = NULL;
   WAC_Params = calloc(1, sizeof(WACPlatformParameters_t));
   require(WAC_Params, exit);
@@ -365,6 +366,8 @@ int application_start(void)
   err = startMFiWAC( context, WAC_Params, 1200);
   free(WAC_Params);
   require_noerr( err, exit );
+#else
+  #error "Wi-Fi configuration mode is not defined"?
 #endif
   }
   else{
@@ -404,10 +407,7 @@ int application_start(void)
     _ConnectToAP( context );
   }
 
-  int free_memory;
-  free_memory = MicoGetMemoryInfo()->free_memory;
-  REFERENCE_DEBUG_ONLY_VARIABLE(free_memory);
-  mico_log("Free memory %d bytes", free_memory) ; 
+  mico_log("Free memory %d bytes", MicoGetMemoryInfo()->free_memory) ; 
   
   /*System status changed*/
   while(mico_rtos_get_semaphore(&context->micoStatus.sys_state_change_sem, MICO_WAIT_FOREVER)==kNoErr){

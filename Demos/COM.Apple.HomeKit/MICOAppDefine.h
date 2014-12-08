@@ -36,6 +36,9 @@
 #define LOCAL_PORT          8080
 #define CONFIGURATION_VERSION    0x00010001 // if changed default configuration, add this num
 
+/* Wi-Fi configuration mode */
+#define MICO_CONFIG_MODE CONFIG_MODE_EASYLINK_PLUS
+
 /*User provided application configurations*/
 #define MAX_Local_Client_Num                8
 #define DEAFULT_REMOTE_SERVER               "192.168.2.254"
@@ -156,15 +159,12 @@ typedef struct _HKServiceStatus_t {
 
 /*Running status*/
 typedef struct _current_app_status_t {
-  /*Local clients port list*/
-  uint32_t          loopBack_PortList[MAX_Local_Client_Num];
-  /*Remote TCP client connecte*/
-  bool              isRemoteConnected;
-  /*Homekit*/
+  /* Homekit basic, should not add, delete or change order under any circumstances */
   bool              haPairSetupRunning;
   int               statusNumber;
+  bool              useMFiAuth;
 
-  //mico_semaphore_t  write
+  /* Homekit application */
   HKServiceStatus   service;
 
 
