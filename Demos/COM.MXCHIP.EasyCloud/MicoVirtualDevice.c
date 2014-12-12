@@ -49,7 +49,7 @@ void MVDMainThread(void *arg)
   bool connected = false;
 #ifdef DEVICE_AUTO_ACTIVATE_ENABLE
   OSStatus err = kUnknownErr;
-  int wait_time = DEVICE_AUTO_ACTIVATE_TIME/5;  //auto activate after 10s (5*2)
+  int wait_time = DEVICE_AUTO_ACTIVATE_TIME/1;  //auto activate after 5s
   MVDActivateRequestData_t devDefaultActivateData;
 #endif
   
@@ -73,17 +73,17 @@ void MVDMainThread(void *arg)
       if (connected){
         connected = false; //recovery value;
 #ifdef DEVICE_AUTO_ACTIVATE_ENABLE
-        wait_time = DEVICE_AUTO_ACTIVATE_TIME/5;  //recovery value;
+        wait_time = DEVICE_AUTO_ACTIVATE_TIME/1;  //recovery value;
 #endif
         mvd_log("[MVD]cloud service disconnected!");
-        MVDCloudInterfaceSend("device disconnected!", strlen("device disconnected!"));
+        //MVDCloudInterfaceSend("device disconnected!", strlen("device disconnected!"));
       }
       
 #ifdef DEVICE_AUTO_ACTIVATE_ENABLE
       if(false == inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated){
         if (wait_time > 0){
           mvd_log("cloud service disconnected, will activate device after %ds...", 
-                  wait_time*5);
+                  wait_time*1);
           wait_time--;
         }
         else if(0 == wait_time){
@@ -105,8 +105,8 @@ void MVDMainThread(void *arg)
             wait_time = -1;  //activate ok, never do activate again.
           }
           else{
-            wait_time = 1;  //reactivate after 5 (5*1) seconds
-            mvd_log("device activate failed, will retry in 5s...");
+            wait_time = 1;  //reactivate after 1 seconds
+            mvd_log("device activate failed, will retry in %ds...", wait_time*1);
           }
         }
         else{
@@ -115,7 +115,7 @@ void MVDMainThread(void *arg)
 #endif
     }
     
-    mico_thread_sleep(5);
+    mico_thread_sleep(1);
   }
 }
 
