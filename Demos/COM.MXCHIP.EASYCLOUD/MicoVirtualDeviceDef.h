@@ -41,7 +41,7 @@
 #define DEVICE_AUTO_ACTIVATE_ENABLE      1
 
 //device will auto activate 10s after the MVD start up if auto activate enabled.
-#define DEVICE_AUTO_ACTIVATE_TIME        10
+#define DEVICE_AUTO_ACTIVATE_TIME        5
 
 /*******************************************************************************
  * STRUCTURES

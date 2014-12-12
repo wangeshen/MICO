@@ -137,7 +137,7 @@ MQTTClientRestart:
     if (rc >= 0)
       break;
  
-    mico_mqtt_client_log("MQTT socket network connect failed, rc = %d\r\nRetry after 3 seconds...", rc);
+    mico_mqtt_client_log("MQTT socket network connect failed, rc = %d\r\nRetry after 1 seconds...", rc);
     mico_thread_sleep(1);
   }
   mico_mqtt_client_log("MQTT socket network connect OK!");
@@ -165,7 +165,7 @@ MQTTClientRestart:
     if(SUCCESS == rc)
       break;
     
-    mico_mqtt_client_log("MQTT client connect failed, rc = %d\r\nRetry after 3 seconds...", rc);
+    mico_mqtt_client_log("MQTT client connect failed, rc = %d\r\nRetry after 1 seconds...", rc);
     mico_thread_sleep(1);
   }
   mico_mqtt_client_log("MQTT client connect OK!");
@@ -184,7 +184,7 @@ MQTTClientRestart:
     if (SUCCESS == rc)
       break;
     
-    mico_mqtt_client_log("MQTT client subscribe [%s] failed, rc = %d\r\nRetry after 3 seconds...",
+    mico_mqtt_client_log("MQTT client subscribe [%s] failed, rc = %d\r\nRetry after 1 seconds...",
                          mqttClientContext.client_config_info.subtopic, rc);
     mico_thread_sleep(1);
   }

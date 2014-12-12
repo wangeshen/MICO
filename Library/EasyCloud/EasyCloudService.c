@@ -21,7 +21,6 @@
 */ 
 
 #include "MICO.h"
-#include "MICONotificationCenter.h"
 
 #include "JSON-C/json.h"
 #include "SocketUtils.h"
@@ -68,10 +67,6 @@ typedef enum {
  ******************************************************************************/
 
 static mico_thread_t easyCloudServiceThreadHandle = NULL;
-//static easycloud_service_context_t easyCloudServiceContext = {0};
-
-//mqtt client info
-//static mqtt_client_config_t mqtt_client_config_info = {0};
 
 extern char rom_file_md5[32];
 
@@ -159,10 +154,8 @@ OSStatus EasyCloudServiceInit(easycloud_service_context_t* const context)
   context->service_config_info.mqttKeepAliveInterval = DEFAULT_MQTT_CLLIENT_KEEPALIVE_INTERVAL;
   
   // init status
-  //memset((void*)&(context->service_status), '\0', sizeof(context->service_status));
   context->service_status.state = EASYCLOUD_STOPPED;
   context->service_status.bin_file_size = 0;
-  //context->service_status.isActivated = context->service_config_info.devActivatedStatus;
   
   return kNoErr;
 }

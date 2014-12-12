@@ -25,7 +25,6 @@
 #define __EASYEASYCLOUD_SERVICE_DEF_H_
 
 
-//#include "MICO.h"
 #include "Common.h"
 
 /*******************************************************************************
@@ -66,9 +65,6 @@
 #define DEFAULT_MQTT_PORT_SSL           8883
 // in seconds, here set 60s
 #define DEFAULT_MQTT_CLLIENT_KEEPALIVE_INTERVAL    60
-   
-//#define DEFAULT_DEVICE_ID               "none"
-//#define DEFAULT_DEVICE_KEY              "none"
 
  /*******************************************************************************
  * STRUCTURES
@@ -106,7 +102,6 @@ typedef struct _easycloud_service_config_t {
   char                    bssid[MAX_SIZE_BSSID];
   char                    productId[MAX_SIZE_PRODUCT_ID];
   char                    productKey[MAX_SIZE_PRODUCT_KEY];
-  //bool                    devActivatedStatus;
   
   /* easycloud server info */
   char                    cloudServerDomain[MAX_SIZE_DOMAIN_NAME];
@@ -116,9 +111,9 @@ typedef struct _easycloud_service_config_t {
   uint16_t                mqttKeepAliveInterval;
   
   /* device settings */
-  char                    loginId[MAX_SIZE_LOGIN_ID];            // user login id
-  char                    devPasswd[MAX_SIZE_DEV_PASSWD];        // master device password set by user
-  char                    userToken[MAX_SIZE_USER_TOKEN];        // user token
+  char                    loginId[MAX_SIZE_LOGIN_ID];      // user login id
+  char                    devPasswd[MAX_SIZE_DEV_PASSWD];  // master device password set by user
+  char                    userToken[MAX_SIZE_USER_TOKEN];  // user token
   
   /* callback */
   easycloudMsgRecvCallBack  msgRecvhandler;                // message received callback
