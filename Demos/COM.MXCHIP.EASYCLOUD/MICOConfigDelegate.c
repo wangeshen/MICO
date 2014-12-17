@@ -42,9 +42,7 @@
   
 #define config_delegate_log(M, ...) custom_log("Config Delegate", M, ##__VA_ARGS__)
 #define config_delegate_log_trace() custom_log_trace("Config Delegate")
-  
-//extern volatile ring_buffer_t  rx_buffer;
-//extern volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
+
 
 static mico_timer_t _Led_EL_timer = NULL;
 
@@ -474,6 +472,62 @@ OSStatus getMVDAuthorizeRequestData(const char *input, MVDAuthorizeRequestData_t
     }
     else if(!strcmp(key, "user_token")){
       strncpy(authorizeData->user_token, json_object_get_string(val), MAX_SIZE_USER_TOKEN);
+    }
+  }
+  json_object_put(new_obj);
+  err = kNoErr;
+  
+exit:  
+  return err;
+}
+
+OSStatus getMVDResetRequestData(const char *input, MVDResetRequestData_t *devResetData)
+{
+  OSStatus err = kUnknownErr;
+  json_object *new_obj;
+  config_delegate_log_trace();
+  
+  new_obj = json_tokener_parse(input);
+  require_action(new_obj, exit, err = kUnknownErr);
+  
+  config_delegate_log("Recv devReset object=%s", json_object_to_json_string(new_obj));
+  
+  json_object_object_foreach(new_obj, key, val) {
+    if(!strcmp(key, "login_id")){
+      strncpy(devResetData->loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
+    }
+    else if(!strcmp(key, "dev_passwd")){
+      strncpy(devResetData->devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD);
+    }
+    else {
+    }
+  }
+  json_object_put(new_obj);
+  err = kNoErr;
+  
+exit:  
+  return err;
+}
+
+OSStatus getMVDOTARequestData(const char *input, MVDOTARequestData_t *OTAData)
+{
+  OSStatus err = kUnknownErr;
+  json_object *new_obj;
+  config_delegate_log_trace();
+  
+  new_obj = json_tokener_parse(input);
+  require_action(new_obj, exit, err = kUnknownErr);
+  
+  config_delegate_log("Recv OTA request object=%s", json_object_to_json_string(new_obj));
+  
+  json_object_object_foreach(new_obj, key, val) {
+    if(!strcmp(key, "login_id")){
+      strncpy(OTAData->loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
+    }
+    else if(!strcmp(key, "dev_passwd")){
+      strncpy(OTAData->devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD);
+    }
+    else {
     }
   }
   json_object_put(new_obj);

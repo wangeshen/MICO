@@ -270,12 +270,13 @@ exit:
 }
 
 //OTA
-OSStatus MVDFirmwareUpdate(mico_Context_t* const context)
+OSStatus MVDFirmwareUpdate(mico_Context_t* const context,
+                           MVDOTARequestData_t OTAData)
 {
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = context;
   
-  err = MVDCloudInterfaceDevFirmwareUpdate(inContext);
+  err = MVDCloudInterfaceDevFirmwareUpdate(inContext, OTAData);
   require_noerr_action(err, exit, 
                        mvd_log("ERROR: Firmware Update error! err=%d", err) );
   return kNoErr;
@@ -285,12 +286,13 @@ exit:
 }
 
 //reset device info on cloud
-OSStatus MVDResetCloudDevInfo(mico_Context_t* const context)
+OSStatus MVDResetCloudDevInfo(mico_Context_t* const context,
+                              MVDResetRequestData_t devResetData)
 {
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = context;
   
-  err = MVDCloudInterfaceResetCloudDevInfo(inContext);
+  err = MVDCloudInterfaceResetCloudDevInfo(inContext, devResetData);
   require_noerr_action(err, exit, 
                        mvd_log("ERROR: reset device info on cloud error! err=%d", err) );
   return kNoErr;

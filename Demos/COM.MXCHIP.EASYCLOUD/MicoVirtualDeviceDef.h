@@ -38,7 +38,7 @@
 #define STACK_SIZE_MVD_MAIN_THREAD       0x500
 
 /* device auto activate mechanism, comment out if not need */
-#define DEVICE_AUTO_ACTIVATE_ENABLE      1
+//#define DEVICE_AUTO_ACTIVATE_ENABLE      1
 
 //device will auto activate 10s after the MVD start up if auto activate enabled.
 #define DEVICE_AUTO_ACTIVATE_TIME        5

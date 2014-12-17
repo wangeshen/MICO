@@ -900,7 +900,7 @@ static OSStatus get_rom_data(char *host, uint16_t port,
   
   // send/recv timemout
   int retVal = -1;
-  int nNetTimeout = 10000;//10Ãë£¬
+  int nNetTimeout = 10000;  // 10s
   
   /* create activate or authorize http request data */
   uint8_t *httpRequestData = NULL;
@@ -984,6 +984,7 @@ static OSStatus get_rom_data(char *host, uint16_t port,
       // Read the rest of the HTTP body if necessary
       err = SocketReadHTTPBodyEx( tcpClient_fd, httpHeader );
       require_noerr(err, exit);
+      
       easycloud_service_log("read httpBody OK!");
       //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       HTTPHeaderClear(httpHeader);  // Reuse HTTPHeader

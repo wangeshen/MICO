@@ -57,6 +57,8 @@ extern OSStatus     ConfigIncommingJsonMessage( const char *input, mico_Context_
 extern json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext );
 extern OSStatus getMVDActivateRequestData(const char *input, MVDActivateRequestData_t *activateData);
 extern OSStatus getMVDAuthorizeRequestData(const char *input, MVDAuthorizeRequestData_t *authorizeData);
+extern OSStatus getMVDResetRequestData(const char *input, MVDResetRequestData_t *devResetData);
+extern OSStatus getMVDOTARequestData(const char *input, MVDOTARequestData_t *OTAData);
 
 static void localConfiglistener_thread(void *inContext);
 static void localConfig_thread(void *inFd);
@@ -208,6 +210,8 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
   
   MVDActivateRequestData_t devActivateRequestData;
   MVDAuthorizeRequestData_t devAuthorizeRequestData;
+  MVDResetRequestData_t devResetRequestData;
+  MVDOTARequestData_t devOTARequestData;
 
 #if 1
   /* This is a demo code for http package has chunked data */
@@ -286,6 +290,10 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
       require( httpResponse, exit );
       err = SocketSend( fd, httpResponse, httpResponseLen );
       SocketClose(&fd);
+      
+      inContext->micoStatus.sys_state = eState_Software_Reset;
+      require(inContext->micoStatus.sys_state_change_sem, exit);
+      mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
     }
     goto exit;
   }
@@ -308,24 +316,32 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
     goto exit;
   }
   else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLResetCloudDevInfo ) == kNoErr){
-    config_log("Recv cloud device info reset request.");
-    
-    err = MVDResetCloudDevInfo(inContext);
-    require_noerr( err, exit );
-    
-    err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
-    require_noerr( err, exit );
-    require( httpResponse, exit );
-    err = SocketSend( fd, httpResponse, httpResponseLen );
-    SocketClose(&fd);
-    
+    if(inHeader->contentLength > 0){
+      config_log("Recv cloud device info reset request.");
+      memset((void*)&devResetRequestData, '\0', sizeof(devResetRequestData));
+      err = getMVDResetRequestData( inHeader->extraDataPtr, &devResetRequestData);
+      require_noerr( err, exit );
+      
+      err = MVDResetCloudDevInfo(inContext, devResetRequestData);
+      require_noerr( err, exit );
+      
+      err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
+      require_noerr( err, exit );
+      require( httpResponse, exit );
+      err = SocketSend( fd, httpResponse, httpResponseLen );
+      SocketClose(&fd);
+    }
     goto exit;
   }
 #ifdef MICO_FLASH_FOR_UPDATE
   else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLDevFWUpdate ) == kNoErr){
+    if(inHeader->contentLength > 0){
       config_log("Recv device fw_update request.");
+      memset((void*)&devOTARequestData, '\0', sizeof(devOTARequestData));
+      err = getMVDOTARequestData( inHeader->extraDataPtr, &devOTARequestData);
+      require_noerr( err, exit );
       
-      err = MVDFirmwareUpdate(inContext);
+      err = MVDFirmwareUpdate(inContext, devOTARequestData);
       require_noerr( err, exit );
       
       err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
@@ -355,6 +371,7 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
       inContext->micoStatus.sys_state = eState_Software_Reset;
       require(inContext->micoStatus.sys_state_change_sem, exit);
       mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
+    }
       
     goto exit;
   }

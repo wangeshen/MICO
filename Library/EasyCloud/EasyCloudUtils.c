@@ -34,7 +34,7 @@ static volatile uint32_t flashStorageAddress = UPDATE_START_ADDRESS;
 #endif
 
 // OTA test by WES
-uint64_t rom_wrote_size = 0;
+//static volatile uint64_t rom_wrote_size = 0;
 md5_context md5;
 //unsigned char *md5_input = NULL;
 unsigned char md5_16[16] = {0};
@@ -150,8 +150,8 @@ int SocketReadHTTPHeaderEx( int inSock, HTTPHeader_t *inHeader )
     require_noerr(err, exit);
     
     // OTA test by WES
-    rom_wrote_size = inHeader->extraDataLen;
-    easycloud_utils_log("OTA[%lld/%lld][Header][%d]", rom_wrote_size,
+    //rom_wrote_size = inHeader->extraDataLen;
+    easycloud_utils_log("OTA[%d/%lld][Header][%d]", inHeader->extraDataLen,
                    inHeader->contentLength, inHeader->extraDataLen);  
     // update MD5
     InitMd5(&md5);
@@ -343,8 +343,8 @@ OSStatus SocketReadHTTPBodyEx( int inSock, HTTPHeader_t *inHeader )
       require_noerr(err, exit);
          
       // OTA test by WES
-      rom_wrote_size += readResult;
-      easycloud_utils_log("OTA[%lld/%lld][Body][%d]", rom_wrote_size,
+      //rom_wrote_size += readResult;
+      easycloud_utils_log("OTA[%d/%lld][Body][%d]", inHeader->extraDataLen,
                           inHeader->contentLength, readResult);
       
       // update MD5
@@ -381,6 +381,7 @@ OSStatus SocketReadHTTPBodyEx( int inSock, HTTPHeader_t *inHeader )
     goto exit;
   }
   
+  //rom_wrote_size = 0;
   err = kNoErr;
   
 exit:

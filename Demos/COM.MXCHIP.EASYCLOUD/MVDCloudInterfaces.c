@@ -136,8 +136,28 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
     return kStateErr;
   }
   
-  //login_id/dev_passwd set ?
-  //login_id/dev_passwd ok ?
+  // login_id/dev_passwd set(not default value) ?
+  if((0 != strncmp((char*)DEFAULT_LOGIN_ID,
+                   inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,       
+                   strlen((char*)DEFAULT_LOGIN_ID))) ||
+     (0 != strncmp((char*)DEFAULT_DEV_PASSWD,
+                   inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+                   strlen((char*)DEFAULT_DEV_PASSWD))))
+  {
+    // login_id/dev_passwd ok ?
+    if((0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, 
+                     devActivateRequestData.loginId, 
+                     strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId))) ||
+       (0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
+                     devActivateRequestData.devPasswd, 
+                     strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd))))
+    {
+      // devPass err
+      cloud_if_log("ERROR: MVDCloudInterfaceDevActivate: loginId/devPasswd mismatch!");
+      return kMismatchErr;
+    }
+  }
+  cloud_if_log("MVDCloudInterfaceDevActivate: loginId/devPasswd ok!");
   
   //ok, set cloud context
   strncpy(easyCloudContext.service_config_info.loginId, 
@@ -150,7 +170,7 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
   // activate request
   err = EasyCloudActivate(&easyCloudContext);
   require_noerr_action(err, exit, 
-                       cloud_if_log("ERROR: EasyCloud activate failed! err=%d", err) );
+                       cloud_if_log("ERROR: MVDCloudInterfaceDevActivate failed! err=%d", err) );
   
   // write activate data back to flash
   mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
@@ -192,8 +212,16 @@ OSStatus MVDCloudInterfaceDevAuthorize(mico_Context_t* const inContext,
     return kStateErr;
   }
   
-  //login_id/dev_passwd set ?
-  //login_id/dev_passwd ok ?
+  // dev_passwd ok ?
+  if(0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
+                  devAuthorizeReqData.devPasswd, 
+                  strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd)))
+  {
+    // devPass err
+    cloud_if_log("ERROR: MVDCloudInterfaceDevAuthorize: devPasswd mismatch!");
+    return kMismatchErr;
+  }
+  cloud_if_log("MVDCloudInterfaceDevAuthorize: devPasswd ok!");
   
   //ok, set cloud context
   strncpy(easyCloudContext.service_config_info.loginId, 
@@ -207,12 +235,12 @@ OSStatus MVDCloudInterfaceDevAuthorize(mico_Context_t* const inContext,
   require_noerr_action( err, exit, cloud_if_log("ERROR: authorize failed! err=%d", err) );
   
   // write back to flash
-  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
-  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
-          easyCloudContext.service_config_info.userToken, MAX_SIZE_USER_TOKEN);
-  err = MICOUpdateConfiguration(inContext);
-  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
-  require_noerr_action( err, exit, cloud_if_log("ERROR: authorize write flash failed! err=%d", err) );
+//  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
+//  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
+//          easyCloudContext.service_config_info.userToken, MAX_SIZE_USER_TOKEN);
+//  err = MICOUpdateConfiguration(inContext);
+//  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+//  require_noerr_action( err, exit, cloud_if_log("ERROR: authorize write flash failed! err=%d", err) );
   
   return kNoErr;
   
@@ -220,12 +248,27 @@ exit:
   return err;
 }
 
-OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext)
+OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
+                                            MVDOTARequestData_t devOTARequestData)
 {
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
 
   cloud_if_log("Update firmware...");
+  
+  // login_id/dev_passwd ok ?
+  if((0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, 
+                   devOTARequestData.loginId, 
+                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId))) ||
+     (0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
+                   devOTARequestData.devPasswd, 
+                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd))))
+  {
+    // devPass err
+    cloud_if_log("ERROR: MVDCloudInterfaceDevFirmwareUpdate: loginId/devPasswd mismatch!");
+    return kMismatchErr;
+  }
+  cloud_if_log("MVDCloudInterfaceDevFirmwareUpdate: loginId/devPasswd ok!");
   
   //get latest rom version, file_path, md5
   err = EasyCloudGetLatestRomVersion(&easyCloudContext);
@@ -270,9 +313,24 @@ exit:
   return err;
 }
 
-OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext)
+OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
+                                            MVDResetRequestData_t devResetRequestData)
 {
   OSStatus err = kUnknownErr;
+  
+  // login_id/dev_passwd ok ?
+  if((0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, 
+                   devResetRequestData.loginId, 
+                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId))) ||
+     (0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
+                   devResetRequestData.devPasswd, 
+                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd))))
+  {
+    // devPass err
+    cloud_if_log("ERROR: MVDCloudInterfaceResetCloudDevInfo: loginId/devPasswd mismatch!");
+    return kMismatchErr;
+  }
+  cloud_if_log("MVDCloudInterfaceResetCloudDevInfo: loginId/devPasswd ok!");
   
   err = EasyCloudDeviceReset(&easyCloudContext);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloudDeviceReset failed! err=%d", err) );
