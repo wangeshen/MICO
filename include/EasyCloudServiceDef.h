@@ -136,7 +136,7 @@ typedef struct _dev_activate_data_t {
   char                   loginId[MAX_SIZE_LOGIN_ID];
   char                   devPasswd[MAX_SIZE_DEV_PASSWD];
   char                   user_token[MAX_SIZE_USER_TOKEN];
-} MVDActivateRequestData_t, MVDAuthorizeRequestData_t;
+} MVDActivateRequestData_t, MVDAuthorizeRequestData_t, MVDOTARequestData_t, MVDResetRequestData_t;
 
 
 #endif

@@ -56,6 +56,7 @@ static uint8_t checksum(lm_usart_message_t msg)
   return result;
 }
 
+
 /*******************************************************************************
  * rewrite MVD Msg transform protocol API
  ******************************************************************************/
@@ -198,6 +199,10 @@ OSStatus MVDMsgTransformDevice2Cloud(unsigned char* inUsartString, unsigned int 
   }
   memcpy(*outJson, json_str, *outJsonLen);
   //led_log("outJson[%d]=%.*s", *outJsonLen, *outJsonLen, *outJson);
+  if(NULL != object){
+    json_object_put(object);
+    object = NULL;
+  }
   return kNoErr;
   
 exit:

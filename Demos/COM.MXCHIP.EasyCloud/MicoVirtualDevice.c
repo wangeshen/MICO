@@ -29,16 +29,12 @@
 #include "MVDDeviceInterfaces.h"
 #include "MVDCloudInterfaces.h"
 
-#include "MVDMsgProtocol.h"
+//#include "MVDMsgProtocol.h"
 
 
 #define mvd_log(M, ...) custom_log("MVD", M, ##__VA_ARGS__)
 #define mvd_log_trace() custom_log_trace("MVD")
 
-
-// default device info
-#define DEFAULT_DEVICE_ID                "none"
-#define DEFAULT_DEVICE_KEY               "none"
 
 #define DEFAULT_MVD_CLOUD_CONNECTED      "{\"MVDCloud\":\"connected\"}"
 
@@ -60,6 +56,9 @@ void MVDMainThread(void *arg)
   
   while(1)
   {
+//    memInfo = mico_memory_info();
+//    mvd_log("[MVD]system free mem=%d", memInfo->free_memory);
+    
     if(inContext->appStatus.virtualDevStatus.isCloudConnected){
       if (!connected){
         mvd_log("[MVD]cloud service connected!");
@@ -105,7 +104,7 @@ void MVDMainThread(void *arg)
             wait_time = -1;  //activate ok, never do activate again.
           }
           else{
-            wait_time = 1;  //reactivate after 1 seconds
+            wait_time = 1;  //reactivate after 1 (1*1) seconds
             mvd_log("device activate failed, will retry in %ds...", wait_time*1);
           }
         }
@@ -181,9 +180,11 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   mvd_log_trace();
   OSStatus err = kUnknownErr;
   //mico_Context_t *inContext = context;
-  unsigned char* usartCmd = NULL;
-  unsigned int usartCmdLen = 0;
+  //unsigned char* usartCmd = NULL;
+  //unsigned int usartCmdLen = 0;
   
+  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data
+/*
   // translate cloud json message to usart protocol format
   err = MVDMsgTransformCloud2Device(inBuf, inBufLen, &usartCmd, &usartCmdLen);
   require_noerr_action(err, exit, 
@@ -196,6 +197,7 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
     usartCmd = NULL;
     usartCmdLen = 0;
   }
+*/
   require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
   return kNoErr;
   
@@ -210,9 +212,11 @@ OSStatus MVDDeviceMsgProcess(mico_Context_t* const context,
   mvd_log_trace();
   OSStatus err = kUnknownErr;
   //mico_Context_t *inContext = context;
-  unsigned char* cloudMsg = NULL;
-  unsigned int cloudMsgLen = 0;
+  //unsigned char* cloudMsg = NULL;
+  //unsigned int cloudMsgLen = 0;
   
+  err = MVDCloudInterfaceSend(inBuf, inBufLen);  // transfer raw data
+/*
   // translate mcu usart message to json for cloud
   err = MVDMsgTransformDevice2Cloud(inBuf, inBufLen, &cloudMsg, &cloudMsgLen);
   require_noerr_action(err, exit, 
@@ -221,11 +225,13 @@ OSStatus MVDDeviceMsgProcess(mico_Context_t* const context,
   
   // send data
   err = MVDCloudInterfaceSend(cloudMsg, cloudMsgLen);
+  
   if(NULL != cloudMsg){
     free(cloudMsg);
     cloudMsg = NULL;
     cloudMsgLen = 0;
   }
+*/
   require_noerr_action( err, exit, mvd_log("ERROR: send to cloud error! err=%d", err) );
   return kNoErr;
   
@@ -270,12 +276,13 @@ exit:
 }
 
 //OTA
-OSStatus MVDFirmwareUpdate(mico_Context_t* const context)
+OSStatus MVDFirmwareUpdate(mico_Context_t* const context,
+                           MVDOTARequestData_t OTAData)
 {
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = context;
   
-  err = MVDCloudInterfaceDevFirmwareUpdate(inContext);
+  err = MVDCloudInterfaceDevFirmwareUpdate(inContext, OTAData);
   require_noerr_action(err, exit, 
                        mvd_log("ERROR: Firmware Update error! err=%d", err) );
   return kNoErr;
@@ -285,12 +292,13 @@ exit:
 }
 
 //reset device info on cloud
-OSStatus MVDResetCloudDevInfo(mico_Context_t* const context)
+OSStatus MVDResetCloudDevInfo(mico_Context_t* const context,
+                              MVDResetRequestData_t devResetData)
 {
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = context;
   
-  err = MVDCloudInterfaceResetCloudDevInfo(inContext);
+  err = MVDCloudInterfaceResetCloudDevInfo(inContext, devResetData);
   require_noerr_action(err, exit, 
                        mvd_log("ERROR: reset device info on cloud error! err=%d", err) );
   return kNoErr;

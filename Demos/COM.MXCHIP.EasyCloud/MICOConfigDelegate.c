@@ -42,9 +42,7 @@
   
 #define config_delegate_log(M, ...) custom_log("Config Delegate", M, ##__VA_ARGS__)
 #define config_delegate_log_trace() custom_log_trace("Config Delegate")
-  
-//extern volatile ring_buffer_t  rx_buffer;
-//extern volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
+
 
 static mico_timer_t _Led_EL_timer = NULL;
 
@@ -336,7 +334,7 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
   /*Sector 6: cloud settings*/
   sector = json_object_new_array();
   require( sector, exit );
-  err = MICOAddSector(sectors, "ClOUD", sector);
+  err = MICOAddSector(sectors, "Cloud info", sector);
   require_noerr(err, exit);
   
   // device activate status
@@ -358,6 +356,26 @@ json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext )
   err = MICOAddStringCellToSector(sector, "device_id", 
                                   inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
                                   "RW", NULL);
+  /*sub menu - cloud setting */
+  subMenuSectors = json_object_new_array();
+  require( subMenuSectors, exit );
+  err = MICOAddMenuCellToSector(sector, "Cloud settings", subMenuSectors);
+  require_noerr(err, exit);
+  
+  subMenuSector = json_object_new_array();
+  require( subMenuSector, exit );
+  err = MICOAddSector(subMenuSectors, "Authentication", subMenuSector);
+  require_noerr(err, exit);
+  
+  err = MICOAddStringCellToSector(subMenuSector, "login_id",  
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
+                                  "RW", NULL);
+  err = MICOAddStringCellToSector(subMenuSector, "devPasswd",  
+                                  inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+                                  "RW", NULL);
+//  err = MICOAddStringCellToSector(subMenuSector, "user_token",  
+//                                  inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
+//                                  "RW", NULL);
 
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   
@@ -413,6 +431,13 @@ OSStatus ConfigIncommingJsonMessage( const char *input, mico_Context_t * const i
       strncpy(inContext->flashContentInRam.micoSystemConfig.dnsServer, json_object_get_string(val), maxIpLen);   
     }else if(!strcmp(key, "Baurdrate")){
       inContext->flashContentInRam.appConfig.virtualDevConfig.USART_BaudRate = json_object_get_int(val);
+    }else if(!strcmp(key, "login_id")){
+      strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID); 
+    } else if(!strcmp(key, "devPasswd")){
+      strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD); 
+    }/*else if(!strcmp(key, "user_token")){
+      strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, json_object_get_string(val), MAX_SIZE_USER_TOKEN); 
+    }*/else{
     }
   }
   json_object_put(new_obj);
@@ -474,6 +499,62 @@ OSStatus getMVDAuthorizeRequestData(const char *input, MVDAuthorizeRequestData_t
     }
     else if(!strcmp(key, "user_token")){
       strncpy(authorizeData->user_token, json_object_get_string(val), MAX_SIZE_USER_TOKEN);
+    }
+  }
+  json_object_put(new_obj);
+  err = kNoErr;
+  
+exit:  
+  return err;
+}
+
+OSStatus getMVDResetRequestData(const char *input, MVDResetRequestData_t *devResetData)
+{
+  OSStatus err = kUnknownErr;
+  json_object *new_obj;
+  config_delegate_log_trace();
+  
+  new_obj = json_tokener_parse(input);
+  require_action(new_obj, exit, err = kUnknownErr);
+  
+  config_delegate_log("Recv devReset object=%s", json_object_to_json_string(new_obj));
+  
+  json_object_object_foreach(new_obj, key, val) {
+    if(!strcmp(key, "login_id")){
+      strncpy(devResetData->loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
+    }
+    else if(!strcmp(key, "dev_passwd")){
+      strncpy(devResetData->devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD);
+    }
+    else {
+    }
+  }
+  json_object_put(new_obj);
+  err = kNoErr;
+  
+exit:  
+  return err;
+}
+
+OSStatus getMVDOTARequestData(const char *input, MVDOTARequestData_t *OTAData)
+{
+  OSStatus err = kUnknownErr;
+  json_object *new_obj;
+  config_delegate_log_trace();
+  
+  new_obj = json_tokener_parse(input);
+  require_action(new_obj, exit, err = kUnknownErr);
+  
+  config_delegate_log("Recv OTA request object=%s", json_object_to_json_string(new_obj));
+  
+  json_object_object_foreach(new_obj, key, val) {
+    if(!strcmp(key, "login_id")){
+      strncpy(OTAData->loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
+    }
+    else if(!strcmp(key, "dev_passwd")){
+      strncpy(OTAData->devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD);
+    }
+    else {
     }
   }
   json_object_put(new_obj);

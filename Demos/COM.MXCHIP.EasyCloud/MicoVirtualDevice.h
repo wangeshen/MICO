@@ -48,7 +48,8 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* const context,
 /* device control */
 
 //OTA
-OSStatus MVDFirmwareUpdate(mico_Context_t* const context);
+OSStatus MVDFirmwareUpdate(mico_Context_t* const context,
+                           MVDOTARequestData_t OTAData);
 //activate
 OSStatus MVDActivate(mico_Context_t* const context, 
                      MVDActivateRequestData_t activateData);
@@ -56,6 +57,7 @@ OSStatus MVDActivate(mico_Context_t* const context,
 OSStatus MVDAuthorize(mico_Context_t* const context,
                       MVDAuthorizeRequestData_t authorizeData);
 //reset device info on cloud
-OSStatus MVDResetCloudDevInfo(mico_Context_t* const context);
+OSStatus MVDResetCloudDevInfo(mico_Context_t* const context,
+                              MVDResetRequestData_t devResetData);
 
 #endif

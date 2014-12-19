@@ -48,7 +48,9 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
 OSStatus MVDCloudInterfaceDevAuthorize(mico_Context_t* const inContext,
                                        MVDAuthorizeRequestData_t devAuthorizeReqData);
 
-OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext);
-OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext);
+OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
+                                            MVDOTARequestData_t devOTARequestData);
+OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
+                                            MVDResetRequestData_t devResetRequestData);
 
 #endif

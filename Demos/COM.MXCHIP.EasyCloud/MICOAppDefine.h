@@ -47,12 +47,12 @@
 /* product type */
 #define DEFAULT_PRODUCT_ID        "d7d5fb56-cdb9-45d7-af8c-9a9a880a674a"
 #define DEFAULT_PRODUCT_KEY       "c1272927-e573-4ff8-a62b-08f358d46571"
-#define DEFAULT_ROM_VERSION       "v0.2.0"  // OTA version 0.2.1
+#define DEFAULT_ROM_VERSION       "v0.2.2"
 
 /*Application's configuration stores in flash*/
 typedef struct
 {
-  uint32_t          configDataVer;
+  uint32_t          configDataVer;    // config param update number
   uint32_t          localServerPort;  // for bonjour service port
 
   virtual_device_config_t virtualDevConfig;  //virtual device settings
