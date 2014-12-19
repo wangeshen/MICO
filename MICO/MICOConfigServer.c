@@ -193,6 +193,7 @@ void localConfig_thread(void *inFd)
 exit:
   config_log("Exit: Client exit with err = %d", err);
   SocketClose(&clientFd);
+  HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
   mico_rtos_delete_thread(NULL);
   return;
@@ -226,7 +227,7 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
 #endif
 
   config_log("recv=%s", inHeader->buf);
-  if(HTTPHeaderMatchURL( inHeader, kCONFIGURLRead ) == kNoErr){    
+/*  if(HTTPHeaderMatchURL( inHeader, kCONFIGURLRead ) == kNoErr){    
     report = ConfigCreateReportJsonMessage( inContext );
     require( report, exit );
     json_str = json_object_to_json_string(report);
@@ -249,20 +250,6 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
       config_log("Recv new configuration, apply and reset");
       err = ConfigIncommingJsonMessage( inHeader->extraDataPtr, inContext);
       require_noerr( err, exit );
-      /*test by WES
-      memset((void*)&devActivateRequestData, '\0', sizeof(devActivateRequestData));
-      strncpy(devActivateRequestData.loginId,
-              inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
-              MAX_SIZE_LOGIN_ID);
-      strncpy(devActivateRequestData.devPasswd,
-              inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
-              MAX_SIZE_DEV_PASSWD);
-      strncpy(devActivateRequestData.user_token,
-              inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
-              MAX_SIZE_USER_TOKEN);
-      err = MVDActivate(inContext, devActivateRequestData);
-      require_noerr( err, exit );
-      */    
       err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
       require_noerr( err, exit );
       require( httpResponse, exit );
@@ -275,7 +262,7 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
     }
     goto exit;
   }
-  else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLDevActivate ) == kNoErr){
+  else */if(HTTPHeaderMatchURL( inHeader, kCONFIGURLDevActivate ) == kNoErr){
     if(inHeader->contentLength > 0){
       config_log("Recv device activate request.");
       memset((void*)&devActivateRequestData, '\0', sizeof(devActivateRequestData));
@@ -285,7 +272,16 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
       err = MVDActivate(inContext, devActivateRequestData);
       require_noerr( err, exit );
       
-      err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
+      report = json_object_new_object();
+      require_action(report, exit, err = kNoMemoryErr);
+      json_object_object_add(report, "device_id",
+                             json_object_new_string(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId)); 
+      
+      json_str = (char*)json_object_to_json_string(report);
+      config_log("json_str=%s", json_str);
+      
+      err =  CreateSimpleHTTPMessage( kMIMEType_JSON, (uint8_t*)json_str, strlen(json_str), 
+                                     &httpResponse, &httpResponseLen );
       require_noerr( err, exit );
       require( httpResponse, exit );
       err = SocketSend( fd, httpResponse, httpResponseLen );
@@ -307,11 +303,27 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
       err = MVDAuthorize(inContext, devAuthorizeRequestData);
       require_noerr( err, exit );
       
-      err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
-      require_noerr( err, exit );
+      report = json_object_new_object();
+      require_action(report, exit, err = kNoMemoryErr);
+      json_object_object_add(report, "device_id",
+                             json_object_new_string(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId)); 
+      
+      json_str = (char*)json_object_to_json_string(report);
+      config_log("json_str=%s", json_str);
+      
+      //err =  CreateSimpleHTTPOKMessage( &httpResponse, &httpResponseLen );
+      //require_noerr( err, exit );
+      err =  CreateSimpleHTTPMessage( kMIMEType_JSON, (uint8_t*)json_str, strlen(json_str), 
+                                     &httpResponse, &httpResponseLen );
       require( httpResponse, exit );
       err = SocketSend( fd, httpResponse, httpResponseLen );
       SocketClose(&fd);
+      
+      err = kConnectionErr; //Return an err to close the current thread
+      
+//      inContext->micoStatus.sys_state = eState_Software_Reset;
+//      require(inContext->micoStatus.sys_state_change_sem, exit);
+//      mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
     }
     goto exit;
   }
@@ -330,6 +342,10 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
       require( httpResponse, exit );
       err = SocketSend( fd, httpResponse, httpResponseLen );
       SocketClose(&fd);
+      
+      inContext->micoStatus.sys_state = eState_Software_Reset;
+      require(inContext->micoStatus.sys_state_change_sem, exit);
+      mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
     }
     goto exit;
   }
@@ -375,7 +391,7 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
       
     goto exit;
   }
-  else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLOTA ) == kNoErr){
+ /* else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLOTA ) == kNoErr){
     if(inHeader->contentLength > 0){
       config_log("Receive OTA data!");
       mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
@@ -392,18 +408,18 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
       mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
     }
     goto exit;
-  }
+  }*/
 #endif
   else{
     return kNotFoundErr;
   };
 
 exit:
-  if(kNoErr != err){
-    err =  CreateSimpleHTTPFailedMessage( &httpResponse, &httpResponseLen );
-    require_noerr( err, exit );
+  if((kNoErr != err) && (fd > 0)){
+    CreateSimpleHTTPFailedMessage( &httpResponse, &httpResponseLen );
+    //require_noerr( err, exit );  // keep previous err num
     require( httpResponse, exit );
-    err = SocketSend( fd, httpResponse, httpResponseLen );
+    SocketSend( fd, httpResponse, httpResponseLen );
     SocketClose(&fd);
   }
       

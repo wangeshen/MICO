@@ -31,17 +31,21 @@
  ******************************************************************************/
 
 // default device settings
-#define DEFAULT_LOGIN_ID                 "mxchip-admin"
-#define DEFAULT_DEV_PASSWD               "mxchip"
-#define DEFAULT_USER_TOKEN               "mxchip-user"
+#define DEFAULT_LOGIN_ID                 "admin"
+#define DEFAULT_DEV_PASSWD               "admin"
+#define DEFAULT_USER_TOKEN               "88888888"
+   
+// default device info
+#define DEFAULT_DEVICE_ID                "none"
+#define DEFAULT_DEVICE_KEY               "none"
 
 #define STACK_SIZE_MVD_MAIN_THREAD       0x500
 
 /* device auto activate mechanism, comment out if not need */
 //#define DEVICE_AUTO_ACTIVATE_ENABLE      1
 
-//device will auto activate 10s after the MVD start up if auto activate enabled.
-#define DEVICE_AUTO_ACTIVATE_TIME        5
+//device will auto activate 3s after the MVD start up if auto activate enabled.
+//#define DEVICE_AUTO_ACTIVATE_TIME        3
 
 /*******************************************************************************
  * STRUCTURES

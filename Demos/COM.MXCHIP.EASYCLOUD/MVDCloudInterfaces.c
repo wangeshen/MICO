@@ -335,6 +335,17 @@ OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
   err = EasyCloudDeviceReset(&easyCloudContext);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloudDeviceReset failed! err=%d", err) );
   
+  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
+  inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated = false;  // need to reActivate
+  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId, DEFAULT_DEVICE_ID);
+  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey, DEFAULT_DEVICE_KEY);
+  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, DEFAULT_LOGIN_ID);
+  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, DEFAULT_DEV_PASSWD);
+  sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, DEFAULT_USER_TOKEN);
+  inContext->appStatus.virtualDevStatus.isCloudConnected = false;
+  MICOUpdateConfiguration(inContext);
+  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+  
 exit:
   return err;
 }
