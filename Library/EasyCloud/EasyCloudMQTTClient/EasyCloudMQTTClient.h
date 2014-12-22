@@ -47,7 +47,9 @@
 * STRUCTURES
 *******************************************************************************/
 
-typedef void (*mqttMsgArrivedHandler)(void* context, unsigned char* Msg, unsigned int len);
+typedef void (*mqttMsgArrivedHandler)(void* context, 
+                                      const char* topic,
+                                      unsigned char* Msg, unsigned int len);
 
 typedef enum {
   MQTT_CLIENT_STATUS_STOPPED = 1,  //client stopped
@@ -97,6 +99,7 @@ OSStatus EasyCloudMQTTClientStart(void);
 OSStatus EasyCloudMQTTClientStop(void);
 
 OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen);
+OSStatus EasyCloudMQTTClientPublishto(const char* topic, const unsigned char* msg, int msglen);
 mqttClientState EasyCloudMQTTClientState(void);
 
 //not implement

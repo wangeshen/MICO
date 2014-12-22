@@ -226,7 +226,8 @@ EasycCloudServiceState EasyCloudServiceState(easycloud_service_context_t *contex
 }
 
 
-OSStatus EasyCloudUpload(easycloud_service_context_t *context, const unsigned char *msg, unsigned int msgLen)
+OSStatus EasyCloudPublish(easycloud_service_context_t *context, 
+                          const unsigned char *msg, unsigned int msgLen)
 {
   int ret = kUnknownErr;
   //char *pubtopic = mqtt_client_config_info.pubtopic;
@@ -240,6 +241,25 @@ OSStatus EasyCloudUpload(easycloud_service_context_t *context, const unsigned ch
   }
   
   ret = EasyCloudMQTTClientPublish(msg, msgLen);
+  return ret;
+}
+
+OSStatus EasyCloudPublishto(easycloud_service_context_t* const context, 
+                            const char* topic, 
+                            const unsigned char *msg, unsigned int msgLen)
+{
+  int ret = kUnknownErr;
+  //char *pubtopic = mqtt_client_config_info.pubtopic;
+
+  if (NULL == context || topic == NULL || NULL == msg || 0 == msgLen){
+    return kParamErr;
+  }
+  
+  if (EASYCLOUD_CONNECTED != context->service_status.state){
+    return kStateErr;
+  }
+  
+  ret = EasyCloudMQTTClientPublishto(topic, msg, msgLen);
   return ret;
 }
 
@@ -587,14 +607,14 @@ void easyCloudServiceThread(void *arg)
   easycloud_service_log("device activated.");
   
   /* 2. set publish && subscribe topic for MQTT client
-   *      subscribe_topic = device_id/in
-   *      publish_topic  = device_id/out
+   *      subscribe_topic = device_id/in/#
+   *      publish_topic  = device_id/out  (default)
    */
   memset(subscribe_topic, 0, sizeof(subscribe_topic));
   strncpy(subscribe_topic,
           easyCloudContext->service_status.deviceId,
           strlen(easyCloudContext->service_status.deviceId));
-  strncat(subscribe_topic, "/in", 3);
+  strncat(subscribe_topic, "/in/#", 5);
   
   memset(publish_topic, 0, sizeof(publish_topic));
   strncpy(publish_topic,

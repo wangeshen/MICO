@@ -28,8 +28,9 @@
 #include "MicoVirtualDevice.h"
 #include "MVDDeviceInterfaces.h"
 #include "MVDCloudInterfaces.h"
+#include "EasyCloudUtils.h"
 
-#include "MVDMsgProtocol.h"
+//#include "MVDMsgProtocol.h"
 
 
 #define mvd_log(M, ...) custom_log("MVD", M, ##__VA_ARGS__)
@@ -175,6 +176,7 @@ exit:
 
 // Cloud => MCU
 OSStatus MVDCloudMsgProcess(mico_Context_t* context, 
+                            const char* topic,
                             unsigned char *inBuf, unsigned int inBufLen)
 {
   mvd_log_trace();
@@ -182,8 +184,8 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   //mico_Context_t *inContext = context;
   //unsigned char* usartCmd = NULL;
   //unsigned int usartCmdLen = 0;
+  char* responseTopic = NULL;
   
-  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data
 /*
   // translate cloud json message to usart protocol format
   err = MVDMsgTransformCloud2Device(inBuf, inBufLen, &usartCmd, &usartCmdLen);
@@ -198,7 +200,16 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
     usartCmdLen = 0;
   }
 */
+  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data
   require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  
+  // add response to cloud(echo), replace topic 'device_id/in/xxx' to 'device_id/out/xxx'
+  responseTopic = str_replace(responseTopic, topic, "/in", "/out");
+  err = MVDCloudInterfaceSendto(responseTopic, inBuf, inBufLen);
+  if(NULL != responseTopic){
+    free(responseTopic);
+  }
+  
   return kNoErr;
   
 exit:

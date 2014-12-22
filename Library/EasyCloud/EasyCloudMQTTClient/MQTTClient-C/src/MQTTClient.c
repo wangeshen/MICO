@@ -156,8 +156,10 @@ char isTopicMatched(char* topicFilter, MQTTString* topicName)
         curf++;
         curn++;
     };
-    
-    return (curn == curn_end) && (*curf == '\0');
+    // fix by wes 20141222, return matched for the last level wildcard "/#"
+    return (curn == curn_end) && ((*curf == '\0') ||   // whole match
+                                  (('#' == *curf) && ('\0' == *(curf+1))) ||  // like "id/in/" match "id/in/#"
+                                  (('/' == *curf) && ('#' == *(curf+1)) && ('\0' == *(curf+2))));  // like "id/in" match "id/in/#"
 }
 
 

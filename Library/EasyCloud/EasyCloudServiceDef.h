@@ -93,6 +93,7 @@ typedef struct _easycloud_service_status_t {
  
 //message recived callback function prototype
 typedef void (*easycloudMsgRecvCallBack)(void* const context, 
+                                         const char* topic,
                                          unsigned char* msg, unsigned int msgLen);
 typedef void (*easycloudStatusChangedCallback)(void* const context,
                                                easycloud_service_status_t serviceStateInfo);

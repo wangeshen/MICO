@@ -90,6 +90,7 @@ void messageArrived(MessageData* md)
   
   //call user registered handler
   mqttClientContext.client_config_info.hmsg(mqttClientContext.client_config_info.context,
+                                            md->topicName->lenstring.data,
                                             (unsigned char*)message->payload, 
                                             (unsigned int)message->payloadlen);
 }
@@ -254,6 +255,36 @@ OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
   
   mico_rtos_lock_mutex( &mqttClientContext_mutex );
   ret = MQTTPublish(&c, mqttClientContext.client_config_info.pubtopic, &publishData);
+  mico_rtos_unlock_mutex( &mqttClientContext_mutex );
+  
+  if (SUCCESS == ret)
+    err = kNoErr;
+  else
+    err = kUnknownErr;
+  
+  return err;
+}
+
+OSStatus EasyCloudMQTTClientPublishto(const char* topic, const unsigned char* msg, int msglen)
+{
+  OSStatus err = kUnknownErr;
+  int ret = 0;
+
+  MQTTMessage publishData =  MQTTMessage_publishData_initializer;
+  
+  if(topic == NULL || msglen <= 0 || msglen > MAX_UPLOAD_MESSAGE_SIZE)
+    return kParamErr;
+  
+  if(0 == c.isconnected)
+    return kStateErr;
+    
+  //upload data qos1: at most once.
+  publishData.qos = QOS0;
+  publishData.payload = (void*)msg;
+  publishData.payloadlen = msglen;
+  
+  mico_rtos_lock_mutex( &mqttClientContext_mutex );
+  ret = MQTTPublish(&c, topic, &publishData);
   mico_rtos_unlock_mutex( &mqttClientContext_mutex );
   
   if (SUCCESS == ret)

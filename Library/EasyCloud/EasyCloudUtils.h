@@ -47,6 +47,8 @@ OSStatus SocketReadHTTPBodyEx( int inSock, HTTPHeader_t *inHeader );
 // ============================= STRING UTILS ==============================
 
 char* DataToHexStringLowercase( const uint8_t *inBuf, size_t inBufLen );
+// string replace, dst string must be freed by user
+char* str_replace(char *dst, const char *src, char *old_str, char *new_str);
 
 #endif // __EASYCLOUD_UTILS_H__
 

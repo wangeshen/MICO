@@ -3857,6 +3857,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.MXCHIP.EASYCLOUD\MVDMsgProtocol.c</name>
+      <excluded>
+        <configuration>EMW3162</configuration>
+      </excluded>
     </file>
   </group>
   <group>

@@ -38,7 +38,11 @@ EasycCloudServiceState EasyCloudServiceState(easycloud_service_context_t* const 
 OSStatus EasyCloudActivate(easycloud_service_context_t* const context);
 OSStatus EasyCloudAuthorize(easycloud_service_context_t* const context);
 
-OSStatus EasyCloudUpload(easycloud_service_context_t* const context, const unsigned char *msg, unsigned int msgLen);
+OSStatus EasyCloudPublish(easycloud_service_context_t* const context, 
+                          const unsigned char *msg, unsigned int msgLen);
+OSStatus EasyCloudPublishto(easycloud_service_context_t* const context, 
+                            const char* topic, 
+                            const unsigned char *msg, unsigned int msgLen);
 
 OSStatus EasyCloudGetLatestRomVersion(easycloud_service_context_t* const context); //get rom version
 OSStatus EasyCloudGetRomData(easycloud_service_context_t* const context); //get rom data

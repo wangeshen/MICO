@@ -40,14 +40,15 @@ static easycloud_service_context_t easyCloudContext;
  ******************************************************************************/
 
 //cloud message recived handler
-void cloudMsgArrivedHandler(void* context, unsigned char *msg, unsigned int msgLen)
+void cloudMsgArrivedHandler(void* context, const char* topic,
+                            unsigned char *msg, unsigned int msgLen)
 {
   mico_Context_t *inContext = (mico_Context_t*)context;
   
   //note: get data just for length=len is valid, because Msg is just a buf pionter.
-  cloud_if_log("Cloud => MVD: [%d]=%.*s", msgLen, msgLen, msg);
+  cloud_if_log("Cloud[%s] => MVD: [%d]=%.*s", topic, msgLen, msgLen, msg);
   
-  MVDCloudMsgProcess(inContext, msg, msgLen);
+  MVDCloudMsgProcess(inContext, topic, msg, msgLen);
 }
 
 //cloud service status changed handler
@@ -112,8 +113,22 @@ OSStatus MVDCloudInterfaceSend(unsigned char *inBuf, unsigned int inBufLen)
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
 
-  cloud_if_log("MVD => Cloud:[%d]=%.*s", inBufLen, inBufLen, inBuf);
-  err = EasyCloudUpload(&easyCloudContext, inBuf, inBufLen);
+  cloud_if_log("MVD => Cloud[publish]:[%d]=%.*s", inBufLen, inBufLen, inBuf);
+  err = EasyCloudPublish(&easyCloudContext, inBuf, inBufLen);
+  require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloud upload failed! err=%d", err) );
+  return kNoErr;
+  
+exit:
+  return err;
+}
+
+OSStatus MVDCloudInterfaceSendto(const char* topic, unsigned char *inBuf, unsigned int inBufLen)
+{
+  cloud_if_log_trace();
+  OSStatus err = kUnknownErr;
+
+  cloud_if_log("MVD => Cloud[%s]:[%d]=%.*s", topic, inBufLen, inBufLen, inBuf);
+  err = EasyCloudPublishto(&easyCloudContext, topic, inBuf, inBufLen);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloud upload failed! err=%d", err) );
   return kNoErr;
   
