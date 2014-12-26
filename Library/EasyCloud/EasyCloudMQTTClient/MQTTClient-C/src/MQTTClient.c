@@ -240,7 +240,7 @@ exit:
 int cycle(Client* c, Timer* timer)
 {
   // read the socket, see what work is due
-  memset((void*)(c->readbuf), 0, sizeof(c->readbuf_size));
+  memset((void*)(c->readbuf), '\0', c->readbuf_size);
   //unsigned short packet_type = readPacket(c, timer);
   int packet_type = readPacket(c, timer);
   

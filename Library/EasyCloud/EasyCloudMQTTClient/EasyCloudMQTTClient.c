@@ -84,13 +84,15 @@ void messageArrived(MessageData* md)
 {
   //MQTT client msg handle
   MQTTMessage* message = md->message;
-//  mico_mqtt_client_log("messageArrived: %.*s\t %.*s",
-//                       md->topicName->lenstring.len, md->topicName->lenstring.data,
-//                       (int)message->payloadlen, (char*)message->payload);
+  MQTTString* topic = md->topicName;
+  mico_mqtt_client_log("messageArrived: [%.*s]\t [%.*s]",
+                       topic->lenstring.len, topic->lenstring.data,
+                       (int)message->payloadlen, (char*)message->payload);
   
   //call user registered handler
   mqttClientContext.client_config_info.hmsg(mqttClientContext.client_config_info.context,
                                             md->topicName->lenstring.data,
+                                            (unsigned int)md->topicName->lenstring.len,
                                             (unsigned char*)message->payload, 
                                             (unsigned int)message->payloadlen);
 }
@@ -242,7 +244,7 @@ OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
 
   MQTTMessage publishData =  MQTTMessage_publishData_initializer;
   
-  if(msglen <= 0 || msglen > MAX_UPLOAD_MESSAGE_SIZE)
+  if(msglen <= 0 || msglen > MAX_PLAYLOAD_SIZE)
     return kParamErr;
   
   if(0 == c.isconnected)
@@ -272,7 +274,7 @@ OSStatus EasyCloudMQTTClientPublishto(const char* topic, const unsigned char* ms
 
   MQTTMessage publishData =  MQTTMessage_publishData_initializer;
   
-  if(topic == NULL || msglen <= 0 || msglen > MAX_UPLOAD_MESSAGE_SIZE)
+  if(topic == NULL || msglen <= 0 || msglen > MAX_PLAYLOAD_SIZE)
     return kParamErr;
   
   if(0 == c.isconnected)

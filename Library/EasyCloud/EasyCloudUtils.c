@@ -418,17 +418,19 @@ error:
 }
 
 // dump a new string, must be freed by user
-char* str_replace(char *dst, const char *src, char *old_str, char *new_str)  
+char* str_replace(char *dst, const char *src, const unsigned int srcLen, char *old_str, char *new_str)  
 {
     char *pszPeccancy = strstr(src, old_str);  
     int length_str = strlen(old_str);  
+    int length_new_str = srcLen - length_str + strlen(new_str)  + 1;
   
     if (pszPeccancy)
     {
         //easycloud_utils_log("yes, fond it.");
-        char *tmp_str = (char *)malloc(strlen(src) - length_str + strlen(new_str)  + 1);  
+        
+        char *tmp_str = (char *)malloc(length_new_str);  
         if (tmp_str)  
-        {  
+        {   memset(tmp_str, '\0', length_new_str);
             // 前段部分的字符串  
             int len_before = pszPeccancy - src;  
             strncpy(tmp_str, src, len_before);  
@@ -437,7 +439,7 @@ char* str_replace(char *dst, const char *src, char *old_str, char *new_str)
             strcat(tmp_str, new_str);  
               
             // 后面那段字符串  
-            strcat(tmp_str, pszPeccancy + length_str);  
+            strncat(tmp_str, pszPeccancy + length_str, (srcLen - len_before - length_str));  
   
             dst = strdup(tmp_str);  
   

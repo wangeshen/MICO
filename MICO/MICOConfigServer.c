@@ -227,7 +227,7 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
 #endif
 
   config_log("recv=%s", inHeader->buf);
-/*  if(HTTPHeaderMatchURL( inHeader, kCONFIGURLRead ) == kNoErr){    
+  if(HTTPHeaderMatchURL( inHeader, kCONFIGURLRead ) == kNoErr){    
     report = ConfigCreateReportJsonMessage( inContext );
     require( report, exit );
     json_str = json_object_to_json_string(report);
@@ -262,7 +262,7 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
     }
     goto exit;
   }
-  else */if(HTTPHeaderMatchURL( inHeader, kCONFIGURLDevActivate ) == kNoErr){
+  else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLDevActivate ) == kNoErr){
     if(inHeader->contentLength > 0){
       config_log("Recv device activate request.");
       memset((void*)&devActivateRequestData, '\0', sizeof(devActivateRequestData));

@@ -42,7 +42,7 @@
 void MVDMainThread(void *arg)
 {
   mico_Context_t *inContext = (mico_Context_t *)arg;
-  micoMemInfo_t *memInfo = NULL;
+//  micoMemInfo_t *memInfo = NULL;
   bool connected = false;
 #ifdef DEVICE_AUTO_ACTIVATE_ENABLE
   OSStatus err = kUnknownErr;
@@ -52,8 +52,8 @@ void MVDMainThread(void *arg)
   
   mvd_log("MVD main thread start.");
       
-  memInfo = mico_memory_info();
-  mvd_log("[MVD]system free mem=%d", memInfo->free_memory);
+//  memInfo = mico_memory_info();
+//  mvd_log("[MVD]system free mem=%d", memInfo->free_memory);
   
   while(1)
   {
@@ -176,7 +176,7 @@ exit:
 
 // Cloud => MCU
 OSStatus MVDCloudMsgProcess(mico_Context_t* context, 
-                            const char* topic,
+                            const char* topic, const unsigned int topicLen,
                             unsigned char *inBuf, unsigned int inBufLen)
 {
   mvd_log_trace();
@@ -204,7 +204,10 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
   
   // add response to cloud(echo), replace topic 'device_id/in/xxx' to 'device_id/out/xxx'
-  responseTopic = str_replace(responseTopic, topic, "/in", "/out");
+  mvd_log("topic=[%.*s]", topicLen, topic);
+  responseTopic = str_replace(responseTopic, topic, topicLen, "/in", "/out");
+  mvd_log("responseTopic=[%.*s]", strlen(responseTopic), responseTopic);
+  //err = MVDCloudInterfaceSend(inBuf, inBufLen);
   err = MVDCloudInterfaceSendto(responseTopic, inBuf, inBufLen);
   if(NULL != responseTopic){
     free(responseTopic);

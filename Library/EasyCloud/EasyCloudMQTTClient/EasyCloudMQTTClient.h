@@ -37,11 +37,11 @@
 //in ms
 #define DEFAULT_MICO_MQTT_CMD_TIMEOUT         500
 //in byte
-#define MAX_UPLOAD_MESSAGE_SIZE               256
-#define DEFAULT_MICO_MQTT_BUF_SIZE            (MAX_UPLOAD_MESSAGE_SIZE + 45)
-#define DEFAULT_MICO_MQTT_READBUF_SIZE        256
+#define MAX_PLAYLOAD_SIZE                     512
+#define DEFAULT_MICO_MQTT_BUF_SIZE            (MAX_PLAYLOAD_SIZE + 50)
+#define DEFAULT_MICO_MQTT_READBUF_SIZE        (MAX_PLAYLOAD_SIZE + 50)
 
-#define STACK_SIZE_MQTT_CLIENT_THREAD         0x800
+#define STACK_SIZE_MQTT_CLIENT_THREAD         0xC00
 
 /*******************************************************************************
 * STRUCTURES
@@ -49,6 +49,7 @@
 
 typedef void (*mqttMsgArrivedHandler)(void* context, 
                                       const char* topic,
+                                      const unsigned int topicLen,
                                       unsigned char* Msg, unsigned int len);
 
 typedef enum {
