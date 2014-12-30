@@ -1376,13 +1376,16 @@ static OSStatus _configRomVersionIncommingJsonMessage(const char *input,
       strncpy(out_bin_md5, json_object_get_string(val), MAX_SIZE_FILE_MD5);
       //easycloud_service_log("get out_bin_md5[%d]=%s", strlen(out_bin_md5), out_bin_md5);
     }
+    else if(!strcmp(key, "error")){
+      err = kNotFoundErr;
+    }
     else {
     }
   }
 
   //free unused memory
   json_object_put(new_obj);
-  return kNoErr;
+  return err;
 
 exit:
   return err; 
