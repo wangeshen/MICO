@@ -80,5 +80,10 @@ typedef struct _virtual_device_context_t {
   virtual_device_status_t status;       //virtual device running status
 } virtual_device_context_t;
 
+typedef struct _get_state_req_data_t {
+  char                   loginId[MAX_SIZE_LOGIN_ID];
+  char                   devPasswd[MAX_SIZE_DEV_PASSWD];
+  char                   user_token[MAX_SIZE_USER_TOKEN];
+} MVDGetStateRequestData_t;
 
 #endif

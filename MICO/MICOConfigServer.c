@@ -48,6 +48,7 @@
 #define kCONFIGURLOTA     "/OTA"
 
 //for temp config by WES at 20141123
+#define kCONFIGURLDevState             "/dev-state"
 #define kCONFIGURLDevActivate          "/dev-activate"
 #define kCONFIGURLDevAuthorize         "/dev-authorize"
 #define kCONFIGURLResetCloudDevInfo    "/dev-cloud_reset"
@@ -59,6 +60,7 @@ extern OSStatus getMVDActivateRequestData(const char *input, MVDActivateRequestD
 extern OSStatus getMVDAuthorizeRequestData(const char *input, MVDAuthorizeRequestData_t *authorizeData);
 extern OSStatus getMVDResetRequestData(const char *input, MVDResetRequestData_t *devResetData);
 extern OSStatus getMVDOTARequestData(const char *input, MVDOTARequestData_t *OTAData);
+extern OSStatus getMVDGetStateRequestData(const char *input, MVDGetStateRequestData_t *devGetStateData);
 
 static void localConfiglistener_thread(void *inContext);
 static void localConfig_thread(void *inFd);
@@ -213,6 +215,7 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
   MVDAuthorizeRequestData_t devAuthorizeRequestData;
   MVDResetRequestData_t devResetRequestData;
   MVDOTARequestData_t devOTARequestData;
+  MVDGetStateRequestData_t devGetStateRequestData;
 
 #if 1
   /* This is a demo code for http package has chunked data */
@@ -262,7 +265,30 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, HTTPHeader_t* inHeader, mico
     }
     goto exit;
   }
-  else */if(HTTPHeaderMatchURL( inHeader, kCONFIGURLDevActivate ) == kNoErr){
+  else */if(HTTPHeaderMatchURL( inHeader, kCONFIGURLDevState ) == kNoErr){
+    if(inHeader->contentLength > 0){
+      config_log("Recv device getState request.");
+      memset((void*)&devGetStateRequestData, '\0', sizeof(devGetStateRequestData));
+      err = getMVDGetStateRequestData(inHeader->extraDataPtr, &devGetStateRequestData);
+      require_noerr( err, exit );
+      report = json_object_new_object();
+      err = MVDGetState(inContext, devGetStateRequestData, report);
+      require_noerr( err, exit );
+      
+      json_str = (char*)json_object_to_json_string(report);
+      config_log("json_str=%s", json_str);
+      
+      err =  CreateSimpleHTTPMessage( kMIMEType_JSON, (uint8_t*)json_str, strlen(json_str), 
+                                     &httpResponse, &httpResponseLen );
+      require( httpResponse, exit );
+      err = SocketSend( fd, httpResponse, httpResponseLen );
+      SocketClose(&fd);
+      
+      err = kConnectionErr; //Return an err to close the current thread
+    }
+    goto exit;
+  }
+  else if(HTTPHeaderMatchURL( inHeader, kCONFIGURLDevActivate ) == kNoErr){
     if(inHeader->contentLength > 0){
       config_log("Recv device activate request.");
       memset((void*)&devActivateRequestData, '\0', sizeof(devActivateRequestData));

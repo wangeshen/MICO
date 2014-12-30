@@ -28,6 +28,7 @@
 #include "MicoVirtualDevice.h"
 #include "MVDDeviceInterfaces.h"
 #include "MVDCloudInterfaces.h"
+#include "JSON-C/json.h"
 
 //#include "MVDMsgProtocol.h"
 
@@ -305,5 +306,40 @@ OSStatus MVDResetCloudDevInfo(mico_Context_t* const context,
   
 exit:
   return err;
+}
+
+//get state of the MVD( e.g. isActivate/isConnected)
+OSStatus MVDGetState(mico_Context_t* const context,
+                     MVDGetStateRequestData_t getStateRequestData,
+                     void* outDevState)
+{
+  //OSStatus err = kUnknownErr;
+  mico_Context_t *inContext = context;
+  json_object* report = (json_object*)outDevState;
+  
+  if((NULL == context) || (NULL == outDevState)){
+    return kParamErr;
+  }
+  
+  // login_id/dev_passwd ok ?
+  if((0 != strncmp(context->flashContentInRam.appConfig.virtualDevConfig.loginId, 
+                   getStateRequestData.loginId, 
+                   strlen(context->flashContentInRam.appConfig.virtualDevConfig.loginId))) ||
+     (0 != strncmp(context->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
+                   getStateRequestData.devPasswd, 
+                   strlen(context->flashContentInRam.appConfig.virtualDevConfig.devPasswd))))
+  {
+    mvd_log("ERROR: MVDGetState: loginId/devPasswd mismatch!");
+    return kMismatchErr;
+  }
+  
+  json_object_object_add(report, "isActivated",
+                         json_object_new_boolean(inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated)); 
+  json_object_object_add(report, "isConnected",
+                         json_object_new_boolean(inContext->appStatus.virtualDevStatus.isCloudConnected));
+  json_object_object_add(report, "version",
+                         json_object_new_string(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion));
+  
+  return kNoErr;
 }
 

@@ -563,3 +563,32 @@ OSStatus getMVDOTARequestData(const char *input, MVDOTARequestData_t *OTAData)
 exit:  
   return err;
 }
+
+OSStatus getMVDGetStateRequestData(const char *input, MVDGetStateRequestData_t *devGetStateData)
+{
+  OSStatus err = kUnknownErr;
+  json_object *new_obj;
+  config_delegate_log_trace();
+  
+  new_obj = json_tokener_parse(input);
+  require_action(new_obj, exit, err = kUnknownErr);
+  
+  config_delegate_log("Recv activate object=%s", json_object_to_json_string(new_obj));
+  
+  json_object_object_foreach(new_obj, key, val) {
+    if(!strcmp(key, "login_id")){
+      strncpy(devGetStateData->loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
+    }
+    else if(!strcmp(key, "dev_passwd")){
+      strncpy(devGetStateData->devPasswd, json_object_get_string(val), MAX_SIZE_DEV_PASSWD);
+    }
+    else if(!strcmp(key, "user_token")){
+      strncpy(devGetStateData->user_token, json_object_get_string(val), MAX_SIZE_USER_TOKEN);
+    }
+  }
+  json_object_put(new_obj);
+  err = kNoErr;
+  
+exit:  
+  return err;
+}
