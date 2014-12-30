@@ -216,7 +216,7 @@ OSStatus EasyCloudServiceStop(easycloud_service_context_t *context)
 }
 
 
-EasycCloudServiceState EasyCloudServiceState(easycloud_service_context_t *context)
+easycloud_service_state_t EasyCloudServiceState(easycloud_service_context_t *context)
 {
   if (NULL == context){
     return EASYCLOUD_STOPPED;
