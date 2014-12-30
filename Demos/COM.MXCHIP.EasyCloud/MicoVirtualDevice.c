@@ -176,6 +176,8 @@ exit:
 
 // Cloud => MCU
 OSStatus MVDCloudMsgProcess(mico_Context_t* context, 
+                            const char* topic,
+                            const unsigned int topicLen,
                             unsigned char *inBuf, unsigned int inBufLen)
 {
   mvd_log_trace();
