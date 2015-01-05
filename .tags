@@ -1,0 +1,379 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ALIGN	.\API\HTTPClient.h	87;"	d
+ASM_SRCS	.\Debug\sources.mk	/^ASM_SRCS := $/;"	m
+ASM_SRCS	.\Release\sources.mk	/^ASM_SRCS := $/;"	m
+AuthHeader	.\API\HTTPClient.h	/^        HTTP_PARAM          AuthHeader;             \/\/ the pointer and length of the authentication header$/;"	m	struct:_HTTP_AUTH_HEADER
+AuthNotSupported	.\API\HTTPClientCommon.h	/^        AuthNotSupported$/;"	e	enum:_HTTP_AUTH_SCHEMA
+AuthSchemaBasic	.\API\HTTPClientCommon.h	/^        AuthSchemaBasic,$/;"	e	enum:_HTTP_AUTH_SCHEMA
+AuthSchemaDigest	.\API\HTTPClientCommon.h	/^        AuthSchemaDigest,$/;"	e	enum:_HTTP_AUTH_SCHEMA
+AuthSchemaKerberos	.\API\HTTPClientCommon.h	/^        AuthSchemaKerberos,$/;"	e	enum:_HTTP_AUTH_SCHEMA
+AuthSchemaName	.\API\HTTPClient.h	/^        CHAR                AuthSchemaName[16];  \/\/ The authentication schema name (for string comperission)$/;"	m	struct:_HTTP_CREDENTIALS
+AuthSchemaName	.\API\HTTPClient.h	/^        CHAR                AuthSchemaName[16];  \/\/ The authentication schema name (for string comperission)$/;"	m	struct:_HTTP_PROXY
+AuthSchemaNone	.\API\HTTPClientCommon.h	/^        AuthSchemaNone      = 0,$/;"	e	enum:_HTTP_AUTH_SCHEMA
+AuthType	.\HTTPClientSample.h	/^    HTTP_AUTH_SCHEMA        AuthType;$/;"	m	struct:_HTTPParameters
+Authentication	.\API\HTTPClient.h	/^        BOOL                Authentication;      \/\/ a flag that indicates that this session has requested a user authentication$/;"	m	struct:_HTTP_CREDENTIALS
+BAD	.\API\HTTPClientAuth.h	19;"	d
+BOOL	.\API\HTTPClientWrapper.h	/^typedef int                          BOOL;$/;"	t
+CHAR	.\API\HTTPClientWrapper.h	/^typedef char                         CHAR;$/;"	t
+CMSI_HTTPCLIENT_PROTOCOL_GUID	.\API\HTTPClient.h	19;"	d
+C_DEPS	.\Debug\sources.mk	/^C_DEPS := $/;"	m
+C_DEPS	.\Release\sources.mk	/^C_DEPS := $/;"	m
+C_SRCS	.\Debug\sources.mk	/^C_SRCS := $/;"	m
+C_SRCS	.\Release\sources.mk	/^C_SRCS := $/;"	m
+Connection	.\API\HTTPClient.h	/^        BOOL                 Connection;            \/\/ True = Keep alive or undefined, False = Closed$/;"	m	struct:_HTTP_HEADERS_INFO
+CredAuthSchema	.\API\HTTPClient.h	/^        HTTP_AUTH_SCHEMA    CredAuthSchema;      \/\/ The schema that calle has selected for the session$/;"	m	struct:_HTTP_CREDENTIALS
+CredPassword	.\API\HTTPClient.h	/^        CHAR                CredPassword[HTTP_CLIENT_MAX_PASSWORD_LENGTH];$/;"	m	struct:_HTTP_CREDENTIALS
+CredUser	.\API\HTTPClient.h	/^        CHAR                CredUser[HTTP_CLIENT_MAX_USERNAME_LENGTH];$/;"	m	struct:_HTTP_CREDENTIALS
+DECODE64	.\API\HTTPClientAuth.h	18;"	d
+EXECUTABLES	.\Debug\sources.mk	/^EXECUTABLES := $/;"	m
+EXECUTABLES	.\Release\sources.mk	/^EXECUTABLES := $/;"	m
+E_HTTPDebug	.\API\HTTPClient.h	/^    typedef VOID _stdcall E_HTTPDebug(const char *,const char*,UINT32,char *,...); \/\/ HTTPDebug hook function$/;"	t
+F1	.\API\HTTPClientAuth.c	492;"	d	file:
+F2	.\API\HTTPClientAuth.c	493;"	d	file:
+F3	.\API\HTTPClientAuth.c	494;"	d	file:
+F4	.\API\HTTPClientAuth.c	495;"	d	file:
+FALSE	.\API\HTTPClientWrapper.h	124;"	d
+FDError	.\API\HTTPClient.h	/^        fd_set              FDError;            \/\/ socket error event$/;"	m	struct:_HTTP_CONNECTION
+FDRead	.\API\HTTPClient.h	/^        fd_set              FDRead;             \/\/ socket read event$/;"	m	struct:_HTTP_CONNECTION
+FDWrite	.\API\HTTPClient.h	/^        fd_set              FDWrite;            \/\/ socket write event $/;"	m	struct:_HTTP_CONNECTION
+GetRandomeNumber	.\API\HTTPClientWrapper.h	106;"	d
+GetUpTime	.\API\HTTPClientWrapper.h	102;"	d
+HASH	.\API\HTTPClientAuth.h	/^typedef char HASH[HASHLEN];$/;"	t
+HASHHEX	.\API\HTTPClientAuth.h	/^typedef char HASHHEX[HASHHEXLEN+1];$/;"	t
+HASHHEXLEN	.\API\HTTPClientAuth.h	9;"	d
+HASHLEN	.\API\HTTPClientAuth.h	8;"	d
+HTTPBase64Decoder	.\API\HTTPClientAuth.c	/^int HTTPBase64Decoder(char *out, const char *in)$/;"	f
+HTTPBase64Encoder	.\API\HTTPClientAuth.c	/^void HTTPBase64Encoder(unsigned char *out, const unsigned char *in, int inlen)$/;"	f
+HTTPClientAddRequestHeaders	.\API\HTTPClient.c	/^UINT32 HTTPClientAddRequestHeaders (HTTP_SESSION_HANDLE pSession,$/;"	f
+HTTPClientCloseRequest	.\API\HTTPClient.c	/^UINT32 HTTPClientCloseRequest (HTTP_SESSION_HANDLE *pSession)$/;"	f
+HTTPClientFindCloseHeader	.\API\HTTPClient.c	/^UINT32 HTTPClientFindCloseHeader (HTTP_SESSION_HANDLE pSession)$/;"	f
+HTTPClientFindFirstHeader	.\API\HTTPClient.c	/^UINT32 HTTPClientFindFirstHeader (HTTP_SESSION_HANDLE pSession, CHAR *pSearchClue,CHAR *pHeaderBuffer, UINT32 *nLength)$/;"	f
+HTTPClientGetInfo	.\API\HTTPClient.c	/^UINT32 HTTPClientGetInfo (HTTP_SESSION_HANDLE pSession, HTTP_CLIENT *HTTPClient)$/;"	f
+HTTPClientGetNextHeader	.\API\HTTPClient.c	/^UINT32 HTTPClientGetNextHeader (HTTP_SESSION_HANDLE pSession, CHAR *pHeaderBuffer, UINT32 *nLength)$/;"	f
+HTTPClientOpenRequest	.\API\HTTPClient.c	/^HTTP_SESSION_HANDLE  HTTPClientOpenRequest (HTTP_CLIENT_SESSION_FLAGS Flags)$/;"	f
+HTTPClientReadData	.\API\HTTPClient.c	/^                            UINT32 HTTPClientReadData (HTTP_SESSION_HANDLE pSession,$/;"	f
+HTTPClientRecvResponse	.\API\HTTPClient.c	/^UINT32 HTTPClientRecvResponse (HTTP_SESSION_HANDLE pSession,$/;"	f
+HTTPClientReset	.\API\HTTPClient.c	/^UINT32  HTTPClientReset (HTTP_SESSION_HANDLE pSession)$/;"	f
+HTTPClientSendRequest	.\API\HTTPClient.c	/^UINT32 HTTPClientSendRequest (HTTP_SESSION_HANDLE pSession,$/;"	f
+HTTPClientSetAuth	.\API\HTTPClient.c	/^UINT32  HTTPClientSetAuth (HTTP_SESSION_HANDLE pSession,$/;"	f
+HTTPClientSetCredentials	.\API\HTTPClient.c	/^UINT32 HTTPClientSetCredentials (HTTP_SESSION_HANDLE pSession, $/;"	f
+HTTPClientSetDebugHook	.\API\HTTPClient.c	/^UINT32  HTTPClientSetDebugHook (HTTP_SESSION_HANDLE pSession,$/;"	f
+HTTPClientSetLocalConnection	.\API\HTTPClient.c	/^UINT32 HTTPClientSetLocalConnection  (HTTP_SESSION_HANDLE pSession, UINT32 nPort)$/;"	f
+HTTPClientSetProxy	.\API\HTTPClient.c	/^UINT32 HTTPClientSetProxy (HTTP_SESSION_HANDLE pSession,$/;"	f
+HTTPClientSetVerb	.\API\HTTPClient.c	/^UINT32  HTTPClientSetVerb (HTTP_SESSION_HANDLE pSession,$/;"	f
+HTTPClientWriteData	.\API\HTTPClient.c	/^UINT32 HTTPClientWriteData (HTTP_SESSION_HANDLE pSession, $/;"	f
+HTTPDebug	.\HTTPClientSample.c	/^VOID HTTPDebug(const CHAR* FunctionName,const CHAR *DebugDump,UINT32 iLength,CHAR *DebugDescription,...) \/\/ Requested operation$/;"	f
+HTTPDigestCalcHA1	.\API\HTTPClientAuth.c	/^void HTTPDigestCalcHA1($/;"	f
+HTTPDigestCalcResponse	.\API\HTTPClientAuth.c	/^void HTTPDigestCalcResponse($/;"	f
+HTTPDigestCvtHex	.\API\HTTPClientAuth.c	/^void HTTPDigestCvtHex(IN HASH Bin,OUT HASHHEX Hex)$/;"	f
+HTTPDigestGenerateCNonce	.\API\HTTPClientAuth.c	/^void HTTPDigestGenerateCNonce(char *outbuff) $/;"	f
+HTTPDumpHelp	.\HTTPClientSample.c	/^void HTTPDumpHelp(CHAR *ExtraInfo)$/;"	f
+HTTPIntrnAuthHandler	.\API\HTTPClient.c	/^UINT32 HTTPIntrnAuthHandler (P_HTTP_SESSION pHTTPSession)$/;"	f
+HTTPIntrnAuthSendBasic	.\API\HTTPClient.c	/^UINT32 HTTPIntrnAuthSendBasic (P_HTTP_SESSION pHTTPSession)$/;"	f
+HTTPIntrnAuthSendDigest	.\API\HTTPClient.c	/^UINT32 HTTPIntrnAuthSendDigest (P_HTTP_SESSION pHTTPSession)$/;"	f
+HTTPIntrnAuthenticate	.\API\HTTPClient.c	/^UINT32 HTTPIntrnAuthenticate(P_HTTP_SESSION pHTTPSession)$/;"	f
+HTTPIntrnConnectionClose	.\API\HTTPClient.c	/^UINT32 HTTPIntrnConnectionClose (P_HTTP_SESSION pHTTPSession)$/;"	f
+HTTPIntrnConnectionOpen	.\API\HTTPClient.c	/^UINT32 HTTPIntrnConnectionOpen (P_HTTP_SESSION pHTTPSession)$/;"	f
+HTTPIntrnGetRemoteChunkLength	.\API\HTTPClient.c	/^UINT32 HTTPIntrnGetRemoteChunkLength (P_HTTP_SESSION pHTTPSession)$/;"	f
+HTTPIntrnGetRemoteHeaders	.\API\HTTPClient.c	/^UINT32 HTTPIntrnGetRemoteHeaders (P_HTTP_SESSION pHTTPSession)$/;"	f
+HTTPIntrnHeadersAdd	.\API\HTTPClient.c	/^UINT32 HTTPIntrnHeadersAdd (P_HTTP_SESSION pHTTPSession,$/;"	f
+HTTPIntrnHeadersFind	.\API\HTTPClient.c	/^UINT32 HTTPIntrnHeadersFind (P_HTTP_SESSION pHTTPSession,CHAR *pHeaderName,$/;"	f
+HTTPIntrnHeadersParse	.\API\HTTPClient.c	/^UINT32 HTTPIntrnHeadersParse (P_HTTP_SESSION pHTTPSession)$/;"	f
+HTTPIntrnHeadersReceive	.\API\HTTPClient.c	/^UINT32 HTTPIntrnHeadersReceive (P_HTTP_SESSION pHTTPSession,$/;"	f
+HTTPIntrnHeadersRemove	.\API\HTTPClient.c	/^UINT32 HTTPIntrnHeadersRemove (P_HTTP_SESSION pHTTPSession,$/;"	f
+HTTPIntrnHeadersSend	.\API\HTTPClient.c	/^UINT32 HTTPIntrnHeadersSend(P_HTTP_SESSION pHTTPSession,$/;"	f
+HTTPIntrnParseAuthHeader	.\API\HTTPClient.c	/^UINT32 HTTPIntrnParseAuthHeader(P_HTTP_SESSION pHTTPSession)$/;"	f
+HTTPIntrnRecv	.\API\HTTPClient.c	/^UINT32 HTTPIntrnRecv (P_HTTP_SESSION pHTTPSession,$/;"	f
+HTTPIntrnResizeBuffer	.\API\HTTPClient.c	/^UINT32 HTTPIntrnResizeBuffer (P_HTTP_SESSION pHTTPSession,$/;"	f
+HTTPIntrnSend	.\API\HTTPClient.c	/^UINT32 HTTPIntrnSend (P_HTTP_SESSION pHTTPSession,$/;"	f
+HTTPIntrnSessionEvalTimeout	.\API\HTTPClient.c	/^BOOL HTTPIntrnSessionEvalTimeout(P_HTTP_SESSION pHTTPSession)$/;"	f
+HTTPIntrnSessionGetUpTime	.\API\HTTPClient.c	/^UINT32 HTTPIntrnSessionGetUpTime(VOID)$/;"	f
+HTTPIntrnSessionReset	.\API\HTTPClient.c	/^UINT32 HTTPIntrnSessionReset (P_HTTP_SESSION pHTTPSession, BOOL EntireSession)$/;"	f
+HTTPIntrnSetURL	.\API\HTTPClient.c	/^UINT32 HTTPIntrnSetURL (P_HTTP_SESSION pHTTPSession,$/;"	f
+HTTPMD5ByteReverse	.\API\HTTPClientAuth.c	/^void HTTPMD5ByteReverse(unsigned char *buf, unsigned longs)$/;"	f
+HTTPMD5ByteReverse	.\API\HTTPClientAuth.c	310;"	d	file:
+HTTPMD5Final	.\API\HTTPClientAuth.c	/^void HTTPMD5Final(unsigned char digest[16], struct MD5Context *ctx)$/;"	f
+HTTPMD5Init	.\API\HTTPClientAuth.c	/^void HTTPMD5Init(struct MD5Context *ctx)$/;"	f
+HTTPMD5Transform	.\API\HTTPClientAuth.c	/^void HTTPMD5Transform(uint32 buf[4], uint32 const in[16])$/;"	f
+HTTPMD5Update	.\API\HTTPClientAuth.c	/^void HTTPMD5Update(struct MD5Context *ctx, unsigned char const *buf, unsigned len)$/;"	f
+HTTPOSInit	.\HTTPClientSample.c	/^UINT32 HTTPOSInit(UINT32 nState \/\/ Requested operation        $/;"	f
+HTTPParameters	.\HTTPClientSample.h	/^} HTTPParameters;$/;"	t	typeref:struct:_HTTPParameters
+HTTPParseCommandLineArgs	.\HTTPClientSample.c	/^INT32 HTTPParseCommandLineArgs(UINT32 argc, CHAR *argv[],HTTPParameters *pClientParams)$/;"	f
+HTTPStatusCode	.\API\HTTPClientCommon.h	/^        UINT32        HTTPStatusCode;                 \/\/ HTTP Status code (200 OK)$/;"	m	struct:_HTTP_CLIENT
+HTTPStrCaseStr	.\API\HTTPClientString.c	/^CHAR *HTTPStrCaseStr(const char *pSrc,UINT32 nSrcLength,const char *pFind)$/;"	f
+HTTPStrExtract	.\API\HTTPClientString.c	/^CHAR HTTPStrExtract(CHAR *pParam,       \/\/ [IN] a pointer to the input parameter$/;"	f
+HTTPStrGetDigestToken	.\API\HTTPClientString.c	/^UINT32 HTTPStrGetDigestToken (HTTP_PARAM pParamSrc, CHAR *pSearched, HTTP_PARAM *pParamDest)$/;"	f
+HTTPStrGetToken	.\API\HTTPClientString.c	/^CHAR* HTTPStrGetToken (CHAR *pSrc, UINT32 nSrcLength, CHAR *pDest, UINT32 *nDestLength)$/;"	f
+HTTPStrHToL	.\API\HTTPClientString.c	/^UINT32 HTTPStrHToL (CHAR * s) $/;"	f
+HTTPStrInsensitiveCompare	.\API\HTTPClientString.c	/^BOOL HTTPStrInsensitiveCompare(CHAR *pSrc,      \/\/ [IN] a pointer to the source string$/;"	f
+HTTPStrLToH	.\API\HTTPClientString.c	/^CHAR* HTTPStrLToH (CHAR * dest,UINT32 nSrc)$/;"	f
+HTTPStrSearch	.\API\HTTPClientString.c	/^BOOL HTTPStrSearch(CHAR *pSrc,              \/\/ [IN] The source string $/;"	f
+HTTPVersion	.\API\HTTPClient.h	/^        CHAR                 HTTPVersion[16];       \/\/ HTTP version string buffer (for example: "HTTP 1.1")$/;"	m	struct:_HTTP_HEADERS_INFO
+HTTPWrapperGetHostByName	.\API\HTTPClientWrapper.c	/^unsigned long HTTPWrapperGetHostByName(char *name,unsigned long *address)$/;"	f
+HTTPWrapperGetRandomeNumber	.\API\HTTPClientWrapper.c	/^int HTTPWrapperGetRandomeNumber()$/;"	f
+HTTPWrapperGetSocketError	.\API\HTTPClientWrapper.c	/^int HTTPWrapperGetSocketError (int s)$/;"	f
+HTTPWrapperGetUpTime	.\API\HTTPClientWrapper.c	/^long HTTPWrapperGetUpTime()$/;"	f
+HTTPWrapperInitRandomeNumber	.\API\HTTPClientWrapper.c	/^void HTTPWrapperInitRandomeNumber()$/;"	f
+HTTPWrapperIsAlNum	.\API\HTTPClientWrapper.c	/^int HTTPWrapperIsAlNum(int c)$/;"	f
+HTTPWrapperIsAlpha	.\API\HTTPClientWrapper.c	/^int HTTPWrapperIsAlpha(int c)$/;"	f
+HTTPWrapperIsAscii	.\API\HTTPClientWrapper.c	/^int HTTPWrapperIsAscii(int c)$/;"	f
+HTTPWrapperItoa	.\API\HTTPClientWrapper.c	/^char* HTTPWrapperItoa(char *s,int a)$/;"	f
+HTTPWrapperSSLClose	.\API\HTTPClientWrapper.c	/^int HTTPWrapperSSLClose(int s)$/;"	f
+HTTPWrapperSSLConnect	.\API\HTTPClientWrapper.c	/^int HTTPWrapperSSLConnect(int s,const struct sockaddr *name,int namelen,char *hostname)$/;"	f
+HTTPWrapperSSLNegotiate	.\API\HTTPClientWrapper.c	/^int HTTPWrapperSSLNegotiate(int s,const struct sockaddr *name,int namelen,char *hostname)$/;"	f
+HTTPWrapperSSLRecv	.\API\HTTPClientWrapper.c	/^int HTTPWrapperSSLRecv(int s,char *buf, int len,int flags)$/;"	f
+HTTPWrapperSSLRecvPending	.\API\HTTPClientWrapper.c	/^int HTTPWrapperSSLRecvPending(int s)$/;"	f
+HTTPWrapperSSLSend	.\API\HTTPClientWrapper.c	/^int HTTPWrapperSSLSend(int s,char *buf, int len,int flags)$/;"	f
+HTTPWrapperShutDown	.\API\HTTPClientWrapper.c	/^int HTTPWrapperShutDown (int s,int how) $/;"	f
+HTTPWrapperToLower	.\API\HTTPClientWrapper.c	/^int HTTPWrapperToLower(int c)$/;"	f
+HTTPWrapperToUpper	.\API\HTTPClientWrapper.c	/^int HTTPWrapperToUpper(int c)$/;"	f
+HTTP_AUTH_HEADER	.\API\HTTPClient.h	/^    }HTTP_AUTH_HEADER;$/;"	t	typeref:struct:_HTTP_AUTH_HEADER
+HTTP_AUTH_SCHEMA	.\API\HTTPClient.h	/^        UINT32              HTTP_AUTH_SCHEMA;       \/\/ Its schema (could be any of the supported)$/;"	m	struct:_HTTP_AUTH_HEADER
+HTTP_AUTH_SCHEMA	.\API\HTTPClientCommon.h	/^    } HTTP_AUTH_SCHEMA;$/;"	t	typeref:enum:_HTTP_AUTH_SCHEMA
+HTTP_CLIENT	.\API\HTTPClientCommon.h	/^    } HTTP_CLIENT;$/;"	t	typeref:struct:_HTTP_CLIENT
+HTTP_CLIENT_ALLOW_HEAD_VERB	.\API\HTTPClient.h	42;"	d
+HTTP_CLIENT_AUTH_H	.\API\HTTPClientAuth.h	3;"	d
+HTTP_CLIENT_BUFFER_SIZE	.\HTTPClientSample.h	5;"	d
+HTTP_CLIENT_CRLF	.\API\HTTPClient.h	58;"	d
+HTTP_CLIENT_CRLFX2	.\API\HTTPClient.h	59;"	d
+HTTP_CLIENT_DEFAULT_AGENT	.\API\HTTPClient.h	52;"	d
+HTTP_CLIENT_DEFAULT_DIGEST_AUTH	.\API\HTTPClient.h	55;"	d
+HTTP_CLIENT_DEFAULT_KEEP_ALIVE	.\API\HTTPClient.h	54;"	d
+HTTP_CLIENT_DEFAULT_PORT	.\API\HTTPClient.h	47;"	d
+HTTP_CLIENT_DEFAULT_PROXY_AUTH	.\API\HTTPClient.h	56;"	d
+HTTP_CLIENT_DEFAULT_PROXY_VER	.\API\HTTPClient.h	51;"	d
+HTTP_CLIENT_DEFAULT_SSL_PORT	.\API\HTTPClient.h	48;"	d
+HTTP_CLIENT_DEFAULT_TIMEOUT	.\API\HTTPClient.h	53;"	d
+HTTP_CLIENT_DEFAULT_VER	.\API\HTTPClient.h	50;"	d
+HTTP_CLIENT_DEFAULT_VERB	.\API\HTTPClient.h	49;"	d
+HTTP_CLIENT_EOS	.\API\HTTPClientCommon.h	75;"	d
+HTTP_CLIENT_ERROR_AUTH_HOST	.\API\HTTPClientCommon.h	59;"	d
+HTTP_CLIENT_ERROR_AUTH_MISMATCH	.\API\HTTPClientCommon.h	69;"	d
+HTTP_CLIENT_ERROR_AUTH_PROXY	.\API\HTTPClientCommon.h	60;"	d
+HTTP_CLIENT_ERROR_BAD_AUTH	.\API\HTTPClientCommon.h	68;"	d
+HTTP_CLIENT_ERROR_BAD_HEADER	.\API\HTTPClientCommon.h	66;"	d
+HTTP_CLIENT_ERROR_BAD_STATE	.\API\HTTPClientCommon.h	63;"	d
+HTTP_CLIENT_ERROR_BAD_URL	.\API\HTTPClientCommon.h	65;"	d
+HTTP_CLIENT_ERROR_BAD_VERB	.\API\HTTPClientCommon.h	61;"	d
+HTTP_CLIENT_ERROR_BUFFER_RSIZE	.\API\HTTPClientCommon.h	67;"	d
+HTTP_CLIENT_ERROR_CHUNK	.\API\HTTPClientCommon.h	64;"	d
+HTTP_CLIENT_ERROR_CHUNK_TOO_BIG	.\API\HTTPClientCommon.h	58;"	d
+HTTP_CLIENT_ERROR_HEADER_BIG_CLUE	.\API\HTTPClientCommon.h	56;"	d
+HTTP_CLIENT_ERROR_HEADER_NOT_FOUND	.\API\HTTPClientCommon.h	55;"	d
+HTTP_CLIENT_ERROR_HEADER_NO_LENGTH	.\API\HTTPClientCommon.h	57;"	d
+HTTP_CLIENT_ERROR_HEADER_RECV	.\API\HTTPClientCommon.h	54;"	d
+HTTP_CLIENT_ERROR_INVALID_HANDLE	.\API\HTTPClientCommon.h	45;"	d
+HTTP_CLIENT_ERROR_LONG_INPUT	.\API\HTTPClientCommon.h	62;"	d
+HTTP_CLIENT_ERROR_NOT_IMPLEMENTED	.\API\HTTPClientCommon.h	74;"	d
+HTTP_CLIENT_ERROR_NO_DIGEST_ALG	.\API\HTTPClientCommon.h	71;"	d
+HTTP_CLIENT_ERROR_NO_DIGEST_TOKEN	.\API\HTTPClientCommon.h	70;"	d
+HTTP_CLIENT_ERROR_NO_MEMORY	.\API\HTTPClientCommon.h	46;"	d
+HTTP_CLIENT_ERROR_SOCKET_BIND	.\API\HTTPClientCommon.h	72;"	d
+HTTP_CLIENT_ERROR_SOCKET_CANT_SET	.\API\HTTPClientCommon.h	48;"	d
+HTTP_CLIENT_ERROR_SOCKET_CONNECT	.\API\HTTPClientCommon.h	50;"	d
+HTTP_CLIENT_ERROR_SOCKET_INVALID	.\API\HTTPClientCommon.h	47;"	d
+HTTP_CLIENT_ERROR_SOCKET_RECV	.\API\HTTPClientCommon.h	52;"	d
+HTTP_CLIENT_ERROR_SOCKET_RESOLVE	.\API\HTTPClientCommon.h	49;"	d
+HTTP_CLIENT_ERROR_SOCKET_SEND	.\API\HTTPClientCommon.h	53;"	d
+HTTP_CLIENT_ERROR_SOCKET_TIME_OUT	.\API\HTTPClientCommon.h	51;"	d
+HTTP_CLIENT_ERROR_TLS_NEGO	.\API\HTTPClientCommon.h	73;"	d
+HTTP_CLIENT_FLAG_ASYNC	.\API\HTTPClientCommon.h	27;"	d
+HTTP_CLIENT_FLAG_CHUNKED	.\API\HTTPClient.h	67;"	d
+HTTP_CLIENT_FLAG_KEEP_ALIVE	.\API\HTTPClientCommon.h	24;"	d
+HTTP_CLIENT_FLAG_NO_CACHE	.\API\HTTPClientCommon.h	26;"	d
+HTTP_CLIENT_FLAG_SECURE	.\API\HTTPClient.h	63;"	d
+HTTP_CLIENT_FLAG_SEND_CHUNKED	.\API\HTTPClientCommon.h	25;"	d
+HTTP_CLIENT_FLAG_URLANDPORT	.\API\HTTPClient.h	64;"	d
+HTTP_CLIENT_FLAG_URLHTTPS	.\API\HTTPClient.h	65;"	d
+HTTP_CLIENT_FLAG_USINGPROXY	.\API\HTTPClient.h	66;"	d
+HTTP_CLIENT_INIT_SEND_RECV_HEADERS	.\API\HTTPClient.h	31;"	d
+HTTP_CLIENT_MAX_64_ENCODED_CRED	.\API\HTTPClient.h	36;"	d
+HTTP_CLIENT_MAX_CHUNK_HEADER	.\API\HTTPClient.h	37;"	d
+HTTP_CLIENT_MAX_HEADER_SEARCH_CLUE	.\API\HTTPClient.h	41;"	d
+HTTP_CLIENT_MAX_PASSWORD_LENGTH	.\API\HTTPClient.h	34;"	d
+HTTP_CLIENT_MAX_PROXY_HOST_LENGTH	.\API\HTTPClient.h	38;"	d
+HTTP_CLIENT_MAX_SEND_RECV_HEADERS	.\API\HTTPClient.h	30;"	d
+HTTP_CLIENT_MAX_TOKEN_LENGTH	.\API\HTTPClient.h	39;"	d
+HTTP_CLIENT_MAX_TOKEN_NAME_LENGTH	.\API\HTTPClient.h	40;"	d
+HTTP_CLIENT_MAX_URL_LENGTH	.\API\HTTPClientCommon.h	21;"	d
+HTTP_CLIENT_MAX_USERNAME_LENGTH	.\API\HTTPClient.h	33;"	d
+HTTP_CLIENT_MEMORY_RESIZABLE	.\API\HTTPClient.h	44;"	d
+HTTP_CLIENT_MEMORY_RESIZE_FACTOR	.\API\HTTPClient.h	45;"	d
+HTTP_CLIENT_SAMPLE	.\HTTPClientSample.h	3;"	d
+HTTP_CLIENT_SESSION_FLAGS	.\API\HTTPClient.h	/^    typedef UINT32          HTTP_CLIENT_SESSION_FLAGS;$/;"	t
+HTTP_CLIENT_STATE_HEADERS_OK	.\API\HTTPClientCommon.h	39;"	d
+HTTP_CLIENT_STATE_HEADERS_PARSED	.\API\HTTPClientCommon.h	38;"	d
+HTTP_CLIENT_STATE_HEADERS_RECIVED	.\API\HTTPClientCommon.h	37;"	d
+HTTP_CLIENT_STATE_HEAD_SENT	.\API\HTTPClientCommon.h	34;"	d
+HTTP_CLIENT_STATE_HOST_CONNECTED	.\API\HTTPClientCommon.h	33;"	d
+HTTP_CLIENT_STATE_INIT	.\API\HTTPClientCommon.h	31;"	d
+HTTP_CLIENT_STATE_POST_SENT	.\API\HTTPClientCommon.h	35;"	d
+HTTP_CLIENT_STATE_PRE_INIT	.\API\HTTPClientCommon.h	30;"	d
+HTTP_CLIENT_STATE_REQUEST_SENT	.\API\HTTPClientCommon.h	36;"	d
+HTTP_CLIENT_STATE_URL_PARSED	.\API\HTTPClientCommon.h	32;"	d
+HTTP_CLIENT_SUCCESS	.\API\HTTPClientCommon.h	42;"	d
+HTTP_CLIENT_UNKNOWN_ERROR	.\API\HTTPClientCommon.h	44;"	d
+HTTP_CLIENT_VERSION_MAJOR	.\API\HTTPClient.h	27;"	d
+HTTP_CLIENT_VERSION_MINOR	.\API\HTTPClient.h	26;"	d
+HTTP_CLIENT_WRAPPER	.\API\HTTPClientWrapper.h	3;"	d
+HTTP_CONNECTION	.\API\HTTPClient.h	/^    } HTTP_CONNECTION;$/;"	t	typeref:struct:_HTTP_CONNECTION
+HTTP_COUNTERS	.\API\HTTPClient.h	/^    }HTTP_COUNTERS;$/;"	t	typeref:struct:_HTTP_COUNTERS
+HTTP_CREDENTIALS	.\API\HTTPClient.h	/^    }HTTP_CREDENTIALS;$/;"	t	typeref:struct:_HTTP_CREDENTIALS
+HTTP_ECONNRESET	.\API\HTTPClientWrapper.h	25;"	d
+HTTP_EINPROGRESS	.\API\HTTPClientWrapper.h	26;"	d
+HTTP_EINPROGRESS	.\API\HTTPClientWrapper.h	57;"	d
+HTTP_EWOULDBLOCK	.\API\HTTPClientWrapper.h	27;"	d
+HTTP_EWOULDBLOCK	.\API\HTTPClientWrapper.h	58;"	d
+HTTP_HEADERS	.\API\HTTPClient.h	/^    }HTTP_HEADERS;$/;"	t	typeref:struct:_HTTP_HEADERS
+HTTP_HEADERS_INFO	.\API\HTTPClient.h	/^    }HTTP_HEADERS_INFO;$/;"	t	typeref:struct:_HTTP_HEADERS_INFO
+HTTP_HOSTNET	.\API\HTTPClientWrapper.h	/^typedef struct hostent               HTTP_HOSTNET;$/;"	t	typeref:struct:hostent
+HTTP_INADDR	.\API\HTTPClientWrapper.h	/^typedef struct in_addr               HTTP_INADDR;$/;"	t	typeref:struct:in_addr
+HTTP_INVALID_SOCKET	.\API\HTTPClientWrapper.h	131;"	d
+HTTP_PARAM	.\API\HTTPClient.h	/^    } HTTP_PARAM;$/;"	t	typeref:struct:_HTTP_PARAM
+HTTP_PROXY	.\API\HTTPClient.h	/^    }HTTP_PROXY;$/;"	t	typeref:struct:_HTTP_PROXY
+HTTP_SESSION	.\API\HTTPClient.h	/^} HTTP_SESSION, *P_HTTP_SESSION;$/;"	t	typeref:struct:_HTTP_REQUEST
+HTTP_SESSION_HANDLE	.\API\HTTPClient.h	/^    typedef UINT32          HTTP_SESSION_HANDLE;$/;"	t
+HTTP_SOCKADDR	.\API\HTTPClientWrapper.h	/^typedef struct sockaddr              HTTP_SOCKADDR;$/;"	t	typeref:struct:sockaddr
+HTTP_SOCKADDR_IN	.\API\HTTPClientWrapper.h	/^typedef struct sockaddr_in           HTTP_SOCKADDR_IN;$/;"	t	typeref:struct:sockaddr_in
+HTTP_STATUS_CONTINUE	.\API\HTTPClient.h	77;"	d
+HTTP_STATUS_OBJECT_MOVED	.\API\HTTPClient.h	75;"	d
+HTTP_STATUS_OBJECT_MOVED_PERMANENTLY	.\API\HTTPClient.h	76;"	d
+HTTP_STATUS_OK	.\API\HTTPClient.h	70;"	d
+HTTP_STATUS_PROXY_AUTHENTICATION_REQUIRED	.\API\HTTPClient.h	72;"	d
+HTTP_STATUS_UNAUTHORIZED	.\API\HTTPClient.h	71;"	d
+HTTP_TIMEOUT	.\API\HTTPClient.h	84;"	d
+HTTP_TIMEVAL	.\API\HTTPClientWrapper.h	/^typedef struct timeval               HTTP_TIMEVAL; $/;"	t	typeref:struct:timeval
+HTTP_URL	.\API\HTTPClient.h	/^    }HTTP_URL;$/;"	t	typeref:struct:_HTTP_URL
+HTTP_VERB	.\API\HTTPClientCommon.h	/^    } HTTP_VERB;$/;"	t	typeref:enum:_HTTP_VERB
+HaveCredentials	.\API\HTTPClient.h	/^        BOOL                 HaveCredentials;       \/\/ a flag that indicates if we have credentials for the session$/;"	m	struct:_HTTP_HEADERS_INFO
+HeaderSearch	.\API\HTTPClient.h	/^        HTTP_PARAM           HeaderSearch;      \/\/ Index and pointer for the header search functions$/;"	m	struct:_HTTP_HEADERS
+HeadersBuffer	.\API\HTTPClient.h	/^        HTTP_PARAM           HeadersBuffer;     \/\/ a pointer and length of the complete Headers (in\\out) buffer$/;"	m	struct:_HTTP_HEADERS
+HeadersIn	.\API\HTTPClient.h	/^        HTTP_PARAM           HeadersIn;         \/\/ a pointer and length of the incoming headers$/;"	m	struct:_HTTP_HEADERS
+HeadersOut	.\API\HTTPClient.h	/^        HTTP_PARAM           HeadersOut;        \/\/ a pointer and length of the outgoing HTTP headers$/;"	m	struct:_HTTP_HEADERS
+HostByName	.\API\HTTPClientWrapper.h	104;"	d
+HttpAuthHeader	.\API\HTTPClient.h	/^        HTTP_AUTH_HEADER    HttpAuthHeader;$/;"	m	struct:_HTTP_REQUEST
+HttpClientPort	.\API\HTTPClient.h	/^        UINT32              HttpClientPort;     \/\/ For client side binding$/;"	m	struct:_HTTP_CONNECTION
+HttpConnection	.\API\HTTPClient.h	/^        HTTP_CONNECTION     HttpConnection;$/;"	m	struct:_HTTP_REQUEST
+HttpCounters	.\API\HTTPClient.h	/^        HTTP_COUNTERS       HttpCounters;$/;"	m	struct:_HTTP_REQUEST
+HttpCredentials	.\API\HTTPClient.h	/^        HTTP_CREDENTIALS    HttpCredentials;  $/;"	m	struct:_HTTP_REQUEST
+HttpFlags	.\API\HTTPClient.h	/^        UINT32              HttpFlags;$/;"	m	struct:_HTTP_REQUEST
+HttpHeaders	.\API\HTTPClient.h	/^        HTTP_HEADERS        HttpHeaders;$/;"	m	struct:_HTTP_REQUEST
+HttpHeadersInfo	.\API\HTTPClient.h	/^        HTTP_HEADERS_INFO   HttpHeadersInfo;$/;"	m	struct:_HTTP_REQUEST
+HttpLastVerb	.\API\HTTPClient.h	/^        HTTP_VERB            HttpLastVerb;      \/\/ the HTTP verb that was last transmited to the server$/;"	m	struct:_HTTP_HEADERS
+HttpProxy	.\API\HTTPClient.h	/^        HTTP_PROXY          HttpProxy;$/;"	m	struct:_HTTP_REQUEST
+HttpRedirectURL	.\API\HTTPClient.h	/^        HTTP_PARAM           HttpRedirectURL;       \/\/ Stores the redirection URL if we got a 301 or 303 return code$/;"	m	struct:_HTTP_HEADERS_INFO
+HttpSocket	.\API\HTTPClient.h	/^        INT32               HttpSocket;         \/\/ The underling socket$/;"	m	struct:_HTTP_CONNECTION
+HttpStartTime	.\API\HTTPClient.h	/^        UINT32              HttpStartTime;      \/\/ Time stamp for the session$/;"	m	struct:_HTTP_CONNECTION
+HttpState	.\API\HTTPClient.h	/^        UINT32              HttpState;$/;"	m	struct:_HTTP_REQUEST
+HttpState	.\API\HTTPClientCommon.h	/^        UINT32        HttpState;$/;"	m	struct:_HTTP_CLIENT
+HttpUrl	.\API\HTTPClient.h	/^        HTTP_URL            HttpUrl;$/;"	m	struct:_HTTP_REQUEST
+HttpVerb	.\API\HTTPClient.h	/^        HTTP_VERB            HttpVerb;          \/\/ the HTTP verb that was used in the session$/;"	m	struct:_HTTP_HEADERS
+IN	.\API\HTTPClientAuth.h	10;"	d
+INT32	.\API\HTTPClientWrapper.h	/^typedef long                         INT32; $/;"	t
+IToA	.\API\HTTPClientWrapper.h	101;"	d
+InitRandomeNumber	.\API\HTTPClientWrapper.h	105;"	d
+LIBS	.\Debug\objects.mk	/^LIBS :=$/;"	m
+LIBS	.\Release\objects.mk	/^LIBS :=$/;"	m
+MAX	.\API\HTTPClient.h	82;"	d
+MD5Context	.\API\HTTPClientAuth.h	/^struct MD5Context $/;"	s
+MD5STEP	.\API\HTTPClientAuth.c	499;"	d	file:
+MD5STEP	.\API\HTTPClientAuth.c	502;"	d	file:
+MD5_CTX	.\API\HTTPClientAuth.h	/^typedef struct MD5Context MD5_CTX;$/;"	t	typeref:struct:MD5Context
+MIN	.\API\HTTPClient.h	81;"	d
+NULL	.\API\HTTPClientWrapper.h	121;"	d
+OBJS	.\Debug\sources.mk	/^OBJS := $/;"	m
+OBJS	.\Release\sources.mk	/^OBJS := $/;"	m
+OBJ_SRCS	.\Debug\sources.mk	/^OBJ_SRCS := $/;"	m
+OBJ_SRCS	.\Release\sources.mk	/^OBJ_SRCS := $/;"	m
+OUT	.\API\HTTPClientAuth.h	11;"	d
+O_SRCS	.\Debug\sources.mk	/^O_SRCS := $/;"	m
+O_SRCS	.\Release\sources.mk	/^O_SRCS := $/;"	m
+P_HTTP_SESSION	.\API\HTTPClient.h	/^} HTTP_SESSION, *P_HTTP_SESSION;$/;"	t	typeref:struct:_HTTP_REQUEST
+Password	.\HTTPClientSample.h	/^    CHAR                    Password[64];$/;"	m	struct:_HTTPParameters
+ProxtUser	.\API\HTTPClient.h	/^        CHAR                ProxtUser[HTTP_CLIENT_MAX_USERNAME_LENGTH];$/;"	m	struct:_HTTP_PROXY
+ProxyAuthSchema	.\API\HTTPClient.h	/^        HTTP_AUTH_SCHEMA    ProxyAuthSchema;$/;"	m	struct:_HTTP_PROXY
+ProxyHost	.\API\HTTPClient.h	/^        CHAR                ProxyHost[HTTP_CLIENT_MAX_PROXY_HOST_LENGTH];$/;"	m	struct:_HTTP_PROXY
+ProxyHost	.\HTTPClientSample.h	/^    CHAR                    ProxyHost[1024];  $/;"	m	struct:_HTTPParameters
+ProxyPassword	.\API\HTTPClient.h	/^        CHAR                ProxyPassword[HTTP_CLIENT_MAX_PASSWORD_LENGTH];$/;"	m	struct:_HTTP_PROXY
+ProxyPort	.\HTTPClientSample.h	/^    UINT32                  ProxyPort;$/;"	m	struct:_HTTPParameters
+RequestBodyLengthSent	.\API\HTTPClientCommon.h	/^        UINT32		    RequestBodyLengthSent;          \/\/ Total bytes sent (body only)$/;"	m	struct:_HTTP_CLIENT
+ResponseBodyLengthReceived	.\API\HTTPClientCommon.h	/^        UINT32		    ResponseBodyLengthReceived;     \/\/ Total bytes received (body only)$/;"	m	struct:_HTTP_CLIENT
+SOCKET_ERROR	.\API\HTTPClientWrapper.h	54;"	d
+SUBDIRS	.\Debug\sources.mk	/^SUBDIRS := \\$/;"	m
+SUBDIRS	.\Release\sources.mk	/^SUBDIRS := \\$/;"	m
+S_UPPER_SRCS	.\Debug\sources.mk	/^S_UPPER_SRCS := $/;"	m
+S_UPPER_SRCS	.\Release\sources.mk	/^S_UPPER_SRCS := $/;"	m
+SearchClue	.\API\HTTPClient.h	/^        CHAR                 SearchClue[HTTP_CLIENT_MAX_HEADER_SEARCH_CLUE];$/;"	m	struct:_HTTP_HEADERS
+SocketGetErr	.\API\HTTPClientWrapper.h	103;"	d
+TRUE	.\API\HTTPClientWrapper.h	123;"	d
+TlsNego	.\API\HTTPClient.h	/^        BOOL				TlsNego;            \/\/ TLS negotiation flag$/;"	m	struct:_HTTP_CONNECTION
+TotalResponseBodyLength	.\API\HTTPClientCommon.h	/^        UINT32		    TotalResponseBodyLength;        \/\/ as extracted from the “content-length" header$/;"	m	struct:_HTTP_CLIENT
+UINT16	.\API\HTTPClientWrapper.h	/^typedef unsigned short               UINT16;$/;"	t
+UINT32	.\API\HTTPClientWrapper.h	/^typedef unsigned long                UINT32;$/;"	t
+USER_OBJS	.\Debug\objects.mk	/^USER_OBJS :=$/;"	m
+USER_OBJS	.\Release\objects.mk	/^USER_OBJS :=$/;"	m
+Uri	.\HTTPClientSample.h	/^    CHAR                    Uri[1024];        $/;"	m	struct:_HTTPParameters
+Url	.\API\HTTPClient.h	/^        CHAR                 Url[HTTP_CLIENT_MAX_URL_LENGTH];   \/\/ a buffer for the URL$/;"	m	struct:_HTTP_URL
+UrlBsee	.\API\HTTPClient.h	/^        HTTP_PARAM           UrlBsee;           \/\/ a pointer and length to the "http" section of the URL$/;"	m	struct:_HTTP_URL
+UrlHost	.\API\HTTPClient.h	/^        HTTP_PARAM           UrlHost;           \/\/ a pointer and length to the host section of the URL$/;"	m	struct:_HTTP_URL
+UrlPort	.\API\HTTPClient.h	/^        HTTP_PARAM           UrlPort;           \/\/ a pointer and length to the PORT (if was specified section)$/;"	m	struct:_HTTP_URL
+UrlRequest	.\API\HTTPClient.h	/^        HTTP_PARAM           UrlRequest;        \/\/ a pointer and length of the request section of the URL$/;"	m	struct:_HTTP_URL
+UseProxy	.\HTTPClientSample.h	/^    UINT32                  UseProxy ;  $/;"	m	struct:_HTTPParameters
+UserName	.\HTTPClientSample.h	/^    CHAR                    UserName[64];$/;"	m	struct:_HTTPParameters
+VOID	.\API\HTTPClientWrapper.h	119;"	d
+ValidHeaders	.\API\HTTPClient.h	/^        BOOL                 ValidHeaders;          \/\/ a flag that indicates if the incoming header ware parsed OK and found to be valid$/;"	m	struct:_HTTP_HEADERS_INFO
+Verb	.\API\HTTPClient.h	/^        CHAR                 Verb[16];          \/\/ the actual string buffer of the HTTP verb$/;"	m	struct:_HTTP_HEADERS
+VerbGet	.\API\HTTPClientCommon.h	/^        VerbGet             = 0,$/;"	e	enum:_HTTP_VERB
+VerbHead	.\API\HTTPClientCommon.h	/^        VerbHead,$/;"	e	enum:_HTTP_VERB
+VerbNotSupported	.\API\HTTPClientCommon.h	/^        VerbNotSupported$/;"	e	enum:_HTTP_VERB
+VerbPost	.\API\HTTPClientCommon.h	/^        VerbPost,$/;"	e	enum:_HTTP_VERB
+Verbose	.\HTTPClientSample.h	/^    UINT32                  Verbose;$/;"	m	struct:_HTTPParameters
+_HTTPCLIENT_PROTOCOL_H_	.\API\HTTPClientCommon.h	14;"	d
+_HTTPParameters	.\HTTPClientSample.h	/^typedef struct _HTTPParameters$/;"	s
+_HTTP_AUTH_HEADER	.\API\HTTPClient.h	/^    typedef struct _HTTP_AUTH_HEADER$/;"	s
+_HTTP_AUTH_SCHEMA	.\API\HTTPClientCommon.h	/^    typedef enum _HTTP_AUTH_SCHEMA$/;"	g
+_HTTP_CLIENT	.\API\HTTPClient.h	3;"	d
+_HTTP_CLIENT	.\API\HTTPClientCommon.h	/^    typedef struct _HTTP_CLIENT$/;"	s
+_HTTP_CLIENT_STRING	.\API\HTTPClientString.h	3;"	d
+_HTTP_CONNECTION	.\API\HTTPClient.h	/^    typedef struct _HTTP_CONNECTION$/;"	s
+_HTTP_COUNTERS	.\API\HTTPClient.h	/^    typedef struct _HTTP_COUNTERS$/;"	s
+_HTTP_CREDENTIALS	.\API\HTTPClient.h	/^    typedef struct _HTTP_CREDENTIALS$/;"	s
+_HTTP_HEADERS	.\API\HTTPClient.h	/^    typedef struct _HTTP_HEADERS$/;"	s
+_HTTP_HEADERS_INFO	.\API\HTTPClient.h	/^    typedef struct _HTTP_HEADERS_INFO$/;"	s
+_HTTP_PARAM	.\API\HTTPClient.h	/^    typedef struct _HTTP_PARAM$/;"	s
+_HTTP_PROXY	.\API\HTTPClient.h	/^    typedef struct _HTTP_PROXY$/;"	s
+_HTTP_REQUEST	.\API\HTTPClient.h	/^    typedef struct _HTTP_REQUEST$/;"	s
+_HTTP_URL	.\API\HTTPClient.h	/^    typedef struct _HTTP_URL$/;"	s
+_HTTP_VERB	.\API\HTTPClientCommon.h	/^    typedef enum _HTTP_VERB$/;"	g
+base64digits	.\API\HTTPClientAuth.h	/^static const char base64digits[] =$/;"	v
+base64val	.\API\HTTPClientAuth.h	/^static const char base64val[] = {$/;"	v
+bits	.\API\HTTPClientAuth.h	/^    uint32 bits[2];$/;"	m	struct:MD5Context
+buf	.\API\HTTPClientAuth.h	/^    uint32 buf[4];$/;"	m	struct:MD5Context
+in	.\API\HTTPClientAuth.h	/^    unsigned char in[64];$/;"	m	struct:MD5Context
+main	.\HTTPClientSample.c	/^int main(int argc, CHAR *argv[])$/;"	f
+nActionStartTime	.\API\HTTPClient.h	/^        UINT32              nActionStartTime;       \/\/ Operation start time$/;"	m	struct:_HTTP_COUNTERS
+nActionTimeout	.\API\HTTPClient.h	/^        UINT32              nActionTimeout;         \/\/ Timeout for the session$/;"	m	struct:_HTTP_COUNTERS
+nBytesToNextChunk	.\API\HTTPClient.h	/^        UINT32              nBytesToNextChunk;      \/\/ How many bytes we have to read until we can expect the next chunk$/;"	m	struct:_HTTP_COUNTERS
+nHTTPContentLength	.\API\HTTPClient.h	/^        UINT32               nHTTPContentLength;    \/\/ the Content length if specified of the returned data$/;"	m	struct:_HTTP_HEADERS_INFO
+nHTTPPostContentLength	.\API\HTTPClient.h	/^        UINT32               nHTTPPostContentLength;\/\/ the Content-Length of the POSTed data (if known)$/;"	m	struct:_HTTP_HEADERS_INFO
+nHTTPStatus	.\API\HTTPClient.h	/^        UINT32               nHTTPStatus;           \/\/ the HTTP status code (200 401 407 act')$/;"	m	struct:_HTTP_HEADERS_INFO
+nLength	.\API\HTTPClient.h	/^        UINT32              nLength;$/;"	m	struct:_HTTP_PARAM
+nPort	.\API\HTTPClient.h	/^        UINT16               nPort;             \/\/ the PORT that we should use (could be default or the one found within the URL)$/;"	m	struct:_HTTP_URL
+nProxyPort	.\API\HTTPClient.h	/^        UINT16              nProxyPort;$/;"	m	struct:_HTTP_PROXY
+nRecivedBodyLength	.\API\HTTPClient.h	/^        UINT32              nRecivedBodyLength;     \/\/ Bytes count of the incoming body length$/;"	m	struct:_HTTP_COUNTERS
+nRecivedChunkLength	.\API\HTTPClient.h	/^        UINT32              nRecivedChunkLength;    \/\/ The next chunk length in bytes$/;"	m	struct:_HTTP_COUNTERS
+nRecivedHeaderLength	.\API\HTTPClient.h	/^        UINT32              nRecivedHeaderLength;   \/\/ Bytes count of the incoming header$/;"	m	struct:_HTTP_COUNTERS
+nSentBodyBytes	.\API\HTTPClient.h	/^        UINT32              nSentBodyBytes;         \/\/ Count of body bytes that ware sent$/;"	m	struct:_HTTP_COUNTERS
+nSentChunks	.\API\HTTPClient.h	/^        UINT32              nSentChunks;            \/\/ Count of sent chunks$/;"	m	struct:_HTTP_COUNTERS
+nSentHeaderBytes	.\API\HTTPClient.h	/^        UINT32              nSentHeaderBytes;       \/\/ Count of header bytes thhat ware sent$/;"	m	struct:_HTTP_COUNTERS
+pDebug	.\API\HTTPClient.h	/^        E_HTTPDebug         *pDebug;$/;"	m	struct:_HTTP_REQUEST
+pParam	.\API\HTTPClient.h	/^        CHAR                *pParam;$/;"	m	struct:_HTTP_PARAM
+sktSetNonblocking	.\API\HTTPClient.c	/^int sktSetNonblocking( int socket , int on_off )$/;"	f
+strcasecmp	.\API\HTTPClientWrapper.h	32;"	d
+strncasecmp	.\API\HTTPClientWrapper.h	31;"	d
+uint32	.\API\HTTPClientAuth.h	/^typedef unsigned long uint32;$/;"	t
