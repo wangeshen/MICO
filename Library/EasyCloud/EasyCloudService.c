@@ -507,6 +507,13 @@ OSStatus EasyCloudDeviceReset(easycloud_service_context_t* const context)
       //easycloud_service_log("read httpheader OK!");
       //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
+      // statusCode check
+      if(kStatusOK != httpHeader->statusCode){
+        easycloud_service_log("ERROR: server response statusCode=%d", httpHeader->statusCode);
+        err = kRequestErr;
+        goto exit;
+      }
+      
       // Read the rest of the HTTP body if necessary
       err = SocketReadHTTPBody( remoteTcpClient_fd, httpHeader );
       require_noerr(err, exit);
@@ -827,6 +834,14 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
       //easycloud_service_log("read httpheader OK!");
       //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
+      // statusCode check
+      if(kStatusOK != httpHeader->statusCode){
+        easycloud_service_log("ERROR: server response statusCode=%d", 
+                              httpHeader->statusCode);
+        err = kRequestErr;
+        goto exit;
+      }
+      
       // Read the rest of the HTTP body if necessary
       err = SocketReadHTTPBody( remoteTcpClient_fd, httpHeader );
       require_noerr(err, exit);
@@ -1001,6 +1016,14 @@ static OSStatus get_rom_data(char *host, uint16_t port,
       //easycloud_service_log("read httpheader OK!");
       easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
+      // statusCode check
+      if(kStatusOK != httpHeader->statusCode){
+        easycloud_service_log("ERROR: server response statusCode=%d", 
+                              httpHeader->statusCode);
+        err = kRequestErr;
+        goto exit;
+      }
+      
       // Read the rest of the HTTP body if necessary
       err = SocketReadHTTPBodyEx( tcpClient_fd, httpHeader );
       require_noerr(err, exit);
@@ -1147,6 +1170,14 @@ static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
     case kNoErr:
       //easycloud_service_log("read httpheader OK!");
       //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
+      
+      // statusCode check
+      if(kStatusOK != httpHeader->statusCode){
+        easycloud_service_log("ERROR: server response statusCode=%d", 
+                              httpHeader->statusCode);
+        err = kRequestErr;
+        goto exit;
+      }
       
       // Read the rest of the HTTP body if necessary
       err = SocketReadHTTPBody( tcpClient_fd, httpHeader );

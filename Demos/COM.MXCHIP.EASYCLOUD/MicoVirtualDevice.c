@@ -225,9 +225,43 @@ OSStatus MVDDeviceMsgProcess(mico_Context_t* const context,
 {
   mvd_log_trace();
   OSStatus err = kUnknownErr;
-  //mico_Context_t *inContext = context;
+  mico_Context_t *inContext = context;
   //unsigned char* cloudMsg = NULL;
   //unsigned int cloudMsgLen = 0;
+  MVDGetFileRequestData_t devGetFileRequestData;
+  json_object *new_obj = NULL;
+  
+  memset((void*)&devGetFileRequestData, 0, sizeof(devGetFileRequestData));
+  
+  if(0 == strncmp("Update", (const char*)inBuf, strlen("Update"))){
+    new_obj = json_tokener_parse((const char*)(inBuf + strlen("Update")));
+    require_action(new_obj, exit, err = kUnknownErr);
+    
+    mvd_log("Recv getfile request object=%s", json_object_to_json_string(new_obj));
+    
+    json_object_object_foreach(new_obj, key, val) {
+      if(!strcmp(key, "bin")){
+        strncpy(devGetFileRequestData.file_path, 
+                json_object_get_string(val), MAX_SIZE_FILE_PATH);
+      }
+      else if(!strcmp(key, "bin_md5")){
+        strncpy(devGetFileRequestData.file_checksum, 
+                json_object_get_string(val), MAX_SIZE_FILE_MD5);
+      }
+      else if(!strcmp(key, "version")){
+        strncpy(devGetFileRequestData.file_version, 
+                json_object_get_string(val), MAX_SIZE_FW_VERSION);
+      }
+      else {
+      }
+    }
+    json_object_put(new_obj);
+    
+    err = MVDCloudInterfaceGetFile(inContext, devGetFileRequestData);
+    require_noerr_action(err, exit, 
+                         mvd_log("ERROR: MVDCloudInterfaceGetFile error! err=%d", err));
+  }
+  else{
   
   err = MVDCloudInterfaceSend(inBuf, inBufLen);  // transfer raw data
 /*
@@ -248,6 +282,7 @@ OSStatus MVDDeviceMsgProcess(mico_Context_t* const context,
 */
   require_noerr_action( err, exit, mvd_log("ERROR: send to cloud error! err=%d", err) );
   return kNoErr;
+  }
   
 exit:
   return err;

@@ -365,3 +365,78 @@ OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
 exit:
   return err;
 }
+
+
+OSStatus MVDCloudInterfaceGetFile(mico_Context_t* const inContext,
+                                  MVDGetFileRequestData_t devGetFileRequestData)
+{
+  cloud_if_log_trace();
+  OSStatus err = kUnknownErr;
+
+  cloud_if_log("Get file from server...\r\nfile=%s\r\nchecsum=%s\r\nversion=%s\r\n",
+               devGetFileRequestData.file_path,
+               devGetFileRequestData.file_checksum,
+               devGetFileRequestData.file_version);
+ /* 
+  // login_id/dev_passwd ok ?
+  if((0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, 
+                   devOTARequestData.loginId, 
+                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId))) ||
+     (0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
+                   devOTARequestData.devPasswd, 
+                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd))))
+  {
+    // devPass err
+    cloud_if_log("ERROR: MVDCloudInterfaceDevFirmwareUpdate: loginId/devPasswd mismatch!");
+    return kMismatchErr;
+  }
+  cloud_if_log("MVDCloudInterfaceDevFirmwareUpdate: loginId/devPasswd ok!");
+
+  //get latest rom version, file_path, md5
+  err = EasyCloudGetLatestRomVersion(&easyCloudContext);
+  require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloudGetLatestRomVersion failed! err=%d", err) );
+  
+  //FW version compare
+  cloud_if_log("currnt_version=%s", inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion);
+  cloud_if_log("latestRomVersion=%s", easyCloudContext.service_status.latestRomVersion);
+  cloud_if_log("bin_file=%s", easyCloudContext.service_status.bin_file);
+  cloud_if_log("bin_md5=%s", easyCloudContext.service_status.bin_md5);
+  
+  if(0 == strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
+                  easyCloudContext.service_status.latestRomVersion, 
+                  strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion))){
+     cloud_if_log("the current firmware version[%s] is up to date!", 
+                  inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion);
+     inContext->appStatus.virtualDevStatus.RecvRomFileSize = 0;
+     return kNoErr;
+  }
+  cloud_if_log("new firmware[%s] found on server, update...",
+               easyCloudContext.service_status.latestRomVersion);
+*/
+  
+  memset((void*)easyCloudContext.service_status.bin_file, 0, MAX_SIZE_FILE_PATH);
+  memset((void*)easyCloudContext.service_status.bin_md5, 0, MAX_SIZE_FILE_MD5);
+  memset((void*)easyCloudContext.service_status.latestRomVersion, 0, MAX_SIZE_FW_VERSION);
+  easyCloudContext.service_status.bin_file_size = 0;
+  
+  strncpy(easyCloudContext.service_status.bin_file, 
+          devGetFileRequestData.file_path, MAX_SIZE_FILE_PATH);
+  strncpy(easyCloudContext.service_status.bin_md5, 
+          devGetFileRequestData.file_checksum, MAX_SIZE_FILE_MD5);
+  strncpy(easyCloudContext.service_status.latestRomVersion, 
+          devGetFileRequestData.file_version, MAX_SIZE_FW_VERSION);
+  //get rom data
+  err = EasyCloudGetRomData(&easyCloudContext);
+  require_noerr_action( err, exit, 
+                       cloud_if_log("ERROR: EasyCloudGetRomData failed! err=%d", err) );
+  
+  //notify
+   cloud_if_log("Get file from server done! file_size=%lld",
+                easyCloudContext.service_status.bin_file_size);
+   inContext->appStatus.virtualDevStatus.RecvRomFileSize = easyCloudContext.service_status.bin_file_size;
+  
+  return kNoErr;
+  
+exit:
+  return err;
+}
