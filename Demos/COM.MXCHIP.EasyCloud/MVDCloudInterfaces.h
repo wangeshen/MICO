@@ -32,7 +32,12 @@
 /*******************************************************************************
  * DEFINES
  ******************************************************************************/
-
+/* data of get file from server */
+typedef struct _dev_get_file_data_t {
+  char                   file_path[MAX_SIZE_FILE_PATH];
+  char                   file_checksum[MAX_SIZE_FILE_MD5];
+  char                   file_version[MAX_SIZE_FW_VERSION];
+} MVDGetFileRequestData_t;
 
 /*******************************************************************************
  * INTERFACES
@@ -41,6 +46,8 @@
 //common interfaces
 OSStatus MVDCloudInterfaceInit(mico_Context_t* const inContext);
 OSStatus MVDCloudInterfaceSend(unsigned char *inBuf, unsigned int inBufLen);
+OSStatus MVDCloudInterfaceSendto(const char* topic, 
+                                 unsigned char *inBuf, unsigned int inBufLen);
 
 // cloud specifical interfaces
 OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
@@ -52,5 +59,8 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
                                             MVDOTARequestData_t devOTARequestData);
 OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
                                             MVDResetRequestData_t devResetRequestData);
+
+OSStatus MVDCloudInterfaceGetFile(mico_Context_t* const inContext,
+                                  MVDGetFileRequestData_t devGetFileRequestData);
 
 #endif
