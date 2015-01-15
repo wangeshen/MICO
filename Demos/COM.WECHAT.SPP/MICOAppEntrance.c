@@ -29,6 +29,70 @@
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
 #define app_log_trace() custom_log_trace("APP")
 
+
+static mico_thread_t user_thread_handler = NULL;
+
+#define APP_CLOUD_CONNECTED_MSG_2CLOUD     "{\"APPCloud\":\"connected\"}"
+#define APP_CLOUD_CONNECTED_MSG_2MCU       "[APP]Cloud connected!\r\n"
+#define APP_CLOUD_DISCONNECTED_MSG_2MCU    "[APP]Cloud disconnected!\r\n"
+#define APP_DEVICE_INACTIVATED_MSG_2MCU    "[APP]Device unactivated!\r\n"
+
+void user_thread(void* arg){
+  OSStatus err = kUnknownErr;
+  mico_Context_t* inContext = (mico_Context_t*)arg;
+  
+  while(1){
+    /* check cloud status && send msg test */
+    if(MVDIsActivated(inContext)){
+      app_log("[APP]device is activated.");
+      if(MVDCloudIsConnect(inContext)){
+        app_log("[APP]cloud is connected, send msg to Cloud && MCU.");
+        // send msg to cloud
+        err = MVDSendMsg2Cloud(inContext, APP_CLOUD_CONNECTED_MSG_2CLOUD, 
+                               strlen(APP_CLOUD_CONNECTED_MSG_2CLOUD));
+        if(kNoErr != err){
+          app_log("[APP]ERROR: send msg to cloud err=%d.", err);
+        }
+        // send msg to MCU
+        err = MVDSendMsg2Device(inContext, APP_CLOUD_CONNECTED_MSG_2MCU, 
+                                strlen(APP_CLOUD_CONNECTED_MSG_2MCU));
+        if(kNoErr != err){
+          app_log("[APP]ERROR: send msg to MCU err=%d.", err);
+        }
+      }
+      else{
+        app_log("[APP]cloud is not connected, send msg to MCU.");
+        // send msg to MCU
+        err = MVDSendMsg2Device(inContext, APP_CLOUD_DISCONNECTED_MSG_2MCU, 
+                                strlen(APP_CLOUD_DISCONNECTED_MSG_2MCU));
+        if(kNoErr != err){
+          app_log("[APP]ERROR: send msg to MCU err=%d.", err);
+        }
+      }
+    }
+    else{
+      app_log("[APP]device is not activated, send msg to MCU.");
+      // send msg to MCU
+      err = MVDSendMsg2Device(inContext, APP_DEVICE_INACTIVATED_MSG_2MCU, 
+                              strlen(APP_DEVICE_INACTIVATED_MSG_2MCU));
+      if(kNoErr != err){
+        app_log("[APP]ERROR: send msg to MCU err=%d.", err);
+      }
+    }
+    
+    mico_thread_sleep(5);
+  }
+}
+
+OSStatus start_user_work(void* arg)
+{
+  mico_Context_t* inContext = (mico_Context_t*)arg;
+  return mico_rtos_create_thread(&user_thread_handler, 
+                                 MICO_APPLICATION_PRIORITY, 
+                                 "user", user_thread, 0x500, inContext );
+}
+
+
 /* MICO system callback: Restore default configuration provided by application */
 void appRestoreDefault_callback(mico_Context_t *inContext)
 {
@@ -53,11 +117,12 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
   /* start virtual device */
   err = MVDInit(inContext);
   require_noerr_action( err, exit, app_log("ERROR: virtual device start failed!") );
+  
+  /* user test */
+  err =  start_user_work(inContext);
+  require_noerr_action( err, exit, app_log("ERROR: start user work failed!") );
 
 exit:
   return err;
 }
-
-
-
 
