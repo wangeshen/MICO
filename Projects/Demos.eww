@@ -13,6 +13,9 @@
   <project>
     <path>$WS_DIR$\COM.WECHAT.SPP\EWARM\COM.WECHAT.SPP.ewp</path>
   </project>
+   <project>
+    <path>$WS_DIR$\COM.WECHAT.LED\EWARM\COM.WECHAT.LED.ewp</path>
+  </project>
   <batchBuild/>
 </workspace>
 
