@@ -45,8 +45,8 @@ OSStatus EasyCloudPublishto(easycloud_service_context_t* const context,
                             const char* topic, 
                             const unsigned char *msg, unsigned int msgLen);
 // publish to sub-level "device_id/in/<level>"
-OSStatus EasyCloudPublishtoLevel(easycloud_service_context_t* const context, 
-                            const char* level, 
+OSStatus EasyCloudPublishtoChannel(easycloud_service_context_t* const context, 
+                            const char* channel, 
                             const unsigned char *msg, unsigned int msgLen);
 
 OSStatus EasyCloudGetLatestRomVersion(easycloud_service_context_t* const context); //get rom version

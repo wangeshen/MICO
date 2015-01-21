@@ -263,14 +263,14 @@ OSStatus EasyCloudPublishto(easycloud_service_context_t* const context,
   return ret;
 }
 
-OSStatus EasyCloudPublishtoLevel(easycloud_service_context_t* const context, 
-                            const char* level, 
+OSStatus EasyCloudPublishtoChannel(easycloud_service_context_t* const context, 
+                            const char* channel, 
                             const unsigned char *msg, unsigned int msgLen)
 {
   int ret = kUnknownErr;
   //char *pubtopic = mqtt_client_config_info.pubtopic;
 
-  if (NULL == context || NULL == level || NULL == msg || 0 == msgLen){
+  if (NULL == context || NULL == channel || NULL == msg || 0 == msgLen){
     return kParamErr;
   }
   
@@ -278,7 +278,7 @@ OSStatus EasyCloudPublishtoLevel(easycloud_service_context_t* const context,
     return kStateErr;
   }
   
-  ret = EasyCloudMQTTClientPublishtoLevel(level, msg, msgLen);
+  ret = EasyCloudMQTTClientPublishtoChannel(channel, msg, msgLen);
   return ret;
 }
 

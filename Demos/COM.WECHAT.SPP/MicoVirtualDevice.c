@@ -68,7 +68,7 @@ void MVDMainThread(void *arg)
 {
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = (mico_Context_t *)arg;
-  //micoMemInfo_t *memInfo = NULL;
+  micoMemInfo_t *memInfo = NULL;
   bool connected = false;
   
 #ifdef DEVICE_AUTO_ACTIVATE_ENABLE
@@ -86,15 +86,15 @@ void MVDMainThread(void *arg)
   
   while(1)
   {
-//    memInfo = mico_memory_info();
-//    mvd_log("[MVD]system free mem=%d", memInfo->free_memory);
+    memInfo = mico_memory_info();
+    mvd_log("[MVD]system free mem=%d", memInfo->free_memory);
     
     if(inContext->appStatus.virtualDevStatus.isCloudConnected){
       if (!connected){
         mvd_log("[MVD]cloud service connected!");
         MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU, 
                                    strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU));
-        MVDCloudInterfaceSendtoLevel(PUBLISH_TOPIC_CHANNEL_STATUS,
+        MVDCloudInterfaceSendtoChannel(PUBLISH_TOPIC_CHANNEL_STATUS,
                                      DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD, 
                                      strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD));
         
@@ -310,7 +310,7 @@ OSStatus MVDSendMsg2Cloud(mico_Context_t* const context, const char* topic,
   mvd_log_trace();
   OSStatus err = kUnknownErr;
   
-  err = MVDCloudInterfaceSendtoLevel(topic, inBuf, inBufLen);  // transfer raw data
+  err = MVDCloudInterfaceSendtoChannel(topic, inBuf, inBufLen);  // transfer raw data
   require_noerr_action( err, exit, mvd_log("ERROR: send to cloud error! err=%d", err) );
   return kNoErr;
   

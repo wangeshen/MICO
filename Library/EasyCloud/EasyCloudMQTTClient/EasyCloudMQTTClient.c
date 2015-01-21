@@ -94,9 +94,9 @@ void messageArrived(MessageData* md)
 {
   //MQTT client msg handle
   MQTTMessage* message = md->message;
-  MQTTString* topic = md->topicName;
+  //MQTTString* topic = md->topicName;
   mico_mqtt_client_log("messageArrived: [%.*s]\t [%.*s]",
-                       topic->lenstring.len, topic->lenstring.data,
+                       md->topicName->lenstring.len, md->topicName->lenstring.data,
                        (int)message->payloadlen, (char*)message->payload);
   
   //call user registered handler
@@ -474,23 +474,20 @@ static OSStatus internal_parse_topic_msg(const unsigned char* recvDataBuffer, in
   
   return kNoErr;
 }
-           
-//static int send_loopback_fd = -1;
-OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
+
+/****************************************
+ * Loopback publish data to MQTT thread
+ ***************************************/
+static OSStatus internal_loopbackMsg(const unsigned char *sendBuf, int sendBufLen)
 {
   OSStatus err = kUnknownErr;
-  unsigned char* sendBuf = NULL;
-  int sendBufLen = 0;
   int send_loopback_fd = -1;
   struct sockaddr_t addr;
   int ret = 0;
   
-  if (NULL == msg || 0 >= msglen || msglen > MAX_PLAYLOAD_SIZE){
+  if (NULL == sendBuf || 0 >= sendBufLen){
     return kParamErr;
   }
-  
-  if(0 == c.isconnected)
-    return kStateErr;
   
   /* use loopback socket send data to MQTT clent thread */
   send_loopback_fd = socket(AF_INET, SOCK_DGRM, IPPROTO_UDP);
@@ -501,18 +498,11 @@ OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
   ret = bind(send_loopback_fd, &addr, sizeof(addr));
   if(0 != ret){
     close(send_loopback_fd);
+    send_loopback_fd = -1;
     return kNoResourcesErr;
   }
   
-  // format topic && msg string with default pubTopic
-  err = internal_format_topic_msg_buf(&sendBuf, &sendBufLen, 
-                                        NULL, 0, false, msg, msglen);
-  if(kNoErr != err){
-    close(send_loopback_fd);
-    return kNoMemoryErr;
-  }
-  mico_mqtt_client_log("FORMAT BUFFER:[%d][%s]", sendBufLen, sendBuf+10);
- 
+  mico_mqtt_client_log("LOOPBACK_SEND:[%d][%s]", sendBufLen, sendBuf);
   addr.s_port = RECVED_DATA_LOOPBACK_PORT;
   ret = sendto(send_loopback_fd, sendBuf, sendBufLen, 0, &addr, sizeof(addr));
   if(ret != sendBufLen){
@@ -522,8 +512,43 @@ OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
     err = kNoErr;
   }
   
-  close(send_loopback_fd);
-  send_loopback_fd = -1;
+  if(-1 != send_loopback_fd){
+    close(send_loopback_fd);
+    send_loopback_fd = -1;
+  }
+  
+  return err;
+}
+
+/****************************************
+ * Publish msg to "device_id/out"
+ ***************************************/
+OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
+{
+  OSStatus err = kUnknownErr;
+  unsigned char* sendBuf = NULL;
+  int sendBufLen = 0;
+  
+  if (NULL == msg || 0 >= msglen || msglen > MAX_PLAYLOAD_SIZE){
+    return kParamErr;
+  }
+  
+  // check MQTT client connect status
+  if(0 == c.isconnected)
+    return kStateErr;
+  
+  // format topic && msg string with default pubTopic, MUST be freed later.
+  err = internal_format_topic_msg_buf(&sendBuf, &sendBufLen, 
+                                        NULL, 0, false, msg, msglen);
+  if(kNoErr != err){
+    return kNoMemoryErr;
+  }
+  mico_mqtt_client_log("LOOPBACK_FORMAT:[%d][%s]", sendBufLen, sendBuf+10);
+ 
+  // send loopback msg
+  err = internal_loopbackMsg(sendBuf ,sendBufLen);
+
+  // free sendBuf
   if(NULL != sendBuf){
     free(sendBuf);
   }
@@ -531,16 +556,15 @@ OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
   return err;
 }
 
-// formait topic && msg
+/****************************************
+ * Publish msg to user-defined topic
+ ***************************************/
 OSStatus EasyCloudMQTTClientPublishto(const char* topic, 
                                       const unsigned char* msg, int msglen)
 {
   OSStatus err = kUnknownErr;
   unsigned char* sendBuf = NULL;
   int sendBufLen = 0;
-  int send_loopback_fd = -1;
-  struct sockaddr_t addr;
-  int ret = 0;
   
   if (NULL == topic || NULL == msg || 0 >= msglen || msglen > MAX_PLAYLOAD_SIZE){
     return kParamErr;
@@ -549,37 +573,17 @@ OSStatus EasyCloudMQTTClientPublishto(const char* topic,
   if(0 == c.isconnected)
     return kStateErr;
   
-  /* use loopback socket send data to MQTT clent thread */
-  send_loopback_fd = socket(AF_INET, SOCK_DGRM, IPPROTO_UDP);
-  if(send_loopback_fd < 0)
-    return kNoResourcesErr;
-  addr.s_ip = IPADDR_LOOPBACK;
-  addr.s_port = SEND_DATA_LOOPBACK_PORT;
-  if(0 != bind(send_loopback_fd, &addr, sizeof(addr))){
-    close(send_loopback_fd);
-    return kNoResourcesErr;
-  }
- 
   // format msg string with pubtopic
   err = internal_format_topic_msg_buf(&sendBuf, &sendBufLen, 
                                       topic, strlen(topic), false, msg, msglen);
   if(kNoErr != err){
-    close(send_loopback_fd);
     return kNoMemoryErr;
   }
-  mico_mqtt_client_log("FORMAT BUFFER:[%d][%s]", sendBufLen, sendBuf+10);
+  mico_mqtt_client_log("LOOPBAKC_FORMAT:[%d][%s]", sendBufLen, sendBuf+10);
   
-  addr.s_port = RECVED_DATA_LOOPBACK_PORT;
-  ret = sendto(send_loopback_fd, sendBuf, sendBufLen, 0, &addr, sizeof(addr));
-  if(ret != sendBufLen){
-    err = kWriteErr;
-  }
-  else{
-    err = kNoErr;
-  }
+  // send loopback msg
+  err = internal_loopbackMsg(sendBuf ,sendBufLen);
   
-  close(send_loopback_fd);
-  send_loopback_fd = -1;
   if(NULL != sendBuf){
     free(sendBuf);
   }
@@ -587,55 +591,34 @@ OSStatus EasyCloudMQTTClientPublishto(const char* topic,
   return err;
 }
 
-// formait topic && msg with sub-level
-OSStatus EasyCloudMQTTClientPublishtoLevel(const char* level, 
+/****************************************
+ * Publish msg to "device_id/out/<CHANNEL>"
+ ***************************************/
+OSStatus EasyCloudMQTTClientPublishtoChannel(const char* channel, 
                                  const unsigned char *msg, unsigned int msglen)
 {
   OSStatus err = kUnknownErr;
   unsigned char* sendBuf = NULL;
   int sendBufLen = 0;
-  int send_loopback_fd = -1;
-  struct sockaddr_t addr;
-  int ret = 0;
   
-  if (NULL == level || NULL == msg || 0 >= msglen || msglen > MAX_PLAYLOAD_SIZE){
+  if (NULL == channel || NULL == msg || 0 >= msglen || msglen > MAX_PLAYLOAD_SIZE){
     return kParamErr;
   }
   
   if(0 == c.isconnected)
     return kStateErr;
-  
-  /* use loopback socket send data to MQTT clent thread */
-  send_loopback_fd = socket(AF_INET, SOCK_DGRM, IPPROTO_UDP);
-  if(send_loopback_fd < 0)
-    return kNoResourcesErr;
-  addr.s_ip = IPADDR_LOOPBACK;
-  addr.s_port = SEND_DATA_LOOPBACK_PORT;
-  if(0 != bind(send_loopback_fd, &addr, sizeof(addr))){
-    close(send_loopback_fd);
-    return kNoResourcesErr;
-  }
  
-  // format msg string with sub-level
+  // format msg string with sub-level, level_flag set true
   err = internal_format_topic_msg_buf(&sendBuf, &sendBufLen, 
-                                      level, strlen(level), true, msg, msglen);
+                                      channel, strlen(channel), true, msg, msglen);
   if(kNoErr != err){
-    close(send_loopback_fd);
     return kNoMemoryErr;
   }
-  mico_mqtt_client_log("FORMAT BUFFER:[%d][%s]", sendBufLen, sendBuf+10);
+  mico_mqtt_client_log("LOOPBACK_FORMAT:[%d][%s]", sendBufLen, sendBuf+10);
   
-  addr.s_port = RECVED_DATA_LOOPBACK_PORT;
-  ret = sendto(send_loopback_fd, sendBuf, sendBufLen, 0, &addr, sizeof(addr));
-  if(ret != sendBufLen){
-    err = kWriteErr;
-  }
-  else{
-    err = kNoErr;
-  }
-  
-  close(send_loopback_fd);
-  send_loopback_fd = -1;
+  // send loopback msg
+  err = internal_loopbackMsg(sendBuf, sendBufLen);
+
   if(NULL != sendBuf){
     free(sendBuf);
   }
@@ -647,38 +630,11 @@ OSStatus EasyCloudMQTTClientPublishtoLevel(const char* level,
 static OSStatus internal_EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
 {
   OSStatus err = kUnknownErr;
-  int ret = 0;
-
-  MQTTMessage publishData =  MQTTMessage_publishData_initializer;
-  
-  if((NULL == msg) || (msglen <= 0) || (msglen > MAX_PLAYLOAD_SIZE))
-    return kParamErr;
-  
-  if(0 == c.isconnected)
-    return kStateErr;
-    
-  //upload data qos1: at most once.
-  publishData.qos = QOS0;
-  publishData.payload = (void*)msg;
-  publishData.payloadlen = msglen;
-  
-  mico_rtos_lock_mutex( &mqttClientContext_mutex );
-  ret = MQTTPublish(&c, mqttClientContext.client_config_info.pubtopic, &publishData);
-  mico_rtos_unlock_mutex( &mqttClientContext_mutex );
-  
-  if (SUCCESS == ret){
-    err = kNoErr;
-    mico_mqtt_client_log("MQTTPublish ERROR: %d", ret);
-  }
-  else{
-    err = kUnknownErr;
-    mico_mqtt_client_log("MQTTPublish ERROR: %d", ret);
-  }
-  
+  err = internal_EasyCloudMQTTClientPublishto(mqttClientContext.client_config_info.pubtopic,
+                                              msg, msglen);
   return err;
 }
 
-//TODO
 // use user-defined topic
 static OSStatus internal_EasyCloudMQTTClientPublishto(const char* topic, 
                                                       const unsigned char* msg, 

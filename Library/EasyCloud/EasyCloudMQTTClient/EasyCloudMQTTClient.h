@@ -41,15 +41,13 @@
 #define DEFAULT_MICO_MQTT_BUF_SIZE            (MAX_PLAYLOAD_SIZE + 50)
 #define DEFAULT_MICO_MQTT_READBUF_SIZE        (MAX_PLAYLOAD_SIZE + 50)
 
-//#define MAX_SIZE_INTERNAL_TOPIC               32
 #define MAX_SIZE_MQTT_SUBSCRIBE_TOPIC         256
 #define MAX_SIZE_MQTT_PUBLISH_TOPIC           256
 
-#define STACK_SIZE_MQTT_CLIENT_THREAD         0x1000
+#define STACK_SIZE_MQTT_CLIENT_THREAD         0xC00
 
 #define RECVED_DATA_LOOPBACK_PORT             9001
 #define SEND_DATA_LOOPBACK_PORT               9002
-//#define SENDTO_DATA_LOOPBACK_PORT             9003
 
 /*******************************************************************************
 * STRUCTURES
@@ -112,7 +110,7 @@ OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen);
 OSStatus EasyCloudMQTTClientPublishto(const char* topic, 
                                       const unsigned char* msg, int msglen);
 //TODO: send to sub-level "device_id/in/<level>"
-OSStatus EasyCloudMQTTClientPublishtoLevel(const char* level, 
+OSStatus EasyCloudMQTTClientPublishtoChannel(const char* channel, 
                                  const unsigned char *msg, unsigned int msglen);
 mqttClientState EasyCloudMQTTClientState(void);
 
