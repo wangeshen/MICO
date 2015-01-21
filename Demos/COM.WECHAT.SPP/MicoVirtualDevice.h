@@ -49,7 +49,7 @@ bool MVDCloudIsConnect(mico_Context_t* const context);
 OSStatus MVDSendMsg2Device(mico_Context_t* const context, 
                            unsigned char *inBuf, unsigned int inBufLen);
 // MVD => Cloud
-OSStatus MVDSendMsg2Cloud(mico_Context_t* const context, 
+OSStatus MVDSendMsg2Cloud(mico_Context_t* const context, const char* topic,
                        unsigned char *inBuf, unsigned int inBufLen);
 
 

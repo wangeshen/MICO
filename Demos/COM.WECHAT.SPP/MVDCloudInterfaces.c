@@ -137,6 +137,20 @@ exit:
   return err;
 }
 
+OSStatus MVDCloudInterfaceSendtoLevel(const char* level, unsigned char *inBuf, unsigned int inBufLen)
+{
+  cloud_if_log_trace();
+  OSStatus err = kUnknownErr;
+
+  cloud_if_log("MVD => Cloud[%s]:[%d]=%.*s", level, inBufLen, inBufLen, inBuf);
+  err = EasyCloudPublishtoLevel(&easyCloudContext, level, inBuf, inBufLen);
+  require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloudPublishtoLevel failed! err=%d", err) );
+  return kNoErr;
+  
+exit:
+  return err;
+}
+
 OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
                                       MVDActivateRequestData_t devActivateRequestData)
 {

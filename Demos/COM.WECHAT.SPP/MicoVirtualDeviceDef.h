@@ -44,6 +44,9 @@
 /* device auto activate mechanism, comment out if not need */
 #define DEVICE_AUTO_ACTIVATE_ENABLE      1
 
+/* MQTT topic sub-level */
+#define PUBLISH_TOPIC_CHANNEL_STATUS     "status"
+
 
 /*******************************************************************************
  * STRUCTURES

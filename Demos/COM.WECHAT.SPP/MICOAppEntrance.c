@@ -47,8 +47,9 @@ void user_thread(void* arg){
       app_log("[APP]device is activated.");
       if(MVDCloudIsConnect(inContext)){
         app_log("[APP]cloud is connected, send msg to Cloud && MCU.");
-        // send msg to cloud
-        err = MVDSendMsg2Cloud(inContext, APP_CLOUD_CONNECTED_MSG_2CLOUD, 
+        // send msg to cloud status channel
+        err = MVDSendMsg2Cloud(inContext, PUBLISH_TOPIC_CHANNEL_STATUS,
+                               APP_CLOUD_CONNECTED_MSG_2CLOUD, 
                                strlen(APP_CLOUD_CONNECTED_MSG_2CLOUD));
         if(kNoErr != err){
           app_log("[APP]ERROR: send msg to cloud err=%d.", err);

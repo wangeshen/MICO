@@ -93,9 +93,10 @@ void MVDMainThread(void *arg)
       if (!connected){
         mvd_log("[MVD]cloud service connected!");
         MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU, 
-                            strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU));
-        MVDCloudInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD, 
-                              strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD));
+                                   strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU));
+        MVDCloudInterfaceSendtoLevel(PUBLISH_TOPIC_CHANNEL_STATUS,
+                                     DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD, 
+                                     strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD));
         
         connected = true;
       }
@@ -303,13 +304,13 @@ exit:
 }
 
 // MVD => Cloud
-OSStatus MVDSendMsg2Cloud(mico_Context_t* const context, 
+OSStatus MVDSendMsg2Cloud(mico_Context_t* const context, const char* topic, 
                        unsigned char *inBuf, unsigned int inBufLen)
 {
   mvd_log_trace();
   OSStatus err = kUnknownErr;
   
-  err = MVDCloudInterfaceSend(inBuf, inBufLen);  // transfer raw data
+  err = MVDCloudInterfaceSendtoLevel(topic, inBuf, inBufLen);  // transfer raw data
   require_noerr_action( err, exit, mvd_log("ERROR: send to cloud error! err=%d", err) );
   return kNoErr;
   
