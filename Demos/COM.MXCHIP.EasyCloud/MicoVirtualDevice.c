@@ -24,92 +24,111 @@
 #include <stdio.h>
 
 #include "MICODefine.h"
+#include "MICONotificationCenter.h"
 
 #include "MicoVirtualDevice.h"
 #include "MVDDeviceInterfaces.h"
 #include "MVDCloudInterfaces.h"
 #include "EasyCloudUtils.h"
 
-//#include "MVDMsgProtocol.h"
-
 
 #define mvd_log(M, ...) custom_log("MVD", M, ##__VA_ARGS__)
 #define mvd_log_trace() custom_log_trace("MVD")
 
 
-#define DEFAULT_MVD_CLOUD_CONNECTED      "{\"MVDCloud\":\"connected\"}"
+#define DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD     "{\"MVDCloud\":\"connected\"}"
+#define DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU       "[MVD]Cloud connected!\r\n"
+#define DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU    "[MVD]Cloud disconnected!\r\n"
+
+static bool _is_wifi_station_on = false;
+
+void mvdNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inContext)
+{
+  mvd_log_trace();
+  (void)inContext;
+  switch (event) {
+  case NOTIFY_STATION_UP:
+    _is_wifi_station_on = true;
+    break;
+  case NOTIFY_STATION_DOWN:
+    _is_wifi_station_on = false;
+    break;
+  case NOTIFY_AP_UP:
+    break;
+  case NOTIFY_AP_DOWN:
+    break;
+  default:
+    break;
+  }
+  return;
+}
+
 
 void MVDMainThread(void *arg)
 {
-  mico_Context_t *inContext = (mico_Context_t *)arg;
-//  micoMemInfo_t *memInfo = NULL;
-  bool connected = false;
-#ifdef DEVICE_AUTO_ACTIVATE_ENABLE
   OSStatus err = kUnknownErr;
-  int wait_time = DEVICE_AUTO_ACTIVATE_TIME/1;  //auto activate after 5s
+  mico_Context_t *inContext = (mico_Context_t *)arg;
+  //micoMemInfo_t *memInfo = NULL;
+  bool connected = false;
+  
+#ifdef DEVICE_AUTO_ACTIVATE_ENABLE
   MVDActivateRequestData_t devDefaultActivateData;
 #endif
   
   mvd_log("MVD main thread start.");
+  
+  /* Regisist notifications */
+  err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)mvdNotify_WifiStatusHandler );
+  require_noerr( err, exit ); 
       
 //  memInfo = mico_memory_info();
 //  mvd_log("[MVD]system free mem=%d", memInfo->free_memory);
   
   while(1)
   {
-//    memInfo = mico_memory_info();
-//    mvd_log("[MVD]system free mem=%d", memInfo->free_memory);
+    //memInfo = mico_memory_info();
+    //mvd_log("[MVD]system free mem=%d", memInfo->free_memory);
     
     if(inContext->appStatus.virtualDevStatus.isCloudConnected){
       if (!connected){
-        mvd_log("[MVD]cloud service connected!");
-        MVDCloudInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED, 
-                              strlen(DEFAULT_MVD_CLOUD_CONNECTED));
+        mvd_log("[MVD]cloud connected!");
+        MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU, 
+                                   strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU));
+        MVDCloudInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD, 
+                              strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD));
         
         connected = true;
       }
     }
     else{
       if (connected){
-        connected = false; //recovery value;
-#ifdef DEVICE_AUTO_ACTIVATE_ENABLE
-        wait_time = DEVICE_AUTO_ACTIVATE_TIME/1;  //recovery value;
-#endif
-        mvd_log("[MVD]cloud service disconnected!");
-        //MVDCloudInterfaceSend("device disconnected!", strlen("device disconnected!"));
+        connected = false;
+        mvd_log("[MVD]cloud disconnected!");
+        MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU, 
+                            strlen(DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU));
       }
       
 #ifdef DEVICE_AUTO_ACTIVATE_ENABLE
-      if(false == inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated){
-        if (wait_time > 0){
-          mvd_log("cloud service disconnected, will activate device after %ds...", 
-                  wait_time*1);
-          wait_time--;
-        }
-        else if(0 == wait_time){
-          // auto activate, using default login_id/dev_pass/user_token
-          mvd_log("auto activate device by MVD...");
-          memset((void*)&devDefaultActivateData, 0, sizeof(devDefaultActivateData));
-          strncpy(devDefaultActivateData.loginId,
-                  inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
-                  MAX_SIZE_LOGIN_ID);
-          strncpy(devDefaultActivateData.devPasswd,
-                  inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
-                  MAX_SIZE_DEV_PASSWD);
-          strncpy(devDefaultActivateData.user_token,
-                  inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
-                  MAX_SIZE_USER_TOKEN);
-          err = MVDCloudInterfaceDevActivate(inContext, devDefaultActivateData);
-          if(kNoErr == err){
-            mvd_log("device activate success!");
-            wait_time = -1;  //activate ok, never do activate again.
-          }
-          else{
-            wait_time = 1;  //reactivate after 1 (1*1) seconds
-            mvd_log("device activate failed, will retry in %ds...", wait_time*1);
-          }
+      if((true == _is_wifi_station_on) &&
+         (false == inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated)){
+        // auto activate, using default login_id/dev_pass/user_token(MAC)
+        mvd_log("auto activate device by MVD...");
+        memset((void*)&devDefaultActivateData, 0, sizeof(devDefaultActivateData));
+        strncpy(devDefaultActivateData.loginId,
+                inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
+                MAX_SIZE_LOGIN_ID);
+        strncpy(devDefaultActivateData.devPasswd,
+                inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+                MAX_SIZE_DEV_PASSWD);
+        strncpy(devDefaultActivateData.user_token,
+                inContext->micoStatus.mac,
+                MAX_SIZE_USER_TOKEN);
+        err = MVDCloudInterfaceDevActivate(inContext, devDefaultActivateData);
+        if(kNoErr == err){
+          mvd_log("device activate success!");
         }
         else{
+          mvd_log("device activate failed, will retry in %ds...", 1);
         }
       }
 #endif
@@ -117,6 +136,10 @@ void MVDMainThread(void *arg)
     
     mico_thread_sleep(1);
   }
+  
+exit:
+  mvd_log("[MVD]ERROR: exit with err=%d",err);
+  return;
 }
 
 
