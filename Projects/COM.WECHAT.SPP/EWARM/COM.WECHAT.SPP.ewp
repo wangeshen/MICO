@@ -316,7 +316,6 @@
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Drivers\spi_flash</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx\STM32F2xx_Drv\STM32F2xx_HAL_Driver\Inc</state>
-          <state>$PROJ_DIR$\..\..\..\include\EasyCloud</state>
           <state>$PROJ_DIR$\..\..\..\Library\EasyCloud</state>
           <state>$PROJ_DIR$\..\..\..\Library\EasyCloud\EasyCloudMQTTClient</state>
           <state>$PROJ_DIR$\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src</state>
@@ -4010,7 +4009,7 @@
       <name>$PROJ_DIR$\..\..\..\include\MicoAlgorithm.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\include\MicoPlatform.h</name>
+      <name>$PROJ_DIR$\..\..\..\include\MICOPlatform.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\include\MICORTOS.h</name>

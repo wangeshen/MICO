@@ -270,7 +270,7 @@ OSStatus EasyCloudPublishtoChannel(easycloud_service_context_t* const context,
   int ret = kUnknownErr;
   //char *pubtopic = mqtt_client_config_info.pubtopic;
 
-  if (NULL == context || NULL == channel || NULL == msg || 0 == msgLen){
+  if (NULL == context || NULL == msg || 0 == msgLen){
     return kParamErr;
   }
   
@@ -278,7 +278,13 @@ OSStatus EasyCloudPublishtoChannel(easycloud_service_context_t* const context,
     return kStateErr;
   }
   
-  ret = EasyCloudMQTTClientPublishtoChannel(channel, msg, msgLen);
+  if(NULL == channel){
+    // if channel is null, send to default topic "device_id/out"
+    ret = EasyCloudMQTTClientPublish(msg, msgLen);
+  }
+  else{
+    ret = EasyCloudMQTTClientPublishtoChannel(channel, msg, msgLen);
+  }
   return ret;
 }
 

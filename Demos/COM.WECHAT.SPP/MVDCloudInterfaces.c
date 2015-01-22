@@ -143,7 +143,12 @@ OSStatus MVDCloudInterfaceSendtoChannel(const char* channel, unsigned char *inBu
   OSStatus err = kUnknownErr;
 
   cloud_if_log("MVD => Cloud[%s]:[%d]=%.*s", channel, inBufLen, inBufLen, inBuf);
-  err = EasyCloudPublishtoChannel(&easyCloudContext, channel, inBuf, inBufLen);
+  if(NULL == channel){
+    err = EasyCloudPublish(&easyCloudContext, inBuf, inBufLen);
+  }
+  else{
+    err = EasyCloudPublishtoChannel(&easyCloudContext, channel, inBuf, inBufLen);
+  }
   require_noerr_action( err, exit, cloud_if_log("ERROR: MVDCloudInterfaceSendtoChannel failed! err=%d", err) );
   return kNoErr;
   
