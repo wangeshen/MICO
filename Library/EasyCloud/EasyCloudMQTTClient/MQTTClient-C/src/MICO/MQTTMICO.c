@@ -153,8 +153,8 @@ int ConnectNetwork(Network* n, char* addr, int port)
       break;
     }
     
-    MQTTClient_log("retry: get MQTT host address after 3 seconds...");
-    mico_thread_sleep(3);
+    MQTTClient_log("retry: get MQTT host address after 1 seconds...");
+    mico_thread_sleep(1);
   }
   //*******************************************************************
   
