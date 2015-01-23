@@ -340,6 +340,15 @@
   </configuration>
   <group>
     <name>Application</name>
+    <group>
+      <name>MVDTest</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDTest\MVDCloudTest.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDTest\MVDCloudTest.h</name>
+      </file>
+    </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOAppDefine.h</name>
     </file>
@@ -506,7 +515,7 @@
       <name>$PROJ_DIR$\..\..\..\include\MicoAlgorithm.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\include\MICOPlatform.h</name>
+      <name>$PROJ_DIR$\..\..\..\include\MicoPlatform.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\include\MICORTOS.h</name>

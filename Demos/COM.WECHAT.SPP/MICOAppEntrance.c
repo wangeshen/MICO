@@ -40,38 +40,45 @@ static mico_thread_t user_thread_handler = NULL;
 void user_thread(void* arg){
   OSStatus err = kUnknownErr;
   mico_Context_t* inContext = (mico_Context_t*)arg;
+  bool isConnected = false;
   
   while(1){
     /* check cloud status && send msg test */
     if(MVDIsActivated(inContext)){
       app_log("[APP]device is activated.");
       if(MVDCloudIsConnect(inContext)){
-        app_log("[APP]cloud is connected, send msg to Cloud && MCU.");
-        // send msg to cloud default channel
-        err = MVDSendMsg2Cloud(inContext, NULL,
-                               APP_CLOUD_CONNECTED_MSG_2CLOUD, 
-                               strlen(APP_CLOUD_CONNECTED_MSG_2CLOUD));
-        // send msg to cloud status channel
-        err = MVDSendMsg2Cloud(inContext, PUBLISH_TOPIC_CHANNEL_STATUS,
-                               APP_CLOUD_CONNECTED_MSG_2CLOUD, 
-                               strlen(APP_CLOUD_CONNECTED_MSG_2CLOUD));
-        if(kNoErr != err){
+        if(false == isConnected){
+          app_log("[APP]cloud is connected, send msg to Cloud && MCU.");
+          // send msg to cloud default channel
+          /*err = MVDSendMsg2Cloud(inContext, NULL,
+          APP_CLOUD_CONNECTED_MSG_2CLOUD, 
+          strlen(APP_CLOUD_CONNECTED_MSG_2CLOUD));
+          // send msg to cloud status channel
+          err = MVDSendMsg2Cloud(inContext, PUBLISH_TOPIC_CHANNEL_STATUS,
+          APP_CLOUD_CONNECTED_MSG_2CLOUD, 
+          strlen(APP_CLOUD_CONNECTED_MSG_2CLOUD));
+          if(kNoErr != err){
           app_log("[APP]ERROR: send msg to cloud err=%d.", err);
-        }
-        // send msg to MCU
-        err = MVDSendMsg2Device(inContext, APP_CLOUD_CONNECTED_MSG_2MCU, 
-                                strlen(APP_CLOUD_CONNECTED_MSG_2MCU));
-        if(kNoErr != err){
-          app_log("[APP]ERROR: send msg to MCU err=%d.", err);
+        }*/
+          // send msg to MCU
+          err = MVDSendMsg2Device(inContext, APP_CLOUD_CONNECTED_MSG_2MCU, 
+                                  strlen(APP_CLOUD_CONNECTED_MSG_2MCU));
+          if(kNoErr != err){
+            app_log("[APP]ERROR: send msg to MCU err=%d.", err);
+          }
+          isConnected = true;
         }
       }
       else{
-        app_log("[APP]cloud is not connected, send msg to MCU.");
-        // send msg to MCU
-        err = MVDSendMsg2Device(inContext, APP_CLOUD_DISCONNECTED_MSG_2MCU, 
-                                strlen(APP_CLOUD_DISCONNECTED_MSG_2MCU));
-        if(kNoErr != err){
-          app_log("[APP]ERROR: send msg to MCU err=%d.", err);
+        if(isConnected){
+          app_log("[APP]cloud is not connected, send msg to MCU.");
+          // send msg to MCU
+          err = MVDSendMsg2Device(inContext, APP_CLOUD_DISCONNECTED_MSG_2MCU, 
+                                  strlen(APP_CLOUD_DISCONNECTED_MSG_2MCU));
+          if(kNoErr != err){
+            app_log("[APP]ERROR: send msg to MCU err=%d.", err);
+          }
+          isConnected = false;
         }
       }
     }
@@ -85,7 +92,7 @@ void user_thread(void* arg){
       }
     }
     
-    mico_thread_sleep(5);
+    mico_thread_sleep(1);
   }
 }
 

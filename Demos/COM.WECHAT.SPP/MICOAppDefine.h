@@ -51,8 +51,8 @@
 #define BONJOUR_SERVICE                     "_easylink._tcp.local."
 
 /* product type */
-#define DEFAULT_PRODUCT_ID                  "2bed1355"
-#define DEFAULT_PRODUCT_KEY                 "d98963de-97c9-11e4-ae3a-f23c9150064b"
+#define DEFAULT_PRODUCT_ID                  "07f9151c"
+#define DEFAULT_PRODUCT_KEY                 "009aec0d-4dad-41fd-8987-b30c382986bf"
 #define DEFAULT_ROM_VERSION                 "v0.1.0"
 
 /*Application's configuration stores in flash*/

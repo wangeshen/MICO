@@ -173,7 +173,6 @@
         <option>
           <name>CCDefines</name>
           <state>USE_STDPERIPH_DRIVER</state>
-          <state>DEBUG</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -321,6 +320,7 @@
           <state>$PROJ_DIR$\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src</state>
           <state>$PROJ_DIR$\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTClient-C\src</state>
           <state>$PROJ_DIR$\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTClient-C\src\MICO</state>
+          <state>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDTest</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -3832,6 +3832,15 @@
   </configuration>
   <group>
     <name>Application</name>
+    <group>
+      <name>MVDTest</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDTest\MVDCloudTest.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDTest\MVDCloudTest.h</name>
+      </file>
+    </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOAppDefine.h</name>
     </file>
@@ -4009,7 +4018,7 @@
       <name>$PROJ_DIR$\..\..\..\include\MicoAlgorithm.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\include\MICOPlatform.h</name>
+      <name>$PROJ_DIR$\..\..\..\include\MicoPlatform.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\include\MICORTOS.h</name>

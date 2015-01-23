@@ -35,7 +35,7 @@
 //in ms
 #define DEFAULT_MICO_MQTT_YIELD_TMIE          200
 //in ms
-#define DEFAULT_MICO_MQTT_CMD_TIMEOUT         200
+#define DEFAULT_MICO_MQTT_CMD_TIMEOUT         500
 //in byte
 #define MAX_PLAYLOAD_SIZE                     512
 #define DEFAULT_MICO_MQTT_BUF_SIZE            (MAX_PLAYLOAD_SIZE + 50)

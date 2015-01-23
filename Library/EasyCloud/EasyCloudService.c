@@ -743,7 +743,7 @@ ReStartMQTTClient:
     }
     
     //easycloud_service_log("cloud service runing...");
-    mico_thread_sleep(3);
+    mico_thread_sleep(1);
   }
   
 cloud_service_stop:

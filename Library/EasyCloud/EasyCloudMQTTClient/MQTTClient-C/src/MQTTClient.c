@@ -301,7 +301,7 @@ int cycle(Client* c, Timer* timer)
     break;
   case DISCONNECT:  //// disconnect recived ,will try reconnect. add by WES 20141022
     c->ping_outstanding = 0;
-    c->isconnected = 1;  
+    c->isconnected = 0;  
     return FAILURE;  
     break;
   case SOCKET_ERR:

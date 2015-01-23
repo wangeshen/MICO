@@ -42,6 +42,8 @@ void MVDRestoreDefault(mico_Context_t* const context);
 bool MVDIsActivated(mico_Context_t* const context);
 // cloud connect state
 bool MVDCloudIsConnect(mico_Context_t* const context);
+// get device_id
+char* MVDGetDeviceID(mico_Context_t* const context);
 
 /* MVD message send interface */
 
