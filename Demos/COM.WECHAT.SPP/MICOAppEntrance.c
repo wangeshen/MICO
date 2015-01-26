@@ -37,6 +37,8 @@ static mico_thread_t user_thread_handler = NULL;
 #define APP_CLOUD_DISCONNECTED_MSG_2MCU    "[APP]Cloud disconnected!\r\n"
 #define APP_DEVICE_INACTIVATED_MSG_2MCU    "[APP]Device unactivated!\r\n"
 
+extern bool testStop;
+
 void user_thread(void* arg){
   OSStatus err = kUnknownErr;
   mico_Context_t* inContext = (mico_Context_t*)arg;
@@ -93,7 +95,14 @@ void user_thread(void* arg){
     }
     
     mico_thread_sleep(1);
+    
+    if(testStop){
+      break;
+    }
   }
+  
+  mico_rtos_delete_thread(NULL);
+  return;
 }
 
 OSStatus start_user_work(void* arg)

@@ -43,12 +43,13 @@
 
 /* test define */
 #define MVD_CLOUD_TEST_RECV_MSG_SIZE             100      // byte
-#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           30       // s
+#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           300       // s
 #define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         100      // ms
 
 static bool _is_wifi_station_on = false;
 
 static uint64_t cloud_test_data_cnt = 0;
+bool testStop = false;
 
 void mvdNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inContext)
 {
@@ -111,7 +112,7 @@ void MVDMainThread(void *arg)
         
         connected = true;
         // exit when cloud connected
-        break;
+        //break;
       }
     }
     else{
@@ -152,38 +153,41 @@ void MVDMainThread(void *arg)
   }
   
   /* Cloud recv test */
-  mvd_log("[MVD][TEST: CLOUD RECV]start");
-  MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]start\r\n", strlen("[MVD][TEST: CLOUD RECV]start\r\n"));
-  cloud_test_data_cnt = 0;
-  err = MVDCloudTest_StartRecv(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
-                               MVD_CLOUD_TEST_RECV_MSG_SIZE,
-                               MVD_CLOUD_TEST_RECV_MSG_PERIOD, 
-                               MVD_CLOUD_TEST_RECV_MSG_INTERVAL);
-  require_noerr( err, exit );
+//  mvd_log("[MVD][TEST: CLOUD RECV]start");
+//  MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]start\r\n", strlen("[MVD][TEST: CLOUD RECV]start\r\n"));
+//  cloud_test_data_cnt = 0;
+//  err = MVDCloudTest_StartRecv(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
+//                               MVD_CLOUD_TEST_RECV_MSG_SIZE,
+//                               MVD_CLOUD_TEST_RECV_MSG_PERIOD, 
+//                               MVD_CLOUD_TEST_RECV_MSG_INTERVAL);
+//  require_noerr( err, exit );
+//  testStop = false;
+//  
+//  // timeout for stopping test process
+//  mvd_log("[MVD][TEST: CLOUD RECV]testing...");
+//  MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]testing...\r\n", strlen("[MVD][TEST: CLOUD RECV]testing...\r\n"));
+//  mico_thread_sleep(MVD_CLOUD_TEST_RECV_MSG_PERIOD+10);
+//  err = MVDCloudTest_StopRecv(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId);
+//  require_noerr( err, exit );
+//  mvd_log("[MVD][TEST: CLOUD RECV]stopped");
+//  MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]stopped\r\n", strlen("[MVD][TEST: CLOUD RECV]stopped\r\n"));
+//  
+//  // check test ok?
+//  check_recv_data_len = (MVD_CLOUD_TEST_RECV_MSG_SIZE*1000*MVD_CLOUD_TEST_RECV_MSG_PERIOD/MVD_CLOUD_TEST_RECV_MSG_INTERVAL);
+//  sprintf(recv_data_cnt_str, "[MVD][TEST: CLOUD RECV]recv=%lld\t", cloud_test_data_cnt);
+//  sprintf(total_recv_data_cnt_str, "total=%lld\r\n", check_recv_data_len);
+//  
+//  if(check_recv_data_len == cloud_test_data_cnt){
+//    err = MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]test OK!\r\n", strlen("[MVD][TEST: CLOUD RECV]test OK!\r\n"));
+//  }
+//  else{
+//    err = MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]test FAILED!\r\n", strlen("[MVD][TEST: CLOUD RECV]test FAILED!\r\n"));
+//    mvd_log("MVD recv: %lld/%lld", cloud_test_data_cnt, check_recv_data_len);
+//    MVDDevInterfaceSend(recv_data_cnt_str, strlen(recv_data_cnt_str));
+//    MVDDevInterfaceSend(total_recv_data_cnt_str, strlen(total_recv_data_cnt_str));
+//  }
   
-  // timeout for stopping test process
-  mvd_log("[MVD][TEST: CLOUD RECV]testing...");
-  MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]testing...\r\n", strlen("[MVD][TEST: CLOUD RECV]testing...\r\n"));
-  mico_thread_sleep(MVD_CLOUD_TEST_RECV_MSG_PERIOD+5);
-  err = MVDCloudTest_StopRecv(inContext);
-  require_noerr( err, exit );
-  mvd_log("[MVD][TEST: CLOUD RECV]stopped");
-  MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]stopped\r\n", strlen("[MVD][TEST: CLOUD RECV]stopped\r\n"));
-  
-  // check test ok?
-  check_recv_data_len = (MVD_CLOUD_TEST_RECV_MSG_SIZE*1000*MVD_CLOUD_TEST_RECV_MSG_PERIOD/MVD_CLOUD_TEST_RECV_MSG_INTERVAL);
-  sprintf(recv_data_cnt_str, "[MVD][TEST: CLOUD RECV]recv=%lld\t", cloud_test_data_cnt);
-  sprintf(total_recv_data_cnt_str, "total=%lld\r\n", check_recv_data_len);
-  
-  if(check_recv_data_len == cloud_test_data_cnt){
-    err = MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]test OK!\r\n", strlen("[MVD][TEST: CLOUD RECV]test OK!\r\n"));
-  }
-  else{
-    err = MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]test FAILED!\r\n", strlen("[MVD][TEST: CLOUD RECV]test FAILED!\r\n"));
-    mvd_log("MVD recv: %lld/%lld", cloud_test_data_cnt, check_recv_data_len);
-    MVDDevInterfaceSend(recv_data_cnt_str, strlen(recv_data_cnt_str));
-    MVDDevInterfaceSend(total_recv_data_cnt_str, strlen(total_recv_data_cnt_str));
-  }
+  //testStop = true;
   
 exit:
   mvd_log("[MVD]EXIT: exit code=%d",err);
@@ -285,7 +289,9 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   
   //err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data
   cloud_test_data_cnt += inBufLen;
-  err = MVDCloudInterfaceSend(inBuf, inBufLen); // transfer raw data
+  mvd_log("recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
+  err = kNoErr;
+  //err = MVDCloudInterfaceSend(inBuf, inBufLen); // transfer raw data
   return err;
   /*
   char* responseTopic = NULL;

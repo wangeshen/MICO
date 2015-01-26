@@ -633,7 +633,7 @@ void easyCloudServiceThread(void *arg)
       break;
     }
     else{
-      mico_thread_sleep(1);
+      //mico_thread_msleep(500);
     }
   }
   easycloud_service_log("device activated.");
@@ -663,7 +663,7 @@ ReStartMQTTClient:
   mqtt_client_config_info.port = easyCloudContext->service_config_info.mqttServerPort;
   mqtt_client_config_info.keepAliveInterval = easyCloudContext->service_config_info.mqttKeepAliveInterval;
   mqtt_client_config_info.client_id = easyCloudContext->service_config_info.bssid;
-  mqtt_client_config_info.subscribe_qos = QOS2;  //here for subscribe qos
+  mqtt_client_config_info.subscribe_qos = QOS0;  //here for subscribe qos
   mqtt_client_config_info.username = easyCloudContext->service_status.masterDeviceKey;
   mqtt_client_config_info.password = "null";   //server not check temporary
   mqtt_client_config_info.subtopic = subscribe_topic;
@@ -686,7 +686,7 @@ ReStartMQTTClient:
       break;
     }
     else{
-      mico_thread_sleep(1);
+      //mico_thread_msleep(500);
     }
   }
   easyCloudContext->service_status.state = EASYCLOUD_CONNECTED;
@@ -714,11 +714,11 @@ ReStartMQTTClient:
       break;
     case MQTT_CLIENT_STATUS_STOPPED:
       if (EASYCLOUD_DISCONNECTED != easyCloudContext->service_status.state){
-        easycloud_service_log("MQTT client stopped! try restarting it after 3 seconds...");
+        easycloud_service_log("MQTT client stopped! try restarting it...");
         easyCloudContext->service_status.state = EASYCLOUD_DISCONNECTED;
         easyCloudContext->service_config_info.statusNotify(easyCloudContext->service_config_info.context,
                                                           easyCloudContext->service_status);
-        mico_thread_sleep(3);
+        //mico_thread_sleep(1);
         goto ReStartMQTTClient;
       }
       break;
@@ -743,7 +743,7 @@ ReStartMQTTClient:
     }
     
     //easycloud_service_log("cloud service runing...");
-    mico_thread_sleep(1);
+    //mico_thread_sleep(1);
   }
   
 cloud_service_stop:
@@ -1321,6 +1321,7 @@ static OSStatus _configIncommingJsonMessage(const char *input,
   easycloud_service_log_trace();
   OSStatus err = kUnknownErr;
   json_object *new_obj = NULL;
+  uint8_t response_data_param_cnt = 0;  // get json param data cnt, 2 is ok(device_id, key)
 
   //easycloud_service_log("Recv json data input=%s", input);
   new_obj = json_tokener_parse(input);
@@ -1334,10 +1335,12 @@ static OSStatus _configIncommingJsonMessage(const char *input,
       memset((char *)out_device_id, 0, strlen(out_device_id));
       strncpy((char*)out_device_id, json_object_get_string(val), MAX_SIZE_DEVICE_ID);
       //easycloud_service_log("get out_device_id[%d]=%s", strlen(out_device_id), out_device_id);
+      response_data_param_cnt += 1;
     }else if(!strcmp(key, "master_device_key")){
       memset((char *)out_master_device_key, 0, strlen(out_master_device_key));
       strncpy(out_master_device_key, json_object_get_string(val), MAX_SIZE_DEVICE_KEY);
       //easycloud_service_log("get out_master_device_key[%d]=%s", strlen(out_master_device_key), out_master_device_key);
+      response_data_param_cnt += 1;
     }
     else {
     }
@@ -1345,7 +1348,14 @@ static OSStatus _configIncommingJsonMessage(const char *input,
 
   //free unused memory
   json_object_put(new_obj);
-  return kNoErr;
+  
+  // whether got all 2 param(device_id, key)
+  if(2 == response_data_param_cnt){
+    err = kNoErr;
+  }
+  else{
+    err = kResponseErr;
+  }
 
 exit:
   return err; 
@@ -1408,6 +1418,7 @@ static OSStatus _configRomVersionIncommingJsonMessage(const char *input,
   easycloud_service_log_trace();
   OSStatus err = kUnknownErr;
   json_object *new_obj = NULL;
+  uint8_t rom_version_param_cnt = 0; // must get three data(version, bin, bin_md5)
 
   //easycloud_service_log("Recv json data input=%s", input);
   new_obj = json_tokener_parse(input);
@@ -1421,16 +1432,19 @@ static OSStatus _configRomVersionIncommingJsonMessage(const char *input,
       memset((char *)out_version, 0, strlen(out_version));
       strncpy((char*)out_version, json_object_get_string(val), MAX_SIZE_FW_VERSION);
       //easycloud_service_log("get out_version[%d]=%s", strlen(out_version), out_version);
+      rom_version_param_cnt += 1;
     }
     else if(!strcmp(key, "bin")){
       memset((char *)out_bin_file, 0, strlen(out_bin_file));
       strncpy(out_bin_file, json_object_get_string(val), MAX_SIZE_FILE_PATH);
       //easycloud_service_log("get out_bin_file[%d]=%s", strlen(out_bin_file), out_bin_file);
+      rom_version_param_cnt += 1;
     }
     else if(!strcmp(key, "bin_md5")){
       memset((char *)out_bin_md5, 0, strlen(out_bin_md5));
       strncpy(out_bin_md5, json_object_get_string(val), MAX_SIZE_FILE_MD5);
       //easycloud_service_log("get out_bin_md5[%d]=%s", strlen(out_bin_md5), out_bin_md5);
+      rom_version_param_cnt += 1;
     }
     else if(!strcmp(key, "error")){
       err = kNotFoundErr;
@@ -1441,7 +1455,14 @@ static OSStatus _configRomVersionIncommingJsonMessage(const char *input,
 
   //free unused memory
   json_object_put(new_obj);
-  return err;
+  
+  // whether got all three param(version, bin, bin_md5)
+  if(3 == rom_version_param_cnt){
+    err = kNoErr;
+  }
+  else{
+    err = kResponseErr;
+  }
 
 exit:
   return err; 

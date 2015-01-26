@@ -22,7 +22,8 @@
 #ifndef __MVD_CLOUD_TEST_H_
 #define __MVD_CLOUD_TEST_H_
 
-#include "MICODefine.h"
+//#include "MICODefine.h"
+#include "Common.h"
 
 /* test params */
 #define EASYCLOUD_TEST_SERVER               "api.easylink.io"
@@ -32,11 +33,11 @@
 #define EASYCLOUD_TEST_URL_STOP_RECV        "/stopTest"
 
 // start request server to send msg to device, then echo to server
-OSStatus MVDCloudTest_StartRecv(const char* product_id,
+OSStatus MVDCloudTest_StartRecv(const char* device_id,
                                 uint32_t msg_length, 
                                 uint32_t period_s, uint32_t interval_ms);
 // stop server test
-OSStatus MVDCloudTest_StopRecv(mico_Context_t* const context);
+OSStatus MVDCloudTest_StopRecv(const char* device_id);
 
 #endif
 
