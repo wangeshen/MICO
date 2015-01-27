@@ -171,6 +171,7 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
     return kStateErr;
   }
   
+#ifdef MVD_LOGINID_DEVPASS_CHECK 
   // login_id/dev_passwd set(not default value) ?
   if((0 != strncmp((char*)DEFAULT_LOGIN_ID,
                    inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,       
@@ -199,6 +200,7 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
           devActivateRequestData.loginId, MAX_SIZE_LOGIN_ID);
   strncpy(easyCloudContext.service_config_info.devPasswd, 
           devActivateRequestData.devPasswd, MAX_SIZE_DEV_PASSWD);
+#endif
   strncpy(easyCloudContext.service_config_info.userToken, 
           devActivateRequestData.user_token, MAX_SIZE_USER_TOKEN);
     
@@ -214,14 +216,16 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
           easyCloudContext.service_status.deviceId, MAX_SIZE_DEVICE_ID);
   strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey,
           easyCloudContext.service_status.masterDeviceKey, MAX_SIZE_DEVICE_KEY);
-  
+
+#ifdef MVD_LOGINID_DEVPASS_CHECK  
   strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
           easyCloudContext.service_config_info.loginId, MAX_SIZE_LOGIN_ID);
   strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
           easyCloudContext.service_config_info.devPasswd, MAX_SIZE_DEV_PASSWD);
+#endif
   strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
           easyCloudContext.service_config_info.userToken, MAX_SIZE_USER_TOKEN);
-    
+
   err = MICOUpdateConfiguration(inContext);
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   require_noerr_action(err, exit, 
@@ -247,6 +251,7 @@ OSStatus MVDCloudInterfaceDevAuthorize(mico_Context_t* const inContext,
     return kStateErr;
   }
   
+  #ifdef MVD_LOGINID_DEVPASS_CHECK  
   // dev_passwd ok ?
   if(0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
                   devAuthorizeReqData.devPasswd, 
@@ -263,6 +268,7 @@ OSStatus MVDCloudInterfaceDevAuthorize(mico_Context_t* const inContext,
           devAuthorizeReqData.loginId, MAX_SIZE_LOGIN_ID);
   strncpy(easyCloudContext.service_config_info.devPasswd, 
           devAuthorizeReqData.devPasswd, MAX_SIZE_DEV_PASSWD);
+#endif
   strncpy(easyCloudContext.service_config_info.userToken, 
           devAuthorizeReqData.user_token, MAX_SIZE_USER_TOKEN);
   
@@ -290,7 +296,8 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
   OSStatus err = kUnknownErr;
 
   cloud_if_log("Update firmware...");
-  
+ 
+#ifdef MVD_LOGINID_DEVPASS_CHECK  
   // login_id/dev_passwd ok ?
   if((0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, 
                    devOTARequestData.loginId, 
@@ -304,6 +311,7 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
     return kMismatchErr;
   }
   cloud_if_log("MVDCloudInterfaceDevFirmwareUpdate: loginId/devPasswd ok!");
+#endif
   
   //get latest rom version, file_path, md5
   err = EasyCloudGetLatestRomVersion(&easyCloudContext);
@@ -315,6 +323,7 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
   cloud_if_log("bin_file=%s", easyCloudContext.service_status.bin_file);
   cloud_if_log("bin_md5=%s", easyCloudContext.service_status.bin_md5);
   
+#ifdef MVD_FW_UPDAETE_VERSION_CHECK  
   if(0 == strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
                   easyCloudContext.service_status.latestRomVersion, 
                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion))){
@@ -323,6 +332,7 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
      inContext->appStatus.virtualDevStatus.RecvRomFileSize = 0;
      return kNoErr;
   }
+#endif
   cloud_if_log("new firmware[%s] found on server, update...",
                easyCloudContext.service_status.latestRomVersion);
   
@@ -339,8 +349,24 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
           easyCloudContext.service_status.latestRomVersion, 
           strlen(easyCloudContext.service_status.latestRomVersion));
   inContext->appStatus.virtualDevStatus.RecvRomFileSize = easyCloudContext.service_status.bin_file_size;
+
+  // set bootloader to update App firmware
+  memset(&inContext->flashContentInRam.bootTable, 0, sizeof(boot_table_t));
+  inContext->flashContentInRam.bootTable.length = easyCloudContext.service_status.bin_file_size;;
+  inContext->flashContentInRam.bootTable.start_address = UPDATE_START_ADDRESS;
+  inContext->flashContentInRam.bootTable.type = 'A';
+  inContext->flashContentInRam.bootTable.upgrade_type = 'U';
+  if(inContext->flashContentInRam.micoSystemConfig.configured != allConfigured)
+    inContext->flashContentInRam.micoSystemConfig.easyLinkByPass = EASYLINK_SOFT_AP_BYPASS;
   MICOUpdateConfiguration(inContext);
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+  
+  // system reboot
+  cloud_if_log("Update done! System will reboot...");
+  inContext->micoStatus.sys_state = eState_Software_Reset;
+  if(inContext->micoStatus.sys_state_change_sem != NULL )
+    mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
+  mico_thread_sleep(MICO_WAIT_FOREVER);
   
   return kNoErr;
   
@@ -353,6 +379,7 @@ OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
 {
   OSStatus err = kUnknownErr;
   
+#ifdef MVD_LOGINID_DEVPASS_CHECK
   // login_id/dev_passwd ok ?
   if((0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, 
                    devResetRequestData.loginId, 
@@ -366,6 +393,7 @@ OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
     return kMismatchErr;
   }
   cloud_if_log("MVDCloudInterfaceResetCloudDevInfo: loginId/devPasswd ok!");
+#endif
   
   err = EasyCloudDeviceReset(&easyCloudContext);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloudDeviceReset failed! err=%d", err) );

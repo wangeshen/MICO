@@ -61,7 +61,7 @@
 #define kStatusAccept               202
 #define kStatusOK                   200
 #define kStatusNoConetnt            204
-#define kStatusPartialContent       207
+#define kStatusPartialContent       206
 #define kStatusBadRequest           400
 #define kStatusNotFound             404
 #define kStatusMethodNotAllowed     405

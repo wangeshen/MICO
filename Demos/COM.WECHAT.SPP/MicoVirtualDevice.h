@@ -32,12 +32,11 @@
  * USER INTERFACES
  ******************************************************************************/
 
-/* init */
+/******************************* init && restore ******************************/
 OSStatus MVDInit(mico_Context_t* const context);
 void MVDRestoreDefault(mico_Context_t* const context);
 
-/* get MVD state */
-
+/***************************** get MVD state **********************************/
 // dev activate state
 bool MVDIsActivated(mico_Context_t* const context);
 // cloud connect state
@@ -45,28 +44,28 @@ bool MVDCloudIsConnect(mico_Context_t* const context);
 // get device_id
 char* MVDGetDeviceID(mico_Context_t* const context);
 
-/* MVD message send interface */
-
+/************************* MVD message send interface *************************/
 // MVD => MCU
 OSStatus MVDSendMsg2Device(mico_Context_t* const context, 
                            unsigned char *inBuf, unsigned int inBufLen);
+
 // MVD => Cloud
+// if topic is NULL, send to default topic(device_id/out)
+// else send to sub-topic(device_id/out/<topic>)
 OSStatus MVDSendMsg2Cloud(mico_Context_t* const context, const char* topic,
                        unsigned char *inBuf, unsigned int inBufLen);
 
-
-/* device control */
-
-//OTA
+/*************************** device control ***********************************/
+// OTA, update App firmware && system reboot
 OSStatus MVDFirmwareUpdate(mico_Context_t* const context,
                            MVDOTARequestData_t OTAData);
-//activate
+// activate
 OSStatus MVDActivate(mico_Context_t* const context, 
                      MVDActivateRequestData_t activateData);
-//authorize
+// authorize
 OSStatus MVDAuthorize(mico_Context_t* const context,
                       MVDAuthorizeRequestData_t authorizeData);
-//reset device info on cloud
+// reset device info on cloud
 OSStatus MVDResetCloudDevInfo(mico_Context_t* const context,
                               MVDResetRequestData_t devResetData);
 
@@ -75,8 +74,7 @@ OSStatus MVDResetCloudDevInfo(mico_Context_t* const context,
 * INTERNAL FUNCTIONS
 *******************************************************************************/
 
-/* message exchage protocol */
-
+/* ************************* message exchage protocol *************************/
 // MCU => Cloud, called by MVDDeviceInterface (when msg recv)
 OSStatus MVDDeviceMsgProcess(mico_Context_t* const context, 
                              unsigned char *inBuf, unsigned int inBufLen);
@@ -86,4 +84,4 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* const context,
                             const char* topic, const unsigned int topicLen,
                             unsigned char *inBuf, unsigned int inBufLen);
 
-#endif
+#endif  /*__MICO_MVD_H_*/

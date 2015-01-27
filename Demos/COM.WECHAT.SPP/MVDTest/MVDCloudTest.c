@@ -133,7 +133,7 @@ OSStatus MVDCloudTest_StartRecv(const char* device_id,
   memset(httpRequestData, 0, httpRequestDataLen);
   sprintf((char*)httpRequestData, "GET %s HTTP/1.1\r\nHost:%s\r\nCache-Control: no-cache\r\n\r\n", request_url, host);
   //sprintf((char*)httpRequestData, "GET %s HTTP/1.1\r\nHost:api.easylink.io\r\n\r\n", request_url);
-  httpRequestDataLen = strlen(httpRequestData);
+  httpRequestDataLen = strlen((const char*)httpRequestData);
   ///////////////////////////////////////////////////
   
   mvd_cloud_test_log("send http package: len=%d,\r\n%s", httpRequestDataLen, httpRequestData);
@@ -267,7 +267,7 @@ OSStatus MVDCloudTest_StopRecv(const char* device_id)
   memset(httpRequestData, 0, httpRequestDataLen);
   sprintf((char*)httpRequestData, "GET %s HTTP/1.1\r\nHost:%s\r\nCache-Control: no-cache\r\n\r\n", request_url, host);
   //sprintf((char*)httpRequestData, "GET %s HTTP/1.1\r\nHost:api.easylink.io\r\n\r\n", request_url);
-  httpRequestDataLen = strlen(httpRequestData);
+  httpRequestDataLen = strlen((const char*)httpRequestData);
   ///////////////////////////////////////////////////
   
   mvd_cloud_test_log("send http package: len=%d,\r\n%s", httpRequestDataLen, httpRequestData);

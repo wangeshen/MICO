@@ -30,16 +30,24 @@
 #define easycloud_utils_log(M, ...) custom_log("EasyCloudUtils", M, ##__VA_ARGS__)
 
 #ifdef MICO_FLASH_FOR_UPDATE
-static volatile uint32_t flashStorageAddress = UPDATE_START_ADDRESS;
-#endif
+volatile uint32_t flashStorageAddress = UPDATE_START_ADDRESS;
 
 // OTA test by WES
-//static volatile uint64_t rom_wrote_size = 0;
+volatile uint64_t rom_wrote_size = 0;
+static uint64_t rom_total_size = 0;
 md5_context md5;
 //unsigned char *md5_input = NULL;
 unsigned char md5_16[16] = {0};
 char *pmd5_32 = NULL;
 char rom_file_md5[32] = {0};
+
+uint32_t getFlashStorageAddress(void)
+{
+  return flashStorageAddress-UPDATE_START_ADDRESS;
+}
+
+volatile bool writeToFlash = false;
+#endif
 
 OSStatus CreateHTTPMessageEx( const char *methold, const char * host, 
                              const char *url, const char *contentType, 
@@ -65,6 +73,45 @@ OSStatus CreateHTTPMessageEx( const char *methold, const char * host,
           "Host:", host, kCRLFNewLine,
           "Content-Type:", contentType, kCRLFNewLine,
           "Content-Length:", (int)inDataLen, kCRLFLineEnding );
+
+  // outMessageSize will be the length of the HTTP Header plus the data length
+  *outMessageSize = strlen( (char*)*outMessage ) + inDataLen;
+
+  endOfHTTPHeader = *outMessage + strlen( (char*)*outMessage );
+  if ((NULL != inData) && (inDataLen > 0)){
+    memcpy( endOfHTTPHeader, inData, inDataLen );
+  }
+  err = kNoErr;
+
+exit:
+  return err;
+}
+
+OSStatus CreateHTTPMessageWithRange( const char *methold, const char * host, 
+                             const char *url, const char *contentType, 
+                             uint64_t rangeStart,
+                             uint8_t *inData, size_t inDataLen, 
+                             uint8_t **outMessage, size_t *outMessageSize )
+{
+  uint8_t *endOfHTTPHeader;
+  OSStatus err = kParamErr;
+
+  require( contentType, exit );
+  //require( inData, exit );
+  //require( inDataLen, exit );
+
+  err = kNoMemoryErr;
+  *outMessage = malloc( inDataLen + 500 );
+  require( *outMessage, exit );
+  memset(*outMessage, 0, inDataLen + 500);
+
+  // Create HTTP Response
+  sprintf( (char*)*outMessage,
+          "%s %s %s %s%s %s%s%s %s%s%s bytes=%lld-%s",
+          methold, url, "HTTP/1.1", kCRLFNewLine,
+          "Host:", host, kCRLFNewLine,
+          "Content-Type:", contentType, kCRLFNewLine,
+          "Range:", rangeStart, kCRLFLineEnding );
 
   // outMessageSize will be the length of the HTTP Header plus the data length
   *outMessageSize = strlen( (char*)*outMessage ) + inDataLen;
@@ -142,19 +189,26 @@ int SocketReadHTTPHeaderEx( int inSock, HTTPHeader_t *inHeader )
   if(err == kNoErr && ((strnicmpx( value, valueSize, kMIMEType_MXCHIP_OTA ) == 0)
                        || (strnicmpx( value, valueSize, kMIMEType_EASYCLOUD_OTA ) == 0))){
 #ifdef MICO_FLASH_FOR_UPDATE  
-    easycloud_utils_log("Receive OTA data!");        
-    err = MicoFlashInitialize( MICO_FLASH_FOR_UPDATE );
-    require_noerr(err, exit);
-    flashStorageAddress = UPDATE_START_ADDRESS;   //flash write from beginning
+    easycloud_utils_log("Receive OTA data!");    
+    if(getFlashStorageAddress()==0){    
+      err = MicoFlashInitialize( MICO_FLASH_FOR_UPDATE );
+      require_noerr(err, exit);
+      InitMd5(&md5);
+      memset(rom_file_md5, 0, 32);
+      rom_wrote_size = 0;
+      writeToFlash = true;
+      rom_total_size = inHeader->contentLength;  // first return total file size
+    }
+
     err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint8_t *)end, inHeader->extraDataLen);
     require_noerr(err, exit);
     
     // OTA test by WES
-    //rom_wrote_size = inHeader->extraDataLen;
-    easycloud_utils_log("OTA[%d/%lld][Header][%d]", inHeader->extraDataLen,
-                   inHeader->contentLength, inHeader->extraDataLen);  
+    rom_wrote_size += inHeader->extraDataLen;
+    easycloud_utils_log("OTA[%lld/%lld][Header][%d]", rom_wrote_size, 
+                        rom_total_size, inHeader->extraDataLen);  
     // update MD5
-    InitMd5(&md5);
+    //InitMd5(&md5);
     Md5Update(&md5, (uint8_t *)end, inHeader->extraDataLen);
     
 #else
@@ -206,13 +260,13 @@ OSStatus SocketReadHTTPBodyEx( int inSock, HTTPHeader_t *inHeader )
   size_t          valueSize;
   size_t    lastChunkLen, chunckheaderLen; 
   char *nextPackagePtr;
-#ifdef MICO_FLASH_FOR_UPDATE
-  bool writeToFlash = false;
-#endif
+//#ifdef MICO_FLASH_FOR_UPDATE
+//  bool writeToFlash = false;
+//#endif
   
   // select timeout
   struct timeval_t to;
-  to.tv_sec = 10;
+  to.tv_sec = 15;
   to.tv_usec = 0;
   
   require( inHeader, exit );
@@ -315,6 +369,7 @@ OSStatus SocketReadHTTPBodyEx( int inSock, HTTPHeader_t *inHeader )
   while ( inHeader->extraDataLen < inHeader->contentLength )
   {
     selectResult = select( inSock + 1, &readSet, NULL, NULL, &to );
+    err = kConnectionErr;
     require( selectResult >= 1, exit );
     
     
@@ -343,9 +398,9 @@ OSStatus SocketReadHTTPBodyEx( int inSock, HTTPHeader_t *inHeader )
       require_noerr(err, exit);
          
       // OTA test by WES
-      //rom_wrote_size += readResult;
-      easycloud_utils_log("OTA[%d/%lld][Body][%d]", inHeader->extraDataLen,
-                          inHeader->contentLength, readResult);
+      rom_wrote_size += readResult;
+      easycloud_utils_log("OTA[%lld/%lld][Body][%d]", rom_wrote_size,
+                          rom_total_size, readResult);
       
       // update MD5
       Md5Update(&md5, (uint8_t *)inHeader->otaDataPtr, readResult);
@@ -365,6 +420,9 @@ OSStatus SocketReadHTTPBodyEx( int inSock, HTTPHeader_t *inHeader )
       else { err = kConnectionErr; goto exit; }
     }
   }
+  
+  flashStorageAddress = UPDATE_START_ADDRESS;   // reset flash write addr
+  
   // recv done, check MD5
   Md5Final(&md5, md5_16);
   //convert hex data to hex string
@@ -390,9 +448,9 @@ exit:
     free(inHeader->otaDataPtr);
     inHeader->otaDataPtr = 0;
   }
-#ifdef MICO_FLASH_FOR_UPDATE
-  if(writeToFlash == true) MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
-#endif
+//#ifdef MICO_FLASH_FOR_UPDATE
+//  if(writeToFlash == true) MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
+//#endif
   return err;
 }
 

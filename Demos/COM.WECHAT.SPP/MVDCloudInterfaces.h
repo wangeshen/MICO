@@ -25,14 +25,14 @@
 #ifndef __MICO_MVDCLOUDINTERFACES_H_
 #define __MICO_MVDCLOUDINTERFACES_H_
 
-
 #include "MICODefine.h"
 #include "EasyCloudServiceDef.h"
 
 /*******************************************************************************
  * DEFINES
  ******************************************************************************/
-
+//#define MVD_LOGINID_DEVPASS_CHECK          1
+//#define MVD_FW_UPDAETE_VERSION_CHECK       1
 
 /*******************************************************************************
  * INTERFACES
@@ -58,4 +58,4 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
 OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
                                             MVDResetRequestData_t devResetRequestData);
 
-#endif
+#endif /* __MICO_MVDCLOUDINTERFACES_H_*/

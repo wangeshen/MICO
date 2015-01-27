@@ -30,7 +30,6 @@
 #include "MVDDeviceInterfaces.h"
 #include "MVDCloudInterfaces.h"
 #include "EasyCloudUtils.h"
-#include "MVDCloudTest.h"
 
 
 #define mvd_log(M, ...) custom_log("MVD", M, ##__VA_ARGS__)
@@ -38,18 +37,12 @@
 
 
 #define DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD     "{\"MVDCloud\":\"connected\"}"
-#define DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU       "[MVD]Cloud connected!\r\n"
-#define DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU    "[MVD]Cloud disconnected!\r\n"
+#define DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU       "[MVD]Cloud status: connected\r\n"
+#define DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU    "[MVD]Cloud status: disconnected\r\n"
 
-/* test define */
-#define MVD_CLOUD_TEST_RECV_MSG_SIZE             100      // byte
-#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           300       // s
-#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         100      // ms
+extern uint64_t cloud_test_data_cnt;
 
 static bool _is_wifi_station_on = false;
-
-static uint64_t cloud_test_data_cnt = 0;
-bool testStop = false;
 
 void mvdNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inContext)
 {
@@ -77,11 +70,8 @@ void MVDMainThread(void *arg)
 {
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = (mico_Context_t *)arg;
-  micoMemInfo_t *memInfo = NULL;
+
   bool connected = false;
-  uint64_t check_recv_data_len = 0;
-  char recv_data_cnt_str[64] = {0};
-  char total_recv_data_cnt_str[64] = {0};
   
 #ifdef DEVICE_AUTO_ACTIVATE_ENABLE
   MVDActivateRequestData_t devDefaultActivateData;
@@ -92,18 +82,12 @@ void MVDMainThread(void *arg)
   /* Regisist notifications */
   err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)mvdNotify_WifiStatusHandler );
   require_noerr( err, exit ); 
-      
-//  memInfo = mico_memory_info();
-//  mvd_log("[MVD]system free mem=%d", memInfo->free_memory);
   
   while(1)
   {
-    memInfo = mico_memory_info();
-    mvd_log("[MVD]system free mem=%d", memInfo->free_memory);
-    
     if(inContext->appStatus.virtualDevStatus.isCloudConnected){
       if (!connected){
-        mvd_log("[MVD]cloud service connected!");
+        mvd_log("[MVD]Cloud status: connected");
         MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU, 
                                    strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU));
         MVDCloudInterfaceSendtoChannel(PUBLISH_TOPIC_CHANNEL_STATUS,
@@ -118,7 +102,7 @@ void MVDMainThread(void *arg)
     else{
       if (connected){
         connected = false; //recovery value;
-        mvd_log("[MVD]cloud service disconnected!");
+        mvd_log("[MVD]Cloud status: disconnected");
         MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU, 
                             strlen(DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU));
       }
@@ -127,7 +111,7 @@ void MVDMainThread(void *arg)
       if((true == _is_wifi_station_on) &&
          (false == inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated)){
         // auto activate, using default login_id/dev_pass/user_token
-        mvd_log("auto activate device by MVD...");
+        mvd_log("[MVD]Device activate by MVD ...");
         memset((void*)&devDefaultActivateData, 0, sizeof(devDefaultActivateData));
         strncpy(devDefaultActivateData.loginId,
                 inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
@@ -140,10 +124,10 @@ void MVDMainThread(void *arg)
                 MAX_SIZE_USER_TOKEN);
         err = MVDCloudInterfaceDevActivate(inContext, devDefaultActivateData);
         if(kNoErr == err){
-          mvd_log("device activate success!");
+          mvd_log("[MVD]Device activate by MVD [OK]");
         }
         else{
-          mvd_log("device activate failed, will retry in %ds...", 1);
+          mvd_log("[MVD]Device activate by MVD [FAILED], will retry in %ds...", 1);
         }
       }
 #endif
@@ -151,43 +135,6 @@ void MVDMainThread(void *arg)
     
     mico_thread_sleep(1);
   }
-  
-  /* Cloud recv test */
-//  mvd_log("[MVD][TEST: CLOUD RECV]start");
-//  MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]start\r\n", strlen("[MVD][TEST: CLOUD RECV]start\r\n"));
-//  cloud_test_data_cnt = 0;
-//  err = MVDCloudTest_StartRecv(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
-//                               MVD_CLOUD_TEST_RECV_MSG_SIZE,
-//                               MVD_CLOUD_TEST_RECV_MSG_PERIOD, 
-//                               MVD_CLOUD_TEST_RECV_MSG_INTERVAL);
-//  require_noerr( err, exit );
-//  testStop = false;
-//  
-//  // timeout for stopping test process
-//  mvd_log("[MVD][TEST: CLOUD RECV]testing...");
-//  MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]testing...\r\n", strlen("[MVD][TEST: CLOUD RECV]testing...\r\n"));
-//  mico_thread_sleep(MVD_CLOUD_TEST_RECV_MSG_PERIOD+10);
-//  err = MVDCloudTest_StopRecv(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId);
-//  require_noerr( err, exit );
-//  mvd_log("[MVD][TEST: CLOUD RECV]stopped");
-//  MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]stopped\r\n", strlen("[MVD][TEST: CLOUD RECV]stopped\r\n"));
-//  
-//  // check test ok?
-//  check_recv_data_len = (MVD_CLOUD_TEST_RECV_MSG_SIZE*1000*MVD_CLOUD_TEST_RECV_MSG_PERIOD/MVD_CLOUD_TEST_RECV_MSG_INTERVAL);
-//  sprintf(recv_data_cnt_str, "[MVD][TEST: CLOUD RECV]recv=%lld\t", cloud_test_data_cnt);
-//  sprintf(total_recv_data_cnt_str, "total=%lld\r\n", check_recv_data_len);
-//  
-//  if(check_recv_data_len == cloud_test_data_cnt){
-//    err = MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]test OK!\r\n", strlen("[MVD][TEST: CLOUD RECV]test OK!\r\n"));
-//  }
-//  else{
-//    err = MVDDevInterfaceSend("[MVD][TEST: CLOUD RECV]test FAILED!\r\n", strlen("[MVD][TEST: CLOUD RECV]test FAILED!\r\n"));
-//    mvd_log("MVD recv: %lld/%lld", cloud_test_data_cnt, check_recv_data_len);
-//    MVDDevInterfaceSend(recv_data_cnt_str, strlen(recv_data_cnt_str));
-//    MVDDevInterfaceSend(total_recv_data_cnt_str, strlen(total_recv_data_cnt_str));
-//  }
-  
-  //testStop = true;
   
 exit:
   mvd_log("[MVD]EXIT: exit code=%d",err);
@@ -274,84 +221,6 @@ char* MVDGetDeviceID(mico_Context_t* const context)
   }
   return (char*)(context->flashContentInRam.appConfig.virtualDevConfig.deviceId);
 }
-
-/*******************************************************************************
- * MVD message exchange protocol
- ******************************************************************************/
-
-// Cloud => MCU
-OSStatus MVDCloudMsgProcess(mico_Context_t* context, 
-                            const char* topic, const unsigned int topicLen,
-                            unsigned char *inBuf, unsigned int inBufLen)
-{
-  mvd_log_trace();
-  OSStatus err = kUnknownErr;
-  
-  //err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data
-  cloud_test_data_cnt += inBufLen;
-  mvd_log("recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
-  err = kNoErr;
-  //err = MVDCloudInterfaceSend(inBuf, inBufLen); // transfer raw data
-  return err;
-  /*
-  char* responseTopic = NULL;
-  unsigned char* responseMsg = NULL;
-  unsigned char* ptr = NULL;
-  int responseMsgLen = 0;
-  
-  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data
-  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
-  
-  // add response to cloud(echo), replace topic 'device_id/in/xxx' to 'device_id/out/xxx'
-  responseTopic = str_replace(responseTopic, topic, topicLen, "/in", "/out");
-  responseMsgLen = strlen(context->micoStatus.mac) + 2 + inBufLen;
-  responseMsg = (unsigned char*)malloc(responseMsgLen + 1);
-  memset(responseMsg, 0x00, responseMsgLen);
-  if(NULL == responseMsg){
-    err = kNoMemoryErr;
-    goto exit;
-  }
-  ptr = responseMsg;
-  memcpy(ptr, "[", 1);
-  ptr += 1;
-  memcpy(ptr, (const void*)&(context->micoStatus.mac), strlen(context->micoStatus.mac));
-  ptr += strlen(context->micoStatus.mac);
-  memcpy(ptr, "]", 1);
-  ptr += 1;
-  memcpy(ptr, inBuf, inBufLen);
-  ptr += inBufLen;
-  memcpy(ptr, '\0', 1);
-  err = MVDCloudInterfaceSendto(responseTopic, responseMsg, responseMsgLen);
-  if(NULL != responseTopic){
-    free(responseTopic);
-  }
-  if(NULL != responseMsg){
-      ptr = NULL;
-      free(responseMsg);
-  }
-  
-  return kNoErr;
-  
-exit:
-  return err;
-  */
-}
-
-// MCU => Cloud
-OSStatus MVDDeviceMsgProcess(mico_Context_t* const context, 
-                             uint8_t *inBuf, unsigned int inBufLen)
-{
-  mvd_log_trace();
-  OSStatus err = kUnknownErr;
-  
-  err = MVDCloudInterfaceSend(inBuf, inBufLen);  // transfer raw data
-  require_noerr_action( err, exit, mvd_log("ERROR: send to cloud error! err=%d", err) );
-  return kNoErr;
-  
-exit:
-  return err;
-}
-
 
 /*******************************************************************************
  * MVD message send interface
@@ -450,6 +319,97 @@ OSStatus MVDResetCloudDevInfo(mico_Context_t* const context,
   require_noerr_action(err, exit, 
                        mvd_log("ERROR: reset device info on cloud error! err=%d", err) );
   return kNoErr;
+  
+exit:
+  return err;
+}
+
+/*******************************************************************************
+ * MVD message exchange protocol
+ ******************************************************************************/
+
+// Cloud => MCU
+OSStatus MVDCloudMsgProcess(mico_Context_t* context, 
+                            const char* topic, const unsigned int topicLen,
+                            unsigned char *inBuf, unsigned int inBufLen)
+{
+  mvd_log_trace();
+  OSStatus err = kUnknownErr;
+  
+  //err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data
+  cloud_test_data_cnt += inBufLen;
+  mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
+  err = kNoErr;
+  
+  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data
+  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  //err = MVDCloudInterfaceSend(inBuf, inBufLen); // transfer raw data
+  return err;
+  /*
+  char* responseTopic = NULL;
+  unsigned char* responseMsg = NULL;
+  unsigned char* ptr = NULL;
+  int responseMsgLen = 0;
+  
+  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data
+  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  
+  // add response to cloud(echo), replace topic 'device_id/in/xxx' to 'device_id/out/xxx'
+  responseTopic = str_replace(responseTopic, topic, topicLen, "/in", "/out");
+  responseMsgLen = strlen(context->micoStatus.mac) + 2 + inBufLen;
+  responseMsg = (unsigned char*)malloc(responseMsgLen + 1);
+  memset(responseMsg, 0x00, responseMsgLen);
+  if(NULL == responseMsg){
+    err = kNoMemoryErr;
+    goto exit;
+  }
+  ptr = responseMsg;
+  memcpy(ptr, "[", 1);
+  ptr += 1;
+  memcpy(ptr, (const void*)&(context->micoStatus.mac), strlen(context->micoStatus.mac));
+  ptr += strlen(context->micoStatus.mac);
+  memcpy(ptr, "]", 1);
+  ptr += 1;
+  memcpy(ptr, inBuf, inBufLen);
+  ptr += inBufLen;
+  memcpy(ptr, '\0', 1);
+  err = MVDCloudInterfaceSendto(responseTopic, responseMsg, responseMsgLen);
+  if(NULL != responseTopic){
+    free(responseTopic);
+  }
+  if(NULL != responseMsg){
+      ptr = NULL;
+      free(responseMsg);
+  }
+  
+  return kNoErr;
+*/  
+exit:
+  return err;
+}
+
+// MCU => Cloud
+OSStatus MVDDeviceMsgProcess(mico_Context_t* const context, 
+                             uint8_t *inBuf, unsigned int inBufLen)
+{
+  mvd_log_trace();
+  OSStatus err = kUnknownErr;
+  MVDOTARequestData_t OTAData;
+  memset((void*)(&OTAData), 0, sizeof(OTAData));
+  
+  if(0 == strncmp("Update", (const char*)inBuf, inBufLen)){
+    err = MVDFirmwareUpdate(context, OTAData);
+    require_noerr_action( err, exit, mvd_log("ERROR: MVDFirmwareUpdate error! err=%d", err) );
+    
+    err = MVDDevInterfaceSend("Update OK!", strlen("Update OK!"));
+    require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+    return kNoErr;
+  }
+  else{
+    err = MVDCloudInterfaceSend(inBuf, inBufLen);  // transfer raw data
+    require_noerr_action( err, exit, mvd_log("ERROR: send to cloud error! err=%d", err) );
+    return kNoErr;
+  }
   
 exit:
   return err;

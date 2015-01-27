@@ -68,7 +68,12 @@ typedef enum {
 
 static mico_thread_t easyCloudServiceThreadHandle = NULL;
 
+#ifdef MICO_FLASH_FOR_UPDATE
+extern volatile uint32_t flashStorageAddress;
 extern char rom_file_md5[32];
+extern volatile bool writeToFlash;
+extern volatile uint64_t rom_wrote_size;
+#endif
 
 /*******************************************************************************
  * STATIC FUNCTIONS
@@ -367,6 +372,7 @@ exit:
 OSStatus EasyCloudGetLatestRomVersion(easycloud_service_context_t* const context)
 {
   OSStatus err = kUnknownErr;
+  int8_t retry_cnt = 5;
   
   //set purl = URL?product_id=xxxxx
   char *purl = NULL;
@@ -378,6 +384,7 @@ OSStatus EasyCloudGetLatestRomVersion(easycloud_service_context_t* const context
   
   param = (char*)malloc(paramLen);
   if (NULL == param){
+    err = kNoMemoryErr;
     goto exit;
   }
   memset(param, 0, paramLen);
@@ -387,6 +394,7 @@ OSStatus EasyCloudGetLatestRomVersion(easycloud_service_context_t* const context
   purlLen = strlen((char *)DEFAULT_ROM_GET_VERSION_URL) + 1 + strlen(param);
   purl = (char*)malloc(purlLen);
   if (NULL == purl){
+    err = kNoMemoryErr;
     goto exit;
   }
   memset(purl, 0, purlLen);
@@ -396,12 +404,15 @@ OSStatus EasyCloudGetLatestRomVersion(easycloud_service_context_t* const context
   
   easycloud_service_log("EasyCloud update firmware, url=[%s]", purl);
   
-  err = get_rom_version(context->service_config_info.cloudServerDomain,
-                        context->service_config_info.cloudServerPort,
-                        purl,
-                        context->service_status.latestRomVersion,
-                        context->service_status.bin_file,
-                        context->service_status.bin_md5);
+  do{
+    err = get_rom_version(context->service_config_info.cloudServerDomain,
+                          context->service_config_info.cloudServerPort,
+                          purl,
+                          context->service_status.latestRomVersion,
+                          context->service_status.bin_file,
+                          context->service_status.bin_md5);
+    retry_cnt--;
+  }while((kNoErr != err) && (retry_cnt > 0));
 
 exit:
   if(NULL != param){
@@ -418,12 +429,17 @@ exit:
 OSStatus EasyCloudGetRomData(easycloud_service_context_t* const context)
 {
   OSStatus err = kUnknownErr;
-  err = get_rom_data(context->service_config_info.cloudServerDomain,
-                     context->service_config_info.cloudServerPort,
-                     context->service_status.bin_file,
-                     context->service_status.bin_md5,
-                     &(context->service_status.bin_file_size));
-    
+  int8_t retry_cnt = 5;
+  
+  do{
+    err = get_rom_data(context->service_config_info.cloudServerDomain,
+                       context->service_config_info.cloudServerPort,
+                       context->service_status.bin_file,
+                       context->service_status.bin_md5,
+                       &(context->service_status.bin_file_size));
+    retry_cnt--;
+  }while((kNoErr != err) && (retry_cnt > 0));
+  
   return err;
 }
 
@@ -936,6 +952,60 @@ exit:
   return err;
 }
 
+//////////////////////////////////////////////////////
+static OSStatus _connectToServer(const char* host, uint16_t port, int* fd){
+  OSStatus err = kUnknownErr;
+  char ipstr[16];
+  struct sockaddr_t addr;
+  
+  // send/recv timemout
+  int retVal = -1;
+  int nNetTimeout = 10000;  // 10s
+  
+  //create tcp connect
+  easycloud_service_log("tcp client start to connect...");
+  err = gethostbyname((char *)host, (uint8_t *)ipstr, 16);
+  require_noerr(err, exit);
+  easycloud_service_log("cloud service host:%s, ip: %s", host, ipstr);
+  
+  *fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  require_action(*fd != -1, exit, err = kOpenErr);
+  
+  retVal = setsockopt(*fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&nNetTimeout,sizeof(int));
+  if( retVal < 0 ) {
+    // error
+    easycloud_service_log("setsockopt error:[%d]", retVal);
+    err = kOptionErr;
+    goto exit;
+  }
+  
+  retVal = setsockopt(*fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&nNetTimeout,sizeof(int));
+  if( retVal < 0 ) {
+    // error
+    easycloud_service_log("setsockopt error:[%d]", retVal);
+    err = kOptionErr;
+    goto exit;
+  }
+  
+  addr.s_ip = inet_addr(ipstr); 
+  addr.s_port = port;
+  
+  err = connect(*fd, &addr, sizeof(addr));
+  require_noerr(err, exit);
+  
+  easycloud_service_log("EasyCloud server connected at port=%d, fd=%d", 
+                        port,
+                        *fd);
+  
+  return kNoErr;
+  
+exit:
+  if(-1 != *fd){
+    close(*fd);
+    *fd = -1;
+  }
+  return err;
+}
 
 static OSStatus get_rom_data(char *host, uint16_t port,
                              char bin_file[MAX_SIZE_FILE_PATH],
@@ -946,21 +1016,15 @@ static OSStatus get_rom_data(char *host, uint16_t port,
   easycloud_service_log("get_rom_data: bin_file=%s", bin_file);
   easycloud_service_log("get_rom_data: bin_md5=%s", bin_md5);
   
+  int reTryCount = 0;
   char* request_url = NULL;
-  
   int tcpClient_fd = -1;
-  char ipstr[16];
-  struct sockaddr_t addr;
   fd_set readfds;
   
   // select timeout
   struct timeval_t t;
-  t.tv_sec = 3;
+  t.tv_sec = 15;
   t.tv_usec = 0;
-  
-  // send/recv timemout
-  int retVal = -1;
-  int nNetTimeout = 10000;  // 10s
   
   /* create activate or authorize http request data */
   uint8_t *httpRequestData = NULL;
@@ -968,134 +1032,139 @@ static OSStatus get_rom_data(char *host, uint16_t port,
   HTTPHeader_t *httpHeader = NULL;
   
   easycloud_service_log("request: [%s]", bin_file);
+    
+  //strip http://host from bin_file
+  request_url = strstr(bin_file, host) + strlen(host);
   
   httpHeader = HTTPHeaderCreate();
   require_action( httpHeader, exit, err = kNoMemoryErr );
   HTTPHeaderClear( httpHeader );
   
-  //create tcp connect
-  easycloud_service_log("tcp client start to connect...");
-  err = gethostbyname((char *)host, (uint8_t *)ipstr, 16);
-  require_noerr(err, exit);
-  easycloud_service_log("cloud service host:%s, ip: %s", host, ipstr);
-  
-  tcpClient_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  require(tcpClient_fd != -1, exit);
-  
-  retVal = setsockopt(tcpClient_fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&nNetTimeout,sizeof(int));
-  if( retVal < 0 ) {
-    // error
-    easycloud_service_log("setsockopt error:[%d]", retVal);
-    goto exit;
-  }
-  
-  retVal = setsockopt(tcpClient_fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&nNetTimeout,sizeof(int));
-  if( retVal < 0 ) {
-    // error
-    easycloud_service_log("setsockopt error:[%d]", retVal);
-    goto exit;
-  }
-  
-  addr.s_ip = inet_addr(ipstr); 
-  addr.s_port = port;
-  
-  err = connect(tcpClient_fd, &addr, sizeof(addr));
-  require_noerr_quiet(err, exit);
-  
-  easycloud_service_log("EasyCloud server connected at port=%d, fd=%d", 
-                         port,
-                         tcpClient_fd);
-  
-  //strip http://host from bin_file
-  request_url = strstr(bin_file, host) + strlen(host);
-  
-  // send request data
-  easycloud_service_log("tcp client send activate request...");
-  err = CreateHTTPMessageEx(kHTTPGetMethod, 
-                            host, request_url,
-                            kMIMEType_JSON, 
-                            NULL, 0,
-                            &httpRequestData, &httpRequestDataLen);
-  require_noerr( err, exit );
-  easycloud_service_log("send http package: len=%d,\r\n%s", httpRequestDataLen, httpRequestData);
-  
-  err = SocketSend( tcpClient_fd, httpRequestData, httpRequestDataLen );
-  if (httpRequestData != NULL) {
-    free(httpRequestData);
-    httpRequestDataLen = 0;
-  }
-  require_noerr( err, exit );
-  
-  // get http response
-  FD_ZERO(&readfds);
-  FD_SET(tcpClient_fd, &readfds);
-  err = select(1, &readfds, NULL, NULL, &t);
-  require(err >= 1, exit);
-  //easycloud_service_log("select return ok.");
-  
-  if (FD_ISSET(tcpClient_fd, &readfds)) {
-    err = SocketReadHTTPHeaderEx( tcpClient_fd, httpHeader );             
-    switch ( err )
-    {
-    case kNoErr:
-      //easycloud_service_log("read httpheader OK!");
-      easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
-      
-      // statusCode check
-      if(kStatusOK != httpHeader->statusCode){
-        easycloud_service_log("ERROR: server response statusCode=%d", 
-                              httpHeader->statusCode);
-        err = kRequestErr;
-        goto exit;
+  while(1){
+    if(-1 == tcpClient_fd){
+      err = _connectToServer(host, port, &tcpClient_fd);
+      require_noerr(err, ReTry);
+    }
+    else{
+      // format get data request
+      if(getFlashStorageAddress() > 0){
+        // range request data
+        easycloud_service_log("tcp client send get range data request...");
+        err = CreateHTTPMessageWithRange(kHTTPGetMethod, 
+                                  host, request_url,
+                                  kMIMEType_JSON, 
+                                  getFlashStorageAddress(),
+                                  NULL, 0,
+                                  &httpRequestData, &httpRequestDataLen);
+      }else{
+        // get full file request data
+        easycloud_service_log("tcp client send get full data request...");
+        err = CreateHTTPMessageEx(kHTTPGetMethod, 
+                                  host, request_url,
+                                  kMIMEType_JSON, 
+                                  NULL, 0,
+                                  &httpRequestData, &httpRequestDataLen);
+      }
+      // err try again
+      if(kNoErr != err){
+        if (httpRequestData != NULL) {
+          free(httpRequestData);
+          httpRequestDataLen = 0;
+        }
+        goto ReTry;
       }
       
-      // Read the rest of the HTTP body if necessary
-      err = SocketReadHTTPBodyEx( tcpClient_fd, httpHeader );
-      require_noerr(err, exit);
-      
-      easycloud_service_log("read httpBody OK!");
-      //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
-      HTTPHeaderClear(httpHeader);  // Reuse HTTPHeader
-      
-      // check md5
-      if(0 != strncmp(bin_md5, rom_file_md5, strlen(bin_md5))){
-        easycloud_service_log("ERROR: rom md5 checksum err!!");
-        err = kChecksumErr;
-        goto exit;
+      // send read data request
+      easycloud_service_log("send http package: len=%d,\r\n%s", httpRequestDataLen, httpRequestData);
+      err = SocketSend( tcpClient_fd, httpRequestData, httpRequestDataLen );
+      if (httpRequestData != NULL) {
+        free(httpRequestData);
+        httpRequestDataLen = 0;
       }
-      //return file size
-      *out_bin_file_size = httpHeader->contentLength;
+      require_noerr( err, ReTry );
       
-      //HTTPHeaderClear(httpHeader);  // Reuse HTTPHeader
-      //require_noerr( err, exit );
+      // get http response
+      FD_ZERO(&readfds);
+      FD_SET(tcpClient_fd, &readfds);
+      err = select(1, &readfds, NULL, NULL, &t);
+      require(err >= 1, ReTry);
+      //easycloud_service_log("select return ok.");
       
-      easycloud_service_log("get rom data done!");
-      goto exit_success;
-      break;
-      
-    case EWOULDBLOCK:
-      easycloud_service_log("ERROR: read blocked!");
-      // NO-OP, keep reading
-      goto exit;
-      break;
-      
-    case kNoSpaceErr:
-      easycloud_service_log("ERROR: Cannot fit HTTPHeader.");
-      goto exit;
-      break;
-      
-    case kConnectionErr:
-      // NOTE: kConnectionErr from SocketReadHTTPHeader means it's closed
-      easycloud_service_log("ERROR: Connection closed.");
-      goto exit;
-      break;
-      
-    default:
-      easycloud_service_log("ERROR: HTTP Header parse internal error: %d", err);
-      goto exit; 
-    }    
+      if (FD_ISSET(tcpClient_fd, &readfds)) {
+        err = SocketReadHTTPHeaderEx( tcpClient_fd, httpHeader );             
+        switch ( err )
+        {
+        case kNoErr:
+          //easycloud_service_log("read httpheader OK!");
+          easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
+          
+          // statusCode check
+          if((kStatusOK != httpHeader->statusCode) && (kStatusPartialContent != httpHeader->statusCode)){
+            easycloud_service_log("ERROR: server response statusCode=%d", 
+                                  httpHeader->statusCode);
+            err = kRequestErr;
+            goto ReTry;
+          }
+          
+          // Read the rest of the HTTP body if necessary
+          err = SocketReadHTTPBodyEx( tcpClient_fd, httpHeader );
+          // breakpoint retry
+          if(kConnectionErr == err){
+           goto ReTry;
+          }
+          require_noerr(err, exit);
+          
+          easycloud_service_log("read httpBody OK!");
+          //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
+          HTTPHeaderClear(httpHeader);  // Reuse HTTPHeader
+          
+          // check md5
+          if(0 != strncmp(bin_md5, rom_file_md5, strlen(bin_md5))){
+            easycloud_service_log("ERROR: rom md5 checksum err!!");
+            err = kChecksumErr;
+            goto ReTry;
+          }
+          //return file size
+          *out_bin_file_size = rom_wrote_size;
+          easycloud_service_log("get rom data done, file_size=%lld", *out_bin_file_size);
+          goto exit_success;
+          break;
+          
+        case EWOULDBLOCK:
+          easycloud_service_log("ERROR: read blocked!");
+          // NO-OP, keep reading
+          break;
+          
+        case kNoSpaceErr:
+          easycloud_service_log("ERROR: Cannot fit HTTPHeader.");
+          goto exit;
+          break;
+          
+        case kConnectionErr:
+          // NOTE: kConnectionErr from SocketReadHTTPHeader means it's closed
+          easycloud_service_log("ERROR: Connection closed.");
+          goto ReTry;
+          break;
+          
+        default:
+          easycloud_service_log("ERROR: HTTP Header parse internal error: %d", err);
+          goto exit; 
+        }    
+      } 
+    }
+    continue;
+    
+  ReTry:
+    HTTPHeaderClear( httpHeader );
+    if(tcpClient_fd != -1){
+      close(tcpClient_fd);
+      tcpClient_fd = -1;
+    }
+    require(reTryCount < 15, exit);
+    reTryCount++;
+    mico_thread_sleep(3);
   }
-
+  
 exit_success:
   HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
@@ -1104,6 +1173,11 @@ exit_success:
     tcpClient_fd = -1;
   }
   easycloud_service_log("get_rom_data: success!");
+  if(writeToFlash){
+    MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
+    flashStorageAddress = UPDATE_START_ADDRESS;
+    writeToFlash = false;
+  }
   return kNoErr;
   
 exit:
@@ -1115,6 +1189,12 @@ exit:
     close(tcpClient_fd);
     tcpClient_fd = -1;
   }
+  if(writeToFlash){
+    MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
+    flashStorageAddress = UPDATE_START_ADDRESS;
+    writeToFlash = false;
+  }
+  
   return err;
 }
 
@@ -1152,13 +1232,13 @@ static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
   easycloud_service_log("cloud service host:%s, ip: %s", host, ipstr);
   
   tcpClient_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  require(tcpClient_fd != -1, exit);
+  require_action(tcpClient_fd != -1, exit, err = kOpenErr);
   
   addr.s_ip = inet_addr(ipstr); 
   addr.s_port = port;
   
   err = connect(tcpClient_fd, &addr, sizeof(addr));
-  require_noerr_quiet(err, exit);
+  require_noerr(err, exit);
   
   easycloud_service_log("EasyCloud server connected at port=%d, fd=%d", 
                          port,

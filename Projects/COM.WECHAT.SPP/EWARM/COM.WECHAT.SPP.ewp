@@ -173,7 +173,6 @@
         <option>
           <name>CCDefines</name>
           <state>USE_STDPERIPH_DRIVER</state>
-          <state>DEBUG</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -3966,6 +3965,9 @@
     <name>include</name>
     <group>
       <name>EasyCloud</name>
+      <excluded>
+        <configuration>EMW3162</configuration>
+      </excluded>
       <file>
         <name>$PROJ_DIR$\..\..\..\include\EasyCloud\EasyCloudService.h</name>
       </file>
