@@ -69,6 +69,12 @@ OSStatus MVDAuthorize(mico_Context_t* const context,
 OSStatus MVDResetCloudDevInfo(mico_Context_t* const context,
                               MVDResetRequestData_t devResetData);
 
+// using OTA mechanism to download file, stored in OTA area used by user, but not real OTA
+// return file size in
+//   "context->appStatus.virtualDevStatus.RecvRomFileSize" if succeed.
+OSStatus MVDDownloadFile(mico_Context_t* const context,
+                         MVDDownloadFileRequestData_t devGetFileRequestData);
+
 
 /*******************************************************************************
 * INTERNAL FUNCTIONS

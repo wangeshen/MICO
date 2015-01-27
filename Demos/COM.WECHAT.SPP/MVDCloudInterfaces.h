@@ -57,5 +57,8 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
                                             MVDOTARequestData_t devOTARequestData);
 OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
                                             MVDResetRequestData_t devResetRequestData);
+// just get a file from server, stored in OTA area, but not real OTA
+OSStatus MVDCloudInterfaceGetFile(mico_Context_t* const inContext,
+                                  MVDDownloadFileRequestData_t devGetFileRequestData);
 
 #endif /* __MICO_MVDCLOUDINTERFACES_H_*/

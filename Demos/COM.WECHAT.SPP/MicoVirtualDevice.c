@@ -324,11 +324,27 @@ exit:
   return err;
 }
 
+// get file from server, return file size in
+//   "context->appStatus.virtualDevStatus.RecvRomFileSize" if succeed.
+OSStatus MVDDownloadFile(mico_Context_t* const context,
+                         MVDDownloadFileRequestData_t devGetFileRequestData)
+{
+  OSStatus err = kUnknownErr;
+  mico_Context_t *inContext = context;
+  
+  err = MVDCloudInterfaceGetFile(inContext, devGetFileRequestData);
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: MVDCloudInterfaceGetFile error! err=%d", err) );
+  
+exit:
+  return err;
+}
+
 /*******************************************************************************
  * MVD message exchange protocol
  ******************************************************************************/
 
-// Cloud => MCU
+// handle message from Cloud
 OSStatus MVDCloudMsgProcess(mico_Context_t* context, 
                             const char* topic, const unsigned int topicLen,
                             unsigned char *inBuf, unsigned int inBufLen)
@@ -336,79 +352,78 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   mvd_log_trace();
   OSStatus err = kUnknownErr;
   
-  //err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data
   cloud_test_data_cnt += inBufLen;
   mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
-  err = kNoErr;
+  //err = MVDCloudInterfaceSend(inBuf, inBufLen); // response to cloud
+  //err = kNoErr;
   
-  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data
-  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
-  //err = MVDCloudInterfaceSend(inBuf, inBufLen); // transfer raw data
-  return err;
-  /*
-  char* responseTopic = NULL;
-  unsigned char* responseMsg = NULL;
-  unsigned char* ptr = NULL;
-  int responseMsgLen = 0;
-  
-  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data
+  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
   require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
   
-  // add response to cloud(echo), replace topic 'device_id/in/xxx' to 'device_id/out/xxx'
-  responseTopic = str_replace(responseTopic, topic, topicLen, "/in", "/out");
-  responseMsgLen = strlen(context->micoStatus.mac) + 2 + inBufLen;
-  responseMsg = (unsigned char*)malloc(responseMsgLen + 1);
-  memset(responseMsg, 0x00, responseMsgLen);
-  if(NULL == responseMsg){
-    err = kNoMemoryErr;
-    goto exit;
-  }
-  ptr = responseMsg;
-  memcpy(ptr, "[", 1);
-  ptr += 1;
-  memcpy(ptr, (const void*)&(context->micoStatus.mac), strlen(context->micoStatus.mac));
-  ptr += strlen(context->micoStatus.mac);
-  memcpy(ptr, "]", 1);
-  ptr += 1;
-  memcpy(ptr, inBuf, inBufLen);
-  ptr += inBufLen;
-  memcpy(ptr, '\0', 1);
-  err = MVDCloudInterfaceSendto(responseTopic, responseMsg, responseMsgLen);
-  if(NULL != responseTopic){
-    free(responseTopic);
-  }
-  if(NULL != responseMsg){
-      ptr = NULL;
-      free(responseMsg);
-  }
-  
-  return kNoErr;
-*/  
 exit:
   return err;
 }
 
-// MCU => Cloud
+// handle message from MCU
 OSStatus MVDDeviceMsgProcess(mico_Context_t* const context, 
                              uint8_t *inBuf, unsigned int inBufLen)
 {
   mvd_log_trace();
   OSStatus err = kUnknownErr;
   MVDOTARequestData_t OTAData;
-  memset((void*)(&OTAData), 0, sizeof(OTAData));
+  MVDDownloadFileRequestData_t devGetFileRequestData;
+  json_object *new_obj = NULL;
+  uint8_t recv_param_check = 0;  // must recv all three params
   
-  if(0 == strncmp("Update", (const char*)inBuf, inBufLen)){
+  memset((void*)(&OTAData), 0, sizeof(OTAData));
+  memset((void*)&devGetFileRequestData, 0, sizeof(devGetFileRequestData));
+  
+  if(0 == strncmp("Get", (const char*)inBuf, strlen("Get"))){
+    new_obj = json_tokener_parse((const char*)(inBuf + strlen("Get")));
+    require_action(new_obj, exit, err = kUnknownErr);
+    
+    mvd_log("Recv getfile request object=%s", json_object_to_json_string(new_obj));
+    
+    json_object_object_foreach(new_obj, key, val) {
+      if(!strcmp(key, "bin")){
+        strncpy(devGetFileRequestData.file_path, 
+                json_object_get_string(val), MAX_SIZE_FILE_PATH);
+        recv_param_check += 1;
+      }
+      else if(!strcmp(key, "bin_md5")){
+        strncpy(devGetFileRequestData.file_checksum, 
+                json_object_get_string(val), MAX_SIZE_FILE_MD5);
+        recv_param_check += 1;
+      }
+      else if(!strcmp(key, "version")){
+        strncpy(devGetFileRequestData.file_version, 
+                json_object_get_string(val), MAX_SIZE_FW_VERSION);
+        recv_param_check += 1;
+      }
+      else {
+      }
+    }
+    json_object_put(new_obj);
+    require_action(3 == recv_param_check, exit, err = kParamErr);
+    
+    // get file request
+    err = MVDCloudInterfaceGetFile(context, devGetFileRequestData);
+    require_noerr_action(err, exit, 
+                         mvd_log("ERROR: MVDCloudInterfaceGetFile error! err=%d", err));
+    // notify
+    err = MVDDevInterfaceSend("Get file OK!\r\n", strlen("Get file OK!\r\n"));
+    require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  }
+  else if(0 == strncmp("Update", (const char*)inBuf, inBufLen)){
     err = MVDFirmwareUpdate(context, OTAData);
     require_noerr_action( err, exit, mvd_log("ERROR: MVDFirmwareUpdate error! err=%d", err) );
-    
-    err = MVDDevInterfaceSend("Update OK!", strlen("Update OK!"));
-    require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
-    return kNoErr;
+    // notify
+//    err = MVDDevInterfaceSend("Update OK!", strlen("Update OK!"));
+//    require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
   }
   else{
-    err = MVDCloudInterfaceSend(inBuf, inBufLen);  // transfer raw data
+    err = MVDCloudInterfaceSend(inBuf, inBufLen);  // transfer raw data to Cloud
     require_noerr_action( err, exit, mvd_log("ERROR: send to cloud error! err=%d", err) );
-    return kNoErr;
   }
   
 exit:

@@ -413,3 +413,61 @@ OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
 exit:
   return err;
 }
+        
+// get a file from server spicified by user, return file size in
+//   "inContext->appStatus.virtualDevStatus.RecvRomFileSize" if succeed.
+OSStatus MVDCloudInterfaceGetFile(mico_Context_t* const inContext,
+                                  MVDDownloadFileRequestData_t devGetFileRequestData)
+{
+  cloud_if_log_trace();
+  OSStatus err = kUnknownErr;
+
+  cloud_if_log("Get file from server...\r\nfile=%s\r\nchecsum=%s\r\nversion=%s\r\n",
+               devGetFileRequestData.file_path,
+               devGetFileRequestData.file_checksum,
+               devGetFileRequestData.file_version);
+  
+#ifdef MVD_LOGINID_DEVPASS_CHECK
+  // login_id/dev_passwd ok ?
+  if((0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, 
+                   devOTARequestData.loginId, 
+                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId))) ||
+     (0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
+                   devOTARequestData.devPasswd, 
+                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd))))
+  {
+    // devPass err
+    cloud_if_log("ERROR: MVDCloudInterfaceGetFile: loginId/devPasswd mismatch!");
+    return kMismatchErr;
+  }
+  cloud_if_log("MVDCloudInterfaceGetFile: loginId/devPasswd ok!");
+#endif
+
+  // set request params
+  memset((void*)easyCloudContext.service_status.bin_file, 0, MAX_SIZE_FILE_PATH);
+  memset((void*)easyCloudContext.service_status.bin_md5, 0, MAX_SIZE_FILE_MD5);
+  memset((void*)easyCloudContext.service_status.latestRomVersion, 0, MAX_SIZE_FW_VERSION);
+  easyCloudContext.service_status.bin_file_size = 0;
+  
+  strncpy(easyCloudContext.service_status.bin_file, 
+          devGetFileRequestData.file_path, MAX_SIZE_FILE_PATH);
+  strncpy(easyCloudContext.service_status.bin_md5, 
+          devGetFileRequestData.file_checksum, MAX_SIZE_FILE_MD5);
+  strncpy(easyCloudContext.service_status.latestRomVersion, 
+          devGetFileRequestData.file_version, MAX_SIZE_FW_VERSION);
+  
+  // get file data
+  err = EasyCloudGetRomData(&easyCloudContext);
+  require_noerr_action( err, exit, 
+                       cloud_if_log("ERROR: EasyCloudGetRomData failed! err=%d", err) );
+  
+  // notify, record file size for user
+   cloud_if_log("Get file from server done! file_size=%lld",
+                easyCloudContext.service_status.bin_file_size);
+   inContext->appStatus.virtualDevStatus.RecvRomFileSize = easyCloudContext.service_status.bin_file_size;
+  
+  return kNoErr;
+  
+exit:
+  return err;
+}
