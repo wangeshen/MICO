@@ -50,12 +50,12 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
   require_action(inContext, exit, err = kParamErr);
   
   // add for Airkiss LED demo, will enter config mode after reboot
-  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
-  if(inContext->flashContentInRam.micoSystemConfig.configured == allConfigured){
-    inContext->flashContentInRam.micoSystemConfig.configured = wLanUnConfigured;
-    MICOUpdateConfiguration(inContext);
-  }
-  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+//  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
+//  if(inContext->flashContentInRam.micoSystemConfig.configured == allConfigured){
+//    inContext->flashContentInRam.micoSystemConfig.configured = wLanUnConfigured;
+//    MICOUpdateConfiguration(inContext);
+//  }
+//  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   
   /*Bonjour for service searching*/
   if(inContext->flashContentInRam.micoSystemConfig.bonjourEnable == true)

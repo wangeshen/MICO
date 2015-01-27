@@ -73,7 +73,7 @@ void ConfigWillStop( mico_Context_t * const inContext )
 
   mico_stop_timer(&_Led_EL_timer);
   mico_deinit_timer( &_Led_EL_timer );
-  MicoGpioOutputLow((mico_gpio_t)MICO_SYS_LED);
+  MicoGpioOutputHigh((mico_gpio_t)MICO_SYS_LED);
   return;
 }
 

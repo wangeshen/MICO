@@ -338,9 +338,9 @@ int application_start(void)
   err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)micoNotify_WifiStatusHandler );
   require_noerr( err, exit ); 
 
-  if( context->flashContentInRam.micoSystemConfig.configured == wLanUnConfigured ||
-      context->flashContentInRam.micoSystemConfig.configured == unConfigured){
-    mico_log("Empty configuration. Starting configuration mode...");
+//  if( context->flashContentInRam.micoSystemConfig.configured == wLanUnConfigured ||
+//      context->flashContentInRam.micoSystemConfig.configured == unConfigured){
+//    mico_log("Empty configuration. Starting configuration mode...");
 
 #if (MICO_CONFIG_MODE == CONFIG_MODE_EASYLINK) || (MICO_CONFIG_MODE == CONFIG_MODE_EASYLINK_WITH_SOFTAP)
   err = startEasyLink( context );
@@ -384,15 +384,15 @@ int application_start(void)
 #else
   #error "Wi-Fi configuration mode is not defined"?
 #endif
-  }
-#ifdef MFG_MODE_AUTO
-  else if( context->flashContentInRam.micoSystemConfig.configured == mfgConfigured ){
-    mico_mfg_test();
-  }
-#endif
+  //}
+//#ifdef MFG_MODE_AUTO
+//  else if( context->flashContentInRam.micoSystemConfig.configured == mfgConfigured ){
+//    mico_mfg_test();
+//  }
+//#endif
 
-  else{
-    mico_log("Available configuration. Starting Wi-Fi connection...");
+//  else{
+//    mico_log("Available configuration. Starting Wi-Fi connection...");
     
     err = MICOAddNotification( mico_notify_WiFI_PARA_CHANGED, (void *)micoNotify_WiFIParaChangedHandler );
     require_noerr( err, exit ); 
@@ -422,7 +422,7 @@ int application_start(void)
     require_noerr( err, exit );
 
     _ConnectToAP( context );
-  }
+  //}
 
   mico_log("Free memory %d bytes", MicoGetMemoryInfo()->free_memory) ; 
   
@@ -443,10 +443,10 @@ int application_start(void)
         break;
       case eState_Standby:
         mico_log("Enter standby mode");
-        sendNotifySYSWillPowerOff();
-        mico_thread_msleep(200);
-        micoWlanPowerOff();
-        MicoSystemStandBy(MICO_WAIT_FOREVER);
+//        sendNotifySYSWillPowerOff();
+//        mico_thread_msleep(200);
+//        micoWlanPowerOff();
+//        MicoSystemStandBy(MICO_WAIT_FOREVER);
         break;
       default:
         break;
