@@ -167,6 +167,8 @@ OSStatus MVDInit(mico_Context_t* const inContext)
   inContext->appStatus.virtualDevStatus.isCloudConnected = false;
   inContext->appStatus.virtualDevStatus.RecvRomFileSize = 0;
   
+  MVDRestoreDefault(inContext);
+  
   //init MCU connect interface
 //  err = MVDDevInterfaceInit(inContext);
 //  require_noerr_action(err, exit, 

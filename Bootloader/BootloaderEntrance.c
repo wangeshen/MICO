@@ -67,6 +67,25 @@ int main(void)
 {
   init_clocks();
   init_memory();
+//  MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_21, OUTPUT_OPEN_DRAIN_PULL_UP );
+//  MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_21 );
+//  
+//  MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_22, OUTPUT_OPEN_DRAIN_PULL_UP );
+//  MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_22 );
+//  
+//  MicoGpioInitialize( (mico_gpio_t)MICO_GPIO_23, OUTPUT_OPEN_DRAIN_PULL_UP );
+//  MicoGpioOutputLow( (mico_gpio_t)MICO_GPIO_23 );
+  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_R, 50, 0); // red when start LED
+  MicoPwmStart( (mico_pwm_t)MICO_PWM_R);
+  
+  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_G, 50, 100);
+  MicoPwmStart( (mico_pwm_t)MICO_PWM_G);
+  
+  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_B, 50, 100);
+  MicoPwmStart( (mico_pwm_t)MICO_PWM_B);
+    
+  startApplication();
+  
   init_architecture();
   init_platform_bootloader();
   

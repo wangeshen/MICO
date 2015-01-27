@@ -203,10 +203,10 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
   strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
           easyCloudContext.service_config_info.userToken, MAX_SIZE_USER_TOKEN);
     
-  err = MICOUpdateConfiguration(inContext);
+  //err = MICOUpdateConfiguration(inContext);
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
-  require_noerr_action(err, exit, 
-                       cloud_if_log("ERROR: activate write flash failed! err=%d", err) );
+  //require_noerr_action(err, exit, 
+  //                     cloud_if_log("ERROR: activate write flash failed! err=%d", err) );
   
   return kNoErr;
   
@@ -251,12 +251,12 @@ OSStatus MVDCloudInterfaceDevAuthorize(mico_Context_t* const inContext,
   require_noerr_action( err, exit, cloud_if_log("ERROR: authorize failed! err=%d", err) );
   
   // write back to flash
-//  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
-//  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
-//          easyCloudContext.service_config_info.userToken, MAX_SIZE_USER_TOKEN);
-//  err = MICOUpdateConfiguration(inContext);
-//  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
-//  require_noerr_action( err, exit, cloud_if_log("ERROR: authorize write flash failed! err=%d", err) );
+  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
+  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
+          easyCloudContext.service_config_info.userToken, MAX_SIZE_USER_TOKEN);
+  //err = MICOUpdateConfiguration(inContext);
+  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+  //require_noerr_action( err, exit, cloud_if_log("ERROR: authorize write flash failed! err=%d", err) );
   
   return kNoErr;
   
@@ -320,7 +320,7 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
           easyCloudContext.service_status.latestRomVersion, 
           strlen(easyCloudContext.service_status.latestRomVersion));
   inContext->appStatus.virtualDevStatus.RecvRomFileSize = easyCloudContext.service_status.bin_file_size;
-  MICOUpdateConfiguration(inContext);
+  //MICOUpdateConfiguration(inContext);
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   
   return kNoErr;
@@ -360,7 +360,7 @@ OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
   //sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, DEFAULT_USER_TOKEN);
   sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, inContext->micoStatus.mac);
   inContext->appStatus.virtualDevStatus.isCloudConnected = false;
-  MICOUpdateConfiguration(inContext);
+  //MICOUpdateConfiguration(inContext);
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   
 exit:
