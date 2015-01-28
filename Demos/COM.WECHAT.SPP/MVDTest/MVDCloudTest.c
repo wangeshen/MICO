@@ -31,6 +31,16 @@
 #define mvd_cloud_test_log_trace() custom_log_trace("MVD_CLOUD_TEST")
 
 
+typedef struct _test_parms_t{
+  mico_Context_t* inContext;
+  uint32_t msg_length;
+  uint32_t period_s;
+  uint32_t interval_ms;
+}test_params_t;
+
+test_params_t test_params;
+
+
 OSStatus MVDCloudTest_StartRecv(const char* device_id,
                                 uint32_t msg_length, 
                                 uint32_t period_s, uint32_t interval_ms)
@@ -326,6 +336,68 @@ exit:
   }
   
   return err;
+}
+
+void mvd_test_send_thread(void* arg)
+{
+  OSStatus err = kUnknownErr;
+  char* sendMsg = NULL;
+  test_params_t *test_params = NULL;
+  uint32_t send_cnt = 0;
+  uint32_t send_ok_cnt = 0;
+  char send_ok_string[64] = {0};
+  
+  test_params = (test_params_t*)arg;
+  sendMsg = (char*)malloc(test_params->msg_length + 1);
+  if(NULL == sendMsg){
+    goto exit;
+  }
+  memset(sendMsg, 'z', test_params->msg_length);
+  sendMsg[test_params->msg_length] = '\0';
+  
+  send_cnt = (test_params->period_s*1000)/test_params->interval_ms;
+  
+  while(send_cnt > 0){
+    err = MVDSendMsg2Cloud(test_params->inContext, NULL, (unsigned char*)sendMsg, test_params->msg_length);
+    if(kNoErr == err){
+      send_ok_cnt++;
+    }
+    send_cnt--;
+    mico_thread_msleep(test_params->interval_ms);
+  }
+  
+  sprintf(send_ok_string, "send_ok_cnt = %d", send_ok_cnt);
+  MVDSendMsg2Device(test_params->inContext, send_ok_string, strlen(send_ok_string));
+  
+  
+exit:
+  if(NULL != sendMsg){
+    free(sendMsg);
+    sendMsg = NULL;
+  }
+  mico_rtos_delete_thread(NULL);
+  return;
+}
+
+OSStatus MVDCloudTest_StartSend(mico_Context_t* inContext,
+                                uint32_t msg_length, 
+                                uint32_t period_s, uint32_t interval_ms)
+{
+  //OSStatus err = kUnknownErr;
+  
+  if((0 == msg_length) || (0 == period_s) || (0 == interval_ms) ||
+     (interval_ms >= (period_s*1000)) || (NULL == inContext)){
+       return kParamErr;
+  }
+  
+  test_params.inContext = inContext;
+  test_params.msg_length = msg_length;
+  test_params.period_s = period_s;
+  test_params.interval_ms = interval_ms;
+  
+  return mico_rtos_create_thread(NULL, 
+                                 MICO_APPLICATION_PRIORITY, 
+                                 "MVDCloudTest_SendThread", mvd_test_send_thread, 0x800, (void*)(&test_params) );
 }
 
 

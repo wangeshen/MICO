@@ -38,8 +38,12 @@
 
 /* test define */
 #define MVD_CLOUD_TEST_RECV_MSG_SIZE             100      // byte
-#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           10      // s
-#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         1000      // ms
+#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           30      // s
+#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         100      // ms
+
+#define MVD_CLOUD_TEST_SEND_MSG_SIZE             100      // byte
+#define MVD_CLOUD_TEST_SEND_MSG_PERIOD           30      // s
+#define MVD_CLOUD_TEST_SEND_MSG_INTERVAL         100      // ms
 
 #define MVD_CLOUD_TEST_RECV_MSG_RATE             0.99     // recv msg count rate >= 99%
 
@@ -50,15 +54,15 @@ static char total_recv_data_cnt_str[64] = {0};
 
 static mico_thread_t mvd_test_thread_handler = NULL;
 
-static OSStatus mvd_test(mico_Context_t *inContext)
+static OSStatus mvd_transfer_test(mico_Context_t *inContext)
 {
   OSStatus err = kUnknownErr;
   
-   /* Cloud recv test */
-  app_log("[MVD_TEST][CLOUD RECV]start");
+  /* Cloud recv test */
+  //app_log("[MVD_TEST][CLOUD RECV]start");
   MVDSendMsg2Device(inContext, 
-                    "[MVD_TEST][CLOUD RECV]start\r\n", 
-                    strlen("[MVD_TEST][CLOUD RECV]start\r\n"));
+                    "[MVD_TEST][CLOUD RECV]start ...\r\n", 
+                    strlen("[MVD_TEST][CLOUD RECV]start ...\r\n"));
   cloud_test_data_cnt = 0;
   err = MVDCloudTest_StartRecv(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
                                MVD_CLOUD_TEST_RECV_MSG_SIZE,
@@ -66,15 +70,18 @@ static OSStatus mvd_test(mico_Context_t *inContext)
                                MVD_CLOUD_TEST_RECV_MSG_INTERVAL);
   require_noerr( err, exit );
   
+  /* start send test at the same time */
+  // server will echo msg when startTest
+//  err = MVDCloudTest_StartSend(inContext,
+//                         MVD_CLOUD_TEST_SEND_MSG_SIZE, 
+//                         MVD_CLOUD_TEST_SEND_MSG_PERIOD,
+//                         MVD_CLOUD_TEST_SEND_MSG_INTERVAL);
+  
   // timeout for stopping test process
-  app_log("[MVD_TEST][CLOUD RECV]testing...");
-  MVDSendMsg2Device(inContext,
-                    "[MVD_TEST][CLOUD RECV]testing...\r\n", 
-                    strlen("[MVD_TEST][CLOUD RECV]testing...\r\n"));
   mico_thread_sleep(MVD_CLOUD_TEST_RECV_MSG_PERIOD+10);
   err = MVDCloudTest_StopRecv(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId);
   require_noerr( err, exit );
-  app_log("[MVD_TEST]CLOUD RECV]stopped");
+  //app_log("[MVD_TEST]CLOUD RECV]stopped");
   MVDSendMsg2Device(inContext,
                     "[MVD_TEST][CLOUD RECV]stopped\r\n", 
                     strlen("[MVD_TEST][CLOUD RECV]stopped\r\n"));
@@ -86,11 +93,13 @@ static OSStatus mvd_test(mico_Context_t *inContext)
   
   if((check_recv_data_len >= cloud_test_data_cnt) && 
      (cloud_test_data_cnt >= (uint64_t)((long)check_recv_data_len * MVD_CLOUD_TEST_RECV_MSG_RATE))){
-    err = MVDSendMsg2Device(inContext,
-                            "[MVD_TEST][CLOUD RECV]test OK!\r\n", 
-                            strlen("[MVD_TEST][CLOUD RECV]test OK!\r\n"));
-  }
+       //app_log("[MVD_TEST][CLOUD RECV]test OK!");
+       err = MVDSendMsg2Device(inContext,
+                               "[MVD_TEST][CLOUD RECV]test OK!\r\n", 
+                               strlen("[MVD_TEST][CLOUD RECV]test OK!\r\n"));
+     }
   else{
+    //app_log("[MVD_TEST][CLOUD RECV]test FAILED!");
     err = MVDSendMsg2Device(inContext,
                             "[MVD_TEST][CLOUD RECV]test FAILED!\r\n", 
                             strlen("[MVD_TEST][CLOUD RECV]test FAILED!\r\n"));
@@ -113,9 +122,6 @@ void mvd_test_thread(void* arg){
   micoMemInfo_t *memInfo = NULL;
   char freeMemString[64] = {0};
   
-  /* get device_id */
-  app_log("[MVD_TEST]Device_id: %s", MVDGetDeviceID(inContext));
-  
   while(1){
     /* system memory check */
     memInfo = mico_memory_info();
@@ -124,6 +130,8 @@ void mvd_test_thread(void* arg){
     /* check cloud status && send msg test */
     if(MVDIsActivated(inContext)){
       app_log("[MVD_TEST]Device status: activated");
+      /* get device_id */
+      app_log("[MVD_TEST]Device_id: %s", MVDGetDeviceID(inContext));
       if(MVDCloudIsConnect(inContext)){
         if(false == isConnected){
           app_log("[MVD_TEST]Cloud status: connected");
@@ -150,7 +158,9 @@ void mvd_test_thread(void* arg){
           }
           isConnected = true;
           
-          err = mvd_test(inContext);
+          // data transfer test
+          //err = mvd_transfer_test(inContext);
+          
           memInfo = mico_memory_info();
           sprintf(freeMemString, "[MVD_TEST]System memory: %d\r\n", memInfo->free_memory);
           err = MVDSendMsg2Device(inContext, (unsigned char*)freeMemString, strlen(freeMemString));

@@ -44,6 +44,12 @@
 /* device auto activate mechanism, comment out if not need */
 #define DEVICE_AUTO_ACTIVATE_ENABLE      1
 
+/* device login_id/dev_pass check */
+//#define MVD_LOGINID_DEVPASS_CHECK          1
+
+/* device OTA version check */
+//#define MVD_FW_UPDAETE_VERSION_CHECK       1
+
 /* MQTT topic sub-level */
 #define PUBLISH_TOPIC_CHANNEL_STATUS     "status"
 

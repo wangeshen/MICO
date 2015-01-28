@@ -127,7 +127,7 @@ void MVDMainThread(void *arg)
           mvd_log("[MVD]Device activate by MVD [OK]");
         }
         else{
-          mvd_log("[MVD]Device activate by MVD [FAILED], will retry in %ds...", 1);
+          mvd_log("[MVD]Device activate by MVD [FAILED], will retry in %ds ...", 1);
         }
       }
 #endif
@@ -164,6 +164,7 @@ void MVDRestoreDefault(mico_Context_t* const context)
   sprintf(context->flashContentInRam.appConfig.virtualDevConfig.devPasswd, DEFAULT_DEV_PASSWD);
   //sprintf(context->flashContentInRam.appConfig.virtualDevConfig.userToken, DEFAULT_USER_TOKEN);
   sprintf(context->flashContentInRam.appConfig.virtualDevConfig.userToken, context->micoStatus.mac);
+  mvd_log("[MVD]Device local config reset [OK]");
 }
 
 OSStatus MVDInit(mico_Context_t* const inContext)
@@ -188,6 +189,8 @@ OSStatus MVDInit(mico_Context_t* const inContext)
   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "MVD main", 
                                 MVDMainThread, STACK_SIZE_MVD_MAIN_THREAD, 
                                 inContext );
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: virtual device main thread create failed!") );
   
 exit:
   return err;
@@ -352,13 +355,20 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   mvd_log_trace();
   OSStatus err = kUnknownErr;
   
-  cloud_test_data_cnt += inBufLen;
-  mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
-  //err = MVDCloudInterfaceSend(inBuf, inBufLen); // response to cloud
-  //err = kNoErr;
-  
-  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
-  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  /////////////////////////////// for test//////////////////////////////////////
+  if('z' != inBuf[0]){
+    // recv data "xxx..."
+    cloud_test_data_cnt += inBufLen;
+    mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
+    //err = MVDCloudInterfaceSend(inBuf, inBufLen); // response to cloud
+    //err = kNoErr;
+    //////////////////////////////////////////////////////////////////////////////
+  }
+  else {
+    // echo data "zzz..."
+    err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
+    require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  }
   
 exit:
   return err;
@@ -370,6 +380,8 @@ OSStatus MVDDeviceMsgProcess(mico_Context_t* const context,
 {
   mvd_log_trace();
   OSStatus err = kUnknownErr;
+  
+  //////////////////////////////////for test///////////////////////////////////
   MVDOTARequestData_t OTAData;
   MVDDownloadFileRequestData_t devGetFileRequestData;
   json_object *new_obj = NULL;
@@ -421,6 +433,7 @@ OSStatus MVDDeviceMsgProcess(mico_Context_t* const context,
 //    err = MVDDevInterfaceSend("Update OK!", strlen("Update OK!"));
 //    require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
   }
+  //////////////////////////////////////////////////////////////////////////////
   else{
     err = MVDCloudInterfaceSend(inBuf, inBufLen);  // transfer raw data to Cloud
     require_noerr_action( err, exit, mvd_log("ERROR: send to cloud error! err=%d", err) );
