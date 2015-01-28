@@ -24,6 +24,7 @@
 
 //#include "MICODefine.h"
 #include "Common.h"
+#include "MicoVirtualDevice.h"
 
 /* test params */
 #define EASYCLOUD_TEST_SERVER               "api.easylink.io"
@@ -38,6 +39,11 @@ OSStatus MVDCloudTest_StartRecv(const char* device_id,
                                 uint32_t period_s, uint32_t interval_ms);
 // stop server test
 OSStatus MVDCloudTest_StopRecv(const char* device_id);
+
+// start send data test
+OSStatus MVDCloudTest_StartSend(mico_Context_t* inContext,
+                                uint32_t msg_length, 
+                                uint32_t period_s, uint32_t interval_ms);
 
 #endif
 
