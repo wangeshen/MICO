@@ -3041,7 +3041,6 @@
         <option>
           <name>CCDefines</name>
           <state>USE_STDPERIPH_DRIVER</state>
-          <state>DEBUG</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -4027,6 +4026,7 @@
         <name>$PROJ_DIR$\..\..\..\Library\EasyCloud\MicoEasyCloudService_20150128_v0.2.8_debug.a</name>
         <excluded>
           <configuration>EMW3162</configuration>
+          <configuration>EMW3165</configuration>
         </excluded>
       </file>
       <file>
