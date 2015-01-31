@@ -42,8 +42,8 @@
 
 
 /* Wi-Fi configuration mode */
-//#define MICO_CONFIG_MODE CONFIG_MODE_EASYLINK_PLUS
-#define MICO_CONFIG_MODE CONFIG_MODE_AIRKISS
+#define MICO_CONFIG_MODE CONFIG_MODE_EASYLINK
+//#define MICO_CONFIG_MODE CONFIG_MODE_AIRKISS
 
 /*User provided configurations*/
 #define CONFIGURATION_VERSION               0x00000001 // if default configuration is changed, update this number
