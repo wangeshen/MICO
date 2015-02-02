@@ -35,7 +35,7 @@
 #define UART_ONE_PACKAGE_LENGTH             1024
 #define UART_BUFFER_LENGTH                  2048
    
-#define STACK_SIZE_USART_RECV_THREAD        0x800
+#define STACK_SIZE_USART_RECV_THREAD        0xC00
 
 
 /*******************************************************************************

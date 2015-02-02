@@ -41,6 +41,7 @@
 #define DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU    "[MVD]Cloud status: disconnected\r\n"
 
 extern uint64_t cloud_test_data_cnt;
+extern uint64_t cloud_test_echo_data_cnt;
 
 static bool _is_wifi_station_on = false;
 
@@ -88,15 +89,14 @@ void MVDMainThread(void *arg)
     if(inContext->appStatus.virtualDevStatus.isCloudConnected){
       if (!connected){
         mvd_log("[MVD]Cloud status: connected");
-        MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU, 
-                                   strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU));
+        //MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU, 
+        //                           strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU));
         MVDCloudInterfaceSendtoChannel(PUBLISH_TOPIC_CHANNEL_STATUS,
                                      DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD, 
                                      strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD));
         
         connected = true;
-        // exit when cloud connected
-        //break;
+        //break; // exit when cloud connected
       }
     }
     else{
@@ -205,6 +205,11 @@ bool MVDCloudIsConnect(mico_Context_t* const context)
   if(NULL == context){
     return false;
   }
+  // must be activated first
+  if(!MVDIsActivated(context)){
+    return false;
+  }
+  
   return context->appStatus.virtualDevStatus.isCloudConnected;
 }
 
@@ -366,6 +371,7 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   }
   else {
     // echo data "zzz..."
+    cloud_test_echo_data_cnt += inBufLen;
     err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
     require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
   }
@@ -382,11 +388,18 @@ OSStatus MVDDeviceMsgProcess(mico_Context_t* const context,
   OSStatus err = kUnknownErr;
   
   //////////////////////////////////for test///////////////////////////////////
+  MVDActivateRequestData_t devDefaultActivateData;
+  MVDAuthorizeRequestData_t devDefaultAuthorizeData;
+  MVDResetRequestData_t devCloudResetData;
   MVDOTARequestData_t OTAData;
   MVDDownloadFileRequestData_t devGetFileRequestData;
+  
   json_object *new_obj = NULL;
   uint8_t recv_param_check = 0;  // must recv all three params
   
+  memset((void*)(&devDefaultActivateData), 0, sizeof(devDefaultActivateData));
+  memset((void*)(&devDefaultAuthorizeData), 0, sizeof(devDefaultAuthorizeData));
+  memset((void*)(&devCloudResetData), 0, sizeof(devCloudResetData));
   memset((void*)(&OTAData), 0, sizeof(OTAData));
   memset((void*)&devGetFileRequestData, 0, sizeof(devGetFileRequestData));
   
@@ -431,7 +444,70 @@ OSStatus MVDDeviceMsgProcess(mico_Context_t* const context,
     require_noerr_action( err, exit, mvd_log("ERROR: MVDFirmwareUpdate error! err=%d", err) );
     // notify
 //    err = MVDDevInterfaceSend("Update OK!", strlen("Update OK!"));
-//    require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+    //    require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  }
+    else if(0 == strncmp("Activate", (const char*)inBuf, inBufLen)){
+    // authorize
+    mvd_log("Device Activate ...");
+    memset((void*)&devDefaultActivateData, 0, sizeof(devDefaultActivateData));
+    strncpy(devDefaultActivateData.loginId,
+            context->flashContentInRam.appConfig.virtualDevConfig.loginId,
+            MAX_SIZE_LOGIN_ID);
+    strncpy(devDefaultActivateData.devPasswd,
+            context->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+            MAX_SIZE_DEV_PASSWD);
+    strncpy(devDefaultActivateData.user_token,
+            "mxchip-authorize-test",
+            MAX_SIZE_USER_TOKEN);
+    err = MVDCloudInterfaceDevActivate(context, devDefaultActivateData);
+    if(kNoErr == err){
+      mvd_log("Device Activate [OK]");
+    }
+    else{
+      mvd_log("Device Activate [FAILED]");
+    }
+  }
+  else if(0 == strncmp("Authorize", (const char*)inBuf, inBufLen)){
+    // authorize
+    mvd_log("Device authorize ...");
+    memset((void*)&devDefaultAuthorizeData, 0, sizeof(devDefaultAuthorizeData));
+    strncpy(devDefaultAuthorizeData.loginId,
+            context->flashContentInRam.appConfig.virtualDevConfig.loginId,
+            MAX_SIZE_LOGIN_ID);
+    strncpy(devDefaultAuthorizeData.devPasswd,
+            context->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+            MAX_SIZE_DEV_PASSWD);
+    strncpy(devDefaultAuthorizeData.user_token,
+            "mxchip-authorize-test",
+            MAX_SIZE_USER_TOKEN);
+    err = MVDCloudInterfaceDevAuthorize(context, devDefaultAuthorizeData);
+    if(kNoErr == err){
+      mvd_log("Device authorize [OK]");
+    }
+    else{
+      mvd_log("Device authorize [FAILED]");
+    }
+  }
+  else if(0 == strncmp("Reset", (const char*)inBuf, inBufLen)){
+    // authorize
+    mvd_log("Device Cloud Reset ...");
+    memset((void*)&devCloudResetData, 0, sizeof(devCloudResetData));
+    strncpy(devCloudResetData.loginId,
+            context->flashContentInRam.appConfig.virtualDevConfig.loginId,
+            MAX_SIZE_LOGIN_ID);
+    strncpy(devCloudResetData.devPasswd,
+            context->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+            MAX_SIZE_DEV_PASSWD);
+    strncpy(devCloudResetData.user_token,
+            "mxchip-reset-test",
+            MAX_SIZE_USER_TOKEN);
+    err = MVDCloudInterfaceResetCloudDevInfo(context, devCloudResetData);
+    if(kNoErr == err){
+      mvd_log("Device Cloud Reset [OK]");
+    }
+    else{
+      mvd_log("Device Cloud Reset [FAILED]");
+    }
   }
   //////////////////////////////////////////////////////////////////////////////
   else{

@@ -406,7 +406,7 @@ OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
   sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, DEFAULT_DEV_PASSWD);
   //sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, DEFAULT_USER_TOKEN);
   sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, inContext->micoStatus.mac);
-  inContext->appStatus.virtualDevStatus.isCloudConnected = false;
+  //inContext->appStatus.virtualDevStatus.isCloudConnected = false;
   MICOUpdateConfiguration(inContext);
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   
@@ -471,3 +471,18 @@ OSStatus MVDCloudInterfaceGetFile(mico_Context_t* const inContext,
 exit:
   return err;
 }
+
+//OSStatus MVDCloudInterfaceStop(mico_Context_t* const inContext)
+//{  
+//  cloud_if_log_trace();
+//  OSStatus err = kUnknownErr;
+//  
+//  cloud_if_log("MVDCloudInterfaceStop");
+//  // stop EasyCloud service
+//  err = EasyCloudServiceStop(&easyCloudContext);
+//  require_noerr_action( err, exit, 
+//                       cloud_if_log("ERROR: EasyCloudServiceStop failed! err=%d", err) );
+//  
+//exit:
+//  return err;
+//}

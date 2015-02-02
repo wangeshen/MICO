@@ -60,4 +60,6 @@ OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
 OSStatus MVDCloudInterfaceGetFile(mico_Context_t* const inContext,
                                   MVDDownloadFileRequestData_t devGetFileRequestData);
 
+//OSStatus MVDCloudInterfaceStop(mico_Context_t* const inContext);
+
 #endif /* __MICO_MVDCLOUDINTERFACES_H_*/

@@ -24,7 +24,7 @@
 
 #include "JSON-C/json.h"
 #include "SocketUtils.h"
-#include "HTTPUtils.h"
+//#include "HTTPUtils.h"
 #include "StringUtils.h"
 
 #include "EasyCloudService.h"
@@ -69,10 +69,10 @@ typedef enum {
 static mico_thread_t easyCloudServiceThreadHandle = NULL;
 
 #ifdef MICO_FLASH_FOR_UPDATE
-extern volatile uint32_t flashStorageAddress;
-extern char rom_file_md5[32];
-extern volatile bool writeToFlash;
-extern volatile uint64_t rom_wrote_size;
+//extern volatile uint32_t flashStorageAddress;
+//extern volatile bool writeToFlash;
+//extern volatile uint64_t rom_wrote_size;
+//extern char rom_file_md5[32];
 #endif
 
 /*******************************************************************************
@@ -93,7 +93,7 @@ static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
                                 char out_bin_md5[MAX_SIZE_FILE_MD5]);
 
 static OSStatus _parseRomVersionResponseMessage(int fd,
-                              HTTPHeader_t* inHeader, 
+                              ECS_HTTPHeader_t* inHeader, 
                               char out_version[MAX_SIZE_FW_VERSION],
                               char out_bin_file[MAX_SIZE_FILE_PATH],
                               char out_bin_md5[MAX_SIZE_FILE_MD5]);
@@ -116,7 +116,7 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
                                           char out_device_id[MAX_SIZE_DEVICE_ID], 
                                           char out_master_device_key[MAX_SIZE_DEVICE_KEY]);
 
-static OSStatus _parseResponseMessage(int fd, HTTPHeader_t* inHeader, 
+static OSStatus _parseResponseMessage(int fd, ECS_HTTPHeader_t* inHeader, 
                                       char out_device_id[MAX_SIZE_DEVICE_ID], 
                                       char out_master_device_key[MAX_SIZE_DEVICE_KEY]);
 
@@ -464,7 +464,7 @@ OSStatus EasyCloudDeviceReset(easycloud_service_context_t* const context)
   /* create device reset http request data */
   uint8_t *httpRequestData = NULL;
   size_t httpRequestDataLen = 0;
-  HTTPHeader_t *httpHeader = NULL;
+  ECS_HTTPHeader_t *httpHeader = NULL;
   
   char *json_str = NULL;
   size_t json_str_len = 0;
@@ -492,9 +492,9 @@ OSStatus EasyCloudDeviceReset(easycloud_service_context_t* const context)
   json_str_len = strlen(json_str);
   easycloud_service_log("json_str=%s", json_str);
   
-  httpHeader = HTTPHeaderCreate();
+  httpHeader = ECS_HTTPHeaderCreate();
   require_action( httpHeader, exit, err = kNoMemoryErr );
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   
   //create tcp connect
   easycloud_service_log("tcp client start to connect...");
@@ -517,10 +517,10 @@ OSStatus EasyCloudDeviceReset(easycloud_service_context_t* const context)
   
   // send request data
   easycloud_service_log("tcp client send activate request...");
-  err = CreateHTTPMessageEx(kHTTPPostMethod, 
+  err = ECS_CreateHTTPMessageEx(ECS_kHTTPPostMethod, 
                             context->service_config_info.cloudServerDomain,
                             (char*)DEFAULT_DEVICE_RESET_URL,
-                            kMIMEType_JSON, 
+                            ECS_kMIMEType_JSON, 
                             (uint8_t*)json_str, json_str_len,
                             &httpRequestData, &httpRequestDataLen);
   require_noerr( err, exit );
@@ -536,12 +536,13 @@ OSStatus EasyCloudDeviceReset(easycloud_service_context_t* const context)
   // get http response
   FD_ZERO(&readfds);
   FD_SET(remoteTcpClient_fd, &readfds);
+  err = kSelectorErr;
   err = select(1, &readfds, NULL, NULL, &t);
   require(err >= 1, exit);
   //easycloud_service_log("select return ok.");
   
   if (FD_ISSET(remoteTcpClient_fd, &readfds)) {
-    err = SocketReadHTTPHeader( remoteTcpClient_fd, httpHeader );             
+    err = ECS_SocketReadHTTPHeader( remoteTcpClient_fd, httpHeader );             
     switch ( err )
     {
     case kNoErr:
@@ -549,20 +550,20 @@ OSStatus EasyCloudDeviceReset(easycloud_service_context_t* const context)
       //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
       // statusCode check
-      if(kStatusOK != httpHeader->statusCode){
+      if(ECS_kStatusOK != httpHeader->statusCode){
         easycloud_service_log("ERROR: server response statusCode=%d", httpHeader->statusCode);
         err = kRequestErr;
         goto exit;
       }
       
       // Read the rest of the HTTP body if necessary
-      err = SocketReadHTTPBody( remoteTcpClient_fd, httpHeader );
+      err = ECS_SocketReadHTTPBody( remoteTcpClient_fd, httpHeader );
       require_noerr(err, exit);
       easycloud_service_log("read httpBody OK!");
       easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
       // parse response status
-      if (kStatusOK != httpHeader->statusCode){
+      if (ECS_kStatusOK != httpHeader->statusCode){
         err = kResponseErr;
         goto exit;
       }
@@ -594,7 +595,7 @@ OSStatus EasyCloudDeviceReset(easycloud_service_context_t* const context)
   }
 
 exit_success:
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
   if(remoteTcpClient_fd != -1){
     close(remoteTcpClient_fd);
@@ -608,7 +609,7 @@ exit_success:
   
 exit:
   easycloud_service_log("Exit: EasyCloud tcp client exit with err = %d", err);
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
   if(remoteTcpClient_fd != -1){
     close(remoteTcpClient_fd);
@@ -801,7 +802,7 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
   /* create activate or authorize http request data */
   uint8_t *httpRequestData = NULL;
   size_t httpRequestDataLen = 0;
-  HTTPHeader_t *httpHeader = NULL;
+  ECS_HTTPHeader_t *httpHeader = NULL;
   
   char *json_str = NULL;
   size_t json_str_len = 0;
@@ -820,9 +821,9 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
   
   easycloud_service_log("request type(activated=0, authorize=1) = [%d].", request_type);
   
-  httpHeader = HTTPHeaderCreate();
+  httpHeader = ECS_HTTPHeaderCreate();
   require_action( httpHeader, exit, err = kNoMemoryErr );
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   
   //create tcp connect
   easycloud_service_log("tcp client start to connect...");
@@ -845,9 +846,9 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
   
   // send request data
   easycloud_service_log("tcp client send activate request...");
-  err = CreateHTTPMessageEx(kHTTPPostMethod, 
+  err = ECS_CreateHTTPMessageEx(ECS_kHTTPPostMethod, 
                             host, request_url,
-                            kMIMEType_JSON, 
+                            ECS_kMIMEType_JSON, 
                             (uint8_t*)json_str, json_str_len,
                             &httpRequestData, &httpRequestDataLen);
   require_noerr( err, exit );
@@ -868,7 +869,7 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
   //easycloud_service_log("select return ok.");
   
   if (FD_ISSET(remoteTcpClient_fd, &readfds)) {
-    err = SocketReadHTTPHeader( remoteTcpClient_fd, httpHeader );             
+    err = ECS_SocketReadHTTPHeader( remoteTcpClient_fd, httpHeader );             
     switch ( err )
     {
     case kNoErr:
@@ -876,7 +877,7 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
       //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
       // statusCode check
-      if(kStatusOK != httpHeader->statusCode){
+      if(ECS_kStatusOK != httpHeader->statusCode){
         easycloud_service_log("ERROR: server response statusCode=%d", 
                               httpHeader->statusCode);
         err = kRequestErr;
@@ -884,14 +885,14 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
       }
       
       // Read the rest of the HTTP body if necessary
-      err = SocketReadHTTPBody( remoteTcpClient_fd, httpHeader );
+      err = ECS_SocketReadHTTPBody( remoteTcpClient_fd, httpHeader );
       require_noerr(err, exit);
       easycloud_service_log("read httpBody OK!");
       easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
       // parse recived extra data to get devicd_id && master_device_key.
       err = _parseResponseMessage( remoteTcpClient_fd, httpHeader, out_device_id, out_master_device_key );
-      HTTPHeaderClear(httpHeader);  // Reuse HTTPHeader
+      ECS_HTTPHeaderClear(httpHeader);  // Reuse HTTPHeader
       easycloud_service_log("out_device_id=%s", out_device_id);
       easycloud_service_log("out_master_device_key=%s", out_master_device_key);
       require_noerr( err, exit );
@@ -924,7 +925,7 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
   }
 
 exit_success:
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
   if(remoteTcpClient_fd != -1){
     close(remoteTcpClient_fd);
@@ -938,7 +939,7 @@ exit_success:
   
 exit:
   easycloud_service_log("Exit: EasyCloud tcp client exit with err = %d", err);
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
   if(remoteTcpClient_fd != -1){
     close(remoteTcpClient_fd);
@@ -1023,22 +1024,22 @@ static OSStatus get_rom_data(char *host, uint16_t port,
   
   // select timeout
   struct timeval_t t;
-  t.tv_sec = 15;
+  t.tv_sec = 10;
   t.tv_usec = 0;
   
   /* create activate or authorize http request data */
   uint8_t *httpRequestData = NULL;
   size_t httpRequestDataLen = 0;
-  HTTPHeader_t *httpHeader = NULL;
+  ECS_HTTPHeader_t *httpHeader = NULL;
   
   easycloud_service_log("request: [%s]", bin_file);
     
   //strip http://host from bin_file
   request_url = strstr(bin_file, host) + strlen(host);
   
-  httpHeader = HTTPHeaderCreate();
+  httpHeader = ECS_HTTPHeaderCreate();
   require_action( httpHeader, exit, err = kNoMemoryErr );
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   
   while(1){
     if(-1 == tcpClient_fd){
@@ -1047,21 +1048,21 @@ static OSStatus get_rom_data(char *host, uint16_t port,
     }
     else{
       // format get data request
-      if(getFlashStorageAddress() > 0){
+      if(ECS_getFlashStorageAddress() > 0){
         // range request data
         easycloud_service_log("tcp client send get range data request...");
-        err = CreateHTTPMessageWithRange(kHTTPGetMethod, 
+        err = ECS_CreateHTTPMessageWithRange(ECS_kHTTPGetMethod  , 
                                   host, request_url,
-                                  kMIMEType_JSON, 
-                                  getFlashStorageAddress(),
+                                  ECS_kMIMEType_JSON, 
+                                  ECS_getFlashStorageAddress(),
                                   NULL, 0,
                                   &httpRequestData, &httpRequestDataLen);
       }else{
         // get full file request data
         easycloud_service_log("tcp client send get full data request...");
-        err = CreateHTTPMessageEx(kHTTPGetMethod, 
+        err = ECS_CreateHTTPMessageEx(ECS_kHTTPGetMethod  , 
                                   host, request_url,
-                                  kMIMEType_JSON, 
+                                  ECS_kMIMEType_JSON, 
                                   NULL, 0,
                                   &httpRequestData, &httpRequestDataLen);
       }
@@ -1091,7 +1092,7 @@ static OSStatus get_rom_data(char *host, uint16_t port,
       //easycloud_service_log("select return ok.");
       
       if (FD_ISSET(tcpClient_fd, &readfds)) {
-        err = SocketReadHTTPHeaderEx( tcpClient_fd, httpHeader );             
+        err = ECS_SocketReadHTTPHeaderEx( tcpClient_fd, httpHeader );             
         switch ( err )
         {
         case kNoErr:
@@ -1099,7 +1100,7 @@ static OSStatus get_rom_data(char *host, uint16_t port,
           easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
           
           // statusCode check
-          if((kStatusOK != httpHeader->statusCode) && (kStatusPartialContent != httpHeader->statusCode)){
+          if((ECS_kStatusOK != httpHeader->statusCode) && (ECS_kStatusPartialContent != httpHeader->statusCode)){
             easycloud_service_log("ERROR: server response statusCode=%d", 
                                   httpHeader->statusCode);
             err = kRequestErr;
@@ -1107,7 +1108,7 @@ static OSStatus get_rom_data(char *host, uint16_t port,
           }
           
           // Read the rest of the HTTP body if necessary
-          err = SocketReadHTTPBodyEx( tcpClient_fd, httpHeader );
+          err = ECS_SocketReadHTTPBodyEx( tcpClient_fd, httpHeader );
           // breakpoint retry
           if(kConnectionErr == err){
            goto ReTry;
@@ -1116,16 +1117,16 @@ static OSStatus get_rom_data(char *host, uint16_t port,
           
           easycloud_service_log("read httpBody OK!");
           //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
-          HTTPHeaderClear(httpHeader);  // Reuse HTTPHeader
+          ECS_HTTPHeaderClear(httpHeader);  // Reuse HTTPHeader
           
           // check md5
-          if(0 != strncmp(bin_md5, rom_file_md5, strlen(bin_md5))){
+          if(0 != strncmp(bin_md5, ECS_getRomFileMD5_32(), strlen(bin_md5))){
             easycloud_service_log("ERROR: rom md5 checksum err!!");
             err = kChecksumErr;
             goto ReTry;
           }
           //return file size
-          *out_bin_file_size = rom_wrote_size;
+          *out_bin_file_size = ECS_getDownloadedFileSize();
           easycloud_service_log("get rom data done, file_size=%lld", *out_bin_file_size);
           goto exit_success;
           break;
@@ -1155,45 +1156,47 @@ static OSStatus get_rom_data(char *host, uint16_t port,
     continue;
     
   ReTry:
-    HTTPHeaderClear( httpHeader );
+    ECS_HTTPHeaderClear( httpHeader );
     if(tcpClient_fd != -1){
       close(tcpClient_fd);
       tcpClient_fd = -1;
     }
-    require(reTryCount < 15, exit);
+    require(reTryCount < 10, exit);
     reTryCount++;
     mico_thread_sleep(3);
   }
   
 exit_success:
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
   if(tcpClient_fd != -1){
     close(tcpClient_fd);
     tcpClient_fd = -1;
   }
   easycloud_service_log("get_rom_data: success!");
-  if(writeToFlash){
-    MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
-    flashStorageAddress = UPDATE_START_ADDRESS;
-    writeToFlash = false;
-  }
+//  if(writeToFlash){
+//    MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
+//    flashStorageAddress = UPDATE_START_ADDRESS;
+//    writeToFlash = false;
+//  }
+  ECS_FlashWriteDone();
   return kNoErr;
   
 exit:
   *out_bin_file_size = 0;
   easycloud_service_log("Exit: EasyCloud tcp client exit with err = %d", err);
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
   if(tcpClient_fd != -1){
     close(tcpClient_fd);
     tcpClient_fd = -1;
   }
-  if(writeToFlash){
-    MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
-    flashStorageAddress = UPDATE_START_ADDRESS;
-    writeToFlash = false;
-  }
+//  if(writeToFlash){
+//    MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
+//    flashStorageAddress = UPDATE_START_ADDRESS;
+//    writeToFlash = false;
+//  }
+  ECS_FlashWriteDone();
   
   return err;
 }
@@ -1217,13 +1220,13 @@ static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
   /* create activate or authorize http request data */
   uint8_t *httpRequestData = NULL;
   size_t httpRequestDataLen = 0;
-  HTTPHeader_t *httpHeader = NULL;
+  ECS_HTTPHeader_t *httpHeader = NULL;
   
   easycloud_service_log("request: [%s]", request_url);
   
-  httpHeader = HTTPHeaderCreate();
+  httpHeader = ECS_HTTPHeaderCreate();
   require_action( httpHeader, exit, err = kNoMemoryErr );
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   
   //create tcp connect
   easycloud_service_log("tcp client start to connect...");
@@ -1246,9 +1249,9 @@ static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
   
   // send request data
   easycloud_service_log("tcp client send activate request...");
-  err = CreateHTTPMessageEx(kHTTPGetMethod, 
+  err = ECS_CreateHTTPMessageEx(ECS_kHTTPGetMethod  , 
                             host, request_url,
-                            kMIMEType_JSON, 
+                            ECS_kMIMEType_JSON, 
                             NULL, 0,
                             &httpRequestData, &httpRequestDataLen);
   require_noerr( err, exit );
@@ -1269,7 +1272,7 @@ static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
   //easycloud_service_log("select return ok.");
   
   if (FD_ISSET(tcpClient_fd, &readfds)) {
-    err = SocketReadHTTPHeader( tcpClient_fd, httpHeader );             
+    err = ECS_SocketReadHTTPHeader( tcpClient_fd, httpHeader );             
     switch ( err )
     {
     case kNoErr:
@@ -1277,7 +1280,7 @@ static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
       //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
       // statusCode check
-      if(kStatusOK != httpHeader->statusCode){
+      if(ECS_kStatusOK != httpHeader->statusCode){
         easycloud_service_log("ERROR: server response statusCode=%d", 
                               httpHeader->statusCode);
         err = kRequestErr;
@@ -1285,7 +1288,7 @@ static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
       }
       
       // Read the rest of the HTTP body if necessary
-      err = SocketReadHTTPBody( tcpClient_fd, httpHeader );
+      err = ECS_SocketReadHTTPBody( tcpClient_fd, httpHeader );
       require_noerr(err, exit);
       easycloud_service_log("read httpBody OK!");
       easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
@@ -1294,7 +1297,7 @@ static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
       err = _parseRomVersionResponseMessage( tcpClient_fd, httpHeader, 
                                             out_version, 
                                             out_bin_file, out_bin_md5 );
-      HTTPHeaderClear(httpHeader);  // Reuse HTTPHeader
+      ECS_HTTPHeaderClear(httpHeader);  // Reuse HTTPHeader
       require_noerr( err, exit );
       
       easycloud_service_log("get rom version done!");
@@ -1325,7 +1328,7 @@ static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
   }
 
 exit_success:
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
   if(tcpClient_fd != -1){
     close(tcpClient_fd);
@@ -1335,7 +1338,7 @@ exit_success:
   
 exit:
   easycloud_service_log("Exit: EasyCloud tcp client exit with err = %d", err);
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
   if(tcpClient_fd != -1){
     close(tcpClient_fd);
@@ -1347,7 +1350,7 @@ exit:
 
 
 static OSStatus _parseResponseMessage(int fd,
-                                      HTTPHeader_t* inHeader, 
+                                      ECS_HTTPHeader_t* inHeader, 
                                       char out_device_id[MAX_SIZE_DEVICE_ID],
                                       char out_master_device_key[MAX_SIZE_DEVICE_KEY])
 {
@@ -1358,10 +1361,10 @@ static OSStatus _parseResponseMessage(int fd,
     easycloud_service_log_trace();
 
     switch(inHeader->statusCode){
-      case kStatusOK:
+      case ECS_kStatusOK:
         //easycloud_service_log("cloud server respond activate status OK!");
         //get content-type for json format data
-        err = HTTPGetHeaderField(inHeader->buf, 
+        err = ECS_HTTPGetHeaderField(inHeader->buf, 
                                  inHeader->len, 
                                  "Content-Type", 
                                  NULL, NULL, 
@@ -1369,7 +1372,7 @@ static OSStatus _parseResponseMessage(int fd,
                                  NULL );
         require_noerr(err, exit);
           
-        if( strnicmpx( value, strlen(kMIMEType_JSON), kMIMEType_JSON ) == 0 ){
+        if( strnicmpx( value, strlen(ECS_kMIMEType_JSON), ECS_kMIMEType_JSON ) == 0 ){
           //easycloud_service_log("JSON data received!");
           // parse json data
           err = _configIncommingJsonMessage(inHeader->extraDataPtr,
@@ -1430,7 +1433,7 @@ static OSStatus _configIncommingJsonMessage(const char *input,
   json_object_put(new_obj);
   
   // whether got all 2 param(device_id, key)
-  if(2 == response_data_param_cnt){
+  if(1 <= response_data_param_cnt){
     err = kNoErr;
   }
   else{
@@ -1442,7 +1445,7 @@ exit:
 }
 
 static OSStatus _parseRomVersionResponseMessage(int fd,
-                              HTTPHeader_t* inHeader, 
+                              ECS_HTTPHeader_t* inHeader, 
                               char out_version[MAX_SIZE_FW_VERSION],
                               char out_bin_file[MAX_SIZE_FILE_PATH],
                               char out_bin_md5[MAX_SIZE_FILE_MD5])
@@ -1454,10 +1457,10 @@ static OSStatus _parseRomVersionResponseMessage(int fd,
     easycloud_service_log_trace();
 
     switch(inHeader->statusCode){
-      case kStatusOK:
+      case ECS_kStatusOK:
         //easycloud_service_log("cloud server respond activate status OK!");
         //get content-type for json format data
-        err = HTTPGetHeaderField(inHeader->buf, 
+        err = ECS_HTTPGetHeaderField(inHeader->buf, 
                                  inHeader->len, 
                                  "Content-Type", 
                                  NULL, NULL, 
@@ -1465,7 +1468,7 @@ static OSStatus _parseRomVersionResponseMessage(int fd,
                                  NULL );
         require_noerr(err, exit);
           
-        if( strnicmpx( value, strlen(kMIMEType_JSON), kMIMEType_JSON ) == 0 ){
+        if( strnicmpx( value, strlen(ECS_kMIMEType_JSON), ECS_kMIMEType_JSON ) == 0 ){
           //easycloud_service_log("JSON data received!");
           // parse json data
           err = _configRomVersionIncommingJsonMessage(inHeader->extraDataPtr,
@@ -1594,7 +1597,7 @@ static OSStatus calculate_device_token(char *bssid, char *product_key,
   }
   
   //convert hex data to hex string
-  ptoken32 = DataToHexStringLowercase(device_token_16,  sizeof(device_token_16));
+  ptoken32 = ECS_DataToHexStringLowercase(device_token_16,  sizeof(device_token_16));
   //easycloud_service_log("out_device_token[%d]=%s", strlen(ptoken32), ptoken32);
   
   if (NULL != ptoken32){

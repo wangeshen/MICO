@@ -326,13 +326,13 @@ int application_start(void)
   mico_log("Wi-Fi driver version %s, mac %s", wifi_ver, context->micoStatus.mac);
 
   /*Start system monotor thread*/
-//  err = MICOStartSystemMonitor(context);
-//  require_noerr_action( err, exit, mico_log("ERROR: Unable to start the system monitor.") );
-//
-//  err = MICORegisterSystemMonitor(&mico_monitor, APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000);
-//  require_noerr( err, exit );
-//  mico_init_timer(&_watchdog_reload_timer,APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000 - 100, _watchdog_reload_timer_handler, NULL);
-//  mico_start_timer(&_watchdog_reload_timer);
+  err = MICOStartSystemMonitor(context);
+  require_noerr_action( err, exit, mico_log("ERROR: Unable to start the system monitor.") );
+
+  err = MICORegisterSystemMonitor(&mico_monitor, APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000);
+  require_noerr( err, exit );
+  mico_init_timer(&_watchdog_reload_timer,APPLICATION_WATCHDOG_TIMEOUT_SECONDS*1000 - 100, _watchdog_reload_timer_handler, NULL);
+  mico_start_timer(&_watchdog_reload_timer);
 
   /* Regisist notifications */
   err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)micoNotify_WifiStatusHandler );
@@ -436,10 +436,10 @@ int application_start(void)
         break;
       case eState_Standby:
         mico_log("Enter standby mode");
-        sendNotifySYSWillPowerOff();
-        mico_thread_msleep(200);
-        micoWlanPowerOff();
-        MicoSystemStandBy(MICO_WAIT_FOREVER);
+//        sendNotifySYSWillPowerOff();
+//        mico_thread_msleep(200);
+//        micoWlanPowerOff();
+//        MicoSystemStandBy(MICO_WAIT_FOREVER);
         break;
       default:
         break;

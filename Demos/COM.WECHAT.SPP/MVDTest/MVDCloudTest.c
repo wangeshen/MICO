@@ -55,7 +55,7 @@ OSStatus MVDCloudTest_StartRecv(const char* device_id,
   /* create http request data */
   uint8_t *httpRequestData = NULL;
   size_t httpRequestDataLen = 0;
-  HTTPHeader_t *httpHeader = NULL;
+  ECS_HTTPHeader_t *httpHeader = NULL;
   
   const char* host = EASYCLOUD_TEST_SERVER;
   uint16_t port = EASYCLOUD_TEST_PORT;
@@ -108,9 +108,9 @@ OSStatus MVDCloudTest_StartRecv(const char* device_id,
   
   mvd_cloud_test_log("request: [%.*s]", request_url_len, request_url);
   
-  httpHeader = HTTPHeaderCreate();
+  httpHeader = ECS_HTTPHeaderCreate();
   require_action( httpHeader, exit, err = kNoMemoryErr );
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   
   //create tcp connect
   mvd_cloud_test_log("tcp client start to connect...");
@@ -133,9 +133,9 @@ OSStatus MVDCloudTest_StartRecv(const char* device_id,
   
   // send request data
   mvd_cloud_test_log("tcp client send activate request...");
-  err = CreateHTTPMessageEx(kHTTPGetMethod, 
+  err = ECS_CreateHTTPMessageEx(ECS_kHTTPGetMethod, 
                             host, request_url,
-                            kMIMEType_JSON, 
+                            ECS_kMIMEType_JSON, 
                             NULL, 0,
                             &httpRequestData, &httpRequestDataLen);
   require_noerr( err, exit );
@@ -164,12 +164,12 @@ OSStatus MVDCloudTest_StartRecv(const char* device_id,
   require(err >= 1, exit);
   
   if (FD_ISSET(tcpClient_fd, &readfds)) {
-    err = SocketReadHTTPHeader( tcpClient_fd, httpHeader );             
+    err = ECS_SocketReadHTTPHeader( tcpClient_fd, httpHeader );             
     switch ( err )
     {
     case kNoErr:{
       // statusCode check
-      if(kStatusOK != httpHeader->statusCode){
+      if(ECS_kStatusOK != httpHeader->statusCode){
         mvd_cloud_test_log("ERROR: server response statusCode=%d", 
                               httpHeader->statusCode);
         err = kRequestErr;
@@ -190,7 +190,7 @@ OSStatus MVDCloudTest_StartRecv(const char* device_id,
 
 exit:
   mvd_cloud_test_log("Exit: EasyCloud tcp client exit err = %d", err);
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
   if(tcpClient_fd != -1){
     close(tcpClient_fd);
@@ -216,7 +216,7 @@ OSStatus MVDCloudTest_StopRecv(const char* device_id)
   /* create http request data */
   uint8_t *httpRequestData = NULL;
   size_t httpRequestDataLen = 0;
-  HTTPHeader_t *httpHeader = NULL;
+  ECS_HTTPHeader_t *httpHeader = NULL;
   
   const char* host = EASYCLOUD_TEST_SERVER;
   uint16_t port = EASYCLOUD_TEST_PORT;
@@ -242,9 +242,9 @@ OSStatus MVDCloudTest_StopRecv(const char* device_id)
   
   mvd_cloud_test_log("request: [%.*s]", request_url_len, request_url);
   
-  httpHeader = HTTPHeaderCreate();
+  httpHeader = ECS_HTTPHeaderCreate();
   require_action( httpHeader, exit, err = kNoMemoryErr );
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   
   //create tcp connect
   mvd_cloud_test_log("tcp client start to connect...");
@@ -267,9 +267,9 @@ OSStatus MVDCloudTest_StopRecv(const char* device_id)
   
   // send request data
   mvd_cloud_test_log("tcp client send activate request...");
-  err = CreateHTTPMessageEx(kHTTPGetMethod, 
+  err = ECS_CreateHTTPMessageEx(ECS_kHTTPGetMethod, 
                             host, request_url,
-                            kMIMEType_JSON, 
+                            ECS_kMIMEType_JSON, 
                             NULL, 0,
                             &httpRequestData, &httpRequestDataLen);
   require_noerr( err, exit );
@@ -298,12 +298,12 @@ OSStatus MVDCloudTest_StopRecv(const char* device_id)
   require(err >= 1, exit);
   
   if (FD_ISSET(tcpClient_fd, &readfds)) {
-    err = SocketReadHTTPHeader( tcpClient_fd, httpHeader );             
+    err = ECS_SocketReadHTTPHeader( tcpClient_fd, httpHeader );             
     switch ( err )
     {
     case kNoErr:{
       // statusCode check
-      if(kStatusOK != httpHeader->statusCode){
+      if(ECS_kStatusOK != httpHeader->statusCode){
         mvd_cloud_test_log("ERROR: server response statusCode=%d", 
                               httpHeader->statusCode);
         err = kRequestErr;
@@ -324,7 +324,7 @@ OSStatus MVDCloudTest_StopRecv(const char* device_id)
 
 exit:
   mvd_cloud_test_log("Exit: EasyCloud tcp client exit err = %d", err);
-  HTTPHeaderClear( httpHeader );
+  ECS_HTTPHeaderClear( httpHeader );
   if(httpHeader) free(httpHeader);
   if(tcpClient_fd != -1){
     close(tcpClient_fd);
@@ -367,7 +367,7 @@ void mvd_test_send_thread(void* arg)
   }
   
   sprintf(send_ok_string, "send_ok_cnt = %d", send_ok_cnt);
-  MVDSendMsg2Device(test_params->inContext, send_ok_string, strlen(send_ok_string));
+  MVDSendMsg2Device(test_params->inContext, (unsigned char*)send_ok_string, strlen(send_ok_string));
   
   
 exit:
