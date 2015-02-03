@@ -145,21 +145,17 @@ int ConnectNetwork(Network* n, char* addr, int port)
   // gethostbyname in different thread(NTPClient) ???
   //NetAppDnsGetHostByName(addr, strlen(addr), &ipAddress, AF_INET);
   
-  while(1){
-    memset(ipstr_mqtt, 0, sizeof(ipstr_mqtt));
-    err = gethostbyname(addr, (uint8_t *)ipstr_mqtt, 16); // may be failed ???
-    if(kNoErr == err){
-      //MQTTClient_log("MQTT server address: %s",ipstr_mqtt);
-      break;
-    }
-    
-    MQTTClient_log("retry: get MQTT host address after 1 seconds...");
-    mico_thread_sleep(1);
+  memset(ipstr_mqtt, 0, sizeof(ipstr_mqtt));
+  err = gethostbyname(addr, (uint8_t *)ipstr_mqtt, 16); // may be failed ???
+  if(kNoErr != err){
+    MQTTClient_log("MQTT gethostbyname failed, err = %d", err);
+    return -1;
   }
+  MQTTClient_log("MQTT server address: %s",ipstr_mqtt);
   //*******************************************************************
   
   ipAddress = inet_addr(ipstr_mqtt);
-  //ipAddress = inet_addr("198.41.30.241");
+  //ipAddress = inet_addr("106.185.31.65");
   MQTTClient_log("MQTT gethostbyname: addr=%s ipStr=%s ip=%d port=%d", 
                  addr, ipstr_mqtt, ipAddress, (unsigned short)port);
   

@@ -168,7 +168,7 @@ void mvd_test_thread(void* arg){
           isConnected = true;
           
           // data transfer test
-          err = mvd_transfer_test(inContext);
+          //err = mvd_transfer_test(inContext);
           
           memInfo = mico_memory_info();
           sprintf(freeMemString, "[MVD_TEST]System memory: %d\r\n", memInfo->free_memory);
@@ -245,8 +245,8 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
   require_noerr_action( err, exit, app_log("ERROR: virtual device start failed!") );
   
   /* mvd test */
-  err =  start_mvd_test(inContext);
-  require_noerr_action( err, exit, app_log("ERROR: start mvd_test thread failed!") );
+  //err =  start_mvd_test(inContext);
+  //require_noerr_action( err, exit, app_log("ERROR: start mvd_test thread failed!") );
 
 exit:
   return err;

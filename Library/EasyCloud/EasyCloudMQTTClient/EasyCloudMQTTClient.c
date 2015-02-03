@@ -178,7 +178,7 @@ MQTTClientRestart:
     if (rc >= 0)
       break;
  
-    mico_mqtt_client_log("MQTT socket network connect failed, rc = %d\r\nRetry ...", rc);
+    mico_mqtt_client_log("MQTT socket network connect failed, rc = %d", rc);
     //mico_thread_msleep(500);
   }
   mico_mqtt_client_log("MQTT socket network connect OK!");
