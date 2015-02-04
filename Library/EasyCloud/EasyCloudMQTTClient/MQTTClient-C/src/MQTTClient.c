@@ -320,7 +320,7 @@ int cycle(Client* c, Timer* timer)
   return rc;
 }
 
-
+/*
 int MQTTYield(Client* c, int timeout_ms)
 {
     int rc = SUCCESS;
@@ -339,7 +339,21 @@ int MQTTYield(Client* c, int timeout_ms)
         
     return rc;
 }
-
+*/
+int MQTTYield(Client* c, int timeout_ms)
+{
+  int rc = SUCCESS;
+  Timer timer;
+  
+  InitTimer(&timer);    
+  countdown_ms(&timer, timeout_ms);
+  if (cycle(c, &timer) == FAILURE)
+  {
+    rc = FAILURE;
+  }
+  
+  return rc;
+}
 
 // only used in single-threaded mode where one command at a time is in process
 int waitfor(Client* c, int packet_type, Timer* timer)

@@ -343,8 +343,8 @@ void mvd_test_send_thread(void* arg)
   OSStatus err = kUnknownErr;
   char* sendMsg = NULL;
   test_params_t *test_params = NULL;
-  uint32_t send_cnt = 0;
-  uint32_t send_ok_cnt = 0;
+  uint64_t send_cnt = 0;
+  uint64_t send_ok_cnt = 0;
   char send_ok_string[64] = {0};
   
   test_params = (test_params_t*)arg;
@@ -366,7 +366,7 @@ void mvd_test_send_thread(void* arg)
     mico_thread_msleep(test_params->interval_ms);
   }
   
-  sprintf(send_ok_string, "send_ok_cnt = %d", send_ok_cnt);
+  sprintf(send_ok_string, "send_ok_cnt = %lld", send_ok_cnt);
   MVDSendMsg2Device(test_params->inContext, (unsigned char*)send_ok_string, strlen(send_ok_string));
   
   

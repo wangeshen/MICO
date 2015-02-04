@@ -37,13 +37,13 @@
 #define APP_DEVICE_INACTIVATED_MSG_2MCU    "[APP]Device status: inactivate\r\n"
 
 /* test define */
-#define MVD_CLOUD_TEST_RECV_MSG_SIZE             100      // byte
-#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           300      // s
-#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         100      // ms
+#define MVD_CLOUD_TEST_RECV_MSG_SIZE             512      // byte
+#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           (4*60)      // s
+#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (4*60*1000)      // ms
 
-#define MVD_CLOUD_TEST_SEND_MSG_SIZE             100      // byte
-#define MVD_CLOUD_TEST_SEND_MSG_PERIOD           300      // s
-#define MVD_CLOUD_TEST_SEND_MSG_INTERVAL         500      // ms
+#define MVD_CLOUD_TEST_SEND_MSG_SIZE             512      // byte
+#define MVD_CLOUD_TEST_SEND_MSG_PERIOD           (3*60)      // s
+#define MVD_CLOUD_TEST_SEND_MSG_INTERVAL         100      // ms
 
 #define MVD_CLOUD_TEST_RECV_MSG_RATE             0.99     // recv msg count rate >= 99%
 
@@ -107,10 +107,10 @@ static OSStatus mvd_transfer_test(mico_Context_t *inContext)
     err = MVDSendMsg2Device(inContext,
                             "[MVD_TEST][CLOUD RECV]test FAILED!\r\n", 
                             strlen("[MVD_TEST][CLOUD RECV]test FAILED!\r\n"));
-    app_log("[MVD_TEST]Recv: %lld/%lld", cloud_test_data_cnt, check_recv_data_len);
-    MVDSendMsg2Device(inContext, (unsigned char*)recv_data_cnt_str, strlen(recv_data_cnt_str));
-    MVDSendMsg2Device(inContext, (unsigned char*)total_recv_data_cnt_str, strlen(total_recv_data_cnt_str));
   }
+  app_log("[MVD_TEST]Recv: %lld/%lld", cloud_test_data_cnt, check_recv_data_len);
+  MVDSendMsg2Device(inContext, (unsigned char*)recv_data_cnt_str, strlen(recv_data_cnt_str));
+  MVDSendMsg2Device(inContext, (unsigned char*)total_recv_data_cnt_str, strlen(total_recv_data_cnt_str));
   
   // check echo data len
   sprintf(recv_echo_data_cnt_str, "[MVD_TEST][CLOUD RECV]Recv_echo=%lld\r\n", cloud_test_echo_data_cnt);
@@ -168,7 +168,7 @@ void mvd_test_thread(void* arg){
           isConnected = true;
           
           // data transfer test
-          //err = mvd_transfer_test(inContext);
+          err = mvd_transfer_test(inContext);
           
           memInfo = mico_memory_info();
           sprintf(freeMemString, "[MVD_TEST]System memory: %d\r\n", memInfo->free_memory);
@@ -202,7 +202,7 @@ void mvd_test_thread(void* arg){
       }
     }
     
-    mico_thread_sleep(5);
+    mico_thread_sleep(1);
   }
   
 exit:
@@ -245,8 +245,8 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
   require_noerr_action( err, exit, app_log("ERROR: virtual device start failed!") );
   
   /* mvd test */
-  //err =  start_mvd_test(inContext);
-  //require_noerr_action( err, exit, app_log("ERROR: start mvd_test thread failed!") );
+  err =  start_mvd_test(inContext);
+  require_noerr_action( err, exit, app_log("ERROR: start mvd_test thread failed!") );
 
 exit:
   return err;

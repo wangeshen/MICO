@@ -241,17 +241,18 @@ MQTTClientRestart:
       goto client_stop;
     }
     
-    /* recv msg from other thread, then publish */
+    /* recv data both from loopback and mqtt server */
     FD_ZERO(&readfds);
     FD_SET(recv_data_loopBack_fd, &readfds); 
+    FD_SET(c.ipstack->my_socket, &readfds);
 
     select(1, &readfds, NULL, NULL, &t);
 
-    /*recv data using loopback fd*/
+    /* recv loopback data to publish */
     //err = kNoErr;
     if (FD_ISSET( recv_data_loopBack_fd, &readfds )) {
       memset(recvDataBuffer, 0, MAX_PLAYLOAD_SIZE);
-      recvDataLen = recv( recv_data_loopBack_fd, (void*)(&recvDataBuffer[0]), MAX_PLAYLOAD_SIZE, 0 );
+      recvDataLen = recv( recv_data_loopBack_fd, (void*)(&recvDataBuffer[0]), MAX_LOOPBACK_BUF_SIZE, 0 );
       if(recvDataLen > 0){
         //err = internal_EasyCloudMQTTClientPublish((unsigned char*)recvDataBuffer, recvDataLen);
         // parse pubtopic && msg
@@ -292,21 +293,34 @@ MQTTClientRestart:
       }
     }
     
-    /* subscribe read */
-    //mico_mqtt_client_log("MQTT client running...");
-    rc = MQTTYield(&c, (int)DEFAULT_MICO_MQTT_YIELD_TMIE);  //keepalive failed will return FAILURE
-    if (SUCCESS != rc) {
-      MQTTDisconnect(&c);
-      n.disconnect(&n);
-      
-      mico_rtos_lock_mutex( &mqttClientContext_mutex );
-      mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_DISCONNECTED;
-      mico_rtos_unlock_mutex( &mqttClientContext_mutex );
-      
-      mico_mqtt_client_log("MQTT client disconnected,reconnect ...");
-      //mico_thread_sleep(1);
-      goto MQTTClientRestart;
+    /* MQTT recv */
+    if (FD_ISSET( c.ipstack->my_socket, &readfds )){
+      //mico_mqtt_client_log("MQTT client running...");
+      rc = MQTTYield(&c, (int)DEFAULT_MICO_MQTT_YIELD_TMIE);  //keepalive failed will return FAILURE
+      if (SUCCESS != rc) {
+        goto MQTT_disconnected;
+      }
     }
+    else{
+      /* MQTT ping */
+      rc = keepalive(&c);
+      if (SUCCESS != rc) {
+        goto MQTT_disconnected;
+      }
+    }
+    continue;
+    
+  MQTT_disconnected:
+    MQTTDisconnect(&c);
+    n.disconnect(&n);
+    
+    mico_rtos_lock_mutex( &mqttClientContext_mutex );
+    mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_DISCONNECTED;
+    mico_rtos_unlock_mutex( &mqttClientContext_mutex );
+    
+    mico_mqtt_client_log("MQTT client disconnected,reconnect ...");
+    //mico_thread_sleep(1);
+    goto MQTTClientRestart;
   }
   
   /* stop */

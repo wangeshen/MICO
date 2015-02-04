@@ -67,6 +67,8 @@ void setDefaultMessageHandler(Client*, messageHandler);
 
 void MQTTClient(Client*, Network*, unsigned int, unsigned char*, size_t, unsigned char*, size_t);
 
+int keepalive(Client* c);  // add by WES 20150203
+
 struct Client {
     unsigned int next_packetid;
     unsigned int command_timeout_ms;
@@ -90,5 +92,6 @@ struct Client {
 };
 
 #define DefaultClient {0, 0, 0, 0, NULL, NULL, 0, 0, 0}
+
 
 #endif

@@ -89,8 +89,8 @@ void MVDMainThread(void *arg)
     if(inContext->appStatus.virtualDevStatus.isCloudConnected){
       if (!connected){
         mvd_log("[MVD]Cloud status: connected");
-        //MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU, 
-        //                           strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU));
+        MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU, 
+                                   strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU));
         MVDCloudInterfaceSendtoChannel(PUBLISH_TOPIC_CHANNEL_STATUS,
                                      DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD, 
                                      strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD));
@@ -366,14 +366,15 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
     cloud_test_data_cnt += inBufLen;
     mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
     //err = MVDCloudInterfaceSend(inBuf, inBufLen); // response to cloud
-    //err = kNoErr;
+    err = kNoErr;
     //////////////////////////////////////////////////////////////////////////////
   }
   else {
     // echo data "zzz..."
     cloud_test_echo_data_cnt += inBufLen;
-    err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
-    require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+    //err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
+    //require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+    err = kNoErr;
   }
   
 exit:
