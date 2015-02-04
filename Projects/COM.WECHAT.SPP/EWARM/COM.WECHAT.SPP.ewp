@@ -173,6 +173,7 @@
         <option>
           <name>CCDefines</name>
           <state>USE_STDPERIPH_DRIVER</state>
+          <state>DEBUG</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -4194,7 +4195,7 @@
       <name>$PROJ_DIR$\..\..\..\MICO\MICOConfigServer.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\MICO\MicoDefine.h</name>
+      <name>$PROJ_DIR$\..\..\..\MICO\MICODefine.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\MICO\MICOEntrance.c</name>

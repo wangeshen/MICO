@@ -44,6 +44,7 @@ extern uint64_t cloud_test_data_cnt;
 extern uint64_t cloud_test_echo_data_cnt;
 
 static bool _is_wifi_station_on = false;
+static mico_semaphore_t _reset_cloud_info_sem;
 
 void mvdNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inContext)
 {
@@ -96,7 +97,7 @@ void MVDMainThread(void *arg)
                                      strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD));
         
         connected = true;
-        //break; // exit when cloud connected
+        break; // exit when cloud connected
       }
     }
     else{
@@ -125,6 +126,7 @@ void MVDMainThread(void *arg)
         err = MVDCloudInterfaceDevActivate(inContext, devDefaultActivateData);
         if(kNoErr == err){
           mvd_log("[MVD]Device activate by MVD [OK]");
+          break;  // exit when activated.
         }
         else{
           mvd_log("[MVD]Device activate by MVD [FAILED], will retry in %ds ...", 1);
@@ -143,12 +145,57 @@ exit:
 }
 
 
+void MVDDevCloudInfoReset(void *arg)
+{
+  OSStatus err = kUnknownErr;
+  MVDResetRequestData_t devDefaultResetData;
+  mico_Context_t *inContext = (mico_Context_t *)arg;
+  uint8_t cnt = 3;
+
+  /* cloud reset */
+  do{
+    mvd_log("[MVD]Device reset EasyCloud info [%d]...", 4-cnt);
+    memset((void*)&devDefaultResetData, 0, sizeof(devDefaultResetData));
+    strncpy(devDefaultResetData.loginId,
+            inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
+            MAX_SIZE_LOGIN_ID);
+    strncpy(devDefaultResetData.devPasswd,
+            inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+            MAX_SIZE_DEV_PASSWD);
+    strncpy(devDefaultResetData.user_token,
+            inContext->micoStatus.mac,
+            MAX_SIZE_USER_TOKEN);
+    err = MVDResetCloudDevInfo(inContext, devDefaultResetData);
+    if(kNoErr == err){
+      mvd_log("[MVD]Device reset EasyCloud info [OK]");
+    }
+    else{
+      mvd_log("[MVD]Device EasyCloud info [FAILED]");
+    }
+    
+    cnt--;
+  }while((kNoErr != err) && (cnt > 0));
+  
+  // send ok semaphore
+  mico_rtos_set_semaphore(&_reset_cloud_info_sem);
+  
+  mvd_log("[MVD]Thread MVDDevCloudInfoReset EXIT: exit code=%d",err);
+  mico_rtos_delete_thread(NULL);
+  return;
+}
 /*******************************************************************************
  * virtual device interfaces init
  ******************************************************************************/
 
 void MVDRestoreDefault(mico_Context_t* const context)
 {
+  // start a thread to reset device EasyCloud info
+  mico_rtos_init_semaphore(&_reset_cloud_info_sem, 1);
+  mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "MVD resetCloudInfo", 
+                                MVDDevCloudInfoReset, 0x800, 
+                                context );
+  mico_rtos_get_semaphore(&_reset_cloud_info_sem, 5000);  // 5s timeout
+  
   // clean all config buffer
   memset((void*)&(context->flashContentInRam.appConfig.virtualDevConfig), 
          0, sizeof(virtual_device_config_t));
