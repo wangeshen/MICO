@@ -38,10 +38,10 @@
 
 /* test define */
 #define MVD_CLOUD_TEST_RECV_MSG_SIZE             512      // byte
-#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           (4*60)      // s
-#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (4*60*1000)      // ms
+#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           (5*60)      // s
+#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (5*60*1000)      // ms
 
-#define MVD_CLOUD_TEST_SEND_MSG_SIZE             512      // byte
+#define MVD_CLOUD_TEST_SEND_MSG_SIZE             100      // byte
 #define MVD_CLOUD_TEST_SEND_MSG_PERIOD           (3*60)      // s
 #define MVD_CLOUD_TEST_SEND_MSG_INTERVAL         100      // ms
 
@@ -245,8 +245,8 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
   require_noerr_action( err, exit, app_log("ERROR: virtual device start failed!") );
   
   /* mvd test */
-  //err =  start_mvd_test(inContext);
-  //require_noerr_action( err, exit, app_log("ERROR: start mvd_test thread failed!") );
+  err =  start_mvd_test(inContext);
+  require_noerr_action( err, exit, app_log("ERROR: start mvd_test thread failed!") );
 
 exit:
   return err;

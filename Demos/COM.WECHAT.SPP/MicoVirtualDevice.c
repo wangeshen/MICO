@@ -40,8 +40,10 @@
 #define DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU       "[MVD]Cloud status: connected\r\n"
 #define DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU    "[MVD]Cloud status: disconnected\r\n"
 
+/////////////////////////////////////////////////////
 extern uint64_t cloud_test_data_cnt;
 extern uint64_t cloud_test_echo_data_cnt;
+////////////////////////////////////////////////////
 
 static bool _is_wifi_station_on = false;
 static mico_semaphore_t _reset_cloud_info_sem;
@@ -135,7 +137,7 @@ void MVDMainThread(void *arg)
 #endif
     }
     
-    mico_thread_sleep(1);
+    mico_thread_msleep(500);
   }
   
 exit:
@@ -154,7 +156,7 @@ void MVDDevCloudInfoReset(void *arg)
 
   /* cloud reset */
   do{
-    mvd_log("[MVD]Device reset EasyCloud info [%d]...", 4-cnt);
+    mvd_log("[MVD]Device reset EasyCloud info [%d]try ...", 4-cnt);
     memset((void*)&devDefaultResetData, 0, sizeof(devDefaultResetData));
     strncpy(devDefaultResetData.loginId,
             inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
@@ -183,6 +185,7 @@ void MVDDevCloudInfoReset(void *arg)
   mico_rtos_delete_thread(NULL);
   return;
 }
+
 /*******************************************************************************
  * virtual device interfaces init
  ******************************************************************************/
@@ -232,7 +235,7 @@ OSStatus MVDInit(mico_Context_t* const inContext)
   require_noerr_action(err, exit, 
                        mvd_log("ERROR: virtual device cloud interface init failed!") );
   
-  // start MVD monitor thread
+  // start MVD monitor thread(auto activate when wifi station on)
   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "MVD main", 
                                 MVDMainThread, STACK_SIZE_MVD_MAIN_THREAD, 
                                 inContext );
@@ -409,20 +412,20 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   
   /////////////////////////////// for test//////////////////////////////////////
   if('z' != inBuf[0]){
-    // recv data "xxx..."
+    // recv data "xxx..." from server
     cloud_test_data_cnt += inBufLen;
     mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
     //err = MVDCloudInterfaceSend(inBuf, inBufLen); // response to cloud
     err = kNoErr;
-    //////////////////////////////////////////////////////////////////////////////
   }
   else {
     // echo data "zzz..."
     cloud_test_echo_data_cnt += inBufLen;
-    //err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
-    //require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
     err = kNoErr;
   }
+  //////////////////////////////////////////////////////////////////////////////
+  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
+  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
   
 exit:
   return err;

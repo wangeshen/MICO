@@ -343,8 +343,8 @@ void mvd_test_send_thread(void* arg)
   OSStatus err = kUnknownErr;
   char* sendMsg = NULL;
   test_params_t *test_params = NULL;
-  uint64_t send_cnt = 0;
-  uint64_t send_ok_cnt = 0;
+  int64_t send_cnt = 0;
+  int64_t send_ok_cnt = 0;
   char send_ok_string[64] = {0};
   
   test_params = (test_params_t*)arg;
@@ -355,7 +355,8 @@ void mvd_test_send_thread(void* arg)
   memset(sendMsg, 'z', test_params->msg_length);
   sendMsg[test_params->msg_length] = '\0';
   
-  send_cnt = (test_params->period_s*1000)/test_params->interval_ms;
+  send_cnt = (int64_t)((test_params->period_s*1000)/test_params->interval_ms);
+  mvd_cloud_test_log("send_cnt = %lld", send_cnt);
   
   while(send_cnt > 0){
     err = MVDSendMsg2Cloud(test_params->inContext, NULL, (unsigned char*)sendMsg, test_params->msg_length);
@@ -363,6 +364,8 @@ void mvd_test_send_thread(void* arg)
       send_ok_cnt++;
     }
     send_cnt--;
+    mvd_cloud_test_log("send_ok_cnt = %lld", send_ok_cnt);
+    mvd_cloud_test_log("send_cnt = %lld", send_cnt);
     mico_thread_msleep(test_params->interval_ms);
   }
   
