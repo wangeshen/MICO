@@ -372,7 +372,7 @@ exit:
 OSStatus EasyCloudGetLatestRomVersion(easycloud_service_context_t* const context)
 {
   OSStatus err = kUnknownErr;
-  int8_t retry_cnt = 5;
+  int8_t retry_cnt = 3;
   
   //set purl = URL?product_id=xxxxx
   char *purl = NULL;
@@ -429,7 +429,7 @@ exit:
 OSStatus EasyCloudGetRomData(easycloud_service_context_t* const context)
 {
   OSStatus err = kUnknownErr;
-  int8_t retry_cnt = 5;
+  int8_t retry_cnt = 3;
   
   do{
     err = get_rom_data(context->service_config_info.cloudServerDomain,
@@ -1024,7 +1024,7 @@ static OSStatus get_rom_data(char *host, uint16_t port,
   
   // select timeout
   struct timeval_t t;
-  t.tv_sec = 10;
+  t.tv_sec = 5;
   t.tv_usec = 0;
   
   /* create activate or authorize http request data */
