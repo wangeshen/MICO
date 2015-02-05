@@ -424,8 +424,8 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
     err = kNoErr;
   }
   //////////////////////////////////////////////////////////////////////////////
-  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
-  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  //err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
+  //require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
   
 exit:
   return err;

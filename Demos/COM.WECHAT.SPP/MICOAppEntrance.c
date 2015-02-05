@@ -38,12 +38,12 @@
 
 /* test define */
 #define MVD_CLOUD_TEST_RECV_MSG_SIZE             512      // byte
-#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           (5*60)      // s
-#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (5*60*1000)      // ms
+#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           (35*60)      // s
+#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (35*60*1000)      // ms
 
-#define MVD_CLOUD_TEST_SEND_MSG_SIZE             100      // byte
-#define MVD_CLOUD_TEST_SEND_MSG_PERIOD           (3*60)      // s
-#define MVD_CLOUD_TEST_SEND_MSG_INTERVAL         100      // ms
+#define MVD_CLOUD_TEST_SEND_MSG_SIZE             512      // byte
+#define MVD_CLOUD_TEST_SEND_MSG_PERIOD           (30*60)      // s
+#define MVD_CLOUD_TEST_SEND_MSG_INTERVAL         500      // ms
 
 #define MVD_CLOUD_TEST_RECV_MSG_RATE             0.99     // recv msg count rate >= 99%
 
@@ -63,7 +63,7 @@ static OSStatus mvd_transfer_test(mico_Context_t *inContext)
   OSStatus err = kUnknownErr;
   
   /* Cloud recv test */
-  //app_log("[MVD_TEST][CLOUD RECV]start");
+  app_log("[MVD_TEST][CLOUD RECV]start");
   MVDSendMsg2Device(inContext, 
                     "[MVD_TEST][CLOUD RECV]start ...\r\n", 
                     strlen("[MVD_TEST][CLOUD RECV]start ...\r\n"));
@@ -76,22 +76,24 @@ static OSStatus mvd_transfer_test(mico_Context_t *inContext)
   
   /* start send test at the same time */
   // server will echo msg when startTest
+  app_log("[MVD_TEST]CLOUD ECHO]start...");
   err = MVDCloudTest_StartSend(inContext,
                          MVD_CLOUD_TEST_SEND_MSG_SIZE, 
                          MVD_CLOUD_TEST_SEND_MSG_PERIOD,
                          MVD_CLOUD_TEST_SEND_MSG_INTERVAL);
+  require_noerr( err, exit );
   
   // timeout for stopping test process
   mico_thread_sleep(MVD_CLOUD_TEST_RECV_MSG_PERIOD + 5);
   err = MVDCloudTest_StopRecv(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId);
-  require_noerr( err, exit );
-  //app_log("[MVD_TEST]CLOUD RECV]stopped");
+  //require_noerr( err, exit );
+  app_log("[MVD_TEST]CLOUD RECV]stopped");
   MVDSendMsg2Device(inContext,
                     "[MVD_TEST][CLOUD RECV]stopped\r\n", 
                     strlen("[MVD_TEST][CLOUD RECV]stopped\r\n"));
   
   // check test ok?
-  check_recv_data_len = (MVD_CLOUD_TEST_RECV_MSG_SIZE*1000*MVD_CLOUD_TEST_RECV_MSG_PERIOD/MVD_CLOUD_TEST_RECV_MSG_INTERVAL);
+  check_recv_data_len = (uint64_t)(MVD_CLOUD_TEST_RECV_MSG_SIZE*1000*(uint64_t)MVD_CLOUD_TEST_RECV_MSG_PERIOD)/MVD_CLOUD_TEST_RECV_MSG_INTERVAL;
   sprintf(recv_data_cnt_str, "[MVD_TEST][CLOUD RECV]recv=%lld\t", cloud_test_data_cnt);
   sprintf(total_recv_data_cnt_str, "[MVD_TEST][CLOUD RECV]Total=%lld\r\n", check_recv_data_len);
   
