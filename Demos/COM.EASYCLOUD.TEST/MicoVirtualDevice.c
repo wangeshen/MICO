@@ -36,13 +36,14 @@
 #define mvd_log_trace() custom_log_trace("MVD")
 
 
-#define DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD     "{\"MVDCloud\":\"connected\"}"
-#define DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU       "[MVD]Cloud status: connected\r\n"
-#define DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU    "[MVD]Cloud status: disconnected\r\n"
+//#define DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD     "{\"MVDCloud\":\"connected\"}"
+//#define DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU       "[MVD]Cloud status: connected\r\n"
+//#define DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU    "[MVD]Cloud status: disconnected\r\n"
+
 
 /////////////////////////////////////////////////////
-//extern uint64_t cloud_test_data_cnt;
-//extern uint64_t cloud_test_echo_data_cnt;
+extern uint64_t cloud_test_data_cnt;
+extern uint64_t cloud_test_echo_data_cnt;
 ////////////////////////////////////////////////////
 
 //static bool _is_wifi_station_on = false;
@@ -78,6 +79,7 @@ void MVDCloudTestThread(void *arg)
 {
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = (mico_Context_t *)arg;
+  int test_if_cnt = 0;
   
   /* wait for wifi station connect */
   // Regisist wifi connected notifications
@@ -95,9 +97,11 @@ void MVDCloudTestThread(void *arg)
   mvd_log("wifi station connected.");
      
   /* interface test */
-  err = easycloud_if_test(inContext);
-  require_noerr_action(err, exit, 
-                       mvd_log("ERROR: easycloud_if_test failed!") );
+  for(test_if_cnt = 0; test_if_cnt < 3; test_if_cnt++){
+    err = easycloud_if_test(inContext, false);
+    require_noerr_action(err, exit, 
+                         mvd_log("ERROR: easycloud_if_test failed!") );
+  }
   
   /* transmission test */
   err = easycloud_transmission_test(inContext);
@@ -118,84 +122,6 @@ exit:
   mico_rtos_delete_thread(NULL);
   return;
 }
-
-/*
-void MVDCloudTestThread(void *arg)
-{
-  OSStatus err = kUnknownErr;
-  mico_Context_t *inContext = (mico_Context_t *)arg;
-
-  bool connected = false;
-  
-#ifdef DEVICE_AUTO_ACTIVATE_ENABLE
-  MVDActivateRequestData_t devDefaultActivateData;
-#endif
-  
-  mvd_log("MVD main thread start.");
-  
-  // Regisist notifications
-  err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)mvdNotify_WifiStatusHandler );
-  require_noerr( err, exit ); 
-  
-  while(1)
-  {
-    if(inContext->appStatus.virtualDevStatus.isCloudConnected){
-      if (!connected){
-        mvd_log("[MVD]Cloud status: connected");
-        MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU, 
-                                   strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU));
-        MVDCloudInterfaceSendtoChannel(PUBLISH_TOPIC_CHANNEL_STATUS,
-                                     DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD, 
-                                     strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2CLOUD));
-        
-        connected = true;
-        break; // exit when cloud connected
-      }
-    }
-    else{
-      if (connected){
-        connected = false; //recovery value;
-        mvd_log("[MVD]Cloud status: disconnected");
-        MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU, 
-                            strlen(DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU));
-      }
-      
-#ifdef DEVICE_AUTO_ACTIVATE_ENABLE
-      if((true == _is_wifi_station_on) &&
-         (false == inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated)){
-        // auto activate, using default login_id/dev_pass/user_token
-        mvd_log("[MVD]Device activate by MVD ...");
-        memset((void*)&devDefaultActivateData, 0, sizeof(devDefaultActivateData));
-        strncpy(devDefaultActivateData.loginId,
-                inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
-                MAX_SIZE_LOGIN_ID);
-        strncpy(devDefaultActivateData.devPasswd,
-                inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
-                MAX_SIZE_DEV_PASSWD);
-        strncpy(devDefaultActivateData.user_token,
-                inContext->micoStatus.mac,
-                MAX_SIZE_USER_TOKEN);
-        err = MVDCloudInterfaceDevActivate(inContext, devDefaultActivateData);
-        if(kNoErr == err){
-          mvd_log("[MVD]Device activate by MVD [OK]");
-          break;  // exit when activated.
-        }
-        else{
-          mvd_log("[MVD]Device activate by MVD [FAILED], will retry in %ds ...", 1);
-        }
-      }
-#endif
-    }
-    
-    mico_thread_msleep(500);
-  }
-  
-exit:
-  mvd_log("[MVD]EXIT: exit code=%d",err);
-  mico_rtos_delete_thread(NULL);
-  return;
-}
-*/
 
 void MVDDevCloudInfoReset(void *arg)
 {
@@ -456,21 +382,23 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   OSStatus err = kUnknownErr;
   
   /////////////////////////////// for test//////////////////////////////////////
-//  if('z' != inBuf[0]){
-//    // recv data "xxx..." from server
-//    cloud_test_data_cnt += inBufLen;
-//    mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
-//    //err = MVDCloudInterfaceSend(inBuf, inBufLen); // response to cloud
-//    err = kNoErr;
-//  }
-//  else {
-//    // echo data "zzz..."
-//    cloud_test_echo_data_cnt += inBufLen;
-//    err = kNoErr;
-//  }
+  if('z' != inBuf[0]){
+    // recv data "xxx..." from server
+    cloud_test_data_cnt += inBufLen;
+    mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
+    //err = MVDCloudInterfaceSend(inBuf, inBufLen); // response to cloud
+    err = kNoErr;
+  }
+  else {
+    // echo data "zzz..."
+    cloud_test_echo_data_cnt += inBufLen;
+    err = kNoErr;
+  }
   //////////////////////////////////////////////////////////////////////////////
-  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
-  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  
+  //err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
+  //require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  //return kNoErr;
   
 exit:
   return err;

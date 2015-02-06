@@ -137,7 +137,6 @@ exit:
 
 easycloud_service_state_t MVDCloudInterfaceGetState(void)
 {
-  OSStatus err = kUnknownErr;
   easycloud_service_state_t service_running_state = EASYCLOUD_STOPPED;
   
   cloud_if_log("MVDCloudInterfaceGetState");
@@ -228,6 +227,20 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
   err = EasyCloudActivate(&easyCloudContext);
   require_noerr_action(err, exit, 
                        cloud_if_log("ERROR: EasyCloudActivate, err=%d", err));
+  
+  // write back device_id/key to MVD
+  memset(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
+         0, MAX_SIZE_DEVICE_ID);
+  memset(inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey,
+         0, MAX_SIZE_DEVICE_KEY);
+  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
+          easyCloudContext.service_status.deviceId, 
+          strlen(easyCloudContext.service_status.deviceId));
+  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey,
+          easyCloudContext.service_status.masterDeviceKey, 
+          strlen(easyCloudContext.service_status.masterDeviceKey));
+  inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated = true;
+  
   return kNoErr;
   
 exit:
@@ -274,24 +287,9 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
   OSStatus err = kUnknownErr;
 
   cloud_if_log("Update firmware...");
- 
-#ifdef MVD_LOGINID_DEVPASS_CHECK  
-  // login_id/dev_passwd ok ?
-  if((0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, 
-                   devOTARequestData.loginId, 
-                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId))) ||
-     (0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
-                   devOTARequestData.devPasswd, 
-                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd))))
-  {
-    // devPass err
-    cloud_if_log("ERROR: MVDCloudInterfaceDevFirmwareUpdate: loginId/devPasswd mismatch!");
-    return kMismatchErr;
-  }
-  cloud_if_log("MVDCloudInterfaceDevFirmwareUpdate: loginId/devPasswd ok!");
-#endif
   
   //get latest rom version, file_path, md5
+  cloud_if_log("get latest rom version...");
   err = EasyCloudGetLatestRomVersion(&easyCloudContext);
   require_noerr_action( err, exit, 
                        cloud_if_log("ERROR: EasyCloudGetLatestRomVersion failed! err=%d", err) );
@@ -304,6 +302,7 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
   cloud_if_log("bin_md5=%s", easyCloudContext.service_status.bin_md5);
   
 #ifdef MVD_FW_UPDAETE_VERSION_CHECK  
+  cloud_if_log("fw version check...");
   if(0 == strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
                   easyCloudContext.service_status.latestRomVersion, 
                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion))){

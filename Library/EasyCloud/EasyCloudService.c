@@ -780,9 +780,9 @@ exit:
   easyCloudContext->service_config_info.statusNotify(easyCloudContext->service_config_info.context,
                                                      easyCloudContext->service_status);
   easycloud_service_log("Exit: EasyCloud thread exit with err = %d", err);
+  bStopbyUser = false;
   mico_rtos_delete_thread(NULL);
   easyCloudServiceThreadHandle = NULL;
-  bStopbyUser = false;
   return;
 }
 

@@ -52,7 +52,7 @@ OSStatus MVDCloudTest_StartSend(mico_Context_t* inContext,
 *******************************************************************************/
   
 /* interface test */
-OSStatus easycloud_if_test(mico_Context_t* context);
+OSStatus easycloud_if_test(mico_Context_t* context, bool no_stop);
 
 /* transmission test */
 OSStatus easycloud_transmission_test(mico_Context_t* context);
