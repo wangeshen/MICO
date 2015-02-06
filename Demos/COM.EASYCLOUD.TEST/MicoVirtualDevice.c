@@ -29,8 +29,8 @@
 #include "MicoVirtualDevice.h"
 #include "MVDDeviceInterfaces.h"
 #include "MVDCloudInterfaces.h"
-#include "EasyCloudUtils.h"
-
+//#include "EasyCloudUtils.h"
+#include "MVDCloudTest.h"
 
 #define mvd_log(M, ...) custom_log("MVD", M, ##__VA_ARGS__)
 #define mvd_log_trace() custom_log_trace("MVD")
@@ -41,12 +41,13 @@
 #define DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU    "[MVD]Cloud status: disconnected\r\n"
 
 /////////////////////////////////////////////////////
-extern uint64_t cloud_test_data_cnt;
-extern uint64_t cloud_test_echo_data_cnt;
+//extern uint64_t cloud_test_data_cnt;
+//extern uint64_t cloud_test_echo_data_cnt;
 ////////////////////////////////////////////////////
 
-static bool _is_wifi_station_on = false;
-static mico_semaphore_t _reset_cloud_info_sem;
+//static bool _is_wifi_station_on = false;
+static mico_semaphore_t _is_wifi_station_on_sem = NULL;
+static mico_semaphore_t _reset_cloud_info_sem = NULL;
 
 void mvdNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inContext)
 {
@@ -54,10 +55,14 @@ void mvdNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inConte
   (void)inContext;
   switch (event) {
   case NOTIFY_STATION_UP:
-    _is_wifi_station_on = true;
+    //_is_wifi_station_on = true;
+    if(NULL == _is_wifi_station_on_sem) {
+      mico_rtos_init_semaphore(&_is_wifi_station_on_sem, 1);
+    }
+    mico_rtos_set_semaphore(&_is_wifi_station_on_sem);
     break;
   case NOTIFY_STATION_DOWN:
-    _is_wifi_station_on = false;
+    //_is_wifi_station_on = false;
     break;
   case NOTIFY_AP_UP:
     break;
@@ -69,8 +74,53 @@ void mvdNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inConte
   return;
 }
 
+void MVDCloudTestThread(void *arg)
+{
+  OSStatus err = kUnknownErr;
+  mico_Context_t *inContext = (mico_Context_t *)arg;
+  
+  /* wait for wifi station connect */
+  // Regisist wifi connected notifications
+  err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)mvdNotify_WifiStatusHandler );
+  require_noerr_action( err, exit,
+                       mvd_log("ERROR: MICOAddNotification [mico_notify_WIFI_STATUS_CHANGED] failed!")); 
+  
+  // wait wifi connect semaphore
+  if(NULL == _is_wifi_station_on_sem) {
+    err = mico_rtos_init_semaphore(&_is_wifi_station_on_sem, 1);
+  }
+  require_noerr_action( err, exit,
+                       mvd_log("ERROR: mico_rtos_init_semaphore [_is_wifi_station_on_sem] failed!"));
+  while(kNoErr != mico_rtos_get_semaphore(&_is_wifi_station_on_sem, MICO_WAIT_FOREVER));
+  mvd_log("wifi station connected.");
+     
+  /* interface test */
+  err = easycloud_if_test(inContext);
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: easycloud_if_test failed!") );
+  
+  /* transmission test */
+  err = easycloud_transmission_test(inContext);
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: easycloud_transmission_test failed!") );
+  
+  /* OTA test */
+  err = easycloud_ota_test(inContext);
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: easycloud_ota_test failed!") );
+  
+  mvd_log("[SUCCESS]MVD cloud test all done!");
+  mico_rtos_delete_thread(NULL);
+  return;
+  
+exit:
+  mvd_log("[FAILED] MVDCloudTestThread exit err=%d",err);
+  mico_rtos_delete_thread(NULL);
+  return;
+}
 
-void MVDMainThread(void *arg)
+/*
+void MVDCloudTestThread(void *arg)
 {
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = (mico_Context_t *)arg;
@@ -83,7 +133,7 @@ void MVDMainThread(void *arg)
   
   mvd_log("MVD main thread start.");
   
-  /* Regisist notifications */
+  // Regisist notifications
   err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)mvdNotify_WifiStatusHandler );
   require_noerr( err, exit ); 
   
@@ -145,7 +195,7 @@ exit:
   mico_rtos_delete_thread(NULL);
   return;
 }
-
+*/
 
 void MVDDevCloudInfoReset(void *arg)
 {
@@ -217,30 +267,25 @@ void MVDRestoreDefault(mico_Context_t* const context)
   mvd_log("[MVD]Device local config reset [OK]");
 }
 
-OSStatus MVDInit(mico_Context_t* const inContext)
+OSStatus MVDStart(mico_Context_t* const inContext)
 {
   OSStatus err = kUnknownErr;
   
-  //init MVD status
+  // init MVD status
   inContext->appStatus.virtualDevStatus.isCloudConnected = false;
   inContext->appStatus.virtualDevStatus.RecvRomFileSize = 0;
   
-  //init MCU connect interface
+  // init USART
   err = MVDDevInterfaceInit(inContext);
   require_noerr_action(err, exit, 
                        mvd_log("ERROR: virtual device mcu interface init failed!") );
   
-  //init cloud service interface
-  err = MVDCloudInterfaceInit(inContext);
-  require_noerr_action(err, exit, 
-                       mvd_log("ERROR: virtual device cloud interface init failed!") );
-  
-  // start MVD monitor thread(auto activate when wifi station on)
-  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "MVD main", 
-                                MVDMainThread, STACK_SIZE_MVD_MAIN_THREAD, 
+  // cloud test thread
+  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "MVD_Cloud_test", 
+                                MVDCloudTestThread, STACK_SIZE_MVD_CLOUD_TEST_THREAD, 
                                 inContext );
   require_noerr_action(err, exit, 
-                       mvd_log("ERROR: virtual device main thread create failed!") );
+                       mvd_log("ERROR: create MVD cloud test thread failed!") );
   
 exit:
   return err;
@@ -411,21 +456,21 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   OSStatus err = kUnknownErr;
   
   /////////////////////////////// for test//////////////////////////////////////
-  if('z' != inBuf[0]){
-    // recv data "xxx..." from server
-    cloud_test_data_cnt += inBufLen;
-    mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
-    //err = MVDCloudInterfaceSend(inBuf, inBufLen); // response to cloud
-    err = kNoErr;
-  }
-  else {
-    // echo data "zzz..."
-    cloud_test_echo_data_cnt += inBufLen;
-    err = kNoErr;
-  }
+//  if('z' != inBuf[0]){
+//    // recv data "xxx..." from server
+//    cloud_test_data_cnt += inBufLen;
+//    mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
+//    //err = MVDCloudInterfaceSend(inBuf, inBufLen); // response to cloud
+//    err = kNoErr;
+//  }
+//  else {
+//    // echo data "zzz..."
+//    cloud_test_echo_data_cnt += inBufLen;
+//    err = kNoErr;
+//  }
   //////////////////////////////////////////////////////////////////////////////
-  //err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
-  //require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
+  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
   
 exit:
   return err;

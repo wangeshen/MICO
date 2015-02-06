@@ -22,8 +22,9 @@
 #ifndef __MVD_CLOUD_TEST_H_
 #define __MVD_CLOUD_TEST_H_
 
-//#include "MICODefine.h"
 #include "Common.h"
+//#include "MICODefine.h"
+
 #include "MicoVirtualDevice.h"
 
 /* test params */
@@ -44,6 +45,20 @@ OSStatus MVDCloudTest_StopRecv(const char* device_id);
 OSStatus MVDCloudTest_StartSend(mico_Context_t* inContext,
                                 uint32_t msg_length, 
                                 uint32_t period_s, uint32_t interval_ms);
+
+
+/*******************************************************************************
+* EasyCloud test functions
+*******************************************************************************/
+  
+/* interface test */
+OSStatus easycloud_if_test(mico_Context_t* context);
+
+/* transmission test */
+OSStatus easycloud_transmission_test(mico_Context_t* context);
+
+/* OTA test */
+OSStatus easycloud_ota_test(mico_Context_t* context);
 
 #endif
 

@@ -707,8 +707,9 @@ OSStatus EasyCloudMQTTClientStop(void)
     mqttClientThreadHandle = NULL;
   }
   
-  if (kNoErr == err)
-    mico_mqtt_client_log("MQTT client stopped.");
+  if (kNoErr == err){
+    mico_mqtt_client_log("MQTT client stopped ok.");
+  }
   
   return err;
 }

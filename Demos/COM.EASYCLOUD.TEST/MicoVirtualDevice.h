@@ -33,7 +33,7 @@
  ******************************************************************************/
 
 /******************************* init && restore ******************************/
-OSStatus MVDInit(mico_Context_t* const context);
+OSStatus MVDStart(mico_Context_t* const context);
 void MVDRestoreDefault(mico_Context_t* const context);
 
 /***************************** get MVD state **********************************/

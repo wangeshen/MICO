@@ -53,7 +53,8 @@ void cloudMsgArrivedHandler(void* context,
 }
 
 //cloud service status changed handler
-void cloudServiceStatusChangedHandler(void* context, easycloud_service_status_t serviceStateInfo)
+void cloudServiceStatusChangedHandler(void* context, 
+                                      easycloud_service_status_t serviceStateInfo)
 {
   mico_Context_t *inContext = (mico_Context_t*)context;
 
@@ -67,10 +68,25 @@ void cloudServiceStatusChangedHandler(void* context, easycloud_service_status_t 
   }
 }
 
+OSStatus MVDCloudInterfacePrintVersion(void)
+{
+  //OSStatus err = kUnknownErr;
+  int cloudServiceLibVersion = 0;
+  cloud_if_log("MVDCloudInterfacePrintVersion");
+  
+  cloudServiceLibVersion = EasyCloudServiceVersion(&easyCloudContext);
+  cloud_if_log("EasyCloud library version: v%d.%d.%d", 
+               (cloudServiceLibVersion & 0x00FF0000) >> 16,
+               (cloudServiceLibVersion & 0x0000FF00) >> 8,
+               (cloudServiceLibVersion & 0x000000FF));
+  
+  return kNoErr;
+}
+
 OSStatus MVDCloudInterfaceInit(mico_Context_t* const inContext)
 {
   OSStatus err = kUnknownErr;
-  int cloudServiceLibVersion = 0;
+  cloud_if_log("MVDCloudInterfaceInit");
   
   // set cloud service config
   strncpy(easyCloudContext.service_config_info.bssid, 
@@ -84,29 +100,49 @@ OSStatus MVDCloudInterfaceInit(mico_Context_t* const inContext)
   easyCloudContext.service_config_info.context = (void*)inContext;
   
   // set cloud status
-  memset((void*)&(easyCloudContext.service_status), '\0', sizeof(easyCloudContext.service_status));
-  easyCloudContext.service_status.isActivated = inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated;
+  memset((void*)&(easyCloudContext.service_status), '\0',
+         sizeof(easyCloudContext.service_status));
+  easyCloudContext.service_status.isActivated = \
+         inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated;
   strncpy(easyCloudContext.service_status.deviceId, 
-          inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId, MAX_SIZE_DEVICE_ID);
+          inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId, 
+          MAX_SIZE_DEVICE_ID);
   strncpy(easyCloudContext.service_status.masterDeviceKey, 
-          inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey, MAX_SIZE_DEVICE_KEY);
-  
-  cloudServiceLibVersion = EasyCloudServiceVersion(&easyCloudContext);
-  cloud_if_log("EasyCloud library version: %d.%d.%d", 
-               (cloudServiceLibVersion & 0x00FF0000) >> 16,
-               (cloudServiceLibVersion & 0x0000FF00) >> 8,
-               (cloudServiceLibVersion & 0x000000FF));
+          inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey, 
+          MAX_SIZE_DEVICE_KEY);
   
   err = EasyCloudServiceInit(&easyCloudContext);
-  require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloud service init failed.") );
+  require_noerr_action( err, exit, 
+                       cloud_if_log("ERROR: EasyCloudServiceInit err = %d.", err) );
+  return kNoErr;
   
-  // start cloud service
+exit:
+  cloud_if_log("ERROR: MVDCloudInterfaceInit err = %d.", err);
+  return err;
+}
+
+OSStatus MVDCloudInterfaceStart(mico_Context_t* const inContext)
+{
+  OSStatus err = kUnknownErr;
+  
+  cloud_if_log("MVDCloudInterfaceStart");
   err = EasyCloudServiceStart(&easyCloudContext);
-  require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloud service start failed.") );
+  require_noerr_action( err, exit, 
+                       cloud_if_log("ERROR: EasyCloudServiceStart err=%d.", err));
   return kNoErr;
   
 exit:
   return err;
+}
+
+easycloud_service_state_t MVDCloudInterfaceGetState(void)
+{
+  OSStatus err = kUnknownErr;
+  easycloud_service_state_t service_running_state = EASYCLOUD_STOPPED;
+  
+  cloud_if_log("MVDCloudInterfaceGetState");
+  service_running_state = EasyCloudServiceState(&easyCloudContext);
+  return service_running_state;
 }
 
 OSStatus MVDCloudInterfaceSend(unsigned char *inBuf, unsigned int inBufLen)
@@ -114,42 +150,51 @@ OSStatus MVDCloudInterfaceSend(unsigned char *inBuf, unsigned int inBufLen)
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
 
-  cloud_if_log("MVD => Cloud[publish]:[%d]=%.*s", inBufLen, inBufLen, inBuf);
+  cloud_if_log("MVDCloudInterfaceSend: MVD => Cloud[publish]:[%d]=%.*s", 
+               inBufLen, inBufLen, inBuf);
+  
   err = EasyCloudPublish(&easyCloudContext, inBuf, inBufLen);
-  require_noerr_action( err, exit, cloud_if_log("ERROR: MVDCloudInterfaceSend failed! err=%d", err) );
+  require_noerr_action( err, exit, 
+                       cloud_if_log("ERROR: MVDCloudInterfaceSend err=%d", err) );
   return kNoErr;
   
 exit:
   return err;
 }
 
-OSStatus MVDCloudInterfaceSendto(const char* topic, unsigned char *inBuf, unsigned int inBufLen)
+OSStatus MVDCloudInterfaceSendto(const char* topic, 
+                                 unsigned char *inBuf, unsigned int inBufLen)
 {
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
 
-  cloud_if_log("MVD => Cloud[%s]:[%d]=%.*s", topic, inBufLen, inBufLen, inBuf);
+  cloud_if_log("MVDCloudInterfaceSendto: MVD => Cloud[%s]:[%d]=%.*s", 
+               topic, inBufLen, inBufLen, inBuf);
   err = EasyCloudPublishto(&easyCloudContext, topic, inBuf, inBufLen);
-  require_noerr_action( err, exit, cloud_if_log("ERROR: MVDCloudInterfaceSendto failed! err=%d", err) );
+  require_noerr_action( err, exit, 
+                       cloud_if_log("ERROR: MVDCloudInterfaceSendto err=%d", err) );
   return kNoErr;
   
 exit:
   return err;
 }
 
-OSStatus MVDCloudInterfaceSendtoChannel(const char* channel, unsigned char *inBuf, unsigned int inBufLen)
+OSStatus MVDCloudInterfaceSendtoChannel(const char* channel, 
+                                        unsigned char *inBuf, unsigned int inBufLen)
 {
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
 
-  cloud_if_log("MVD => Cloud[%s]:[%d]=%.*s", channel, inBufLen, inBufLen, inBuf);
+  cloud_if_log("MVDCloudInterfaceSendtoChannel: MVD => Cloud[%s]:[%d]=%.*s", 
+               channel, inBufLen, inBufLen, inBuf);
   if(NULL == channel){
     err = EasyCloudPublish(&easyCloudContext, inBuf, inBufLen);
   }
   else{
     err = EasyCloudPublishtoChannel(&easyCloudContext, channel, inBuf, inBufLen);
   }
-  require_noerr_action( err, exit, cloud_if_log("ERROR: MVDCloudInterfaceSendtoChannel failed! err=%d", err) );
+  require_noerr_action( err, exit, 
+                       cloud_if_log("ERROR: MVDCloudInterfaceSendtoChannel err=%d", err) );
   return kNoErr;
   
 exit:
@@ -161,79 +206,32 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
 {
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
-  easycloud_service_state_t cloudServiceState = EASYCLOUD_STOPPED;
+  //easycloud_service_state_t cloudServiceState = EASYCLOUD_STOPPED;
   
-  cloud_if_log("Device activate...");
+  cloud_if_log("MVDCloudInterfaceDevActivate");
    
-  //check status
-  cloudServiceState = EasyCloudServiceState(&easyCloudContext);
-  if (EASYCLOUD_STOPPED == cloudServiceState){
-    return kStateErr;
-  }
+  // check cloud status
+//  cloudServiceState = EasyCloudServiceState(&easyCloudContext);
+//  if (EASYCLOUD_STOPPED == cloudServiceState){
+//    return kStateErr;
+//  }
   
-#ifdef MVD_LOGINID_DEVPASS_CHECK 
-  // login_id/dev_passwd set(not default value) ?
-  if((0 != strncmp((char*)DEFAULT_LOGIN_ID,
-                   inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,       
-                   strlen((char*)DEFAULT_LOGIN_ID))) ||
-     (0 != strncmp((char*)DEFAULT_DEV_PASSWD,
-                   inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
-                   strlen((char*)DEFAULT_DEV_PASSWD))))
-  {
-    // login_id/dev_passwd ok ?
-    if((0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, 
-                     devActivateRequestData.loginId, 
-                     strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId))) ||
-       (0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
-                     devActivateRequestData.devPasswd, 
-                     strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd))))
-    {
-      // devPass err
-      cloud_if_log("ERROR: MVDCloudInterfaceDevActivate: loginId/devPasswd mismatch!");
-      return kMismatchErr;
-    }
-  }
-  cloud_if_log("MVDCloudInterfaceDevActivate: loginId/devPasswd ok!");
-  
-  //ok, set cloud context
+  // set activate params
   strncpy(easyCloudContext.service_config_info.loginId, 
           devActivateRequestData.loginId, MAX_SIZE_LOGIN_ID);
   strncpy(easyCloudContext.service_config_info.devPasswd, 
           devActivateRequestData.devPasswd, MAX_SIZE_DEV_PASSWD);
-#endif
   strncpy(easyCloudContext.service_config_info.userToken, 
           devActivateRequestData.user_token, MAX_SIZE_USER_TOKEN);
     
   // activate request
   err = EasyCloudActivate(&easyCloudContext);
   require_noerr_action(err, exit, 
-                       cloud_if_log("ERROR: MVDCloudInterfaceDevActivate failed! err=%d", err) );
-  
-  // write activate data back to flash
-  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
-  inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated = true;
-  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
-          easyCloudContext.service_status.deviceId, MAX_SIZE_DEVICE_ID);
-  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey,
-          easyCloudContext.service_status.masterDeviceKey, MAX_SIZE_DEVICE_KEY);
-
-#ifdef MVD_LOGINID_DEVPASS_CHECK  
-  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
-          easyCloudContext.service_config_info.loginId, MAX_SIZE_LOGIN_ID);
-  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
-          easyCloudContext.service_config_info.devPasswd, MAX_SIZE_DEV_PASSWD);
-#endif
-  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
-          easyCloudContext.service_config_info.userToken, MAX_SIZE_USER_TOKEN);
-
-  err = MICOUpdateConfiguration(inContext);
-  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
-  require_noerr_action(err, exit, 
-                       cloud_if_log("ERROR: activate write flash failed! err=%d", err) );
-  
+                       cloud_if_log("ERROR: EasyCloudActivate, err=%d", err));
   return kNoErr;
   
 exit:
+  cloud_if_log("ERROR: MVDCloudInterfaceDevActivate, err=%d", err);
   return err;
 }
 
@@ -242,50 +240,30 @@ OSStatus MVDCloudInterfaceDevAuthorize(mico_Context_t* const inContext,
 {
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
-  easycloud_service_state_t cloudServiceState = EASYCLOUD_STOPPED;
+  //easycloud_service_state_t cloudServiceState = EASYCLOUD_STOPPED;
   
-  cloud_if_log("Device authorize...");
+  cloud_if_log("MVDCloudInterfaceDevAuthorize");
 
-  cloudServiceState = EasyCloudServiceState(&easyCloudContext);
-  if (EASYCLOUD_STOPPED == cloudServiceState){
-    return kStateErr;
-  }
+//  cloudServiceState = EasyCloudServiceState(&easyCloudContext);
+//  if (EASYCLOUD_STOPPED == cloudServiceState){
+//    return kStateErr;
+//  }
   
-  #ifdef MVD_LOGINID_DEVPASS_CHECK  
-  // dev_passwd ok ?
-  if(0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
-                  devAuthorizeReqData.devPasswd, 
-                  strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd)))
-  {
-    // devPass err
-    cloud_if_log("ERROR: MVDCloudInterfaceDevAuthorize: devPasswd mismatch!");
-    return kMismatchErr;
-  }
-  cloud_if_log("MVDCloudInterfaceDevAuthorize: devPasswd ok!");
-  
-  //ok, set cloud context
+  // set authorize params
   strncpy(easyCloudContext.service_config_info.loginId, 
           devAuthorizeReqData.loginId, MAX_SIZE_LOGIN_ID);
   strncpy(easyCloudContext.service_config_info.devPasswd, 
           devAuthorizeReqData.devPasswd, MAX_SIZE_DEV_PASSWD);
-#endif
   strncpy(easyCloudContext.service_config_info.userToken, 
           devAuthorizeReqData.user_token, MAX_SIZE_USER_TOKEN);
   
   err = EasyCloudAuthorize(&easyCloudContext);
-  require_noerr_action( err, exit, cloud_if_log("ERROR: authorize failed! err=%d", err) );
-  
-  // write back to flash
-//  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
-//  strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken,
-//          easyCloudContext.service_config_info.userToken, MAX_SIZE_USER_TOKEN);
-//  err = MICOUpdateConfiguration(inContext);
-//  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
-//  require_noerr_action( err, exit, cloud_if_log("ERROR: authorize write flash failed! err=%d", err) );
-  
+  require_noerr_action( err, exit, 
+                       cloud_if_log("ERROR: EasyCloudAuthorize err=%d", err) );
   return kNoErr;
   
 exit:
+  cloud_if_log("ERROR: MVDCloudInterfaceDevAuthorize err=%d", err);
   return err;
 }
 
@@ -315,10 +293,12 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
   
   //get latest rom version, file_path, md5
   err = EasyCloudGetLatestRomVersion(&easyCloudContext);
-  require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloudGetLatestRomVersion failed! err=%d", err) );
+  require_noerr_action( err, exit, 
+                       cloud_if_log("ERROR: EasyCloudGetLatestRomVersion failed! err=%d", err) );
   
   //FW version compare
-  cloud_if_log("currnt_version=%s", inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion);
+  cloud_if_log("currnt_version=%s", 
+               inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion);
   cloud_if_log("latestRomVersion=%s", easyCloudContext.service_status.latestRomVersion);
   cloud_if_log("bin_file=%s", easyCloudContext.service_status.bin_file);
   cloud_if_log("bin_md5=%s", easyCloudContext.service_status.bin_md5);
@@ -348,7 +328,8 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
   strncpy(inContext->flashContentInRam.appConfig.virtualDevConfig.romVersion,
           easyCloudContext.service_status.latestRomVersion, 
           strlen(easyCloudContext.service_status.latestRomVersion));
-  inContext->appStatus.virtualDevStatus.RecvRomFileSize = easyCloudContext.service_status.bin_file_size;
+  inContext->appStatus.virtualDevStatus.RecvRomFileSize = \
+          easyCloudContext.service_status.bin_file_size;
 
   // set bootloader to update App firmware
   memset(&inContext->flashContentInRam.bootTable, 0, sizeof(boot_table_t));
@@ -379,26 +360,12 @@ OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
 {
   OSStatus err = kUnknownErr;
   
-#ifdef MVD_LOGINID_DEVPASS_CHECK
-  // login_id/dev_passwd ok ?
-  if((0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, 
-                   devResetRequestData.loginId, 
-                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId))) ||
-     (0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
-                   devResetRequestData.devPasswd, 
-                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd))))
-  {
-    // devPass err
-    cloud_if_log("ERROR: MVDCloudInterfaceResetCloudDevInfo: loginId/devPasswd mismatch!");
-    return kMismatchErr;
-  }
-  cloud_if_log("MVDCloudInterfaceResetCloudDevInfo: loginId/devPasswd ok!");
-#endif
-  
+  cloud_if_log("MVDCloudInterfaceResetCloudDevInfo");
   err = EasyCloudDeviceReset(&easyCloudContext);
-  require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloudDeviceReset failed! err=%d", err) );
+  require_noerr_action( err, exit, 
+                       cloud_if_log("ERROR: EasyCloudDeviceReset err=%d", err) );
   
-  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
+  //mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
   inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated = false;  // need to reActivate
   sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId, DEFAULT_DEVICE_ID);
   sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey, DEFAULT_DEVICE_KEY);
@@ -407,8 +374,10 @@ OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
   //sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, DEFAULT_USER_TOKEN);
   sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, inContext->micoStatus.mac);
   //inContext->appStatus.virtualDevStatus.isCloudConnected = false;
-  MICOUpdateConfiguration(inContext);
-  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+  //MICOUpdateConfiguration(inContext);
+  //mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+  
+  return kNoErr;
   
 exit:
   return err;
@@ -426,22 +395,6 @@ OSStatus MVDCloudInterfaceGetFile(mico_Context_t* const inContext,
                devGetFileRequestData.file_path,
                devGetFileRequestData.file_checksum,
                devGetFileRequestData.file_version);
-  
-#ifdef MVD_LOGINID_DEVPASS_CHECK
-  // login_id/dev_passwd ok ?
-  if((0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, 
-                   devOTARequestData.loginId, 
-                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId))) ||
-     (0 != strncmp(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, 
-                   devOTARequestData.devPasswd, 
-                   strlen(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd))))
-  {
-    // devPass err
-    cloud_if_log("ERROR: MVDCloudInterfaceGetFile: loginId/devPasswd mismatch!");
-    return kMismatchErr;
-  }
-  cloud_if_log("MVDCloudInterfaceGetFile: loginId/devPasswd ok!");
-#endif
 
   // set request params
   memset((void*)easyCloudContext.service_status.bin_file, 0, MAX_SIZE_FILE_PATH);
@@ -464,7 +417,8 @@ OSStatus MVDCloudInterfaceGetFile(mico_Context_t* const inContext,
   // notify, record file size for user
    cloud_if_log("Get file from server done! file_size=%lld",
                 easyCloudContext.service_status.bin_file_size);
-   inContext->appStatus.virtualDevStatus.RecvRomFileSize = easyCloudContext.service_status.bin_file_size;
+   inContext->appStatus.virtualDevStatus.RecvRomFileSize = \
+                easyCloudContext.service_status.bin_file_size;
   
   return kNoErr;
   
@@ -472,17 +426,32 @@ exit:
   return err;
 }
 
-//OSStatus MVDCloudInterfaceStop(mico_Context_t* const inContext)
-//{  
-//  cloud_if_log_trace();
-//  OSStatus err = kUnknownErr;
-//  
-//  cloud_if_log("MVDCloudInterfaceStop");
-//  // stop EasyCloud service
-//  err = EasyCloudServiceStop(&easyCloudContext);
-//  require_noerr_action( err, exit, 
-//                       cloud_if_log("ERROR: EasyCloudServiceStop failed! err=%d", err) );
-//  
-//exit:
-//  return err;
-//}
+OSStatus MVDCloudInterfaceStop(mico_Context_t* const inContext)
+{  
+  cloud_if_log_trace();
+  OSStatus err = kUnknownErr;
+  
+  cloud_if_log("MVDCloudInterfaceStop");
+  err = EasyCloudServiceStop(&easyCloudContext);
+  require_noerr_action( err, exit, 
+                       cloud_if_log("ERROR: EasyCloudServiceStop err=%d.", err) );
+  return kNoErr;
+  
+exit:
+  return err;
+}
+
+OSStatus MVDCloudInterfaceDeinit(mico_Context_t* const inContext)
+{  
+  cloud_if_log_trace();
+  OSStatus err = kUnknownErr;
+  
+  cloud_if_log("MVDCloudInterfaceDeinit");
+  err = EasyCloudServiceDeInit(&easyCloudContext);
+  require_noerr_action( err, exit, 
+                       cloud_if_log("ERROR: EasyCloudServiceDeInit err=%d.", err) );
+  return kNoErr;
+  
+exit:
+  return err;
+}

@@ -39,7 +39,7 @@
 #define DEFAULT_DEVICE_ID                "none"
 #define DEFAULT_DEVICE_KEY               "none"
 
-#define STACK_SIZE_MVD_MAIN_THREAD       0x500
+#define STACK_SIZE_MVD_CLOUD_TEST_THREAD       0x1000
 
 /* device auto activate mechanism, comment out if not need */
 #define DEVICE_AUTO_ACTIVATE_ENABLE      1

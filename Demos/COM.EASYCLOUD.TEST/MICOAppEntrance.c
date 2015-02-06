@@ -30,13 +30,13 @@
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
 #define app_log_trace() custom_log_trace("APP")
 
-
+/*
 #define APP_CLOUD_CONNECTED_MSG_2CLOUD     "{\"APPCloud\":\"connected\"}"
 #define APP_CLOUD_CONNECTED_MSG_2MCU       "[APP]Cloud status: connected\r\n"
 #define APP_CLOUD_DISCONNECTED_MSG_2MCU    "[APP]Cloud status: disconnected\r\n"
 #define APP_DEVICE_INACTIVATED_MSG_2MCU    "[APP]Device status: inactivate\r\n"
 
-/* test define */
+// test define
 #define MVD_CLOUD_TEST_RECV_MSG_SIZE             512      // byte
 #define MVD_CLOUD_TEST_RECV_MSG_PERIOD           (35*60)      // s
 #define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (35*60*1000)      // ms
@@ -58,11 +58,12 @@ static char recv_echo_data_cnt_str[64] = {0};
 
 static mico_thread_t mvd_test_thread_handler = NULL;
 
+
 static OSStatus mvd_transfer_test(mico_Context_t *inContext)
 {
   OSStatus err = kUnknownErr;
   
-  /* Cloud recv test */
+  // Cloud recv test
   app_log("[MVD_TEST][CLOUD RECV]start");
   MVDSendMsg2Device(inContext, 
                     "[MVD_TEST][CLOUD RECV]start ...\r\n", 
@@ -74,7 +75,7 @@ static OSStatus mvd_transfer_test(mico_Context_t *inContext)
                                MVD_CLOUD_TEST_RECV_MSG_INTERVAL);
   require_noerr( err, exit );
   
-  /* start send test at the same time */
+  // start send test at the same time
   // server will echo msg when startTest
   app_log("[MVD_TEST]CLOUD ECHO]start...");
   err = MVDCloudTest_StartSend(inContext,
@@ -133,14 +134,14 @@ void mvd_test_thread(void* arg){
   char freeMemString[64] = {0};
   
   while(1){
-    /* system memory check */
+    // system memory check
     memInfo = mico_memory_info();
     app_log("[MVD_TEST]System memory: %d", memInfo->free_memory);
     
-    /* check cloud status && send msg test */
+    // check cloud status && send msg test
     if(MVDIsActivated(inContext)){
       app_log("[MVD_TEST]Device status: activated");
-      /* get device_id */
+      // get device_id
       app_log("[MVD_TEST]Device_id: %s", MVDGetDeviceID(inContext));
       if(MVDCloudIsConnect(inContext)){
         app_log("[MVD_TEST]Cloud status: connected");
@@ -219,7 +220,7 @@ OSStatus start_mvd_test(void* arg)
                                  MICO_APPLICATION_PRIORITY, 
                                  "MVD_test", mvd_test_thread, 0x800, inContext );
 }
-
+*/
 
 /* MICO system callback: Restore default configuration provided by application */
 void appRestoreDefault_callback(mico_Context_t *inContext)
@@ -242,13 +243,9 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
   if(inContext->flashContentInRam.micoSystemConfig.bonjourEnable == true)
     MICOStartBonjourService( Station, inContext );
 
-  /* start virtual device */
-  err = MVDInit(inContext);
-  require_noerr_action( err, exit, app_log("ERROR: virtual device start failed!") );
-  
-  /* mvd test */
-  err =  start_mvd_test(inContext);
-  require_noerr_action( err, exit, app_log("ERROR: start mvd_test thread failed!") );
+  /* start virtual device for test */
+  err = MVDStart(inContext);
+  require_noerr_action( err, exit, app_log("ERROR: start virtual device failed!") );
 
 exit:
   return err;

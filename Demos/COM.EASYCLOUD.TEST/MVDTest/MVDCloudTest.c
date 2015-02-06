@@ -22,7 +22,9 @@
 #include <stdio.h>
 
 #include "MVDCloudTest.h"
-#include "MicoVirtualDevice.h"
+//#include "MicoVirtualDevice.h"
+#include "MVDCloudInterfaces.h"
+//#include "EasyCloudService.h"
 #include "EasyCloudUtils.h"
 #include "SocketUtils.h"
 #include "StringUtils.h"
@@ -30,6 +32,11 @@
 #define mvd_cloud_test_log(M, ...) custom_log("MVD_CLOUD_TEST", M, ##__VA_ARGS__)
 #define mvd_cloud_test_log_trace() custom_log_trace("MVD_CLOUD_TEST")
 
+#define MVD_CLOUD_TEST_SEND_DATA              "MVD Cloud send data to default topic: device_id/out."
+#define MVD_CLOUD_TEST_SENDTO_TOPIC           "user_test"
+#define MVD_CLOUD_TEST_SENDTO_TOPIC_DATA      "MVD Cloud send data to user-defined topic: user_test."
+#define MVD_CLOUD_TEST_SENDTO_CHANNEL         "test"
+#define MVD_CLOUD_TEST_SENDTO_CHANNEL_DATA    "MVD Cloud send data to sub-channel: device_id/out/test"
 
 typedef struct _test_parms_t{
   mico_Context_t* inContext;
@@ -403,4 +410,185 @@ OSStatus MVDCloudTest_StartSend(mico_Context_t* inContext,
                                  "MVDCloudTest_SendThread", mvd_test_send_thread, 0x800, (void*)(&test_params) );
 }
 
+
+/*******************************************************************************
+* EasyCloud test functions
+*******************************************************************************/
+  
+/* interface test */
+OSStatus easycloud_if_test(mico_Context_t* context)
+{
+  OSStatus err = kUnknownErr;
+  mico_Context_t *inContext = (mico_Context_t*)context;
+  MVDActivateRequestData_t devActivateData;
+  MVDAuthorizeRequestData_t devAuthorizeData;
+  MVDResetRequestData_t devCloudResetData;
+  micoMemInfo_t *memInfo = NULL;
+  easycloud_service_state_t service_running_state = EASYCLOUD_STOPPED;
+  
+  int activate_retry_cnt = 3;
+  int authorize_retry_cnt = 3;
+  int cloud_reset_retry_cnt = 3;
+  
+  mvd_cloud_test_log("=========== EasyCloud interfaces test ===========");
+  /* 1. lib version */
+  err = MVDCloudInterfacePrintVersion();
+  require_noerr_action(err, exit, 
+                       mvd_cloud_test_log("[FAILED] MVDCloudInterfacePrintVersion"));
+  mvd_cloud_test_log("[SUCCESS] MVDCloudInterfacePrintVersion");
+  
+  /* 2. init */
+  err = MVDCloudInterfaceInit(context);
+  require_noerr_action(err, exit, 
+                       mvd_cloud_test_log("[FAILED] MVDCloudInterfaceInit"));
+  mvd_cloud_test_log("[SUCCESS] MVDCloudInterfaceInit");
+  
+  /* 3. activate */
+  while(activate_retry_cnt > 0){
+    memset((void*)&devActivateData, 0, sizeof(devActivateData));
+    strncpy(devActivateData.loginId,
+            inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
+            MAX_SIZE_LOGIN_ID);
+    strncpy(devActivateData.devPasswd,
+            inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+            MAX_SIZE_DEV_PASSWD);
+    strncpy(devActivateData.user_token,
+            inContext->micoStatus.mac,
+            MAX_SIZE_USER_TOKEN);
+    err = MVDCloudInterfaceDevActivate(inContext, devActivateData);
+    require_noerr_action(err, exit, 
+                         mvd_cloud_test_log("[FAILED] MVDCloudInterfaceDevActivate [%d]", activate_retry_cnt));
+    mvd_cloud_test_log("[SUCCESS] MVDCloudInterfaceDevActivate [%d]", activate_retry_cnt);
+    
+    activate_retry_cnt--;
+  }
+  
+  /* 4. authorize */
+  while(authorize_retry_cnt > 0){
+    memset((void*)&devAuthorizeData, 0, sizeof(devAuthorizeData));
+    strncpy(devAuthorizeData.loginId,
+            inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
+            MAX_SIZE_LOGIN_ID);
+    strncpy(devAuthorizeData.devPasswd,
+            inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+            MAX_SIZE_DEV_PASSWD);
+    strncpy(devAuthorizeData.user_token,
+            inContext->micoStatus.mac,
+            MAX_SIZE_USER_TOKEN);
+    err = MVDCloudInterfaceDevAuthorize(inContext, devAuthorizeData);
+    require_noerr_action(err, exit, 
+                         mvd_cloud_test_log("[FAILED] MVDCloudInterfaceDevAuthorize [%d]",authorize_retry_cnt));
+    mvd_cloud_test_log("[SUCCESS] MVDCloudInterfaceDevAuthorize [%d]", authorize_retry_cnt);
+    
+    authorize_retry_cnt--;
+  }
+  
+  /* 5. start */
+  err = MVDCloudInterfaceStart(inContext);
+  require_noerr_action(err, exit, 
+                       mvd_cloud_test_log("[FAILED] MVDCloudInterfaceStart"));
+  mvd_cloud_test_log("[SUCCESS] MVDCloudInterfaceStart");
+  
+  /* 6. wait servie connect */
+  do{
+    service_running_state = MVDCloudInterfaceGetState();
+    mico_thread_sleep(1);
+  }while(EASYCLOUD_CONNECTED != service_running_state);
+  mvd_cloud_test_log("MVDCloudInterfaceGetState: connected.");
+  
+  /* 7. send data */
+  // default topic: device_id/out
+  err = MVDCloudInterfaceSend(MVD_CLOUD_TEST_SEND_DATA, 
+                              strlen(MVD_CLOUD_TEST_SEND_DATA));
+  require_noerr_action(err, exit, 
+                       mvd_cloud_test_log("[FAILED] MVDCloudInterfaceSend"));
+  mvd_cloud_test_log("[SUCCESS] MVDCloudInterfaceSend");
+  
+  // sub-channel: device_id/out/<channel>
+  err = MVDCloudInterfaceSendtoChannel(MVD_CLOUD_TEST_SENDTO_CHANNEL, 
+                                       MVD_CLOUD_TEST_SENDTO_CHANNEL_DATA, 
+                                       strlen(MVD_CLOUD_TEST_SENDTO_CHANNEL_DATA));
+  require_noerr_action(err, exit, 
+                       mvd_cloud_test_log("[FAILED] MVDCloudInterfaceSendtoChannel"));
+  mvd_cloud_test_log("[SUCCESS] MVDCloudInterfaceSendtoChannel");
+  
+  // user-defined topic
+  err = MVDCloudInterfaceSendto(MVD_CLOUD_TEST_SENDTO_TOPIC, 
+                                MVD_CLOUD_TEST_SENDTO_TOPIC_DATA, 
+                                strlen(MVD_CLOUD_TEST_SENDTO_TOPIC_DATA));
+  require_noerr_action(err, exit, 
+                       mvd_cloud_test_log("[FAILED] MVDCloudInterfaceSendto"));
+  mvd_cloud_test_log("[SUCCESS] MVDCloudInterfaceSendto");
+  
+  //8. stop
+  err = MVDCloudInterfaceStop(inContext);
+  require_noerr_action(err, exit, 
+                       mvd_cloud_test_log("[FAILED] MVDCloudInterfaceStop"));
+  mvd_cloud_test_log("[SUCCESS] MVDCloudInterfaceStop");
+  
+  //9. reset
+  while(cloud_reset_retry_cnt > 0){
+    memset((void*)&devCloudResetData, 0, sizeof(devCloudResetData));
+    strncpy(devCloudResetData.loginId,
+            inContext->flashContentInRam.appConfig.virtualDevConfig.loginId,
+            MAX_SIZE_LOGIN_ID);
+    strncpy(devCloudResetData.devPasswd,
+            inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
+            MAX_SIZE_DEV_PASSWD);
+    strncpy(devCloudResetData.user_token,
+            inContext->micoStatus.mac,
+            MAX_SIZE_USER_TOKEN);
+    err = MVDCloudInterfaceResetCloudDevInfo(inContext, devCloudResetData);
+    require_noerr_action(err, exit, 
+                         mvd_cloud_test_log("[FAILED] MVDCloudInterfaceResetCloudDevInfo [%d]", cloud_reset_retry_cnt));
+    mvd_cloud_test_log("[SUCCESS] MVDCloudInterfaceResetCloudDevInfo [%d]", cloud_reset_retry_cnt);
+    
+    cloud_reset_retry_cnt--;
+  }
+  
+  //10. deinit 
+  err = MVDCloudInterfaceDeinit(inContext);
+  require_noerr_action(err, exit, 
+                       mvd_cloud_test_log("[FAILED] MVDCloudInterfaceDeinit"));
+  mvd_cloud_test_log("[SUCCESS] MVDCloudInterfaceDeinit");
+  
+  //11. system memory info
+  memInfo = mico_memory_info();
+  mvd_cloud_test_log("[TEST_IF_QUIT]System free memory: %d", memInfo->free_memory);
+  //sprintf(freeMemString, "[MVD_TEST]System memory: %d\r\n", memInfo->free_memory);
+  
+  err = kNoErr;
+  mvd_cloud_test_log("MVD Cloud interfaces test [OK]");
+  return err;
+  
+exit:
+  mvd_cloud_test_log("MVD Cloud interfaces test [FAILED]");
+  return err;
+}
+
+/* transmission test */
+OSStatus easycloud_transmission_test(mico_Context_t* context)
+{
+  OSStatus err = kUnknownErr;
+  mvd_cloud_test_log("=========== EasyCloud transmission test ===========");
+  //11. echo
+  
+  err = kNoErr;
+  mvd_cloud_test_log("MVD Cloud transmission test [OK]");
+  return err;
+}
+
+/* OTA test */
+OSStatus easycloud_ota_test(mico_Context_t* context)
+{
+  OSStatus err = kUnknownErr;
+  mvd_cloud_test_log("=========== EasyCloud OTA test ===========");
+  //12. getromversion
+  
+  //13. getromdata
+  
+  err = kNoErr;
+   mvd_cloud_test_log("MVD Cloud OTA test [OK]");
+  return err;
+}
 

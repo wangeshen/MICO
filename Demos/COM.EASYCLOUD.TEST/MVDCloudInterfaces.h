@@ -38,7 +38,10 @@
  ******************************************************************************/
 
 //common interfaces
+OSStatus MVDCloudInterfacePrintVersion(void);
 OSStatus MVDCloudInterfaceInit(mico_Context_t* const inContext);
+OSStatus MVDCloudInterfaceStart(mico_Context_t* const inContext);
+easycloud_service_state_t MVDCloudInterfaceGetState(void);
 OSStatus MVDCloudInterfaceSend(unsigned char *inBuf, unsigned int inBufLen);
 OSStatus MVDCloudInterfaceSendto(const char* topic, 
                                  unsigned char *inBuf, unsigned int inBufLen);
@@ -60,6 +63,7 @@ OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
 OSStatus MVDCloudInterfaceGetFile(mico_Context_t* const inContext,
                                   MVDDownloadFileRequestData_t devGetFileRequestData);
 
-//OSStatus MVDCloudInterfaceStop(mico_Context_t* const inContext);
+OSStatus MVDCloudInterfaceStop(mico_Context_t* const inContext);
+OSStatus MVDCloudInterfaceDeinit(mico_Context_t* const inContext);
 
 #endif /* __MICO_MVDCLOUDINTERFACES_H_*/
