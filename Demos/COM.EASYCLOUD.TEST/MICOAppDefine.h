@@ -28,16 +28,16 @@
 #include "MicoVirtualDeviceDef.h"
 
 
-#define APP_INFO   "mxchipWNet Wechat Demo based on MICO OS"
+#define APP_INFO   "mxchipWNet EasyCloud test based on MICO OS"
 
-#define FIRMWARE_REVISION   "MICO_WECHAT_1_0"
+#define FIRMWARE_REVISION   "MICO_EASYCLOUD_TEST_1_0"
 #define MANUFACTURER        "MXCHIP Inc."
-#define SERIAL_NUMBER       "20141223"
-#define PROTOCOL            "com.wechat.spp"
+#define SERIAL_NUMBER       "20150206"
+#define PROTOCOL            "com.easycloud.test"
 
 #ifdef DEFAULT_NAME
 #undef DEFAULT_NAME
-#define DEFAULT_NAME        "EMW3162 Wechat"
+#define DEFAULT_NAME        "EMW3162 Test"
 #endif
 
 
@@ -53,7 +53,7 @@
 /* product type */
 #define DEFAULT_PRODUCT_ID                  "07f9151c"
 #define DEFAULT_PRODUCT_KEY                 "009aec0d-4dad-41fd-8987-b30c382986bf"
-#define DEFAULT_ROM_VERSION                 "v0.1.0"
+#define DEFAULT_ROM_VERSION                 "v1.0"
 
 /*Application's configuration stores in flash*/
 typedef struct
