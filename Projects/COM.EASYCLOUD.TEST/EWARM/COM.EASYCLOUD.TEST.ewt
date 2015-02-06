@@ -343,35 +343,35 @@
     <group>
       <name>MVDTest</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDTest\MVDCloudTest.c</name>
+        <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MVDTest\MVDCloudTest.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDTest\MVDCloudTest.h</name>
+        <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MVDTest\MVDCloudTest.h</name>
       </file>
     </group>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOAppDefine.h</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MICOAppDefine.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOAppEntrance.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MICOAppEntrance.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOBonjour.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MICOBonjour.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOConfigDelegate.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MICOConfigDelegate.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoDefaults.h</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MicoDefaults.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoVirtualDevice.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MicoVirtualDevice.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDCloudInterfaces.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MVDCloudInterfaces.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDDeviceInterfaces.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MVDDeviceInterfaces.c</name>
     </file>
   </group>
   <group>
@@ -503,7 +503,7 @@
       <name>$PROJ_DIR$\..\..\..\include\MicoAlgorithm.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\include\MicoPlatform.h</name>
+      <name>$PROJ_DIR$\..\..\..\include\MICOPlatform.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\include\MICORTOS.h</name>

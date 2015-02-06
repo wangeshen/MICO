@@ -17,15 +17,15 @@
         <debug>0</debug>
         <option>
           <name>ExePath</name>
-          <state>..\..\..\Build\COM.WECHAT.SPP\Output\EMW3162</state>
+          <state>..\..\..\Build\COM.EASYCLOUD.TEST\Output\EMW3162</state>
         </option>
         <option>
           <name>ObjPath</name>
-          <state>..\..\..\Build\COM.WECHAT.SPP\EMW3162\Obj</state>
+          <state>..\..\..\Build\COM.EASYCLOUD.TEST\EMW3162\Obj</state>
         </option>
         <option>
           <name>ListPath</name>
-          <state>..\..\..\Build\COM.WECHAT.SPP\EMW3162\list</state>
+          <state>..\..\..\Build\COM.EASYCLOUD.TEST\EMW3162\list</state>
         </option>
         <option>
           <name>Variant</name>
@@ -56,7 +56,7 @@
         </option>
         <option>
           <name>GOutputBinary</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>FPU</name>
@@ -79,7 +79,7 @@
         </option>
         <option>
           <name>RTDescription</name>
-          <state>To be used with the full configuration of the C/C++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
+          <state>Use the full configuration of the C/C++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
         </option>
         <option>
           <name>OGProductVersion</name>
@@ -304,7 +304,7 @@
           <name>CCIncludePath2</name>
           <state>$PROJ_DIR$\..\..\..\Platform</state>
           <state>$PROJ_DIR$\..\..\..\Library\support</state>
-          <state>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP</state>
+          <state>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST</state>
           <state>$PROJ_DIR$\..\..\..\MICO</state>
           <state>$PROJ_DIR$\..\..\..\Platform\EMW3162</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx</state>
@@ -321,7 +321,7 @@
           <state>$PROJ_DIR$\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src</state>
           <state>$PROJ_DIR$\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTClient-C\src</state>
           <state>$PROJ_DIR$\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTClient-C\src\MICO</state>
-          <state>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDTest</state>
+          <state>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MVDTest</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -613,7 +613,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>COM.WECHAT.SPP.bin</state>
+          <state>COM.EASYCLOUD.TEST.bin</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -667,7 +667,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>COM.WECHAT.SPP.out</state>
+          <state>COM.EASYCLOUD.TEST.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -953,7 +953,7 @@
         </option>
         <option>
           <name>IarchiveOutput</name>
-          <state>D:\github\MICO\Build\COM.WECHAT.SPP\Output\EMW3162\COM.WECHAT.SPP.a</state>
+          <state>D:\github\MICO\Build\COM.EASYCLOUD.TEST\Output\EMW3162\COM.EASYCLOUD.TEST.a</state>
         </option>
       </data>
     </settings>
@@ -978,15 +978,15 @@
         <debug>1</debug>
         <option>
           <name>ExePath</name>
-          <state>..\..\..\Build\COM.WECHAT.SPP\Output\MICO_EVB_1</state>
+          <state>..\..\..\Build\COM.EASYCLOUD.TEST\Output\MICO_EVB_1</state>
         </option>
         <option>
           <name>ObjPath</name>
-          <state>..\..\..\Build\COM.WECHAT.SPP\MICO_EVB_1\obj</state>
+          <state>..\..\..\Build\COM.EASYCLOUD.TEST\MICO_EVB_1\obj</state>
         </option>
         <option>
           <name>ListPath</name>
-          <state>..\..\..\Build\COM.WECHAT.SPP\MICO_EVB_1\list</state>
+          <state>..\..\..\Build\COM.EASYCLOUD.TEST\MICO_EVB_1\list</state>
         </option>
         <option>
           <name>Variant</name>
@@ -1265,7 +1265,7 @@
           <name>CCIncludePath2</name>
           <state>$PROJ_DIR$\..\..\..\Platform</state>
           <state>$PROJ_DIR$\..\..\..\Library\support</state>
-          <state>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP</state>
+          <state>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST</state>
           <state>$PROJ_DIR$\..\..\..\MICO</state>
           <state>$PROJ_DIR$\..\..\..\Platform\MICO_EVB_1</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M3\STM32F2xx</state>
@@ -1572,7 +1572,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>COM.WECHAT.SPP.bin</state>
+          <state>COM.EASYCLOUD.TEST.bin</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -1626,7 +1626,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>COM.WECHAT.SPP.out</state>
+          <state>COM.EASYCLOUD.TEST.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -1937,15 +1937,15 @@
         <debug>0</debug>
         <option>
           <name>ExePath</name>
-          <state>..\..\..\Build\COM.WECHAT.SPP\Output\Nucleo_411RE</state>
+          <state>..\..\..\Build\COM.EASYCLOUD.TEST\Output\Nucleo_411RE</state>
         </option>
         <option>
           <name>ObjPath</name>
-          <state>..\..\..\Build\COM.WECHAT.SPP\Nucleo_411RE\Obj</state>
+          <state>..\..\..\Build\COM.EASYCLOUD.TEST\Nucleo_411RE\Obj</state>
         </option>
         <option>
           <name>ListPath</name>
-          <state>..\..\..\Build\COM.WECHAT.SPP\Nucleo_411RE\lisr</state>
+          <state>..\..\..\Build\COM.EASYCLOUD.TEST\Nucleo_411RE\lisr</state>
         </option>
         <option>
           <name>Variant</name>
@@ -2224,7 +2224,7 @@
           <name>CCIncludePath2</name>
           <state>$PROJ_DIR$\..\..\..\Platform</state>
           <state>$PROJ_DIR$\..\..\..\Library\support</state>
-          <state>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP</state>
+          <state>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST</state>
           <state>$PROJ_DIR$\..\..\..\MICO</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Nucleo_411RE</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M4\STM32F4xx</state>
@@ -2526,7 +2526,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>COM.WECHAT.SPP.bin</state>
+          <state>COM.EASYCLOUD.TEST.bin</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -2580,7 +2580,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>COM.WECHAT.SPP.out</state>
+          <state>COM.EASYCLOUD.TEST.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -2891,15 +2891,15 @@
         <debug>0</debug>
         <option>
           <name>ExePath</name>
-          <state>..\..\..\Build\COM.WECHAT.SPP\Output\EMW3165</state>
+          <state>..\..\..\Build\COM.EASYCLOUD.TEST\Output\EMW3165</state>
         </option>
         <option>
           <name>ObjPath</name>
-          <state>..\..\..\Build\COM.WECHAT.SPP\EMW3165\Obj</state>
+          <state>..\..\..\Build\COM.EASYCLOUD.TEST\EMW3165\Obj</state>
         </option>
         <option>
           <name>ListPath</name>
-          <state>..\..\..\Build\COM.WECHAT.SPP\EMW3165\list</state>
+          <state>..\..\..\Build\COM.EASYCLOUD.TEST\EMW3165\list</state>
         </option>
         <option>
           <name>Variant</name>
@@ -3178,7 +3178,7 @@
           <name>CCIncludePath2</name>
           <state>$PROJ_DIR$\..\..\..\Platform</state>
           <state>$PROJ_DIR$\..\..\..\Library\support</state>
-          <state>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP</state>
+          <state>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST</state>
           <state>$PROJ_DIR$\..\..\..\MICO</state>
           <state>$PROJ_DIR$\..\..\..\Platform\EMW3165</state>
           <state>$PROJ_DIR$\..\..\..\Platform\Common\Cortex-M4\STM32F4xx</state>
@@ -3481,7 +3481,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>COM.WECHAT.SPP.bin</state>
+          <state>COM.EASYCLOUD.TEST.bin</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -3535,7 +3535,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>COM.WECHAT.SPP.out</state>
+          <state>COM.EASYCLOUD.TEST.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -3833,48 +3833,42 @@
   </configuration>
   <group>
     <name>Application</name>
-    <excluded>
-      <configuration>EMW3162</configuration>
-    </excluded>
     <group>
       <name>MVDTest</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDTest\MVDCloudTest.c</name>
+        <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MVDTest\MVDCloudTest.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDTest\MVDCloudTest.h</name>
+        <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MVDTest\MVDCloudTest.h</name>
       </file>
     </group>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOAppDefine.h</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MICOAppDefine.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOAppEntrance.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MICOAppEntrance.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOBonjour.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MICOBonjour.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MICOConfigDelegate.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MICOConfigDelegate.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoDefaults.h</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MicoDefaults.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MicoVirtualDevice.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MicoVirtualDevice.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDCloudInterfaces.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MVDCloudInterfaces.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDDeviceInterfaces.c</name>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.EASYCLOUD.TEST\MVDDeviceInterfaces.c</name>
     </file>
   </group>
   <group>
     <name>External</name>
-    <excluded>
-      <configuration>EMW3162</configuration>
-    </excluded>
     <group>
       <name>Curve25519</name>
       <file>
@@ -3970,9 +3964,6 @@
   </group>
   <group>
     <name>include</name>
-    <excluded>
-      <configuration>EMW3162</configuration>
-    </excluded>
     <group>
       <name>MicoDriver</name>
       <file>
@@ -4016,7 +4007,7 @@
       <name>$PROJ_DIR$\..\..\..\include\MicoAlgorithm.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\include\MicoPlatform.h</name>
+      <name>$PROJ_DIR$\..\..\..\include\MICOPlatform.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\include\MICORTOS.h</name>
@@ -4137,14 +4128,10 @@
     </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\MICOConfig.c</name>
-      <excluded>
-        <configuration>EMW3162</configuration>
-      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm3_sdio.a</name>
       <excluded>
-        <configuration>EMW3162</configuration>
         <configuration>MICO_EVB_1</configuration>
         <configuration>Nucleo_411RE</configuration>
         <configuration>EMW3165</configuration>
@@ -4177,9 +4164,6 @@
   </group>
   <group>
     <name>MICO</name>
-    <excluded>
-      <configuration>EMW3162</configuration>
-    </excluded>
     <group>
       <name>AIRKISS</name>
       <excluded>
@@ -4234,9 +4218,6 @@
   </group>
   <group>
     <name>Platform</name>
-    <excluded>
-      <configuration>EMW3162</configuration>
-    </excluded>
     <group>
       <name>common</name>
       <group>
@@ -4800,9 +4781,6 @@
   </group>
   <group>
     <name>Support</name>
-    <excluded>
-      <configuration>EMW3162</configuration>
-    </excluded>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\AESUtils.c</name>
     </file>
