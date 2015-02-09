@@ -149,8 +149,8 @@ OSStatus MVDCloudInterfaceSend(unsigned char *inBuf, unsigned int inBufLen)
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
 
-  cloud_if_log("MVDCloudInterfaceSend: MVD => Cloud[publish]:[%d]=%.*s", 
-               inBufLen, inBufLen, inBuf);
+  //cloud_if_log("MVDCloudInterfaceSend: MVD => Cloud[publish]:[%d]=%.*s", 
+  //             inBufLen, inBufLen, inBuf);
   
   err = EasyCloudPublish(&easyCloudContext, inBuf, inBufLen);
   require_noerr_action( err, exit, 
@@ -167,8 +167,8 @@ OSStatus MVDCloudInterfaceSendto(const char* topic,
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
 
-  cloud_if_log("MVDCloudInterfaceSendto: MVD => Cloud[%s]:[%d]=%.*s", 
-               topic, inBufLen, inBufLen, inBuf);
+  //cloud_if_log("MVDCloudInterfaceSendto: MVD => Cloud[%s]:[%d]=%.*s", 
+  //             topic, inBufLen, inBufLen, inBuf);
   err = EasyCloudPublishto(&easyCloudContext, topic, inBuf, inBufLen);
   require_noerr_action( err, exit, 
                        cloud_if_log("ERROR: MVDCloudInterfaceSendto err=%d", err) );
@@ -184,8 +184,8 @@ OSStatus MVDCloudInterfaceSendtoChannel(const char* channel,
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
 
-  cloud_if_log("MVDCloudInterfaceSendtoChannel: MVD => Cloud[%s]:[%d]=%.*s", 
-               channel, inBufLen, inBufLen, inBuf);
+  //cloud_if_log("MVDCloudInterfaceSendtoChannel: MVD => Cloud[%s]:[%d]=%.*s", 
+  //             channel, inBufLen, inBufLen, inBuf);
   if(NULL == channel){
     err = EasyCloudPublish(&easyCloudContext, inBuf, inBufLen);
   }

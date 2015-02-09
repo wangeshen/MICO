@@ -41,22 +41,24 @@
 // test define
 #define MVD_CLOUD_TEST_RECV_MSG_SIZE             512      // byte
 #define MVD_CLOUD_TEST_RECV_MSG_PERIOD           (4*60)      // s
-#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (4*60*1000)      // ms
+#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (4*60*1000 + 1000)      // ms
 
 #define MVD_CLOUD_TEST_ECHO_MSG_SIZE             512      // byte
 #define MVD_CLOUD_TEST_ECHO_MSG_PERIOD           (3*60)      // s
 #define MVD_CLOUD_TEST_ECHO_MSG_INTERVAL         500      // ms
 
 #define MVD_CLOUD_TEST_RECV_MSG_RATE             0.99     // recv msg count rate >= 99%
+#define MVD_CLOUD_TEST_ECHO_MSG_RATE             0.99     // echo msg count rate >= 99%
 
 uint64_t cloud_test_data_cnt = 0;
 static uint64_t check_recv_data_len = 0;
-static char recv_data_cnt_str[64] = {0};
-static char total_recv_data_cnt_str[64] = {0};
+//static char recv_data_cnt_str[64] = {0};
+//static char total_recv_data_cnt_str[64] = {0};
 
 // send data check
 uint64_t cloud_test_echo_data_cnt = 0;
 //static char recv_echo_data_cnt_str[64] = {0};
+static uint64_t check_echo_data_len = 0;
 
 typedef struct _test_parms_t{
   mico_Context_t* inContext;
@@ -449,7 +451,9 @@ OSStatus easycloud_if_test(mico_Context_t* context, bool no_stop)
   int cloud_reset_retry_cnt = 3;
   
   if(no_stop){
-    mvd_cloud_test_log("EasyCloud service start");
+    // if no_stop set, just start easycloud service and not stop it,
+    // else will test easycloud interfaces, maybe several times.
+    mvd_cloud_test_log("start EasyCloud service... ");
     activate_retry_cnt = 1;
     authorize_retry_cnt = 1;
     cloud_reset_retry_cnt = 1;
@@ -605,6 +609,7 @@ OSStatus easycloud_transmission_test(mico_Context_t* context)
 {
   OSStatus err = kUnknownErr;
   mico_Context_t* inContext = (mico_Context_t*)context;
+  int transmission_test_ok_num = 0;
   
   // restart service first
   err = easycloud_if_test(inContext, true);
@@ -615,7 +620,7 @@ OSStatus easycloud_transmission_test(mico_Context_t* context)
   mvd_cloud_test_log("=========== EasyCloud transmission test ===========");
   
   // 14. Cloud recv test
-  mvd_cloud_test_log("[MVD_TEST][CLOUD RECV]start");
+  mvd_cloud_test_log("[MVD_TEST][CLOUD RECV]start...");
 //  MVDSendMsg2Device(inContext, 
 //                    "[MVD_TEST][CLOUD RECV]start ...\r\n", 
 //                    strlen("[MVD_TEST][CLOUD RECV]start ...\r\n"));
@@ -637,7 +642,7 @@ OSStatus easycloud_transmission_test(mico_Context_t* context)
                        mvd_cloud_test_log("ERROR: MVDCloudTest_StartSend err = %d.", err));
   
   // timeout for stopping test process
-  mico_thread_sleep(MVD_CLOUD_TEST_RECV_MSG_PERIOD + 5);
+  mico_thread_sleep(MVD_CLOUD_TEST_RECV_MSG_PERIOD + 10);
   err = MVDCloudTest_StopRecv(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId);
   //require_noerr( err, exit );
   if(kNoErr != err){
@@ -650,35 +655,53 @@ OSStatus easycloud_transmission_test(mico_Context_t* context)
 //                    "[MVD_TEST][CLOUD RECV]stopped\r\n", 
 //                    strlen("[MVD_TEST][CLOUD RECV]stopped\r\n"));
   
-  // check test ok?
+  /* check recv data length */
   check_recv_data_len = (uint64_t)(MVD_CLOUD_TEST_RECV_MSG_SIZE*1000*(uint64_t)MVD_CLOUD_TEST_RECV_MSG_PERIOD)/MVD_CLOUD_TEST_RECV_MSG_INTERVAL;
-  sprintf(recv_data_cnt_str, "[MVD_TEST][CLOUD RECV]recv=%lld\t", cloud_test_data_cnt);
-  sprintf(total_recv_data_cnt_str, "[MVD_TEST][CLOUD RECV]Total=%lld\r\n", check_recv_data_len);
-  
+  //sprintf(recv_data_cnt_str, "[MVD_TEST][CLOUD RECV]recv=%lld\t", cloud_test_data_cnt);
+  //sprintf(total_recv_data_cnt_str, "[MVD_TEST][CLOUD RECV]Total=%lld\r\n", check_recv_data_len);
+
+  mvd_cloud_test_log("[MVD_TEST]Recv: %lld/%lld bytes", cloud_test_data_cnt, check_recv_data_len);
+  //  MVDSendMsg2Device(inContext, (unsigned char*)recv_data_cnt_str, strlen(recv_data_cnt_str));
+  //  MVDSendMsg2Device(inContext, (unsigned char*)total_recv_data_cnt_str, strlen(total_recv_data_cnt_str));
+    
   if((check_recv_data_len >= cloud_test_data_cnt) && 
      (cloud_test_data_cnt >= (uint64_t)((long)check_recv_data_len * MVD_CLOUD_TEST_RECV_MSG_RATE))){
        mvd_cloud_test_log("[MVD_TEST][CLOUD RECV]test OK!");
 //       err = MVDSendMsg2Device(inContext,
 //                               "[MVD_TEST][CLOUD RECV]test OK!\r\n", 
 //                               strlen("[MVD_TEST][CLOUD RECV]test OK!\r\n"));
-     }
+  }
   else{
     mvd_cloud_test_log("[MVD_TEST][CLOUD RECV]test FAILED!");
 //    err = MVDSendMsg2Device(inContext,
 //                            "[MVD_TEST][CLOUD RECV]test FAILED!\r\n", 
 //                            strlen("[MVD_TEST][CLOUD RECV]test FAILED!\r\n"));
   }
-  mvd_cloud_test_log("[MVD_TEST]Recv: %lld/%lld", cloud_test_data_cnt, check_recv_data_len);
-//  MVDSendMsg2Device(inContext, (unsigned char*)recv_data_cnt_str, strlen(recv_data_cnt_str));
-//  MVDSendMsg2Device(inContext, (unsigned char*)total_recv_data_cnt_str, strlen(total_recv_data_cnt_str));
   
-  // check echo data len
+  /* check echo data len */
+  check_echo_data_len = (uint64_t)(MVD_CLOUD_TEST_ECHO_MSG_SIZE*1000*(uint64_t)MVD_CLOUD_TEST_ECHO_MSG_PERIOD)/MVD_CLOUD_TEST_ECHO_MSG_INTERVAL;
+  mvd_cloud_test_log("[MVD_TEST][CLOUD ECHO]Recv_echo=%lld/%lld bytes", cloud_test_echo_data_cnt, check_echo_data_len);
   //sprintf(recv_echo_data_cnt_str, "[MVD_TEST][CLOUD RECV]Recv_echo=%lld\r\n", cloud_test_echo_data_cnt);
   //MVDSendMsg2Device(inContext, (unsigned char*)recv_echo_data_cnt_str, strlen(recv_echo_data_cnt_str));
-  mvd_cloud_test_log("[MVD_TEST][CLOUD RECV]Recv_echo=%lld", cloud_test_echo_data_cnt);
+
+  if((check_echo_data_len >= cloud_test_echo_data_cnt) && 
+     (cloud_test_echo_data_cnt >= (uint64_t)((long)check_echo_data_len * MVD_CLOUD_TEST_ECHO_MSG_RATE))){
+       mvd_cloud_test_log("[MVD_TEST][CLOUD ECHO]test OK!");
+       transmission_test_ok_num++; // an item test ok, add 1.
+  }
+  else{
+    mvd_cloud_test_log("[MVD_TEST][CLOUD ECHO]test FAILED!");
+  }
   
-  mvd_cloud_test_log("MVD Cloud transmission test [OK]");
-  return kNoErr;
+  /* output final test result, all test is ok ? */
+  if(1 == transmission_test_ok_num){
+    mvd_cloud_test_log("MVD Cloud transmission test [OK]");
+    return kNoErr;
+  }
+  else{
+    mvd_cloud_test_log("MVD Cloud transmission test [FAILED]");
+    return kGeneralErr;
+  }
   
 exit:
   return err;
