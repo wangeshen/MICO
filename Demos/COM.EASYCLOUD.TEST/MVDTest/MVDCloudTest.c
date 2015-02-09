@@ -175,7 +175,7 @@ OSStatus MVDCloudTest_StartRecv(const char* device_id,
   httpRequestDataLen = strlen((const char*)httpRequestData);
   ///////////////////////////////////////////////////
   
-  mvd_cloud_test_log("send http package: len=%d,\r\n%s", httpRequestDataLen, httpRequestData);
+  //mvd_cloud_test_log("send http package: len=%d,\r\n%s", httpRequestDataLen, httpRequestData);
   
   err = SocketSend( tcpClient_fd, httpRequestData, httpRequestDataLen );
   if (httpRequestData != NULL) {
