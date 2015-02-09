@@ -238,6 +238,7 @@ MQTTClientRestart:
   
   while (1) {
     if ( MQTT_CLIENT_STATUS_STOPPED == EasyCloudMQTTClientState()){
+      mico_mqtt_client_log("MQTT stop by user.");
       goto client_stop;
     }
     
@@ -325,6 +326,10 @@ MQTTClientRestart:
   
   /* stop */
 client_stop:
+  if(-1 != recv_data_loopBack_fd){
+    close(recv_data_loopBack_fd);
+    recv_data_loopBack_fd = -1;
+  }
   MQTTDisconnect(&c);
   n.disconnect(&n);
   
@@ -707,8 +712,9 @@ OSStatus EasyCloudMQTTClientStop(void)
     mqttClientThreadHandle = NULL;
   }
   
-  if (kNoErr == err)
-    mico_mqtt_client_log("MQTT client stopped.");
+  if (kNoErr == err){
+    mico_mqtt_client_log("MQTT client stopped ok.");
+  }
   
   return err;
 }

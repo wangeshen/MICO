@@ -67,6 +67,7 @@ typedef enum {
  ******************************************************************************/
 
 static mico_thread_t easyCloudServiceThreadHandle = NULL;
+volatile bool bStopbyUser = false;
 
 #ifdef MICO_FLASH_FOR_UPDATE
 //extern volatile uint32_t flashStorageAddress;
@@ -174,6 +175,7 @@ OSStatus EasyCloudServiceDeInit(easycloud_service_context_t* const context)
 
 OSStatus EasyCloudServiceStart(easycloud_service_context_t *context)
 {
+  easycloud_service_context_t* inEasyCloudContext = (easycloud_service_context_t*)context;
   if (NULL == context){
     return kParamErr;
   }
@@ -185,21 +187,25 @@ OSStatus EasyCloudServiceStart(easycloud_service_context_t *context)
                                  MICO_APPLICATION_PRIORITY, 
                                  "EasyCloud service", easyCloudServiceThread, 
                                  STACK_SIZE_EASYCLOUD_SERVICE_MAIN_THREAD, 
-                                 (void*)context);
+                                 inEasyCloudContext);
 }
 
 
 OSStatus EasyCloudServiceStop(easycloud_service_context_t *context)
 {
   OSStatus err = kNoErr;
+  easycloud_service_context_t* inEasyCloudContext = (easycloud_service_context_t*)context;
   
-  if (NULL == context){
+  if (NULL == inEasyCloudContext){
     return kParamErr;
   }
-  if (EASYCLOUD_STOPPED == context->service_status.state){
-    return kNotInUseErr;
-  }
+//  if (EASYCLOUD_STOPPED == context->service_status.state){
+//    return kNotInUseErr;
+//  }
 
+  bStopbyUser = true;
+  inEasyCloudContext->service_status.state = EASYCLOUD_STOPPED;
+  
   if (NULL != easyCloudServiceThreadHandle) {
     err = mico_rtos_thread_join(&easyCloudServiceThreadHandle);
     if (kNoErr != err)
@@ -214,7 +220,7 @@ OSStatus EasyCloudServiceStop(easycloud_service_context_t *context)
     easyCloudServiceThreadHandle = NULL;
   }
   
-  context->service_status.state = EASYCLOUD_STOPPED;
+  //context->service_status.state = EASYCLOUD_STOPPED;
   easycloud_service_log("EasyCloud service stopped.");
   
   return err;
@@ -223,11 +229,12 @@ OSStatus EasyCloudServiceStop(easycloud_service_context_t *context)
 
 easycloud_service_state_t EasyCloudServiceState(easycloud_service_context_t *context)
 {
-  if (NULL == context){
+  easycloud_service_context_t* inEasyCloudContext = (easycloud_service_context_t*)context;
+  if (NULL == inEasyCloudContext){
     return EASYCLOUD_STOPPED;
   }
   
-  return context->service_status.state;
+  return inEasyCloudContext->service_status.state;
 }
 
 
@@ -643,7 +650,7 @@ void easyCloudServiceThread(void *arg)
    */
   easycloud_service_log("service wait for activate...");
   while(1){
-    if(EASYCLOUD_STOPPED == easyCloudContext->service_status.state){
+    if((bStopbyUser) || (EASYCLOUD_STOPPED == easyCloudContext->service_status.state)){
       goto exit;
     }
     if (easyCloudContext->service_status.isActivated){
@@ -695,7 +702,7 @@ ReStartMQTTClient:
   /* 3. wait for MQTT client start up. */
   easycloud_service_log("wait for MQTT client connect...");
   while(1){
-    if(EASYCLOUD_STOPPED == easyCloudContext->service_status.state){
+    if((bStopbyUser) || (EASYCLOUD_STOPPED == easyCloudContext->service_status.state)){
       goto cloud_service_stop;
     }
     
@@ -715,7 +722,9 @@ ReStartMQTTClient:
     
   /* service loop */
   while(1) {
-    if(EASYCLOUD_STOPPED == easyCloudContext->service_status.state){
+    //if(EASYCLOUD_STOPPED == easyCloudContext->service_status.state){
+    if((bStopbyUser) || (EASYCLOUD_STOPPED == EasyCloudServiceState(easyCloudContext))){
+      easycloud_service_log("EasyCloud stop by user.");
       goto cloud_service_stop;
     }
     
@@ -760,7 +769,7 @@ ReStartMQTTClient:
     }
     
     //easycloud_service_log("cloud service runing...");
-    //mico_thread_sleep(1);
+    //mico_thread_msleep(500);
   }
   
 cloud_service_stop:
@@ -771,6 +780,7 @@ exit:
   easyCloudContext->service_config_info.statusNotify(easyCloudContext->service_config_info.context,
                                                      easyCloudContext->service_status);
   easycloud_service_log("Exit: EasyCloud thread exit with err = %d", err);
+  bStopbyUser = false;
   mico_rtos_delete_thread(NULL);
   easyCloudServiceThreadHandle = NULL;
   return;
