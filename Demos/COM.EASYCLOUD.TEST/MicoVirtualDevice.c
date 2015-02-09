@@ -378,7 +378,7 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   if('z' != inBuf[0]){
     // recv data "xxx..." from server
     cloud_test_data_cnt += inBufLen;
-    mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
+    //mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
     //err = MVDCloudInterfaceSend(inBuf, inBufLen); // response to cloud
     err = kNoErr;
   }
@@ -389,9 +389,9 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   }
   //////////////////////////////////////////////////////////////////////////////
   
-  //err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
-  //require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
-  //return kNoErr;
+  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
+  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  return kNoErr;
   
 exit:
   return err;

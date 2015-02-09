@@ -47,7 +47,7 @@ void cloudMsgArrivedHandler(void* context,
   mico_Context_t *inContext = (mico_Context_t*)context;
   
   //note: get data just for length=len is valid, because Msg is just a buf pionter.
-  cloud_if_log("Cloud[%.*s] => MVD: [%d]=%.*s", topicLen, topic, msgLen, msgLen, msg);
+  //cloud_if_log("Cloud[%.*s] => MVD: [%d]=%.*s", topicLen, topic, msgLen, msgLen, msg);
   
   MVDCloudMsgProcess(inContext, topic, topicLen, msg, msgLen);
 }
@@ -229,6 +229,7 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
                        cloud_if_log("ERROR: EasyCloudActivate, err=%d", err));
   
   // write back device_id/key to MVD
+  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
   memset(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId,
          0, MAX_SIZE_DEVICE_ID);
   memset(inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey,
@@ -240,6 +241,10 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
           easyCloudContext.service_status.masterDeviceKey, 
           strlen(easyCloudContext.service_status.masterDeviceKey));
   inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated = true;
+  
+  // update flash
+  MICOUpdateConfiguration(inContext);
+  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   
   return kNoErr;
   
@@ -364,17 +369,15 @@ OSStatus MVDCloudInterfaceResetCloudDevInfo(mico_Context_t* const inContext,
   require_noerr_action( err, exit, 
                        cloud_if_log("ERROR: EasyCloudDeviceReset err=%d", err) );
   
-  //mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
+  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
   inContext->flashContentInRam.appConfig.virtualDevConfig.isActivated = false;  // need to reActivate
   sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId, DEFAULT_DEVICE_ID);
   sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey, DEFAULT_DEVICE_KEY);
   sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.loginId, DEFAULT_LOGIN_ID);
   sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.devPasswd, DEFAULT_DEV_PASSWD);
-  //sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, DEFAULT_USER_TOKEN);
   sprintf(inContext->flashContentInRam.appConfig.virtualDevConfig.userToken, inContext->micoStatus.mac);
-  //inContext->appStatus.virtualDevStatus.isCloudConnected = false;
-  //MICOUpdateConfiguration(inContext);
-  //mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+  MICOUpdateConfiguration(inContext);
+  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
   
   return kNoErr;
   

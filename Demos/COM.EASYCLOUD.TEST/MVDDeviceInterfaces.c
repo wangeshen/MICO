@@ -123,7 +123,7 @@ OSStatus MVDDevInterfaceSend(unsigned char *inBuf, unsigned int inBufLen)
 {
   OSStatus err = kUnknownErr;
 
-  dev_if_log("MVD => MCU:[%d]=%.*s", inBufLen, inBufLen, inBuf);
+  //dev_if_log("MVD => MCU:[%d]=%.*s", inBufLen, inBufLen, inBuf);
   err = MicoUartSend(UART_FOR_APP, inBuf, inBufLen);
   require_noerr_action( err, exit, dev_if_log("ERROR: send to USART error! err=%d", err) );
   return kNoErr;

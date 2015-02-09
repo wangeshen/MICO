@@ -40,15 +40,15 @@
 
 // test define
 #define MVD_CLOUD_TEST_RECV_MSG_SIZE             512      // byte
-#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           (4*60)      // s
-#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (4*60*1000 + 1000)      // ms
+#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           (3*60 + 10)      // s
+#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (3*60*1000 + 10000)      // ms
 
 #define MVD_CLOUD_TEST_ECHO_MSG_SIZE             512      // byte
 #define MVD_CLOUD_TEST_ECHO_MSG_PERIOD           (3*60)      // s
 #define MVD_CLOUD_TEST_ECHO_MSG_INTERVAL         500      // ms
 
-#define MVD_CLOUD_TEST_RECV_MSG_RATE             0.99     // recv msg count rate >= 99%
-#define MVD_CLOUD_TEST_ECHO_MSG_RATE             0.99     // echo msg count rate >= 99%
+#define MVD_CLOUD_TEST_RECV_MSG_RATE             0.98     // recv msg count rate >= 98%
+#define MVD_CLOUD_TEST_ECHO_MSG_RATE             0.98     // echo msg count rate >= 98%
 
 uint64_t cloud_test_data_cnt = 0;
 static uint64_t check_recv_data_len = 0;
@@ -135,17 +135,17 @@ OSStatus MVDCloudTest_StartRecv(const char* device_id,
   strncat(request_url, param_interval, strlen(param_interval));
   strncat(request_url, string_intervalLen, intervalLen);
   
-  mvd_cloud_test_log("request: [%.*s]", request_url_len, request_url);
+  //mvd_cloud_test_log("request: [%.*s]", request_url_len, request_url);
   
   httpHeader = ECS_HTTPHeaderCreate();
   require_action( httpHeader, exit, err = kNoMemoryErr );
   ECS_HTTPHeaderClear( httpHeader );
   
   //create tcp connect
-  mvd_cloud_test_log("tcp client start to connect...");
+  //mvd_cloud_test_log("tcp client start to connect...");
   err = gethostbyname((char *)host, (uint8_t *)ipstr, 16);
   require_noerr(err, exit);
-  mvd_cloud_test_log("cloud service host:%s, ip: %s", host, ipstr);
+  //mvd_cloud_test_log("cloud service host:%s, ip: %s", host, ipstr);
   
   tcpClient_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   require(tcpClient_fd != -1, exit);
@@ -156,12 +156,12 @@ OSStatus MVDCloudTest_StartRecv(const char* device_id,
   err = connect(tcpClient_fd, &addr, sizeof(addr));
   require_noerr_quiet(err, exit);
   
-  mvd_cloud_test_log("EasyCloud server connected at port=%d, fd=%d", 
-                         port,
-                         tcpClient_fd);
+  //mvd_cloud_test_log("EasyCloud server connected at port=%d, fd=%d", 
+  //                       port,
+  //                       tcpClient_fd);
   
   // send request data
-  mvd_cloud_test_log("tcp client send activate request...");
+  //mvd_cloud_test_log("tcp client send activate request...");
   err = ECS_CreateHTTPMessageEx(ECS_kHTTPGetMethod, 
                             host, request_url,
                             ECS_kMIMEType_JSON, 
@@ -269,17 +269,17 @@ OSStatus MVDCloudTest_StopRecv(const char* device_id)
   strncat(request_url, param_deviceId, strlen(param_deviceId));
   strncat(request_url, device_id, deviceIdLen);
   
-  mvd_cloud_test_log("request: [%.*s]", request_url_len, request_url);
+  //mvd_cloud_test_log("request: [%.*s]", request_url_len, request_url);
   
   httpHeader = ECS_HTTPHeaderCreate();
   require_action( httpHeader, exit, err = kNoMemoryErr );
   ECS_HTTPHeaderClear( httpHeader );
   
   //create tcp connect
-  mvd_cloud_test_log("tcp client start to connect...");
+  //mvd_cloud_test_log("tcp client start to connect...");
   err = gethostbyname((char *)host, (uint8_t *)ipstr, 16);
   require_noerr(err, exit);
-  mvd_cloud_test_log("cloud service host:%s, ip: %s", host, ipstr);
+  //mvd_cloud_test_log("cloud service host:%s, ip: %s", host, ipstr);
   
   tcpClient_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   require(tcpClient_fd != -1, exit);
@@ -290,12 +290,12 @@ OSStatus MVDCloudTest_StopRecv(const char* device_id)
   err = connect(tcpClient_fd, &addr, sizeof(addr));
   require_noerr_quiet(err, exit);
   
-  mvd_cloud_test_log("EasyCloud server connected at port=%d, fd=%d", 
-                         port,
-                         tcpClient_fd);
+  //mvd_cloud_test_log("EasyCloud server connected at port=%d, fd=%d", 
+  //                       port,
+  //                       tcpClient_fd);
   
   // send request data
-  mvd_cloud_test_log("tcp client send activate request...");
+  //mvd_cloud_test_log("tcp client send activate request...");
   err = ECS_CreateHTTPMessageEx(ECS_kHTTPGetMethod, 
                             host, request_url,
                             ECS_kMIMEType_JSON, 
@@ -309,7 +309,7 @@ OSStatus MVDCloudTest_StopRecv(const char* device_id)
   httpRequestDataLen = strlen((const char*)httpRequestData);
   ///////////////////////////////////////////////////
   
-  mvd_cloud_test_log("send http package: len=%d,\r\n%s", httpRequestDataLen, httpRequestData);
+  //mvd_cloud_test_log("send http package: len=%d,\r\n%s", httpRequestDataLen, httpRequestData);
   
   err = SocketSend( tcpClient_fd, httpRequestData, httpRequestDataLen );
   if (httpRequestData != NULL) {
@@ -393,12 +393,12 @@ void mvd_test_send_thread(void* arg)
       send_ok_cnt++;
     }
     send_cnt--;
-    mvd_cloud_test_log("send_ok_cnt = %lld", send_ok_cnt);
-    mvd_cloud_test_log("send_cnt = %lld", send_cnt);
+    //mvd_cloud_test_log("send_ok_cnt = %lld", send_ok_cnt);
+    //mvd_cloud_test_log("send_cnt = %lld", send_cnt);
     mico_thread_msleep(test_params->interval_ms);
   }
   
-  sprintf(send_ok_string, "send_ok_cnt = %lld", send_ok_cnt);
+  sprintf(send_ok_string, "\r\nsend_ok_cnt = %lld", send_ok_cnt);
   MVDSendMsg2Device(test_params->inContext, (unsigned char*)send_ok_string, strlen(send_ok_string));
   
   
@@ -643,6 +643,7 @@ OSStatus easycloud_transmission_test(mico_Context_t* context)
   
   // timeout for stopping test process
   mico_thread_sleep(MVD_CLOUD_TEST_RECV_MSG_PERIOD + 10);
+  mvd_cloud_test_log("[MVD_TEST]CLOUD RECV]stop recv...");
   err = MVDCloudTest_StopRecv(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId);
   //require_noerr( err, exit );
   if(kNoErr != err){

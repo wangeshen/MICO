@@ -626,6 +626,12 @@
       <name>$PROJ_DIR$\..\..\..\Library\MICOConfig.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\Library\EasyCloud\MicoEasyCloudService_20150209_v0.3.1_debug.a</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\EasyCloud\MicoEasyCloudService_20150209_v0.3.1_release.a</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm3_sdio.a</name>
     </file>
     <file>
