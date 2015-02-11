@@ -31,9 +31,10 @@
 #define cloud_if_log(M, ...) custom_log("MVD_CLOUD_IF", M, ##__VA_ARGS__)
 #define cloud_if_log_trace() custom_log_trace("MVD_CLOUD_IF")
 
+extern mico_semaphore_t _easycloud_test_status_changed_sem;
+extern _easycloud_test_state_t _easycloud_test_state;
 
 static easycloud_service_context_t easyCloudContext;
-
 
 /*******************************************************************************
  * cloud service callbacks
@@ -61,10 +62,16 @@ void cloudServiceStatusChangedHandler(void* context,
   if (EASYCLOUD_CONNECTED == serviceStateInfo.state){
     cloud_if_log("cloud service connected!");
     inContext->appStatus.virtualDevStatus.isCloudConnected = true;
+    
+    _easycloud_test_state = _EASYCLOUD_TEST_STATE_CLOUD_ON;
+    mico_rtos_set_semaphore(&_easycloud_test_status_changed_sem);
   }
   else{
     cloud_if_log("cloud service disconnected!");
     inContext->appStatus.virtualDevStatus.isCloudConnected = false;
+    
+    _easycloud_test_state = _EASYCLOUD_TEST_STATE_CLOUD_OFF;
+    mico_rtos_set_semaphore(&_easycloud_test_status_changed_sem);
   }
 }
 

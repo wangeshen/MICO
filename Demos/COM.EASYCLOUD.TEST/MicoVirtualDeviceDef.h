@@ -88,4 +88,16 @@ typedef struct _virtual_device_context_t {
 } virtual_device_context_t;
 
 
+// for test
+typedef enum {
+  _EASYCLOUD_TEST_STATE_NORMAL = 0,
+  _EASYCLOUD_TEST_STATE_WIFI_UP = 1,
+  _EASYCLOUD_TEST_STATE_WIFI_DOWN = 2,
+  _EASYCLOUD_TEST_STATE_CLOUD_ON = 3,
+  _EASYCLOUD_TEST_STATE_CLOUD_OFF = 4,
+  _EASYCLOUD_TEST_STATE_PRINT_SYSTEM_MEMORY = 5,
+  _EASYCLOUD_TEST_STATE_PRINT_STATISTICS = 6
+}_easycloud_test_state_t;
+
+
 #endif

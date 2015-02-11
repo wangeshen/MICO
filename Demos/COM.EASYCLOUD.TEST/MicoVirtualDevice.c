@@ -44,18 +44,108 @@ extern uint64_t cloud_test_echo_data_cnt;
 static mico_semaphore_t _is_wifi_station_on_sem = NULL;
 //static mico_semaphore_t _reset_cloud_info_sem = NULL;
 
+// test statistics
+mico_semaphore_t _easycloud_test_status_changed_sem;
+_easycloud_test_state_t _easycloud_test_state = _EASYCLOUD_TEST_STATE_NORMAL;
+
+void TestMonitorThread(void* arg)
+{
+  OSStatus err = kUnknownErr;
+  //mico_Context_t *inContext = (mico_Context_t *)arg;
+  int cnt_wifi_disconnect = 0;
+  int cnt_cloud_disconnect = 0;
+  int cnt_wifi_connect = 0;
+  int cnt_cloud_connect = 0;
+  micoMemInfo_t* sysMemInfo = NULL;
+  
+  while(kNoErr == mico_rtos_get_semaphore(&_easycloud_test_status_changed_sem, MICO_WAIT_FOREVER)){
+    switch(_easycloud_test_state){
+    case _EASYCLOUD_TEST_STATE_NORMAL:
+      break;
+    case _EASYCLOUD_TEST_STATE_WIFI_UP:
+      cnt_wifi_connect++;
+      break;
+    case _EASYCLOUD_TEST_STATE_WIFI_DOWN:
+      cnt_wifi_disconnect++;
+      break;
+    case _EASYCLOUD_TEST_STATE_CLOUD_ON:
+      cnt_cloud_connect++;
+      break;
+    case _EASYCLOUD_TEST_STATE_CLOUD_OFF:
+      cnt_cloud_disconnect++;
+      break;
+    case _EASYCLOUD_TEST_STATE_PRINT_SYSTEM_MEMORY:
+      sysMemInfo = MicoGetMemoryInfo();
+      mvd_log("[MVD][STATISTICS]==========================================");
+      mvd_log("[MVD][SytemMemInfo]Free/Total=%d/%d", sysMemInfo->free_memory, sysMemInfo->total_memory);
+      mvd_log("[MVD][STATISTICS]===============================================");
+      break;
+    case _EASYCLOUD_TEST_STATE_PRINT_STATISTICS:
+      mvd_log("[MVD][STATISTICS]=========================================");
+      mvd_log("[MVD][STATISTICS]Wi-Fi: disconnect_cnt = %d",cnt_wifi_disconnect);
+      mvd_log("[MVD][STATISTICS]Wi-Fi: connect_cnt = %d",cnt_wifi_connect);
+      mvd_log("[MVD][STATISTICS]Cloud: disconnect_cnt = %d",cnt_cloud_disconnect);
+      mvd_log("[MVD][STATISTICS]Cloud: connect_cnt = %d",cnt_cloud_connect);
+      sysMemInfo = MicoGetMemoryInfo();
+      mvd_log("[MVD][STATISTICS]Memory: Free/Total = %d/%d bytes", sysMemInfo->free_memory, sysMemInfo->total_memory);
+      mvd_log("[MVD][STATISTICS]=========================================");
+      break;
+    default:
+      break; 
+    }
+  }
+  
+  require_noerr_action( err, exit, mvd_log("Exit TestMonitorThread with err=%d.", err) );
+  
+exit:
+  mico_rtos_delete_thread(NULL);
+  return;
+}
+
+OSStatus startTestMonitor(mico_Context_t *inContext)
+{
+  OSStatus err = kUnknownErr;
+  
+  if(NULL == _easycloud_test_status_changed_sem) {
+    err = mico_rtos_init_semaphore(&_easycloud_test_status_changed_sem, 1);
+  }
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: mico_rtos_init_semaphore (_easycloud_test_status_changed_sem) failed!") );
+  
+  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "TestMonitor", 
+                                TestMonitorThread, 0x400, 
+                                inContext );
+  require_noerr_action(err, exit, 
+                       mvd_log("ERROR: create TestMonitor thread failed!") );
+  
+exit:
+  return err;
+}
+
 void mvdNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inContext)
 {
   mvd_log_trace();
   (void)inContext;
   switch (event) {
   case NOTIFY_STATION_UP:
-    if(NULL == _is_wifi_station_on_sem) {
-      mico_rtos_init_semaphore(&_is_wifi_station_on_sem, 1);
+    mvd_log("[MVD]Wi-Fi: connected");
+    
+    if(NULL != _is_wifi_station_on_sem) {
+      mico_rtos_set_semaphore(&_is_wifi_station_on_sem);
     }
-    mico_rtos_set_semaphore(&_is_wifi_station_on_sem);
+    
+    if(NULL != _easycloud_test_status_changed_sem) {
+      _easycloud_test_state = _EASYCLOUD_TEST_STATE_WIFI_UP;
+      mico_rtos_set_semaphore(&_easycloud_test_status_changed_sem);
+    }
     break;
   case NOTIFY_STATION_DOWN:
+    mvd_log("[MVD]Wi-Fi: disconnected");
+    
+    if(NULL != _easycloud_test_status_changed_sem) {
+      _easycloud_test_state = _EASYCLOUD_TEST_STATE_WIFI_DOWN;
+      mico_rtos_set_semaphore(&_easycloud_test_status_changed_sem);
+    }
     break;
   case NOTIFY_AP_UP:
     break;
@@ -74,25 +164,36 @@ void MVDCloudTestThread(void *arg)
   int test_if_cnt = 0;
   
   /* wait for wifi station connect */
+  if(NULL == _is_wifi_station_on_sem) {
+    err = mico_rtos_init_semaphore(&_is_wifi_station_on_sem, 1);
+  }
+  require_noerr_action( err, exit,
+                       mvd_log("ERROR: mico_rtos_init_semaphore [_is_wifi_station_on_sem] failed!"));
+    
   // Regisist wifi connected notifications
   err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)mvdNotify_WifiStatusHandler );
   require_noerr_action( err, exit,
                        mvd_log("ERROR: MICOAddNotification [mico_notify_WIFI_STATUS_CHANGED] failed!")); 
   
   // wait wifi connect semaphore
-  if(NULL == _is_wifi_station_on_sem) {
-    err = mico_rtos_init_semaphore(&_is_wifi_station_on_sem, 1);
-  }
-  require_noerr_action( err, exit,
-                       mvd_log("ERROR: mico_rtos_init_semaphore [_is_wifi_station_on_sem] failed!"));
   while(kNoErr != mico_rtos_get_semaphore(&_is_wifi_station_on_sem, MICO_WAIT_FOREVER));
   mvd_log("wifi station connected.");
+  
+  /* start user thread to test memory && wifi && cloud connect */
+  err = startTestMonitor(inContext);
+  require_noerr_action( err, exit, mvd_log("ERROR: startTestMonitor failed!") );
      
   /* interface test */
   for(test_if_cnt = 0; test_if_cnt < 3; test_if_cnt++){
+    _easycloud_test_state = _EASYCLOUD_TEST_STATE_PRINT_SYSTEM_MEMORY;
+    mico_rtos_set_semaphore(&_easycloud_test_status_changed_sem);
+    
     err = easycloud_if_test(inContext, false);
     require_noerr_action(err, exit, 
                          mvd_log("ERROR: easycloud_if_test failed!") );
+    
+    _easycloud_test_state = _EASYCLOUD_TEST_STATE_PRINT_SYSTEM_MEMORY;
+    mico_rtos_set_semaphore(&_easycloud_test_status_changed_sem);
   }
   
   /* transmission test */
@@ -100,12 +201,17 @@ void MVDCloudTestThread(void *arg)
   require_noerr_action(err, exit, 
                        mvd_log("ERROR: easycloud_transmission_test failed!") );
   
+  //print test statistics
+  _easycloud_test_state = _EASYCLOUD_TEST_STATE_PRINT_STATISTICS;
+  mico_rtos_set_semaphore(&_easycloud_test_status_changed_sem);
+  
   /* OTA test */
   err = easycloud_ota_test(inContext);
   require_noerr_action(err, exit, 
                        mvd_log("ERROR: easycloud_ota_test failed!") );
   
   mvd_log("[SUCCESS]MVD cloud test all done!");
+
   mico_rtos_delete_thread(NULL);
   return;
   

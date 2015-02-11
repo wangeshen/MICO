@@ -39,10 +39,10 @@
 #define MVD_CLOUD_TEST_SENDTO_CHANNEL_DATA    "MVD Cloud send data to sub-channel: device_id/out/test."
 
 // test define
-#define MVD_CLOUD_TEST_TIME                      (5)       // minutes
+#define MVD_CLOUD_TEST_TIME                      (1)       // minutes
 #define MVD_CLOUD_TEST_RECV_MSG_SIZE             512      // byte
-#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           (MVD_CLOUD_TEST_TIME*60 + 5)      // s
-#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (MVD_CLOUD_TEST_TIME*60*1000 + 6000)      // ms
+#define MVD_CLOUD_TEST_RECV_MSG_PERIOD           (MVD_CLOUD_TEST_TIME*60 + 10)      // s
+#define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (MVD_CLOUD_TEST_TIME*60*1000 + 11000)      // ms
 
 #define MVD_CLOUD_TEST_ECHO_MSG_SIZE             512      // byte
 #define MVD_CLOUD_TEST_ECHO_MSG_PERIOD           (MVD_CLOUD_TEST_TIME*60)      // s
@@ -69,7 +69,6 @@ typedef struct _test_parms_t{
 }test_params_t;
 
 test_params_t test_params;
-
 
 OSStatus MVDCloudTest_StartRecv(const char* device_id,
                                 uint32_t msg_length, 
@@ -660,7 +659,7 @@ OSStatus easycloud_transmission_test(mico_Context_t* context)
                        mvd_cloud_test_log("ERROR: MVDCloudTest_StartSend err = %d.", err));
   
   // timeout for stopping test process
-  mico_thread_sleep(MVD_CLOUD_TEST_RECV_MSG_PERIOD + 5);
+  mico_thread_sleep(MVD_CLOUD_TEST_RECV_MSG_PERIOD + 10);
   mvd_cloud_test_log("[MVD_TEST]CLOUD RECV]stop recv...");
   err = MVDCloudTest_StopRecv(inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId);
   //require_noerr( err, exit );

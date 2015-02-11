@@ -4026,9 +4026,6 @@
     <name>Library</name>
     <group>
       <name>EasyCloud</name>
-      <excluded>
-        <configuration>EMW3162</configuration>
-      </excluded>
       <group>
         <name>EasyCloudMQTTClient</name>
         <group>
@@ -4140,6 +4137,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\EasyCloud\MicoEasyCloudService_20150209_v0.3.1_release.a</name>
+      <excluded>
+        <configuration>EMW3162</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm3_sdio.a</name>
