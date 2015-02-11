@@ -377,18 +377,19 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
   if('z' != inBuf[0]){
     // recv data "xxx..." from server
     cloud_test_data_cnt += inBufLen;
-    //mvd_log("[MVD]recv_cnt = [%d/%lld]", inBufLen, cloud_test_data_cnt);
+    mvd_log("[MVD]recv_cnt = [%d/%lld]bytes", inBufLen, cloud_test_data_cnt);
     //err = MVDCloudInterfaceSend(inBuf, inBufLen); // response to cloud
     err = kNoErr;
   }
   else {
     // echo data "zzz..."
     cloud_test_echo_data_cnt += inBufLen;
+    mvd_log("[MVD]recv_echo_cnt = [%d/%lld]bytes", inBufLen, cloud_test_echo_data_cnt);
     err = kNoErr;
   }
   //////////////////////////////////////////////////////////////////////////////
   
-  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
+  //err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to MCU
   require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
   return kNoErr;
   
@@ -473,7 +474,7 @@ OSStatus MVDDeviceMsgProcess(mico_Context_t* const context,
             context->flashContentInRam.appConfig.virtualDevConfig.devPasswd,
             MAX_SIZE_DEV_PASSWD);
     strncpy(devDefaultActivateData.user_token,
-            "mxchip-authorize-test",
+            "mxchip-activate-test",
             MAX_SIZE_USER_TOKEN);
     err = MVDCloudInterfaceDevActivate(context, devDefaultActivateData);
     if(kNoErr == err){
