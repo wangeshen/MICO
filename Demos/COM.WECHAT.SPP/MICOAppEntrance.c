@@ -247,8 +247,8 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
   require_noerr_action( err, exit, app_log("ERROR: virtual device start failed!") );
   
   /* mvd test */
-  err =  start_mvd_test(inContext);
-  require_noerr_action( err, exit, app_log("ERROR: start mvd_test thread failed!") );
+  //err =  start_mvd_test(inContext);
+  //require_noerr_action( err, exit, app_log("ERROR: start mvd_test thread failed!") );
 
 exit:
   return err;
