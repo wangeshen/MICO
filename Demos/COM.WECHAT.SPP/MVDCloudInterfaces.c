@@ -27,8 +27,6 @@
 #include "EasyCloudService.h"
 #include "MicoVirtualDevice.h"
 
-#include "URLUtils.h"
-
 
 #define cloud_if_log(M, ...) custom_log("MVD_CLOUD_IF", M, ##__VA_ARGS__)
 #define cloud_if_log_trace() custom_log_trace("MVD_CLOUD_IF")
@@ -423,7 +421,6 @@ OSStatus MVDCloudInterfaceGetFile(mico_Context_t* const inContext,
 {
   cloud_if_log_trace();
   OSStatus err = kUnknownErr;
-  URLComponents url;
 
   cloud_if_log("Get file from server...\r\nfile=%s\r\nchecsum=%s\r\nversion=%s\r\n",
                devGetFileRequestData.file_path,
@@ -459,19 +456,14 @@ OSStatus MVDCloudInterfaceGetFile(mico_Context_t* const inContext,
   strncpy(easyCloudContext.service_status.latestRomVersion, 
           devGetFileRequestData.file_version, MAX_SIZE_FW_VERSION);
   
+  // set host/port if bin_file is a relative path like: "/path/to/file", and
+  //   port is easyCloudContext.service_config_info.cloudServerPort as default(80)
+//  memset((void*)easyCloudContext.service_config_info.cloudServerDomain, 0, MAX_SIZE_DOMAIN_NAME);
+//  strncpy(easyCloudContext.service_config_info.cloudServerDomain, 
+//          "test.oznerwater.com", strlen("test.oznerwater.com"));
+  
   // get file data
-  // parse host from bin_file path
-  err = URLParseComponents(easyCloudContext.service_status.bin_file, NULL, &url, NULL);
-  require_noerr_action( err, exit, 
-                       cloud_if_log("ERROR: URLParseComponents failed! err=%d", err) );
-  
-  memset((void*)easyCloudContext.service_config_info.cloudServerDomain, 0, MAX_SIZE_DOMAIN_NAME);
-  strncpy(easyCloudContext.service_config_info.cloudServerDomain, url.hostPtr , url.hostLen);
-  
   err = EasyCloudGetRomData(&easyCloudContext);
-  strncpy(easyCloudContext.service_config_info.cloudServerDomain, 
-          (char*)DEFAULT_CLOUD_SERVER, strlen((char*)DEFAULT_CLOUD_SERVER));
-    
   require_noerr_action( err, exit, 
                        cloud_if_log("ERROR: EasyCloudGetRomData failed! err=%d", err) );
   

@@ -1033,6 +1033,9 @@ static OSStatus get_rom_data(char *host, uint16_t port,
   OSStatus err = kUnknownErr;
   easycloud_service_log("get_rom_data: bin_file=%s", bin_file);
   easycloud_service_log("get_rom_data: bin_md5=%s", bin_md5);
+  URLComponents urlComponents;
+  char inner_host[MAX_SIZE_DOMAIN_NAME] = {0};
+  uint16_t inner_port = port;
   
   int reTryCount = 0;
   char* request_url = NULL;
@@ -1050,9 +1053,28 @@ static OSStatus get_rom_data(char *host, uint16_t port,
   ECS_HTTPHeader_t *httpHeader = NULL;
   
   easycloud_service_log("request: [%s]", bin_file);
-    
-  //strip http://host from bin_file
-  request_url = strstr(bin_file, host) + strlen(host);
+  
+  // parse url compnents from bin_file path, if failed use default value in context
+  err = URLParseComponents(bin_file, NULL, &urlComponents, NULL);
+  require_noerr_action( err, exit, 
+                       easycloud_service_log("ERROR: URLParseComponents failed! err=%d", err) );
+  
+  memset((void*)inner_host, 0, MAX_SIZE_DOMAIN_NAME);
+  if( (NULL == urlComponents.hostPtr) || (urlComponents.hostLen > MAX_SIZE_DOMAIN_NAME) ){
+    strncpy(inner_host, host, strlen(host));
+    inner_port = port;
+    request_url = bin_file;
+    easycloud_service_log("ERROR: URLParseComponents host err;\r\n \
+                          use default set in context:\t host=%s, port=%d, path=%s", 
+                            inner_host, inner_port, request_url);
+  }
+  else{
+    strncpy(inner_host, urlComponents.hostPtr , urlComponents.hostLen);
+    inner_port = port;
+    request_url = (char*)urlComponents.pathPtr;
+    easycloud_service_log("URLParseComponents:\t host=%s, port=%d, path=%s", 
+                          inner_host, inner_port, request_url);
+  }
   
   httpHeader = ECS_HTTPHeaderCreate();
   require_action( httpHeader, exit, err = kNoMemoryErr );
@@ -1060,7 +1082,7 @@ static OSStatus get_rom_data(char *host, uint16_t port,
   
   while(1){
     if(-1 == tcpClient_fd){
-      err = _connectToServer(host, port, &tcpClient_fd);
+      err = _connectToServer(inner_host, inner_port, &tcpClient_fd);
       require_noerr(err, ReTry);
     }
     else{
@@ -1069,7 +1091,7 @@ static OSStatus get_rom_data(char *host, uint16_t port,
         // range request data
         easycloud_service_log("tcp client send get range data request...");
         err = ECS_CreateHTTPMessageWithRange(ECS_kHTTPGetMethod  , 
-                                  host, request_url,
+                                  inner_host, request_url,
                                   ECS_kMIMEType_JSON, 
                                   ECS_getFlashStorageAddress(),
                                   NULL, 0,
@@ -1078,7 +1100,7 @@ static OSStatus get_rom_data(char *host, uint16_t port,
         // get full file request data
         easycloud_service_log("tcp client send get full data request...");
         err = ECS_CreateHTTPMessageEx(ECS_kHTTPGetMethod  , 
-                                  host, request_url,
+                                  inner_host, request_url,
                                   ECS_kMIMEType_JSON, 
                                   NULL, 0,
                                   &httpRequestData, &httpRequestDataLen);
