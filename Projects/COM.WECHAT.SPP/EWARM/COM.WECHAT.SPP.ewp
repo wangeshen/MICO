@@ -56,7 +56,7 @@
         </option>
         <option>
           <name>GOutputBinary</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>FPU</name>
@@ -79,7 +79,7 @@
         </option>
         <option>
           <name>RTDescription</name>
-          <state>Use the full configuration of the C/C++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
+          <state>To be used with the full configuration of the C/C++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
         </option>
         <option>
           <name>OGProductVersion</name>
@@ -3833,6 +3833,9 @@
   </configuration>
   <group>
     <name>Application</name>
+    <excluded>
+      <configuration>EMW3162</configuration>
+    </excluded>
     <group>
       <name>MVDTest</name>
       <file>
@@ -3869,6 +3872,9 @@
   </group>
   <group>
     <name>External</name>
+    <excluded>
+      <configuration>EMW3162</configuration>
+    </excluded>
     <group>
       <name>Curve25519</name>
       <file>
@@ -3964,6 +3970,9 @@
   </group>
   <group>
     <name>include</name>
+    <excluded>
+      <configuration>EMW3162</configuration>
+    </excluded>
     <group>
       <name>MicoDriver</name>
       <file>
@@ -4128,10 +4137,14 @@
     </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\MICOConfig.c</name>
+      <excluded>
+        <configuration>EMW3162</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm3_sdio.a</name>
       <excluded>
+        <configuration>EMW3162</configuration>
         <configuration>MICO_EVB_1</configuration>
         <configuration>Nucleo_411RE</configuration>
         <configuration>EMW3165</configuration>
@@ -4164,6 +4177,9 @@
   </group>
   <group>
     <name>MICO</name>
+    <excluded>
+      <configuration>EMW3162</configuration>
+    </excluded>
     <group>
       <name>AIRKISS</name>
       <excluded>
@@ -4218,6 +4234,9 @@
   </group>
   <group>
     <name>Platform</name>
+    <excluded>
+      <configuration>EMW3162</configuration>
+    </excluded>
     <group>
       <name>common</name>
       <group>
@@ -4781,6 +4800,9 @@
   </group>
   <group>
     <name>Support</name>
+    <excluded>
+      <configuration>EMW3162</configuration>
+    </excluded>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\support\AESUtils.c</name>
     </file>
