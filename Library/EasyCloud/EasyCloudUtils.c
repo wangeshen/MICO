@@ -29,8 +29,8 @@
 
 #define easycloud_utils_log(M, ...) custom_log("EasyCloudUtils", M, ##__VA_ARGS__)
 
-#ifdef MICO_FLASH_FOR_UPDATE
-static volatile uint32_t flashStorageAddress = UPDATE_START_ADDRESS;
+//#ifdef MICO_FLASH_FOR_UPDATE
+static volatile uint32_t flashStorageAddress = (uint32_t)0x08060000;  // write pos
 static volatile uint64_t rom_wrote_size = 0;
 static uint64_t rom_total_size = 0;
 static md5_context md5;
@@ -38,21 +38,39 @@ static unsigned char md5_16[16] = {0};
 static char *pmd5_32 = NULL;
 static char rom_file_md5[32] = {0};
 
+
+
+// default for EMW3162 address
+ecs_ota_flash_params_t gflashStorage = {
+  MICO_INTERNAL_FLASH,
+  (uint32_t)0x08060000,
+  (uint32_t)0x080BFFFF,
+  (uint32_t)0x080BFFFF - (uint32_t)0x08060000 + 1
+};
+
+void ECS_initFlashStorageParams(ecs_ota_flash_params_t flashStorageParams)
+{
+  gflashStorage.flash_type = flashStorageParams.flash_type;
+  gflashStorage.update_flashStartAddress = flashStorageParams.update_flashStartAddress;
+  gflashStorage.update_flashEndAddress = flashStorageParams.update_flashEndAddress;
+  gflashStorage.update_flashSize = flashStorageParams.update_flashSize;
+}
+
 uint32_t ECS_getFlashStorageAddress(void)
 {
-  return flashStorageAddress-UPDATE_START_ADDRESS;
+  return (flashStorageAddress - gflashStorage.update_flashStartAddress);
 }
 
 volatile bool writeToFlash = false;
 
 void ECS_resetFlashStorageAddress(void){
-  flashStorageAddress = UPDATE_START_ADDRESS;
+  flashStorageAddress = gflashStorage.update_flashStartAddress;
 }
 
 void ECS_FlashWriteDone(void)
 {
   if(writeToFlash){
-    MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
+    MicoFlashFinalize(gflashStorage.flash_type);
     ECS_resetFlashStorageAddress();
     writeToFlash = false;
   }
@@ -67,7 +85,7 @@ char* ECS_getRomFileMD5_32(void)
   return (char*)&(rom_file_md5[0]);
 }
 
-#endif
+//#endif
 
 OSStatus ECS_CreateHTTPMessageEx( const char *methold, const char * host, 
                              const char *url, const char *contentType, 
@@ -208,10 +226,15 @@ int ECS_SocketReadHTTPHeaderEx( int inSock, ECS_HTTPHeader_t *inHeader )
 
   if(err == kNoErr && ((strnicmpx( value, valueSize, ECS_kMIMEType_MXCHIP_OTA ) == 0)
                        || (strnicmpx( value, valueSize, ECS_kMIMEType_EASYCLOUD_OTA ) == 0))){
-#ifdef MICO_FLASH_FOR_UPDATE  
+//#ifdef MICO_FLASH_FOR_UPDATE  
     easycloud_utils_log("Receive OTA data!");    
     if(ECS_getFlashStorageAddress()==0){    
-      err = MicoFlashInitialize( MICO_FLASH_FOR_UPDATE );
+      err = MicoFlashInitialize( gflashStorage.flash_type );
+      easycloud_utils_log("FlashStorageParams: \r\n\t type=%d \r\n\t start=%d \r\n\t end=%d \r\n\t size=%d", 
+                          gflashStorage.flash_type,
+                          gflashStorage.update_flashStartAddress,
+                          gflashStorage.update_flashEndAddress,
+                          gflashStorage.update_flashSize);
       require_noerr(err, exit);
       InitMd5(&md5);
       memset(rom_file_md5, 0, 32);
@@ -220,7 +243,7 @@ int ECS_SocketReadHTTPHeaderEx( int inSock, ECS_HTTPHeader_t *inHeader )
       rom_total_size = inHeader->contentLength;  // first return total file size
     }
 
-    err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint8_t *)end, inHeader->extraDataLen);
+    err = MicoFlashWrite(gflashStorage.flash_type, &flashStorageAddress, (uint8_t *)end, inHeader->extraDataLen);
     require_noerr(err, exit);
     
     // OTA test by WES
@@ -231,10 +254,10 @@ int ECS_SocketReadHTTPHeaderEx( int inSock, ECS_HTTPHeader_t *inHeader )
     //InitMd5(&md5);
     Md5Update(&md5, (uint8_t *)end, inHeader->extraDataLen);
     
-#else
-    easycloud_utils_log("OTA flash memory is not existed!");
-    err = kUnsupportedErr;
-#endif
+//#else
+//    easycloud_utils_log("OTA flash memory is not existed!");
+//    err = kUnsupportedErr;
+//#endif
     goto exit;
   }
 
@@ -280,9 +303,6 @@ OSStatus ECS_SocketReadHTTPBodyEx( int inSock, ECS_HTTPHeader_t *inHeader )
   size_t          valueSize;
   size_t    lastChunkLen, chunckheaderLen; 
   char *nextPackagePtr;
-//#ifdef MICO_FLASH_FOR_UPDATE
-//  bool writeToFlash = false;
-//#endif
   
   // select timeout
   struct timeval_t to;
@@ -397,7 +417,7 @@ OSStatus ECS_SocketReadHTTPBodyEx( int inSock, ECS_HTTPHeader_t *inHeader )
     require_noerr(err, exit);
     if( (strnicmpx( value, valueSize, ECS_kMIMEType_MXCHIP_OTA ) == 0) 
        || (strnicmpx( value, valueSize, ECS_kMIMEType_EASYCLOUD_OTA ) == 0) ){
-#ifdef MICO_FLASH_FOR_UPDATE  
+//#ifdef MICO_FLASH_FOR_UPDATE  
       writeToFlash = true;
       inHeader->otaDataPtr = calloc(ECS_OTA_Data_Length_per_read, sizeof(uint8_t)); 
       require_action(inHeader->otaDataPtr, exit, err = kNoMemoryErr);
@@ -414,7 +434,7 @@ OSStatus ECS_SocketReadHTTPBodyEx( int inSock, ECS_HTTPHeader_t *inHeader )
       if( readResult  > 0 ) inHeader->extraDataLen += readResult;
       else { err = kConnectionErr; goto exit; }
       
-      err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint8_t *)inHeader->otaDataPtr, readResult);
+      err = MicoFlashWrite(gflashStorage.flash_type, &flashStorageAddress, (uint8_t *)inHeader->otaDataPtr, readResult);
       require_noerr(err, exit);
          
       // OTA test by WES
@@ -427,10 +447,10 @@ OSStatus ECS_SocketReadHTTPBodyEx( int inSock, ECS_HTTPHeader_t *inHeader )
       
       free(inHeader->otaDataPtr);
       inHeader->otaDataPtr = 0;
-#else
-      easycloud_utils_log("OTA flash memory is not existed, !");
-      err = kUnsupportedErr;
-#endif
+//#else
+//      easycloud_utils_log("OTA flash memory is not existed, !");
+//      err = kUnsupportedErr;
+//#endif
     }else{
       readResult = read( inSock,
                         (uint8_t*)( inHeader->extraDataPtr + inHeader->extraDataLen ),
@@ -441,7 +461,7 @@ OSStatus ECS_SocketReadHTTPBodyEx( int inSock, ECS_HTTPHeader_t *inHeader )
     }
   }
   
-  flashStorageAddress = UPDATE_START_ADDRESS;   // reset flash write addr
+  flashStorageAddress = gflashStorage.update_flashStartAddress;   // reset flash write addr
   
   // recv done, check MD5
   Md5Final(&md5, md5_16);
@@ -468,9 +488,7 @@ exit:
     free(inHeader->otaDataPtr);
     inHeader->otaDataPtr = 0;
   }
-//#ifdef MICO_FLASH_FOR_UPDATE
-//  if(writeToFlash == true) MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
-//#endif
+
   return err;
 }
 
@@ -579,19 +597,19 @@ int ECS_SocketReadHTTPHeader( int inSock, ECS_HTTPHeader_t *inHeader )
   err = ECS_HTTPGetHeaderField( inHeader->buf, inHeader->len, "Content-Type", NULL, NULL, &value, &valueSize, NULL );
 
   if(err == kNoErr && strnicmpx( value, valueSize, ECS_kMIMEType_MXCHIP_OTA ) == 0){
-#ifdef MICO_FLASH_FOR_UPDATE  
+//#ifdef MICO_FLASH_FOR_UPDATE  
     easycloud_utils_log("Receive OTA data!");    
-    flashStorageAddress = UPDATE_START_ADDRESS;
-    err = MicoFlashInitialize( MICO_FLASH_FOR_UPDATE );
+    flashStorageAddress = gflashStorage.update_flashStartAddress;
+    err = MicoFlashInitialize( gflashStorage.flash_type );
     require_noerr(err, exit);
-    err = MicoFlashErase(MICO_FLASH_FOR_UPDATE, UPDATE_START_ADDRESS, UPDATE_END_ADDRESS);
+    err = MicoFlashErase(gflashStorage.flash_type, gflashStorage.update_flashStartAddress, gflashStorage.update_flashEndAddress);
     require_noerr(err, exit);
-    err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint8_t *)end, inHeader->extraDataLen);
+    err = MicoFlashWrite(gflashStorage.flash_type, &flashStorageAddress, (uint8_t *)end, inHeader->extraDataLen);
     require_noerr(err, exit);
-#else
-    easycloud_utils_log("OTA flash memory is not existed!");
-    err = kUnsupportedErr;
-#endif
+//#else
+//    easycloud_utils_log("OTA flash memory is not existed!");
+//    err = kUnsupportedErr;
+//#endif
     goto exit;
   }
 
@@ -683,9 +701,9 @@ OSStatus ECS_SocketReadHTTPBody( int inSock, ECS_HTTPHeader_t *inHeader )
   struct timeval_t t;
   t.tv_sec = 5;
   t.tv_usec = 0;
-#ifdef MICO_FLASH_FOR_UPDATE
+//#ifdef MICO_FLASH_FOR_UPDATE
   bool writeToFlash = false;
-#endif
+//#endif
   
   require( inHeader, exit );
   
@@ -790,7 +808,7 @@ OSStatus ECS_SocketReadHTTPBody( int inSock, ECS_HTTPHeader_t *inHeader )
     err = ECS_HTTPGetHeaderField( inHeader->buf, inHeader->len, "Content-Type", NULL, NULL, &value, &valueSize, NULL );
     require_noerr(err, exit);
     if( strnicmpx( value, valueSize, ECS_kMIMEType_MXCHIP_OTA ) == 0 ){
-#ifdef MICO_FLASH_FOR_UPDATE  
+//#ifdef MICO_FLASH_FOR_UPDATE  
       writeToFlash = true;
       inHeader->otaDataPtr = calloc(ECS_OTA_Data_Length_per_read, sizeof(uint8_t)); 
       require_action(inHeader->otaDataPtr, exit, err = kNoMemoryErr);
@@ -806,15 +824,15 @@ OSStatus ECS_SocketReadHTTPBody( int inSock, ECS_HTTPHeader_t *inHeader )
       if( readResult  > 0 ) inHeader->extraDataLen += readResult;
       else { err = kConnectionErr; goto exit; }
 
-      err = MicoFlashWrite(MICO_FLASH_FOR_UPDATE, &flashStorageAddress, (uint8_t *)inHeader->otaDataPtr, readResult);
+      err = MicoFlashWrite(gflashStorage.flash_type, &flashStorageAddress, (uint8_t *)inHeader->otaDataPtr, readResult);
       require_noerr(err, exit);
       
       free(inHeader->otaDataPtr);
       inHeader->otaDataPtr = 0;
-#else
-      easycloud_utils_log("OTA flash memory is not existed, !");
-      err = kUnsupportedErr;
-#endif
+//#else
+//      easycloud_utils_log("OTA flash memory is not existed, !");
+//      err = kUnsupportedErr;
+//#endif
     }else{
       readResult = read( inSock,
                         (uint8_t*)( inHeader->extraDataPtr + inHeader->extraDataLen ),
@@ -832,9 +850,9 @@ exit:
     free(inHeader->otaDataPtr);
     inHeader->otaDataPtr = 0;
   }
-#ifdef MICO_FLASH_FOR_UPDATE
-  if(writeToFlash == true) MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
-#endif
+//#ifdef MICO_FLASH_FOR_UPDATE
+  if(writeToFlash == true) MicoFlashFinalize(gflashStorage.flash_type);
+//#endif
 
   return err;
 }

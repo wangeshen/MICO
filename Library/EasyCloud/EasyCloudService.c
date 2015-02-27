@@ -69,12 +69,6 @@ typedef enum {
 static mico_thread_t easyCloudServiceThreadHandle = NULL;
 volatile bool bStopbyUser = false;
 
-#ifdef MICO_FLASH_FOR_UPDATE
-//extern volatile uint32_t flashStorageAddress;
-//extern volatile bool writeToFlash;
-//extern volatile uint64_t rom_wrote_size;
-//extern char rom_file_md5[32];
-#endif
 
 /*******************************************************************************
  * STATIC FUNCTIONS
@@ -86,7 +80,8 @@ static void easyCloudServiceThread(void *arg);
 static OSStatus get_rom_data(char *host, uint16_t port,
                              char bin_file[MAX_SIZE_FILE_PATH],
                              char bin_md5[MAX_SIZE_FILE_MD5],
-                             uint64_t *out_bin_file_size);
+                             uint64_t *out_bin_file_size,
+                             ecs_ota_flash_params_t ota_flash_params);
 
 static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
                                 char out_version[MAX_SIZE_FW_VERSION],
@@ -433,7 +428,9 @@ exit:
   return err;
 }
 
-OSStatus EasyCloudGetRomData(easycloud_service_context_t* const context)
+//get rom data && write to flash
+OSStatus EasyCloudGetRomData(easycloud_service_context_t* const context,
+                             ecs_ota_flash_params_t ota_flash_params)
 {
   OSStatus err = kUnknownErr;
   int8_t retry_cnt = 3;
@@ -443,7 +440,8 @@ OSStatus EasyCloudGetRomData(easycloud_service_context_t* const context)
                        context->service_config_info.cloudServerPort,
                        context->service_status.bin_file,
                        context->service_status.bin_md5,
-                       &(context->service_status.bin_file_size));
+                       &(context->service_status.bin_file_size),
+                       ota_flash_params);
     retry_cnt--;
   }while((kNoErr != err) && (retry_cnt > 0));
   
@@ -1028,7 +1026,8 @@ exit:
 static OSStatus get_rom_data(char *host, uint16_t port,
                              char bin_file[MAX_SIZE_FILE_PATH],
                              char bin_md5[MAX_SIZE_FILE_MD5],
-                             uint64_t *out_bin_file_size)
+                             uint64_t *out_bin_file_size,
+                             ecs_ota_flash_params_t ota_flash_params)
 {
   OSStatus err = kUnknownErr;
   easycloud_service_log("get_rom_data: bin_file=%s", bin_file);
@@ -1079,6 +1078,9 @@ static OSStatus get_rom_data(char *host, uint16_t port,
   httpHeader = ECS_HTTPHeaderCreate();
   require_action( httpHeader, exit, err = kNoMemoryErr );
   ECS_HTTPHeaderClear( httpHeader );
+  
+  // init ota flash address
+  ECS_initFlashStorageParams(ota_flash_params);
   
   while(1){
     if(-1 == tcpClient_fd){
@@ -1213,11 +1215,6 @@ exit_success:
     tcpClient_fd = -1;
   }
   easycloud_service_log("get_rom_data: success!");
-//  if(writeToFlash){
-//    MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
-//    flashStorageAddress = UPDATE_START_ADDRESS;
-//    writeToFlash = false;
-//  }
   ECS_FlashWriteDone();
   return kNoErr;
   
@@ -1230,11 +1227,6 @@ exit:
     close(tcpClient_fd);
     tcpClient_fd = -1;
   }
-//  if(writeToFlash){
-//    MicoFlashFinalize(MICO_FLASH_FOR_UPDATE);
-//    flashStorageAddress = UPDATE_START_ADDRESS;
-//    writeToFlash = false;
-//  }
   ECS_FlashWriteDone();
   
   return err;
