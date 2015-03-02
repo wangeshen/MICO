@@ -3852,6 +3852,12 @@
     <file>
       <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDDeviceInterfaces.c</name>
     </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\MVDMsgProtocol.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Demos\COM.WECHAT.SPP\RGB.c</name>
+    </file>
   </group>
   <group>
     <name>External</name>

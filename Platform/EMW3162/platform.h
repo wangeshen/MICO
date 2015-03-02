@@ -215,7 +215,7 @@ typedef enum
     MICO_GPIO_8,
     MICO_GPIO_9,
     MICO_GPIO_10,
-    //MICO_GPIO_11,
+    MICO_GPIO_11,
     MICO_GPIO_12,
     MICO_GPIO_13,
     MICO_GPIO_14,
@@ -253,9 +253,9 @@ typedef enum
 
 typedef enum
 {
-    MICO_PWM_1 = MICO_COMMON_PWM_MAX,
-    MICO_PWM_2,
-    MICO_PWM_3,
+    MICO_PWM_R = MICO_COMMON_PWM_MAX,
+    MICO_PWM_G,
+    MICO_PWM_B,
     MICO_PWM_MAX, /* Denotes the total number of PWM port aliases. Not a valid PWM alias */
 } mico_pwm_t;
 

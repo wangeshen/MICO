@@ -90,7 +90,8 @@ const platform_pin_mapping_t gpio_mapping[] =
   [MICO_RF_LED]                       = {GPIOB,  1,  RCC_AHB1Periph_GPIOB}, //MICO_GPIO_16
   [BOOT_SEL]                          = {GPIOB,  1,  RCC_AHB1Periph_GPIOB}, //MICO_GPIO_16
   [MFG_SEL]                           = {GPIOB,  9,  RCC_AHB1Periph_GPIOB}, //MICO_GPIO_30
-  [EasyLink_BUTTON]                   = {GPIOA,  1,  RCC_AHB1Periph_GPIOA}, //MICO_GPIO_11
+  //[EasyLink_BUTTON]                   = {GPIOA,  1,  RCC_AHB1Periph_GPIOA}, //MICO_GPIO_11
+  [EasyLink_BUTTON]                   = {GPIOB,  8,  RCC_AHB1Periph_GPIOB}, //MICO_GPIO_10
 
   /* GPIOs for external use */
   [MICO_GPIO_1]  = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
@@ -101,7 +102,8 @@ const platform_pin_mapping_t gpio_mapping[] =
   [MICO_GPIO_7]  = {GPIOB,  3,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_8]  = {GPIOB , 4,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_9]  = {GPIOB,  5,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_10] = {GPIOB,  8,  RCC_AHB1Periph_GPIOB},
+  //[MICO_GPIO_10] = {GPIOB,  8,  RCC_AHB1Periph_GPIOB},
+  [MICO_GPIO_11] = {GPIOA,  1,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_12] = {GPIOC,  2,  RCC_AHB1Periph_GPIOC},
   [MICO_GPIO_13] = {GPIOB, 14,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_14] = {GPIOC,  6,  RCC_AHB1Periph_GPIOC},
@@ -134,10 +136,10 @@ const platform_pwm_mapping_t pwm_mappings[] =
   /* Extended PWM for internal use */
   [MICO_PWM_WLAN_POWERSAVE_CLOCK] = {TIM1, 4, RCC_APB2Periph_TIM1, GPIO_AF_TIM1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_WLAN_POWERSAVE_CLOCK] }, /* or TIM2/Ch2                       */
 #endif
-  
-  [MICO_PWM_1]  = {TIM4, 3, RCC_APB1Periph_TIM4, GPIO_AF_TIM4, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_10]},    /* or TIM10/Ch1                       */
-  [MICO_PWM_2]  = {TIM12, 1, RCC_APB1Periph_TIM12, GPIO_AF_TIM12, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_13]}, /* or TIM1/Ch2N                       */
-  [MICO_PWM_3]  = {TIM2, 4, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_19]},    
+      
+  [MICO_PWM_B]  = {TIM2, 2, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_11]},               
+  [MICO_PWM_R]  = {TIM12, 1, RCC_APB1Periph_TIM12, GPIO_AF_TIM12, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_13]},              
+  [MICO_PWM_G]  = {TIM8, 1, RCC_APB2Periph_TIM8, GPIO_AF_TIM8, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_14]}, 
   /* TODO: fill in the other options here ... */
 };
 

@@ -31,6 +31,8 @@
 #include "MVDCloudInterfaces.h"
 #include "EasyCloudUtils.h"
 
+#include "MVDMsgProtocol.h"
+
 
 #define mvd_log(M, ...) custom_log("MVD", M, ##__VA_ARGS__)
 #define mvd_log_trace() custom_log_trace("MVD")
@@ -346,9 +348,9 @@ OSStatus MVDInit(mico_Context_t* const inContext)
   inContext->appStatus.virtualDevStatus.RecvRomFileSize = 0;
   
   //init MCU connect interface
-  err = MVDDevInterfaceInit(inContext);
-  require_noerr_action(err, exit, 
-                       mvd_log("ERROR: virtual device mcu interface init failed!") );
+  //err = MVDDevInterfaceInit(inContext);
+  //require_noerr_action(err, exit, 
+  //                     mvd_log("ERROR: virtual device mcu interface init failed!") );
   
   //init cloud service interface
   err = MVDCloudInterfaceInit(inContext);
@@ -444,48 +446,68 @@ OSStatus MVDCloudMsgProcess(mico_Context_t* context,
 {
   mvd_log_trace();
   OSStatus err = kUnknownErr;
-  char* responseTopic = NULL;
-  unsigned char* responseMsg = NULL;
-  unsigned char* ptr = NULL;
-  int responseMsgLen = 0;
+//  char* responseTopic = NULL;
+//  unsigned char* responseMsg = NULL;
+//  unsigned char* ptr = NULL;
+//  int responseMsgLen = 0;
+//  
+//  /* send to USART */
+//  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to USART
+//  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+//  
+//  /* echo to cloud */
+//  // responseTopic = device_id/out, message = [MAC]msg
+//  responseTopic = ECS_str_replace(responseTopic, topic, topicLen, "/in", "/out");
+//  responseMsgLen = strlen(context->micoStatus.mac) + 2 + inBufLen;
+//  responseMsg = (unsigned char*)malloc(responseMsgLen + 1);
+//  memset(responseMsg, 0x00, responseMsgLen);
+//  if(NULL == responseMsg){
+//    err = kNoMemoryErr;
+//    goto exit;
+//  }
+//  ptr = responseMsg;
+//  memcpy(ptr, "[", 1);
+//  ptr += 1;
+//  memcpy(ptr, (const void*)&(context->micoStatus.mac), strlen(context->micoStatus.mac));
+//  ptr += strlen(context->micoStatus.mac);
+//  memcpy(ptr, "]", 1);
+//  ptr += 1;
+//  memcpy(ptr, inBuf, inBufLen);
+//  ptr += inBufLen;
+//  memcpy(ptr, '\0', 1);
+//  err = MVDCloudInterfaceSendto(responseTopic, responseMsg, responseMsgLen);
+//  if(NULL != responseTopic){
+//    free(responseTopic);
+//  }
+//  if(NULL != responseMsg){
+//      ptr = NULL;
+//      free(responseMsg);
+//  }
   
-  /* send to USART */
-  err = MVDDevInterfaceSend(inBuf, inBufLen); // transfer raw data to USART
-  require_noerr_action( err, exit, mvd_log("ERROR: send to MCU error! err=%d", err) );
+  /* LED control */
+  unsigned char* usartCmd = NULL;
+  unsigned int usartCmdLen = 0;
   
-  /* echo to cloud */
-  // responseTopic = device_id/out, message = [MAC]msg
-  responseTopic = ECS_str_replace(responseTopic, topic, topicLen, "/in", "/out");
-  responseMsgLen = strlen(context->micoStatus.mac) + 2 + inBufLen;
-  responseMsg = (unsigned char*)malloc(responseMsgLen + 1);
-  memset(responseMsg, 0x00, responseMsgLen);
-  if(NULL == responseMsg){
-    err = kNoMemoryErr;
-    goto exit;
+  // translate cloud message to control protocol format
+  err = MVDMsgTransformCloud2Device(inBuf, inBufLen, &usartCmd, &usartCmdLen);
+  if(NULL != usartCmd){
+    free(usartCmd);
+    usartCmd = NULL;
+    usartCmdLen = 0;
   }
-  ptr = responseMsg;
-  memcpy(ptr, "[", 1);
-  ptr += 1;
-  memcpy(ptr, (const void*)&(context->micoStatus.mac), strlen(context->micoStatus.mac));
-  ptr += strlen(context->micoStatus.mac);
-  memcpy(ptr, "]", 1);
-  ptr += 1;
-  memcpy(ptr, inBuf, inBufLen);
-  ptr += inBufLen;
-  memcpy(ptr, '\0', 1);
-  err = MVDCloudInterfaceSendto(responseTopic, responseMsg, responseMsgLen);
-  if(NULL != responseTopic){
-    free(responseTopic);
+
+  if (kNoErr == err){
+    err = MVDCloudInterfaceSend(LED_RESP_CMD_VALUE_OK, strlen((const char*)LED_RESP_CMD_VALUE_OK));
+    return kNoErr;
   }
-  if(NULL != responseMsg){
-      ptr = NULL;
-      free(responseMsg);
+  else
+  {
+    err = MVDCloudInterfaceSend(LED_RESP_CMD_VALUE_FAILED, strlen((const char*)LED_RESP_CMD_VALUE_FAILED));
+    return kRequestErr;
   }
   
-  return kNoErr;
-  
-exit:
-  return err;
+//exit:
+//  return err;
 }
 
 // handle MCU msg here, for example: send to Cloud
