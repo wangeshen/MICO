@@ -4007,7 +4007,7 @@
       <name>$PROJ_DIR$\..\..\..\include\MicoAlgorithm.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\include\MICOPlatform.h</name>
+      <name>$PROJ_DIR$\..\..\..\include\MicoPlatform.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\include\MICORTOS.h</name>
@@ -4140,6 +4140,18 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\EasyCloud\MicoEasyCloudService_20150209_v0.3.1_release.a</name>
+      <excluded>
+        <configuration>EMW3162</configuration>
+      </excluded>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\EasyCloud\MicoEasyCloudService_v0.3.4_debug.a</name>
+      <excluded>
+        <configuration>EMW3162</configuration>
+      </excluded>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\Library\EasyCloud\MicoEasyCloudService_v0.3.4_release.a</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\Library\mxchipWNet_cm3_sdio.a</name>

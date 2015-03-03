@@ -39,7 +39,7 @@
 #define MVD_CLOUD_TEST_SENDTO_CHANNEL_DATA    "MVD Cloud send data to sub-channel: device_id/out/test."
 
 // test define
-#define MVD_CLOUD_TEST_TIME                      (30)       // minutes
+#define MVD_CLOUD_TEST_TIME                      (5)       // minutes
 #define MVD_CLOUD_TEST_RECV_MSG_SIZE             512      // byte
 #define MVD_CLOUD_TEST_RECV_MSG_PERIOD           (MVD_CLOUD_TEST_TIME*60 + 30)      // s
 #define MVD_CLOUD_TEST_RECV_MSG_INTERVAL         (MVD_CLOUD_TEST_TIME*60*1000 + 31000)      // ms
