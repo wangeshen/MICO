@@ -16,35 +16,83 @@
 
 #include "MQTTMICO.h"
 #include "Common.h"
+#include "MICORTOS.h"
 
 #define MQTTClient_log(M, ...) custom_log("MQTT_MICO", M, ##__VA_ARGS__)
 #define MQTTClient_log_trace() custom_log_trace("MQTT_MICO")
 
-unsigned long MilliTimer;
-mico_timer_t MQTTClientSystick1ms;
+//unsigned long MilliTimer;
+//mico_timer_t MQTTClientSystick1ms;
 
-void SysTickIntHandler(void) {
-  MilliTimer++;
-}
+//void SysTickIntHandler(void) {
+//  MilliTimer++;
+//}
 
 char expired(Timer* timer) {
-  long left = timer->end_time - MilliTimer;
+  //long left = timer->end_time - mico_get_time();
+  long left = 0;
+  if (timer->over_flow) {
+    left = 0xFFFFFFFF - mico_get_time() + timer->end_time;
+  }
+  else {
+    left = timer->end_time - mico_get_time();
+  }
+  
+  // stop systick timer if expired
+//  if(left < 0){
+//    if (mico_is_timer_running(&MQTTClientSystick1ms)){
+//      mico_stop_timer(&MQTTClientSystick1ms);
+//    }
+//  }
+  
   return (left < 0);
 }
 
 
 void countdown_ms(Timer* timer, unsigned int timeout) {
-  timer->end_time = MilliTimer + timeout;
+//  // restart systick timer
+//  if (!mico_is_timer_running(&MQTTClientSystick1ms)){
+//    mico_start_timer(&MQTTClientSystick1ms);
+//  }
+  uint32_t current_time = mico_get_time();
+  timer->end_time = current_time + timeout;
+  if(timer->end_time < current_time) {
+     timer->over_flow = true;
+  }
 }
 
 
 void countdown(Timer* timer, unsigned int timeout) {
-  timer->end_time = MilliTimer + (timeout * 1000);
+//  // restart systick timer
+//  if (!mico_is_timer_running(&MQTTClientSystick1ms)){
+//    mico_start_timer(&MQTTClientSystick1ms);
+//  }
+  
+  uint32_t current_time = mico_get_time();
+  timer->end_time = current_time + (timeout * 1000);
+  if(timer->end_time < current_time) {
+     timer->over_flow = true;
+  }
 }
 
 
 int left_ms(Timer* timer) {
-  long left = timer->end_time - MilliTimer;
+  //long left = timer->end_time - mico_get_time();
+  long left = 0;
+  if (timer->over_flow) {
+    left = 0xFFFFFFFF - mico_get_time() + timer->end_time;
+  }
+  else {
+    left = timer->end_time - mico_get_time();
+  }
+  
+  // stop systick timer if expired
+//  if(left < 0){
+//    if (mico_is_timer_running(&MQTTClientSystick1ms)){
+//      mico_stop_timer(&MQTTClientSystick1ms);
+//    }
+//  }
+  
   return (left < 0) ? 0 : left;
 }
 
@@ -117,6 +165,12 @@ int MICO_write(Network* n, unsigned char* buffer, int len, int timeout_ms) {
 
 void MICO_disconnect(Network* n) {
   close(n->my_socket);
+  
+  // release systick timer
+//  if (mico_is_timer_running(&MQTTClientSystick1ms)){
+//    mico_stop_timer(&MQTTClientSystick1ms);
+//  }
+//  mico_deinit_timer(&MQTTClientSystick1ms);
 }
 
 
@@ -194,17 +248,14 @@ int ConnectNetwork(Network* n, char* addr, int port)
     return retVal;
   }
   
-  // SysTickIntRegister(SysTickIntHandler);
-  // SysTickPeriodSet(80000);
-  // SysTickEnable();
-  MQTTClient_log("start systick timer for MQTTClient");
-  
-  if (mico_is_timer_running(&MQTTClientSystick1ms)){
-    mico_stop_timer(&MQTTClientSystick1ms);
-    mico_deinit_timer(&MQTTClientSystick1ms);
-  }
-  mico_init_timer(&MQTTClientSystick1ms,1,(timer_handler_t)SysTickIntHandler,0);
-  mico_start_timer(&MQTTClientSystick1ms);
+//  MQTTClient_log("init systick timer for MQTTClient");
+//  
+//  if (mico_is_timer_running(&MQTTClientSystick1ms)){
+//    mico_stop_timer(&MQTTClientSystick1ms);
+//    mico_deinit_timer(&MQTTClientSystick1ms);
+//  }
+//  mico_init_timer(&MQTTClientSystick1ms,1,(timer_handler_t)SysTickIntHandler,0);
+////  mico_start_timer(&MQTTClientSystick1ms);
   
   return retVal;
 }

@@ -722,6 +722,8 @@ ReStartMQTTClient:
     
   /* service loop */
   while(1) {
+    mico_thread_msleep(500);
+    
     //if(EASYCLOUD_STOPPED == easyCloudContext->service_status.state){
     if((bStopbyUser) || (EASYCLOUD_STOPPED == EasyCloudServiceState(easyCloudContext))){
       easycloud_service_log("EasyCloud stop by user.");

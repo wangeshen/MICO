@@ -26,6 +26,7 @@ typedef struct Timer Timer;
 struct Timer {
   unsigned long systick_period;
   unsigned long end_time;
+  bool over_flow;
 };
 
 typedef struct Network Network;
