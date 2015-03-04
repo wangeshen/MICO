@@ -26,6 +26,7 @@
 #include "MVDCloudInterfaces.h"   
 #include "EasyCloudService.h"
 #include "MicoVirtualDevice.h"
+#include "MVDMsgProtocol.h"
 
 
 #define cloud_if_log(M, ...) custom_log("MVD_CLOUD_IF", M, ##__VA_ARGS__)
@@ -347,6 +348,9 @@ OSStatus MVDCloudInterfaceDevFirmwareUpdate(mico_Context_t* const inContext,
   }
   cloud_if_log("MVDCloudInterfaceDevFirmwareUpdate: new firmware[%s] found on server, downloading ...",
                easyCloudContext.service_status.latestRomVersion);
+  
+  // yellow means OTA processing.
+  LedControlMsgHandler("1,60,100,100", strlen("1,60,100,100"));
   
   //get rom data
   err = EasyCloudGetRomData(&easyCloudContext, ota_flash_params);
