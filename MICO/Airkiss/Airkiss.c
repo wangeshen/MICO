@@ -155,13 +155,14 @@ exit:
 
   ConfigWillStop(inContext);
   /*so roll back to previous settings  (if it has) and reboot*/
-  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
-  if(inContext->flashContentInRam.micoSystemConfig.configured != unConfigured){
-    inContext->flashContentInRam.micoSystemConfig.configured = allConfigured;
-    MICOUpdateConfiguration(inContext);
-    MicoSystemReboot();
-  }
-  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+//  mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
+//  if(inContext->flashContentInRam.micoSystemConfig.configured != unConfigured){
+//    inContext->flashContentInRam.micoSystemConfig.configured = allConfigured;
+//    MICOUpdateConfiguration(inContext);
+//    MicoSystemReboot();
+//  }
+//  mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
+  MicoSystemReboot();
   /*module should powd down in default setting*/ 
   micoWlanPowerOff();
 
@@ -333,9 +334,9 @@ void airkiss_thread(void *inContext)
     if (i > 20)
       break;
   }  
-  Context->flashContentInRam.micoSystemConfig.configured = allConfigured;
-  MICOUpdateConfiguration( Context );
-  MicoSystemReboot();
+  //Context->flashContentInRam.micoSystemConfig.configured = allConfigured;
+  //MICOUpdateConfiguration( Context );
+  //MicoSystemReboot();
 threadexit:
   _cleanAirkissResource( Context );
   ConfigWillStop( Context );

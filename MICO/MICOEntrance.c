@@ -80,48 +80,48 @@ void micoNotify_ReadAppInfoHandler(char *str, int len, mico_Context_t * const in
 
 USED void PlatformEasyLinkButtonClickedCallback(void)
 {
-  mico_log_trace();
-  bool needsUpdate = false;
-  
-  if(context->flashContentInRam.micoSystemConfig.easyLinkByPass != EASYLINK_BYPASS_NO){
-    context->flashContentInRam.micoSystemConfig.easyLinkByPass = EASYLINK_BYPASS_NO;
-    needsUpdate = true;
-  }
-
-  if(context->flashContentInRam.micoSystemConfig.configured == allConfigured){
-    context->flashContentInRam.micoSystemConfig.configured = wLanUnConfigured;
-    needsUpdate = true;
-  }
-  
-  if(needsUpdate == true)
-    MICOUpdateConfiguration(context);
-  
-  context->micoStatus.sys_state = eState_Software_Reset;
-  require(context->micoStatus.sys_state_change_sem, exit);
-  mico_rtos_set_semaphore(&context->micoStatus.sys_state_change_sem);
-exit: 
-  return;
+//  mico_log_trace();
+//  bool needsUpdate = false;
+//  
+//  if(context->flashContentInRam.micoSystemConfig.easyLinkByPass != EASYLINK_BYPASS_NO){
+//    context->flashContentInRam.micoSystemConfig.easyLinkByPass = EASYLINK_BYPASS_NO;
+//    needsUpdate = true;
+//  }
+//
+//  if(context->flashContentInRam.micoSystemConfig.configured == allConfigured){
+//    context->flashContentInRam.micoSystemConfig.configured = wLanUnConfigured;
+//    needsUpdate = true;
+//  }
+//  
+//  if(needsUpdate == true)
+//    MICOUpdateConfiguration(context);
+//  
+//  context->micoStatus.sys_state = eState_Software_Reset;
+//  require(context->micoStatus.sys_state_change_sem, exit);
+//  mico_rtos_set_semaphore(&context->micoStatus.sys_state_change_sem);
+//exit: 
+//  return;
 }
 
 USED void PlatformEasyLinkButtonLongPressedCallback(void)
 {
-  mico_log_trace();
-  MICORestoreDefault(context);
-  context->micoStatus.sys_state = eState_Software_Reset;
-  require(context->micoStatus.sys_state_change_sem, exit);
-  mico_rtos_set_semaphore(&context->micoStatus.sys_state_change_sem);
-exit: 
-  return;
+//  mico_log_trace();
+//  MICORestoreDefault(context);
+//  context->micoStatus.sys_state = eState_Software_Reset;
+//  require(context->micoStatus.sys_state_change_sem, exit);
+//  mico_rtos_set_semaphore(&context->micoStatus.sys_state_change_sem);
+//exit: 
+//  return;
 }
 
 USED void PlatformStandbyButtonClickedCallback(void)
  {
-    mico_log_trace();
-    context->micoStatus.sys_state = eState_Standby;
-    require(context->micoStatus.sys_state_change_sem, exit);
-    mico_rtos_set_semaphore(&context->micoStatus.sys_state_change_sem);
-exit: 
-    return;
+//    mico_log_trace();
+//    context->micoStatus.sys_state = eState_Standby;
+//    require(context->micoStatus.sys_state_change_sem, exit);
+//    mico_rtos_set_semaphore(&context->micoStatus.sys_state_change_sem);
+//exit: 
+//    return;
  }
 
 void micoNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inContext)
@@ -272,8 +272,8 @@ int application_start(void)
 {
   OSStatus err = kNoErr;
   IPStatusTypedef para;
-  struct tm currentTime;
-  mico_rtc_time_t time;
+//  struct tm currentTime;
+//  mico_rtc_time_t time;
   char wifi_ver[64];
   mico_log_trace(); 
 
@@ -302,9 +302,9 @@ int application_start(void)
 
   /*wlan driver and tcpip init*/
   MicoInit();
-#ifdef MICO_CLI_ENABLE  
-  MicoCliInit();
-#endif
+//#ifdef MICO_CLI_ENABLE  
+//  MicoCliInit();
+//#endif
   MicoSysLed(true);
   mico_log("Free memory %d bytes", MicoGetMemoryInfo()->free_memory) ; 
   micoWlanGetIPStatus(&para, Station);
@@ -323,85 +323,85 @@ int application_start(void)
   mico_start_timer(&_watchdog_reload_timer);
 
   /* Enter test mode, call a build-in test function amd output on STDIO */
-  if(MicoShouldEnterMFGMode()==true){
-    mico_log( "Enter MFG mode by MFG button" );
-    mico_mfg_test(context);
-  }
+//  if(MicoShouldEnterMFGMode()==true){
+//    mico_log( "Enter MFG mode by MFG button" );
+//    mico_mfg_test(context);
+//  }
   
   /*Read current time from RTC.*/
-  if( MicoRtcGetTime(&time) == kNoErr ){
-    currentTime.tm_sec = time.sec;
-    currentTime.tm_min = time.min;
-    currentTime.tm_hour = time.hr;
-    currentTime.tm_mday = time.date;
-    currentTime.tm_wday = time.weekday;
-    currentTime.tm_mon = time.month - 1;
-    currentTime.tm_year = time.year + 100;
-    mico_log("Current Time: %s",asctime(&currentTime));
-  }else
-    mico_log("RTC function unsupported");
+//  if( MicoRtcGetTime(&time) == kNoErr ){
+//    currentTime.tm_sec = time.sec;
+//    currentTime.tm_min = time.min;
+//    currentTime.tm_hour = time.hr;
+//    currentTime.tm_mday = time.date;
+//    currentTime.tm_wday = time.weekday;
+//    currentTime.tm_mon = time.month - 1;
+//    currentTime.tm_year = time.year + 100;
+//    mico_log("Current Time: %s",asctime(&currentTime));
+//  }else
+//    mico_log("RTC function unsupported");
   
   /* Regisist notifications */
   err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)micoNotify_WifiStatusHandler );
   require_noerr( err, exit ); 
 
-  if( context->flashContentInRam.micoSystemConfig.configured == wLanUnConfigured ||
-      context->flashContentInRam.micoSystemConfig.configured == unConfigured){
-    mico_log("Empty configuration. Starting configuration mode...");
+//  if( context->flashContentInRam.micoSystemConfig.configured == wLanUnConfigured ||
+//      context->flashContentInRam.micoSystemConfig.configured == unConfigured){
+//    mico_log("Empty configuration. Starting configuration mode...");
 
-#if (MICO_CONFIG_MODE == CONFIG_MODE_EASYLINK) || (MICO_CONFIG_MODE == CONFIG_MODE_EASYLINK_WITH_SOFTAP)
-  err = startEasyLink( context );
-  require_noerr( err, exit );
-#elif (MICO_CONFIG_MODE == CONFIG_MODE_SOFT_AP)
-  err = startEasyLinkSoftAP( context );
-  require_noerr( err, exit );
-#elif (MICO_CONFIG_MODE == CONFIG_MODE_AIRKISS)
-  err = startAirkiss( context );
-  require_noerr( err, exit );
-#elif (MICO_CONFIG_MODE == CONFIG_MODE_WPS) || MICO_CONFIG_MODE == defined (CONFIG_MODE_WPS_WITH_SOFTAP)
-  err = startWPS( context );
-  require_noerr( err, exit );
-#elif ( MICO_CONFIG_MODE == CONFIG_MODE_WAC)
-  WACPlatformParameters_t* WAC_Params = NULL;
-  WAC_Params = calloc(1, sizeof(WACPlatformParameters_t));
-  require(WAC_Params, exit);
-
-  str2hex((unsigned char *)para.mac, WAC_Params->macAddress, 6);
-  WAC_Params->isUnconfigured          = 1;
-  WAC_Params->supportsAirPlay         = 0;
-  WAC_Params->supportsAirPrint        = 0;
-  WAC_Params->supports2_4GHzWiFi      = 1;
-  WAC_Params->supports5GHzWiFi        = 0;
-  WAC_Params->supportsWakeOnWireless  = 0;
-
-  WAC_Params->firmwareRevision =  FIRMWARE_REVISION;
-  WAC_Params->hardwareRevision =  HARDWARE_REVISION;
-  WAC_Params->serialNumber =      SERIAL_NUMBER;
-  WAC_Params->name =              context->flashContentInRam.micoSystemConfig.name;
-  WAC_Params->model =             MODEL;
-  WAC_Params->manufacturer =      MANUFACTURER;
-
-  WAC_Params->numEAProtocols =    1;
-  WAC_Params->eaBundleSeedID =    BUNDLE_SEED_ID;
-  WAC_Params->eaProtocols =       (char **)eaProtocols;
-
-  err = startMFiWAC( context, WAC_Params, 1200);
-  free(WAC_Params);
-  require_noerr( err, exit );
-#else
-  #error "Wi-Fi configuration mode is not defined"?
-#endif
-  }
-#ifdef MFG_MODE_AUTO
-  else if( context->flashContentInRam.micoSystemConfig.configured == mfgConfigured ){
-    mico_log( "Enter MFG mode automatically" );
-    mico_mfg_test(context);
-    mico_thread_sleep(MICO_NEVER_TIMEOUT);
-  }
-#endif
-
-  else{
-    mico_log("Available configuration. Starting Wi-Fi connection...");
+//#if (MICO_CONFIG_MODE == CONFIG_MODE_EASYLINK) || (MICO_CONFIG_MODE == CONFIG_MODE_EASYLINK_WITH_SOFTAP)
+//  err = startEasyLink( context );
+//  require_noerr( err, exit );
+//#elif (MICO_CONFIG_MODE == CONFIG_MODE_SOFT_AP)
+//  err = startEasyLinkSoftAP( context );
+//  require_noerr( err, exit );
+//#elif (MICO_CONFIG_MODE == CONFIG_MODE_AIRKISS)
+//  err = startAirkiss( context );
+//  require_noerr( err, exit );
+//#elif (MICO_CONFIG_MODE == CONFIG_MODE_WPS) || MICO_CONFIG_MODE == defined (CONFIG_MODE_WPS_WITH_SOFTAP)
+//  err = startWPS( context );
+//  require_noerr( err, exit );
+//#elif ( MICO_CONFIG_MODE == CONFIG_MODE_WAC)
+//  WACPlatformParameters_t* WAC_Params = NULL;
+//  WAC_Params = calloc(1, sizeof(WACPlatformParameters_t));
+//  require(WAC_Params, exit);
+//
+//  str2hex((unsigned char *)para.mac, WAC_Params->macAddress, 6);
+//  WAC_Params->isUnconfigured          = 1;
+//  WAC_Params->supportsAirPlay         = 0;
+//  WAC_Params->supportsAirPrint        = 0;
+//  WAC_Params->supports2_4GHzWiFi      = 1;
+//  WAC_Params->supports5GHzWiFi        = 0;
+//  WAC_Params->supportsWakeOnWireless  = 0;
+//
+//  WAC_Params->firmwareRevision =  FIRMWARE_REVISION;
+//  WAC_Params->hardwareRevision =  HARDWARE_REVISION;
+//  WAC_Params->serialNumber =      SERIAL_NUMBER;
+//  WAC_Params->name =              context->flashContentInRam.micoSystemConfig.name;
+//  WAC_Params->model =             MODEL;
+//  WAC_Params->manufacturer =      MANUFACTURER;
+//
+//  WAC_Params->numEAProtocols =    1;
+//  WAC_Params->eaBundleSeedID =    BUNDLE_SEED_ID;
+//  WAC_Params->eaProtocols =       (char **)eaProtocols;
+//
+//  err = startMFiWAC( context, WAC_Params, 1200);
+//  free(WAC_Params);
+//  require_noerr( err, exit );
+//#else
+//  #error "Wi-Fi configuration mode is not defined"?
+//#endif
+//  }
+//#ifdef MFG_MODE_AUTO
+//  else if( context->flashContentInRam.micoSystemConfig.configured == mfgConfigured ){
+//    mico_log( "Enter MFG mode automatically" );
+//    mico_mfg_test(context);
+//    mico_thread_sleep(MICO_NEVER_TIMEOUT);
+//  }
+//#endif
+//
+//  else{
+//    mico_log("Available configuration. Starting Wi-Fi connection...");
     
     err = MICOAddNotification( mico_notify_WiFI_PARA_CHANGED, (void *)micoNotify_WiFIParaChangedHandler );
     require_noerr( err, exit ); 
@@ -409,29 +409,33 @@ int application_start(void)
     err = MICOAddNotification( mico_notify_DHCP_COMPLETED, (void *)micoNotify_DHCPCompleteHandler );
     require_noerr( err, exit );  
    
-    if(context->flashContentInRam.micoSystemConfig.rfPowerSaveEnable == true){
-      micoWlanEnablePowerSave();
-    }
-
-    if(context->flashContentInRam.micoSystemConfig.mcuPowerSaveEnable == true){
-      MicoMcuPowerSaveConfig(true);
-    }
+//    if(context->flashContentInRam.micoSystemConfig.rfPowerSaveEnable == true){
+//      micoWlanEnablePowerSave();
+//    }
+//
+//    if(context->flashContentInRam.micoSystemConfig.mcuPowerSaveEnable == true){
+//      MicoMcuPowerSaveConfig(true);
+//    }
 
     /*Local configuration server*/
-    if(context->flashContentInRam.micoSystemConfig.configServerEnable == true){
-      err =  MICOStartConfigServer(context);
-      require_noerr_action( err, exit, mico_log("ERROR: Unable to start the local server thread.") );
-    }
+//    if(context->flashContentInRam.micoSystemConfig.configServerEnable == true){
+//      err =  MICOStartConfigServer(context);
+//      require_noerr_action( err, exit, mico_log("ERROR: Unable to start the local server thread.") );
+//    }
 
-    err =  MICOStartNTPClient(context);
-    require_noerr_action( err, exit, mico_log("ERROR: Unable to start the NTP client thread.") );
+//    err =  MICOStartNTPClient(context);
+//    require_noerr_action( err, exit, mico_log("ERROR: Unable to start the NTP client thread.") );
+    
+    /*Start airkiss*/
+    err = startAirkiss( context );
+    require_noerr( err, exit );
 
     /*Start mico application*/
     err = MICOStartApplication( context );
     require_noerr( err, exit );
 
-    _ConnectToAP( context );
-  }
+    //_ConnectToAP( context );
+//  }
 
   mico_log("Free memory %d bytes", MicoGetMemoryInfo()->free_memory) ; 
   
@@ -445,18 +449,18 @@ int application_start(void)
         mico_thread_msleep(500);
         MicoSystemReboot();
         break;
-      case eState_Wlan_Powerdown:
-        sendNotifySYSWillPowerOff();
-        mico_thread_msleep(500);
-        micoWlanPowerOff();
-        break;
-      case eState_Standby:
-        mico_log("Enter standby mode");
-        sendNotifySYSWillPowerOff();
-        mico_thread_msleep(200);
-        micoWlanPowerOff();
-        MicoSystemStandBy(MICO_WAIT_FOREVER);
-        break;
+//      case eState_Wlan_Powerdown:
+//        sendNotifySYSWillPowerOff();
+//        mico_thread_msleep(500);
+//        micoWlanPowerOff();
+//        break;
+//      case eState_Standby:
+//        mico_log("Enter standby mode");
+//        sendNotifySYSWillPowerOff();
+//        mico_thread_msleep(200);
+//        micoWlanPowerOff();
+//        MicoSystemStandBy(MICO_WAIT_FOREVER);
+//        break;
       default:
         break;
     }
@@ -465,6 +469,9 @@ int application_start(void)
   require_noerr_action( err, exit, mico_log("Closing main thread with err num: %d.", err) );
 
 exit:
+  sendNotifySYSWillPowerOff();
+  mico_thread_msleep(500);
+  MicoSystemReboot();
   mico_rtos_delete_thread(NULL);
   return kNoErr;
 }

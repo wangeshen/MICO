@@ -35,6 +35,7 @@
 #include "StringUtils.h"
 
 #include "MicoVirtualDevice.h"
+#include "MVDMsgProtocol.h"
 
 #define SYS_LED_TRIGGER_INTERVAL 100 
 #define SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK 500 
@@ -58,6 +59,10 @@ void ConfigWillStart( mico_Context_t * const inContext )
     /*Led trigger*/
   mico_init_timer(&_Led_EL_timer, SYS_LED_TRIGGER_INTERVAL, _led_EL_Timeout_handler, NULL);
   mico_start_timer(&_Led_EL_timer);
+  
+  // set LED to red means airkiss config mode
+  // data: on/off,H,S,B
+  LedControlMsgHandler("1,0,100,100", strlen("1,0,100,100"));
   return;
 }
 
@@ -68,7 +73,7 @@ void ConfigWillStop( mico_Context_t * const inContext )
 
   mico_stop_timer(&_Led_EL_timer);
   mico_deinit_timer( &_Led_EL_timer );
-  MicoGpioOutputLow((mico_gpio_t)MICO_SYS_LED);
+  MicoGpioOutputHigh((mico_gpio_t)MICO_SYS_LED);
   return;
 }
 
@@ -81,6 +86,10 @@ void ConfigAirkissIsSuccess( mico_Context_t * const inContext )
   mico_deinit_timer( &_Led_EL_timer );
   mico_init_timer(&_Led_EL_timer, SYS_LED_TRIGGER_INTERVAL_AFTER_EASYLINK, _led_EL_Timeout_handler, NULL);
   mico_start_timer(&_Led_EL_timer);
+  
+  // set LED to light green means Airkiss config ok
+  // data: on/off,H,S,B
+  LedControlMsgHandler("1,120,100,10", strlen("1,120,100,10"));
   return;
 }
 

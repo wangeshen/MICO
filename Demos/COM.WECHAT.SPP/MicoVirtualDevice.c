@@ -78,10 +78,14 @@ void mvdNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inConte
       mico_rtos_init_semaphore(&_wifi_station_on_sem, 1);
     }
     mico_rtos_set_semaphore(&_wifi_station_on_sem);
+    // set LED to green means station down, data: on/off,H,S,B
+    LedControlMsgHandler("1,120,100,100", strlen("1,120,100,100"));
     break;
   case NOTIFY_STATION_DOWN:
     MVDDevInterfaceSend(DEFAULT_MVD_STATION_DOWN_MSG_2MCU, 
                         strlen(DEFAULT_MVD_STATION_DOWN_MSG_2MCU));
+    // set LED to light green means station down, data: on/off,H,S,B
+    LedControlMsgHandler("1,120,100,10", strlen("1,120,100,10"));
     break;
   case NOTIFY_AP_UP:
     break;
@@ -196,6 +200,9 @@ void MVDMainThread(void *arg)
       if (!connected){
         connected = true;
         
+        // set LED to blue means cloud connected, data: on/off,H,S,B
+        LedControlMsgHandler("1,240,100,100", strlen("1,240,100,100"));
+        
         //mvd_log("[MVD]Cloud: connected");
         MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU, 
                             strlen(DEFAULT_MVD_CLOUD_CONNECTED_MSG_2MCU));
@@ -207,6 +214,10 @@ void MVDMainThread(void *arg)
     else{
       if (connected){
         connected = false;
+        
+        // white means cloud disconnect.
+        LedControlMsgHandler("1,0,0,10", strlen("1,0,0,10"));
+        mvd_log("[MVD]cloud service disconnected!");
         
         //mvd_log("[MVD]Cloud: disconnected");
         MVDDevInterfaceSend(DEFAULT_MVD_CLOUD_DISCONNECTED_MSG_2MCU, 
