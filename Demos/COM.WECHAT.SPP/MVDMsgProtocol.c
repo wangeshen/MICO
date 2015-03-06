@@ -34,7 +34,7 @@
 /*******************************************************************************
  * USER CODE
  ******************************************************************************/
-
+/*
 static int getCmdNum(char* cmd, unsigned int len)
 {
   //led_log("cmd[%d]=[%s]", len, cmd);
@@ -57,7 +57,7 @@ static uint8_t checksum(lm_usart_message_t msg)
   result = (uint8_t)(sum & 0x000000FF);
   return result;
 }
-
+*/
 
 /* BRIEF: led control message handler
  * INPUT: led control message string
@@ -267,6 +267,7 @@ exit:
   */
 }
 
+/*
 // rewrite this interface by user
 OSStatus MVDMsgTransformDevice2Cloud(unsigned char* inUsartString, unsigned int inUsartStringLen, 
                               unsigned char** outJson, unsigned int* outJsonLen)
@@ -330,3 +331,4 @@ exit:
   }
   return err;
 }
+*/

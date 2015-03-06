@@ -31,7 +31,7 @@
 /*******************************************************************************
  * USER CODE
  ******************************************************************************/
-
+/*
 // cmd string len for json
 #define MAX_SIZE_CMD         16
 
@@ -74,7 +74,7 @@ typedef struct _lm_usart_message_t {
 #define LED_PARAM_HOUR          "hour"
 #define LED_PARAM_MINUTE        "minute"
 #define LED_PARAM_SECOND        "second"
-
+*/
 
 /*******************************************************************************
  * INTERFACES PROTOTYPE
@@ -83,8 +83,8 @@ typedef struct _lm_usart_message_t {
 OSStatus MVDMsgTransformCloud2Device(unsigned char* inJsonString, unsigned int inJsonStringLen, 
                                unsigned char** outUsartCmd, unsigned int* outUsartCmdLen);
  
-OSStatus MVDMsgTransformDevice2Cloud(unsigned char* inUsartString, unsigned int inUsartStringLen, 
-                              unsigned char** outJson, unsigned int* outJsonLen);
+//OSStatus MVDMsgTransformDevice2Cloud(unsigned char* inUsartString, unsigned int inUsartStringLen, 
+//                              unsigned char** outJson, unsigned int* outJsonLen);
 
 bool LedControlMsgHandler(unsigned char *Msg, unsigned int len);
 
