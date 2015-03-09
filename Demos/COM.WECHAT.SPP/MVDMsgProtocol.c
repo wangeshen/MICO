@@ -99,8 +99,9 @@ bool LedControlMsgHandler(unsigned char *Msg, unsigned int len)
   
   switch(Msg[0]) {
   case '0':{ // led off
-    if(1 != len)
+    if(1 != len){
       ret = false;
+    }
     else{
       led_log("CloseLED.");
       CloseLED_RGB();

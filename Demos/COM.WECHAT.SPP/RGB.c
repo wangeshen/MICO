@@ -116,20 +116,35 @@ void H2R_HSBtoRGB(float hue, float sat, float bright, float *color) {
 }
 
 void OpenLED_RGB(float *color){
+    rgb_log("PWM: R=%.2f", (float)color[0]);
     MicoPwmInitialize( (mico_pwm_t)MICO_PWM_R, 50, (float)color[0]);
     MicoPwmStart( (mico_pwm_t)MICO_PWM_R);
     
+    rgb_log("PWM: G=%.2f", (float)color[1]);
     MicoPwmInitialize( (mico_pwm_t)MICO_PWM_G, 50, (float)color[1]);
     MicoPwmStart( (mico_pwm_t)MICO_PWM_G);
     
+    rgb_log("PWM: B=%.2f", (float)color[2]);
     MicoPwmInitialize( (mico_pwm_t)MICO_PWM_B, 50, (float)color[2]);
     MicoPwmStart( (mico_pwm_t)MICO_PWM_B);
 }
 
 void CloseLED_RGB(){
-  MicoPwmStop((mico_pwm_t)MICO_PWM_R);
-  MicoPwmStop((mico_pwm_t)MICO_PWM_G);
-  MicoPwmStop((mico_pwm_t)MICO_PWM_B);
+  rgb_log("PWM: R=%.2f", 0.0);
+  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_R, 50, 0);
+  MicoPwmStart( (mico_pwm_t)MICO_PWM_R);
+  
+  rgb_log("PWM: G=%.2f", 0.0);
+  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_G, 50, 0);
+  MicoPwmStart( (mico_pwm_t)MICO_PWM_G);
+  
+  rgb_log("PWM: B=%.2f", 0.0);
+  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_B, 50, 0);
+  MicoPwmStart( (mico_pwm_t)MICO_PWM_B);
+    
+//  MicoPwmStop((mico_pwm_t)MICO_PWM_R);
+//  MicoPwmStop((mico_pwm_t)MICO_PWM_G);
+//  MicoPwmStop((mico_pwm_t)MICO_PWM_B);
 }
 
 //void OpenLED_W(float Size){
