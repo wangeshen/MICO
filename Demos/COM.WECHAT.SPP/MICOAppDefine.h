@@ -53,7 +53,7 @@
 /* product type */
 #define DEFAULT_PRODUCT_ID                  "af2b33be"
 #define DEFAULT_PRODUCT_KEY                 "3077ea98-4d07-42db-955a-49821dd39ccb"
-#define DEFAULT_ROM_VERSION                 "v0.0.4"
+#define DEFAULT_ROM_VERSION                 "v0.0.5"
 
 /*Application's configuration stores in flash*/
 typedef struct
