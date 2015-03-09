@@ -30,14 +30,14 @@
 
 #define APP_INFO   "mxchipWNet Wechat Demo based on MICO OS"
 
-#define FIRMWARE_REVISION   "MICO_WECHAT_1_0"
+#define FIRMWARE_REVISION   "MICO_WECHAT_1_1"
 #define MANUFACTURER        "MXCHIP Inc."
-#define SERIAL_NUMBER       "20150209"
+#define SERIAL_NUMBER       "20150309"
 #define PROTOCOL            "com.wechat.spp"
 
 #ifdef DEFAULT_NAME
 #undef DEFAULT_NAME
-#define DEFAULT_NAME        "EMW3162 Wechat"
+#define DEFAULT_NAME        "Wechat LED"
 #endif
 
 
@@ -46,14 +46,14 @@
 #define MICO_CONFIG_MODE CONFIG_MODE_AIRKISS
 
 /*User provided configurations*/
-#define CONFIGURATION_VERSION               0x00000001 // if default configuration is changed, update this number
+#define CONFIGURATION_VERSION               0x00000005 // if default configuration is changed, update this number
 #define LOCAL_PORT                          8080
 #define BONJOUR_SERVICE                     "_easylink._tcp.local."
 
 /* product type */
 #define DEFAULT_PRODUCT_ID                  "af2b33be"
 #define DEFAULT_PRODUCT_KEY                 "3077ea98-4d07-42db-955a-49821dd39ccb"
-#define DEFAULT_ROM_VERSION                 "v0.0.3"
+#define DEFAULT_ROM_VERSION                 "v0.0.4"
 
 /*Application's configuration stores in flash*/
 typedef struct
