@@ -106,6 +106,7 @@ OSStatus MVDCloudInterfaceInit(mico_Context_t* const inContext)
           inContext->flashContentInRam.appConfig.virtualDevConfig.deviceId, MAX_SIZE_DEVICE_ID);
   strncpy(easyCloudContext.service_status.masterDeviceKey, 
           inContext->flashContentInRam.appConfig.virtualDevConfig.masterDeviceKey, MAX_SIZE_DEVICE_KEY);
+  strncpy(easyCloudContext.service_status.device_name, DEFAULT_DEVICE_NAME, MAX_SIZE_DEVICE_KEY);
   
   cloudServiceLibVersion = EasyCloudServiceVersion(&easyCloudContext);
   cloud_if_log("EasyCloud library version: %d.%d.%d", 
@@ -228,6 +229,8 @@ OSStatus MVDCloudInterfaceDevActivate(mico_Context_t* const inContext,
           devActivateRequestData.devPasswd, MAX_SIZE_DEV_PASSWD);
   strncpy(easyCloudContext.service_config_info.userToken, 
           devActivateRequestData.user_token, MAX_SIZE_USER_TOKEN);
+  strncpy(easyCloudContext.service_status.device_name, 
+          DEFAULT_DEVICE_NAME, MAX_SIZE_DEVICE_KEY);
     
   // activate request
   err = EasyCloudActivate(&easyCloudContext);
