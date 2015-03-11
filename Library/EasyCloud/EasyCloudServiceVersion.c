@@ -38,7 +38,7 @@
  ******************************************************************************/
 #define EASYCLOUD_SERVCIE_VERSION_MAIN        0x00
 #define EASYCLOUD_SERVCIE_VERSION_SUB         0x03
-#define EASYCLOUD_SERVCIE_VERSION_REV         0x04
+#define EASYCLOUD_SERVCIE_VERSION_REV         0x05
 
 #define EASYCLOUD_SERVCIE_VERSION             (EASYCLOUD_SERVCIE_VERSION_MAIN << 16 | \
                                                EASYCLOUD_SERVCIE_VERSION_SUB << 8 | \

@@ -109,6 +109,7 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
                                           char *bssid, 
                                           char *device_token,
                                           char *user_token, 
+                                          char *device_name,
                                           char out_device_id[MAX_SIZE_DEVICE_ID], 
                                           char out_master_device_key[MAX_SIZE_DEVICE_KEY]);
 
@@ -322,6 +323,7 @@ OSStatus EasyCloudActivate(easycloud_service_context_t *context)
                                   context->service_config_info.bssid,
                                   device_token,
                                   context->service_config_info.userToken,
+                                  context->service_status.device_name,
                                   context->service_status.deviceId, 
                                   context->service_status.masterDeviceKey);
   require_noerr( err, exit);
@@ -359,6 +361,7 @@ OSStatus EasyCloudAuthorize(easycloud_service_context_t *context)
                                   context->service_config_info.bssid,
                                   device_token,
                                   context->service_config_info.userToken,
+                                  context->service_status.device_name,
                                   context->service_status.deviceId,
                                   context->service_status.masterDeviceKey);
   require_noerr(err, exit);
@@ -802,6 +805,7 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
                                           char *bssid,
                                           char *device_token,
                                           char *user_token,
+                                          char *device_name,
                                           char out_device_id[MAX_SIZE_DEVICE_ID],
                                           char out_master_device_key[MAX_SIZE_DEVICE_KEY])
 {
@@ -831,6 +835,10 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
   json_object_object_add(object, "bssid", json_object_new_string(bssid)); 
   json_object_object_add(object, "device_token", json_object_new_string(device_token)); 
   json_object_object_add(object, "user_token", json_object_new_string(user_token));
+  if(DEVICE_ACTIVATE == request_type) {
+    // pass default device name to server when device activate .
+    json_object_object_add(object, "alias", json_object_new_string(device_name));
+  }
   
   json_str = (char*)json_object_to_json_string(object);
   json_str_len = strlen(json_str);

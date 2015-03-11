@@ -48,6 +48,8 @@
 #define MAX_SIZE_DEVICE_ID              37
 #define MAX_SIZE_DEVICE_KEY             37
 
+#define MAX_SIZE_DEVICE_NAME            32
+
 #define MAX_SIZE_FW_VERSION             32
 #define MAX_SIZE_FILE_PATH              256
 #define MAX_SIZE_FILE_MD5               64
@@ -89,6 +91,8 @@ typedef struct _easycloud_service_status_t {
   char                    bin_file[MAX_SIZE_FILE_PATH];
   char                    bin_md5[MAX_SIZE_FILE_MD5];
   uint64_t                bin_file_size;
+  
+  char                    device_name[MAX_SIZE_DEVICE_NAME];
 } easycloud_service_status_t;
  
 //message recived callback function prototype
