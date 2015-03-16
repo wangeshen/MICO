@@ -50,7 +50,7 @@ char menu[] =
 "1:FWUPDATE <-r>\r\n"
 "2:DRIVERUPDATE <-r>\r\n"
 "3:PARAUPDATE <-r><-e>\r\n"
-"4:FLASHUPDATE  <-i><-s><-e><-r> <-start><-end>\r\n"
+"4:FLASHUPDATE  <-i><-s><-e><-r><-start><-end>\r\n"
 "5:MEMORYMAP\r\n"
 "6:BOOT\r\n"
 "7:REBOOT\r\n";
@@ -92,7 +92,7 @@ int main(void)
   if(MicoShouldEnterBootloader() == false)
     startApplication();
   /* BOOT_SEL = 0, MFG_SEL = 0 => Normal start, MICO will enter MFG mode when "MicoInit" is called*/
-  else if(MicoShouldEnterMFGMode()==true)
+  else if(MicoShouldEnterMFGMode() == true)
     startApplication();
 
   printf ( menu, MODEL, HARDWARE_REVISION );
