@@ -181,7 +181,7 @@ void MicoFogCloudMainThread(void *arg)
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = (mico_Context_t *)arg;
   
-  bool connected = false;
+//  bool connected = false;
   MVDOTARequestData_t devOTARequestData;
  // MVDActivateRequestData_t devDefaultActivateData;
   
@@ -299,7 +299,7 @@ void MicoFogCloudMainThread(void *arg)
                        fogcloud_log("ERROR: MicoFogCloudCloudInterfaceStart failed!") );
   
   /* loop connect status */
-  while(1)
+/*  while(1)
   {
     if(inContext->appStatus.fogcloudStatus.isCloudConnected){
       if (!connected){
@@ -325,6 +325,7 @@ void MicoFogCloudMainThread(void *arg)
     
     mico_thread_sleep(1);
   }
+  */
   
 exit:
   fogcloud_log("[MicoFogCloud]MicoFogCloudMainThread exit err=%d.", err);
@@ -439,9 +440,18 @@ OSStatus MicoFogCloudActivate(mico_Context_t* const context,
 {
   OSStatus err = kUnknownErr;
   
-  err = fogCloudDevActivate(context, activateData);
-  require_noerr_action(err, exit, 
-                       fogcloud_log("ERROR: device activate failed! err=%d", err) );
+  if(context->flashContentInRam.appConfig.fogcloudConfig.isActivated){
+    // already activated, just do authorize
+    err = fogCloudDevAuthorize(context, activateData);
+    require_noerr_action(err, exit, 
+                         fogcloud_log("ERROR: device authorize failed! err=%d", err) );
+  }
+  else {
+    // activate
+    err = fogCloudDevActivate(context, activateData);
+    require_noerr_action(err, exit, 
+                         fogcloud_log("ERROR: device activate failed! err=%d", err) );
+  }
   return kNoErr;
   
 exit:

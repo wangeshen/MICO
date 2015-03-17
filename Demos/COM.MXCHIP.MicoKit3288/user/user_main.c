@@ -29,7 +29,9 @@
 #define user_log_trace() custom_log_trace("USER")
 
 
-/* MICO user callback: Restore default configuration provided by application */
+/* MICO user callback: Restore default configuration provided by user
+ * called when Easylink buttion long pressed
+ */
 void userRestoreDefault_callback(mico_Context_t *inContext)
 {
   user_log("restore user config.");
