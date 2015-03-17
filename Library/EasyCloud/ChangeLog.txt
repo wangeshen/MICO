@@ -1,10 +1,11 @@
 ================================================================================
-¡¾2015.03.11¡¿
+¡¾2015.03.17¡¿
 [Name]   : MicoEasyCloudService
 [version]: v0.3.5
 
 [Changlog]:
-    1. add param device_name when activate.
+    1. add param device_name when activate;
+    2. fix bug for high CPU utilization.
 
 ================================================================================
 ¡¾2015.03.03¡¿
