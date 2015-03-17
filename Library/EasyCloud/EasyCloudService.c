@@ -659,7 +659,7 @@ void easyCloudServiceThread(void *arg)
       break;
     }
     else{
-      //mico_thread_msleep(500);
+      mico_thread_msleep(500);
     }
   }
   easycloud_service_log("device activated.");
@@ -712,7 +712,7 @@ ReStartMQTTClient:
       break;
     }
     else{
-      //mico_thread_msleep(500);
+      mico_thread_msleep(500);
     }
   }
   _mqttClient_state = MQTT_CLIENT_STATUS_CONNECTED;
