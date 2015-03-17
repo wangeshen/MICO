@@ -412,7 +412,7 @@ exit:
 * MicoFogCloud get state
 ******************************************************************************/
 // cloud connect state
-bool MicoFogCloudCloudIsConnect(mico_Context_t* const context)
+bool MicoFogCloudIsConnect(mico_Context_t* const context)
 {
   if(NULL == context){
     return false;
@@ -538,7 +538,7 @@ OSStatus MicoFogCloudGetState(mico_Context_t* const context,
 // MCU => Cloud
 // if topic is NULL, send to default topic: device_id/out,
 // else send to sub-channel: device_id/out/<topic>
-OSStatus MicoFogCloudSendMsg2Cloud(mico_Context_t* const context, const char* topic, 
+OSStatus MicoFogCloudMsgSend(mico_Context_t* const context, const char* topic, 
                                    unsigned char *inBuf, unsigned int inBufLen)
 {
   fogcloud_log_trace();

@@ -72,7 +72,7 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* context,
   ptr += inBufLen;
   memcpy(ptr, '\0', 1);
   //err = MicoFogCloudSendMsg2Cloud(context, responseTopic, responseMsg, responseMsgLen);
-  err = MicoFogCloudSendMsg2Cloud(context, NULL, responseMsg, responseMsgLen);
+  err = MicoFogCloudMsgSend(context, NULL, responseMsg, responseMsgLen);
   if(NULL != responseTopic){
     free(responseTopic);
   }

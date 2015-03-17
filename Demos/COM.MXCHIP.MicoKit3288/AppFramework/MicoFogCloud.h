@@ -52,12 +52,12 @@ void MicoFogCloudRestoreDefault(mico_Context_t* const context);
 // device activate state
 bool MicoFogCloudIsActivated(mico_Context_t* const context);
 // cloud connect state
-bool MicoFogCloudCloudIsConnect(mico_Context_t* const context);
+bool MicoFogCloudIsConnect(mico_Context_t* const context);
 
 
 /****** send message ******/
 // Module => Cloud
-OSStatus MicoFogCloudSendMsg2Cloud(mico_Context_t* const context, const char* topic,
+OSStatus MicoFogCloudMsgSend(mico_Context_t* const context, const char* topic,
                        unsigned char *inBuf, unsigned int inBufLen);
 
 /* device control */

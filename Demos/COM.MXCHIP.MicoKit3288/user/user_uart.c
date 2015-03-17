@@ -53,7 +53,7 @@ void uartRecv_thread(void *inContext)
       continue; 
     user_uart_log("MCU => MVD: [%d]=%.*s", recvlen, recvlen, inDataBuffer);
     //MVDDeviceMsgProcess(Context, inDataBuffer, recvlen);
-    MicoFogCloudSendMsg2Cloud(Context, NULL, inDataBuffer, recvlen);
+    MicoFogCloudMsgSend(Context, NULL, inDataBuffer, recvlen);
   }
   
 exit:
