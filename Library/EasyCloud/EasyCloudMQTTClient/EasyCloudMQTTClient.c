@@ -52,9 +52,10 @@ static Client c;
 *******************************************************************************/
 
 static void mqttClientThread(void *arg);
-static OSStatus internal_EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen);
 static OSStatus internal_EasyCloudMQTTClientPublishto(const char* topic, 
                                                       const unsigned char* msg, int msglen);
+#ifndef ECS_NO_SOCKET_LOOPBACK
+static OSStatus internal_EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen);
 static OSStatus internal_format_topic_msg_buf(unsigned char** outDataBuffer, int* outDataLen,
                                               const char* pubTopic, int pubTopicLen, bool level_flag,
                                               const unsigned char* sendMsg, int sendMsgLen);
@@ -62,6 +63,7 @@ static OSStatus internal_parse_topic_msg(const unsigned char* recvDataBuffer, in
                                     char** recvTopic, int* recvTopicLen,
                                     unsigned char* level_flag,
                                     unsigned char** recvMsg, int* recvMsgLen);
+#endif
 
 /*******************************************************************************
 * IMPLEMENTATIONS
@@ -111,12 +113,14 @@ static void mqttClientThread(void *arg)
 {
   mico_mqtt_client_log_trace();
   //mico_Context_t *Context = arg;
-  OSStatus err = kUnknownErr;
-  
-  int recv_data_loopBack_fd = -1;
-  struct sockaddr_t addr;
+
   fd_set readfds;
   struct timeval_t t;
+  
+#ifndef ECS_NO_SOCKET_LOOPBACK
+  OSStatus err = kUnknownErr;
+  int recv_data_loopBack_fd = -1;
+  struct sockaddr_t addr;
   unsigned char recvDataBuffer[MAX_PLAYLOAD_SIZE] = {0}; 
   int recvDataLen = 0;
   char* recvPubTopic = NULL;
@@ -125,6 +129,7 @@ static void mqttClientThread(void *arg)
   int recvMsgLen = 0;
   unsigned char level_flag = 0;
   char finalPubTopic[MAX_SIZE_MQTT_PUBLISH_TOPIC] = {0};
+#endif
   
   int rc = -1;
   unsigned char buf[DEFAULT_MICO_MQTT_BUF_SIZE];
@@ -151,6 +156,7 @@ MQTTClientRestart:
   mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_STARTED;
   mico_rtos_unlock_mutex( &mqttClientContext_mutex );
   
+ #ifndef ECS_NO_SOCKET_LOOPBACK   
   /* recv data loopback socket */
   if(-1 != recv_data_loopBack_fd){
     close(recv_data_loopBack_fd);
@@ -162,6 +168,7 @@ MQTTClientRestart:
   addr.s_port = RECVED_DATA_LOOPBACK_PORT;
   err = bind( recv_data_loopBack_fd, &addr, sizeof(addr) );
   require_noerr( err,  MQTTClientRestart);
+#endif
   
   t.tv_sec = 0;
   t.tv_usec = DEFAULT_MICO_MQTT_YIELD_TMIE*1000;
@@ -244,11 +251,14 @@ MQTTClientRestart:
     
     /* recv data both from loopback and mqtt server */
     FD_ZERO(&readfds);
+#ifndef ECS_NO_SOCKET_LOOPBACK  
     FD_SET(recv_data_loopBack_fd, &readfds); 
+#endif
     FD_SET(c.ipstack->my_socket, &readfds);
 
     select(1, &readfds, NULL, NULL, &t);
-
+    
+#ifndef ECS_NO_SOCKET_LOOPBACK  
     /* recv loopback data to publish */
     //err = kNoErr;
     if (FD_ISSET( recv_data_loopBack_fd, &readfds )) {
@@ -293,6 +303,7 @@ MQTTClientRestart:
         }
       }
     }
+#endif
     
     /* MQTT recv */
     if (FD_ISSET( c.ipstack->my_socket, &readfds )){
@@ -326,10 +337,12 @@ MQTTClientRestart:
   
   /* stop */
 client_stop:
+#ifndef ECS_NO_SOCKET_LOOPBACK  
   if(-1 != recv_data_loopBack_fd){
     close(recv_data_loopBack_fd);
     recv_data_loopBack_fd = -1;
   }
+#endif
   MQTTDisconnect(&c);
   n.disconnect(&n);
   
@@ -344,6 +357,7 @@ client_stop:
   return;
 }
 
+#ifndef ECS_NO_SOCKET_LOOPBACK
 
 /*******************************************************************************
  *
@@ -539,14 +553,18 @@ static OSStatus internal_loopbackMsg(const unsigned char *sendBuf, int sendBufLe
   return err;
 }
 
+#endif  // NEED_SOCKET_LOOPBACK
+
 /****************************************
  * Publish msg to "device_id/out"
  ***************************************/
 OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
 {
   OSStatus err = kUnknownErr;
+#ifndef ECS_NO_SOCKET_LOOPBACK
   unsigned char* sendBuf = NULL;
   int sendBufLen = 0;
+#endif
   
   if (NULL == msg || 0 >= msglen || msglen > MAX_PLAYLOAD_SIZE){
     return kParamErr;
@@ -556,6 +574,7 @@ OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
   if(0 == c.isconnected)
     return kStateErr;
   
+#ifndef ECS_NO_SOCKET_LOOPBACK
   // format topic && msg string with default pubTopic, MUST be freed later.
   err = internal_format_topic_msg_buf(&sendBuf, &sendBufLen, 
                                         NULL, 0, false, msg, msglen);
@@ -571,6 +590,10 @@ OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
   if(NULL != sendBuf){
     free(sendBuf);
   }
+#else
+  err = internal_EasyCloudMQTTClientPublishto(mqttClientContext.client_config_info.pubtopic,
+                                              msg, msglen);
+#endif
   
   return err;
 }
@@ -582,8 +605,10 @@ OSStatus EasyCloudMQTTClientPublishto(const char* topic,
                                       const unsigned char* msg, int msglen)
 {
   OSStatus err = kUnknownErr;
+#ifndef ECS_NO_SOCKET_LOOPBACK
   unsigned char* sendBuf = NULL;
   int sendBufLen = 0;
+#endif
   
   if (NULL == topic || NULL == msg || 0 >= msglen || msglen > MAX_PLAYLOAD_SIZE){
     return kParamErr;
@@ -592,6 +617,7 @@ OSStatus EasyCloudMQTTClientPublishto(const char* topic,
   if(0 == c.isconnected)
     return kStateErr;
   
+#ifndef ECS_NO_SOCKET_LOOPBACK
   // format msg string with pubtopic
   err = internal_format_topic_msg_buf(&sendBuf, &sendBufLen, 
                                       topic, strlen(topic), false, msg, msglen);
@@ -606,6 +632,9 @@ OSStatus EasyCloudMQTTClientPublishto(const char* topic,
   if(NULL != sendBuf){
     free(sendBuf);
   }
+#else
+  err = internal_EasyCloudMQTTClientPublishto(topic, msg, msglen);
+#endif
   
   return err;
 }
@@ -617,8 +646,12 @@ OSStatus EasyCloudMQTTClientPublishtoChannel(const char* channel,
                                  const unsigned char *msg, unsigned int msglen)
 {
   OSStatus err = kUnknownErr;
+#ifndef ECS_NO_SOCKET_LOOPBACK
   unsigned char* sendBuf = NULL;
   int sendBufLen = 0;
+#else
+  char finalPubTopic[MAX_SIZE_MQTT_PUBLISH_TOPIC] = {0};
+#endif
   
   if (NULL == channel || NULL == msg || 0 >= msglen || msglen > MAX_PLAYLOAD_SIZE){
     return kParamErr;
@@ -627,6 +660,7 @@ OSStatus EasyCloudMQTTClientPublishtoChannel(const char* channel,
   if(0 == c.isconnected)
     return kStateErr;
  
+#ifndef ECS_NO_SOCKET_LOOPBACK
   // format msg string with sub-level, level_flag set true
   err = internal_format_topic_msg_buf(&sendBuf, &sendBufLen, 
                                       channel, strlen(channel), true, msg, msglen);
@@ -641,9 +675,18 @@ OSStatus EasyCloudMQTTClientPublishtoChannel(const char* channel,
   if(NULL != sendBuf){
     free(sendBuf);
   }
+#else
+  // add channel to topic
+  memset(finalPubTopic, 0, MAX_SIZE_MQTT_PUBLISH_TOPIC);
+  sprintf(finalPubTopic, "%s/%s", 
+          mqttClientContext.client_config_info.pubtopic, channel);            
+  err = internal_EasyCloudMQTTClientPublishto(finalPubTopic, msg, msglen);
+#endif
   
   return err;
 }
+
+#ifndef ECS_NO_SOCKET_LOOPBACK
 
 // use default MQTT client config pubtopic "device_id/out"
 static OSStatus internal_EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
@@ -653,6 +696,8 @@ static OSStatus internal_EasyCloudMQTTClientPublish(const unsigned char* msg, in
                                               msg, msglen);
   return err;
 }
+
+#endif  // ! ECS_NO_SOCKET_LOOPBACK
 
 // use user-defined topic
 static OSStatus internal_EasyCloudMQTTClientPublishto(const char* topic, 
