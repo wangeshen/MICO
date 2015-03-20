@@ -1951,9 +1951,24 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework\MicoFogCloudDef.h</name>
       </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework\msg_dispatch.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework\msg_dispatch.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework\properties.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework\properties.h</name>
+      </file>
     </group>
     <group>
       <name>User</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\user_config.h</name>
+      </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\user_main.c</name>
       </file>

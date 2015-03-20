@@ -55,10 +55,13 @@ bool MicoFogCloudIsActivated(mico_Context_t* const context);
 bool MicoFogCloudIsConnect(mico_Context_t* const context);
 
 
-/****** send message ******/
-// Module => Cloud
+/****** send && recv message ******/
+// Module <=> Cloud
 OSStatus MicoFogCloudMsgSend(mico_Context_t* const context, const char* topic,
                        unsigned char *inBuf, unsigned int inBufLen);
+
+//OSStatus MicoFogCloudMsgRecv(mico_Context_t* const context, void *fogcloudMsg.
+//                             int *timeout_ms);
 
 /* device control */
 
@@ -83,11 +86,11 @@ OSStatus MicoFogCloudGetState(mico_Context_t* const context,
 * INTERNAL FUNCTIONS
 *******************************************************************************/
 
-/* message transmit protocol */
-// Cloud => MCU, called by cloudMsgArrivedHandler (when recv msg from cloud)
-OSStatus MicoFogCloudCloudMsgProcess(mico_Context_t* const context, 
-                            const char* topic, const unsigned int topicLen,
-                            unsigned char *inBuf, unsigned int inBufLen);
+///* message transmit protocol */
+//// Cloud => MCU, called by cloudMsgArrivedHandler (when recv msg from cloud)
+//OSStatus MicoFogCloudCloudMsgProcess(mico_Context_t* const context, 
+//                            const char* topic, const unsigned int topicLen,
+//                            unsigned char *inBuf, unsigned int inBufLen);
 
 #endif
 

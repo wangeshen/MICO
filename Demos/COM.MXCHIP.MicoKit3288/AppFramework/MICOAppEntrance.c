@@ -27,6 +27,16 @@
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
 #define app_log_trace() custom_log_trace("APP")
 
+/* default callback function */
+WEAK OSStatus user_main( mico_Context_t * const inContext )
+{
+  return kNoErr;
+}
+
+WEAK void userRestoreDefault_callback(mico_Context_t *inContext)
+{
+}
+
 /* user thread created by MICO */
 void user_thread(void* arg)
 {
@@ -76,12 +86,12 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
     
   require_action(inContext, exit, err = kParamErr);
   
-  /*Bonjour for service searching*/
+  /* Bonjour for service searching */
   if(inContext->flashContentInRam.micoSystemConfig.bonjourEnable == true) {
     MICOStartBonjourService( Station, inContext );
   }
 
-  /*FogCloud service*/
+  /* start cloud service */
 #if (MICO_CLOUD_TYPE == CLOUD_FOGCLOUD)
   err = MicoStartFogCloudService( inContext );
   require_noerr_action( err, exit, app_log("ERROR: Unable to start FogCloud service.") );
@@ -93,7 +103,7 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
   #error "MICO cloud service type is not defined"?
 #endif
   
-  /*start user thread*/
+  /* start user thread */
   err = startUserThread( inContext );
   require_noerr_action( err, exit, app_log("ERROR: start user thread failed!") );
 

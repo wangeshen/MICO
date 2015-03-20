@@ -26,19 +26,32 @@
 
 #include "Common.h"
 #include "MicoFogCloudDef.h"
+#include "user_config.h"
 
+#ifndef APP_INFO
+  #define APP_INFO   "mxchipWNet MicoKit Demo based on MICO OS"
+#endif
 
-#define APP_INFO   "mxchipWNet MicoKit Demo based on MICO OS"
+#ifndef FIRMWARE_REVISION
+  #define FIRMWARE_REVISION   "MICO_KIT_1_0"
+#endif
 
-#define FIRMWARE_REVISION   "MICO_KIT3288_1_0"
-#define MANUFACTURER        "MXCHIP Inc."
-#define SERIAL_NUMBER       "20150317"
-#define PROTOCOL            "com.mxchip.micokit3288"
+#ifndef MANUFACTURER
+  #define MANUFACTURER        "MXCHIP Inc."
+#endif
 
+#ifndef SERIAL_NUMBER
+  #define SERIAL_NUMBER       "20150317"
+#endif
+
+#ifndef PROTOCOL
+  #define PROTOCOL            "com.mxchip.micokit"
+#endif
 
 /* Wi-Fi configuration mode */
-#define MICO_CONFIG_MODE CONFIG_MODE_EASYLINK
-//#define MICO_CONFIG_MODE CONFIG_MODE_AIRKISS
+#ifndef MICO_CONFIG_MODE
+  #define MICO_CONFIG_MODE CONFIG_MODE_EASYLINK
+#endif
 
 /* Define MICO cloud type */
 #define CLOUD_NO                                (0)
@@ -46,19 +59,39 @@
 #define CLOUD_ALINK                             (2)
     
 /* MICO cloud service type */
-#define MICO_CLOUD_TYPE    CLOUD_FOGCLOUD
+#ifndef MICO_CLOUD_TYPE
+  #define MICO_CLOUD_TYPE    CLOUD_FOGCLOUD
+#endif
 
-#define STACK_SIZE_USER_MAIN_THREAD             0x1000
+#ifndef STACK_SIZE_USER_MAIN_THREAD
+  #define STACK_SIZE_USER_MAIN_THREAD           0x1000
+#endif
 
 /*User provided configurations*/
-#define CONFIGURATION_VERSION               0x00000003 // if default configuration is changed, update this number
-#define LOCAL_PORT                          8080       // bonjour service port
-#define BONJOUR_SERVICE                     "_easylink._tcp.local."
+#ifndef CONFIGURATION_VERSION
+  #define CONFIGURATION_VERSION                 0x00000001 // if default configuration is changed, update this number
+#endif
 
-/* product type */
-#define DEFAULT_PRODUCT_ID                  "d64f517c"
-#define DEFAULT_PRODUCT_KEY                 "e935ef56-1d03-4432-9524-8d4a691a26ec"
-#define DEFAULT_ROM_VERSION                 "v0.0.1"
+#ifndef LOCAL_PORT
+  #define LOCAL_PORT                            8080       // bonjour service port
+#endif
+
+#ifndef BONJOUR_SERVICE
+  #define BONJOUR_SERVICE                      "_easylink._tcp.local."
+#endif
+
+/* product id/key check */
+#ifndef PRODUCT_ID
+  #error  "PRODUCT_ID must be set in 'user_config.h'."
+#endif
+
+#ifndef PRODUCT_KEY
+  #error "PRODUCT_KEY must be set in 'user_config.h'."
+#endif
+
+#ifndef DEFAULT_ROM_VERSION
+  #define DEFAULT_ROM_VERSION                 "v1.0.0"
+#endif
 
 /*Application's configuration stores in flash*/
 typedef struct

@@ -64,6 +64,13 @@ static mico_semaphore_t _reset_cloud_info_sem = NULL;
 
 extern OSStatus MicoStartFogCloudConfigServer ( mico_Context_t * const inContext );
 
+WEAK OSStatus user_fogcloud_msg_handler(mico_Context_t* context, 
+                            const char* topic, const unsigned int topicLen,
+                            unsigned char *inBuf, unsigned int inBufLen)
+{
+  return kNoErr;
+}
+
 void mvdNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inContext)
 {
   fogcloud_log_trace();

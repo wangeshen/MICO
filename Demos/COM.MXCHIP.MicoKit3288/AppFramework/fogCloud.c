@@ -25,7 +25,7 @@
 
 #include "fogCloud.h"   
 #include "EasyCloudService.h"
-#include "MicoFogCloud.h"
+//#include "MicoFogCloud.h"
 
 
 #define cloud_if_log(M, ...) custom_log("FOGCLOUD_IF", M, ##__VA_ARGS__)
@@ -34,6 +34,12 @@
 
 static easycloud_service_context_t easyCloudContext;
 
+WEAK OSStatus MicoFogCloudCloudMsgProcess(mico_Context_t* context, 
+                                     const char* topic, const unsigned int topicLen,
+                                     unsigned char *inBuf, unsigned int inBufLen)
+{
+  return kNoErr;
+}
 
 /*******************************************************************************
  * cloud service callbacks
@@ -91,9 +97,9 @@ OSStatus fogCloudInit(mico_Context_t* const inContext)
   strncpy(easyCloudContext.service_config_info.bssid, 
           inContext->micoStatus.mac, MAX_SIZE_BSSID);
   strncpy(easyCloudContext.service_config_info.productId, 
-          (char*)DEFAULT_PRODUCT_ID, strlen((char*)DEFAULT_PRODUCT_ID));
+          (char*)PRODUCT_ID, strlen((char*)PRODUCT_ID));
   strncpy(easyCloudContext.service_config_info.productKey, 
-          (char*)DEFAULT_PRODUCT_KEY, strlen((char*)DEFAULT_PRODUCT_KEY));
+          (char*)PRODUCT_KEY, strlen((char*)PRODUCT_KEY));
   easyCloudContext.service_config_info.msgRecvhandler = cloudMsgArrivedHandler;
   easyCloudContext.service_config_info.statusNotify = cloudServiceStatusChangedHandler;
   easyCloudContext.service_config_info.context = (void*)inContext;

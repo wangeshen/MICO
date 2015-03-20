@@ -20,10 +20,11 @@
   */ 
 
 #include "MICODefine.h"
-#include "MICOAppDefine.h"
+//#include "MICOAppDefine.h"
 #include "user_main.h"
 #include "MicoFogCloud.h"
 #include "user_uart.h"
+#include "msg_dispatch.h"
 
 #define user_log(M, ...) custom_log("USER", M, ##__VA_ARGS__)
 #define user_log_trace() custom_log_trace("USER")
@@ -42,50 +43,27 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* context,
                             const char* topic, const unsigned int topicLen,
                             unsigned char *inBuf, unsigned int inBufLen)
 {
-  user_log();
+  user_log_trace();
   OSStatus err = kUnknownErr;
-  char* responseTopic = NULL;
-  unsigned char* responseMsg = NULL;
-  unsigned char* ptr = NULL;
-  int responseMsgLen = 0;
+  mico_fogcloud_msg fogcloud_msg;
   
-  /* send to USART */
-  err = user_uartSend(inBuf, inBufLen); // transfer raw data to USART
-  require_noerr_action( err, exit, user_log("ERROR: send to uart error! err=%d", err) );
-  
-  /* echo to cloud */
-  // responseTopic = device_id/out, message = [MAC]msg
-  responseTopic = ECS_str_replace(responseTopic, topic, topicLen, "/in", "/out");
-  responseMsgLen = strlen(context->micoStatus.mac) + 2 + inBufLen;
-  responseMsg = (unsigned char*)malloc(responseMsgLen + 1);
-  memset(responseMsg, 0x00, responseMsgLen);
-  if(NULL == responseMsg){
-    err = kNoMemoryErr;
-    goto exit;
-  }
-  ptr = responseMsg;
-  memcpy(ptr, "[", 1);
-  ptr += 1;
-  memcpy(ptr, (const void*)&(context->micoStatus.mac), strlen(context->micoStatus.mac));
-  ptr += strlen(context->micoStatus.mac);
-  memcpy(ptr, "]", 1);
-  ptr += 1;
-  memcpy(ptr, inBuf, inBufLen);
-  ptr += inBufLen;
-  memcpy(ptr, '\0', 1);
-  //err = MicoFogCloudSendMsg2Cloud(context, responseTopic, responseMsg, responseMsgLen);
-  err = MicoFogCloudMsgSend(context, NULL, responseMsg, responseMsgLen);
-  if(NULL != responseTopic){
-    free(responseTopic);
-  }
-  if(NULL != responseMsg){
-      ptr = NULL;
-      free(responseMsg);
+  if((NULL == context) || (NULL == topic) || (0 == topicLen) ) {
+    user_log("ERROR: mico_cloudmsg_dispatch params error, err=%d", err);
+    return kParamErr;
   }
   
-  return kNoErr;
+  fogcloud_msg.topic = topic;
+  fogcloud_msg.topic_len = topicLen;
+  fogcloud_msg.data = inBuf;
+  fogcloud_msg.data_len = inBufLen;
   
-exit:
+  err = mico_cloudmsg_dispatch(context, &fogcloud_msg);    
+  if(kNoErr != err){
+    user_log("ERROR: mico_cloudmsg_dispatch error, err=%d", err);
+  }
+  else
+  {}
+  
   return err;
 }
 
@@ -96,18 +74,37 @@ OSStatus user_main( mico_Context_t * const inContext )
     
   require_action(inContext, exit, err = kParamErr);
   
-  // init uart
+  // uart init
   err = user_uartInit(inContext);
   require_noerr_action( err, exit, user_log("ERROR: user uart init failed!") );
+  
+  /* ADC init */
+  err = MicoAdcInitialize(MICO_ADC_1, 3);
+  require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1 err=%d", err) );
+  
+  /* LED init */
+  // ...
+  
+  // module sample && notification to cloud
     
-  // loop working for user function
+  // loop for handling msg
   while(1){
     user_log("user_main working...");
-    
-    // user work
-    // ...
-    
     mico_thread_sleep(10);
+
+    // recv FogCloud msg, blocking
+//    err = MicoFogCloudMsgRecv(inContext, &FogCloudMsg, NULL);
+//    if(err){
+//    }
+//    else
+//    {}
+//    
+//    // msg handler
+//    err = cloudMsgDispatch(inContext, FogCloudMsg);    
+//    if(err){
+//    }
+//    else
+//    {}
   }
 
   // never get here only if fatal err && exit.
