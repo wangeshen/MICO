@@ -32,7 +32,7 @@ typedef enum {
   ACCESSORY_TYPE_SERVICE = 2,
   ACCESSORY_TYPE_PROPERTY = 3,
   ACCESSORY_TYPE_MAX
-}mico_accessory_type;
+}mico_accessory_type_t;
 
 // property data type
 typedef enum {
@@ -41,7 +41,7 @@ typedef enum {
   PROP_TYPE_BOOL = 2,
   PROP_TYPE_STRING = 3,
   PROP_TYPE_MAX
-}mico_prop_data_type;
+}mico_prop_data_type_t;
 
 // property data attribute
 typedef enum {
@@ -50,22 +50,22 @@ typedef enum {
   PROP_PERMS_RW = 0x03,
   PROP_PERMS_EV = 0x04,
   PROP_PERMS_MAX
-}mico_prop_permission_type;
+}mico_prop_permission_type_t;
 
 // property node
 typedef struct _mico_dev_property_node_t{
   const char *type;              // UID
-  const int iid;                 // internal id in current device
+  const uint32_t iid;            // internal id in current device
   void *value;                   // property data value
-  int value_len;                 // data value len, int = sizefo(int), string = strlen("xxx")
-  mico_prop_data_type format;    // data type, int, float, bool, ...
-  uint8_t perms;             // "RO", "RW", "WO", "EV"
+  uint32_t value_len;            // data value len, int = sizefo(int), string = strlen("xxx")
+  mico_prop_data_type_t format;    // data type, int, float, bool, ...
+  uint8_t perms;                 // RO | WO | RW | EV
   int(*set)(void *arg);          // property set
   int(*get)(void *arg);          // property get
-  int maxValue;                  // max value for int or float
-  int minValue;                  // min value for int or float
-  int minStep;                   // min step for int or float
-  int maxLen;                    // max length for string
+  void *maxValue;                // max value for int or float
+  void *minValue;                // min value for int or float
+  void *minStep;                 // min step for int or float
+  uint32_t maxLen;               // max length for string
   bool event;                    // notification enable status
 }mico_dev_property_node_t;
 
