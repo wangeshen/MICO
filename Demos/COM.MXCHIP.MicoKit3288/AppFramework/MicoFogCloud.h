@@ -54,6 +54,7 @@ bool MicoFogCloudIsActivated(mico_Context_t* const context);
 // cloud connect state
 bool MicoFogCloudIsConnect(mico_Context_t* const context);
 
+void mico_fogcloud_waitfor_connect(mico_Context_t* const context, uint32_t timeout_ms);
 
 /****** send && recv message ******/
 // Module <=> Cloud

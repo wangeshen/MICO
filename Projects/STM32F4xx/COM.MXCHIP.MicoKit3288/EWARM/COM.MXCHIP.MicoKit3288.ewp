@@ -1189,7 +1189,7 @@
         <option>
           <name>CCAllowList</name>
           <version>1</version>
-          <state>11111110</state>
+          <state>00000000</state>
         </option>
         <option>
           <name>CCDebugInfo</name>
@@ -1292,7 +1292,7 @@
         </option>
         <option>
           <name>CCOptLevel</name>
-          <state>3</state>
+          <state>1</state>
         </option>
         <option>
           <name>CCOptStrategy</name>
@@ -1301,7 +1301,7 @@
         </option>
         <option>
           <name>CCOptLevelSlave</name>
-          <state>3</state>
+          <state>1</state>
         </option>
         <option>
           <name>CompilerMisraRules98</name>
@@ -1618,7 +1618,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>COM.MXCHIP.SPP.out</state>
+          <state>COM.MXCHIP.MicoKit3288.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -1967,6 +1967,12 @@
     <group>
       <name>User</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\properties_user.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\properties_user.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\user_config.h</name>
       </file>
       <file>
@@ -2234,6 +2240,9 @@
     <name>MICO</name>
     <group>
       <name>AirKiss</name>
+      <excluded>
+        <configuration>MiCOKit-3288</configuration>
+      </excluded>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\MICO\Airkiss\Airkiss.c</name>
       </file>

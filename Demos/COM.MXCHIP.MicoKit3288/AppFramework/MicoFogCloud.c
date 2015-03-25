@@ -61,6 +61,7 @@ operation
 
 static mico_semaphore_t _wifi_station_on_sem = NULL;
 static mico_semaphore_t _reset_cloud_info_sem = NULL;
+mico_semaphore_t _fogcloud_connect_sem = NULL;
 
 extern OSStatus MicoStartFogCloudConfigServer ( mico_Context_t * const inContext );
 
@@ -407,6 +408,9 @@ OSStatus MicoStartFogCloudService(mico_Context_t* const inContext)
                                 MicoFogCloudMainThread, STACK_SIZE_FOGCLOUD_MAIN_THREAD, 
                                 inContext );
   
+  if(NULL == _fogcloud_connect_sem){
+    mico_rtos_init_semaphore(&_fogcloud_connect_sem, 1);
+  }
   // start configServer for fogcloud
   err = MicoStartFogCloudConfigServer( inContext);
   require_noerr_action(err, exit, 
@@ -435,6 +439,13 @@ bool MicoFogCloudIsActivated(mico_Context_t* const context)
     return false;
   }
   return context->flashContentInRam.appConfig.fogcloudConfig.isActivated;
+}
+
+void mico_fogcloud_waitfor_connect(mico_Context_t* const context, uint32_t timeout_ms){
+  if(NULL == _fogcloud_connect_sem){
+    mico_rtos_init_semaphore(&_fogcloud_connect_sem, 1);
+  }
+  while(kNoErr != mico_rtos_get_semaphore(&_fogcloud_connect_sem, timeout_ms));
 }
 
 /*******************************************************************************

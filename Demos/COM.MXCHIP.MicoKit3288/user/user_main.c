@@ -25,9 +25,12 @@
 #include "MicoFogCloud.h"
 #include "user_uart.h"
 #include "msg_dispatch.h"
+#include "properties.h"
 
 #define user_log(M, ...) custom_log("USER", M, ##__VA_ARGS__)
 #define user_log_trace() custom_log_trace("USER")
+
+extern struct mico_service_t  service_table[];
 
 
 /* MICO user callback: Restore default configuration provided by user
@@ -45,7 +48,7 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* context,
 {
   user_log_trace();
   OSStatus err = kUnknownErr;
-  mico_fogcloud_msg fogcloud_msg;
+  mico_fogcloud_msg_t fogcloud_msg;
   
   if((NULL == context) || (NULL == topic) || (0 == topicLen) ) {
     user_log("ERROR: mico_cloudmsg_dispatch params error, err=%d", err);
@@ -85,7 +88,9 @@ OSStatus user_main( mico_Context_t * const inContext )
   /* LED init */
   // ...
   
-  // module sample && notification to cloud
+  // wait semaphore for cloud connection
+  mico_fogcloud_waitfor_connect(inContext, MICO_WAIT_FOREVER);  // block to wait fogcloud connect
+  user_log("fogcloud connected.");
     
   // loop for handling msg
   while(1){
@@ -105,6 +110,9 @@ OSStatus user_main( mico_Context_t * const inContext )
 //    }
 //    else
 //    {}
+    
+      // prop notify
+      err = mico_property_notify(inContext, service_table);
   }
 
   // never get here only if fatal err && exit.

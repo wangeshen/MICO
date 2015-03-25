@@ -223,6 +223,12 @@
     <group>
       <name>User</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\properties_user.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\properties_user.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\user_config.h</name>
       </file>
       <file>
@@ -422,7 +428,7 @@
       <name>$PROJ_DIR$\..\..\..\..\include\MicoAlgorithm.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\include\MicoPlatform.h</name>
+      <name>$PROJ_DIR$\..\..\..\..\include\MICOPlatform.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\include\MICORTOS.h</name>

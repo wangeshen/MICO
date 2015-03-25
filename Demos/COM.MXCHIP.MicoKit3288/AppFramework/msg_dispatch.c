@@ -32,17 +32,20 @@
 #define msg_dispatch_log(M, ...) custom_log("MSG_DISPATCH", M, ##__VA_ARGS__)
 #define msg_dispatch_log_trace() custom_log_trace("MSG_DISPATCH")
 
+extern struct mico_service_t  service_table[];
 
-extern mico_dev_service_node_t service_table[1];
+int g_hues = 0;
+int g_sat = 0;
+int g_bright = 0;
 
 // handle cloud msg here, for example: send to USART or echo to cloud
-OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg *cloud_msg)
+OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cloud_msg)
 {
   msg_dispatch_log_trace();
   OSStatus err = kUnknownErr;
   char* topic_ptr = NULL;
   char* session_id = NULL;
-  json_object *dev_info_json_object = NULL;
+//  json_object *dev_info_json_object = NULL;
   
   if((NULL == context) || (NULL == cloud_msg->topic) || (0 == cloud_msg->topic_len) ) {
        return kParamErr;
@@ -59,6 +62,16 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg *clou
                      cloud_msg->data_len, cloud_msg->data);
     // parse json data:  { iid:0, iid:0, ...}
     // create response json data
+    mico_property_read(context, service_table, 1);
+    mico_property_read(context, service_table, 2);
+    mico_property_read(context, service_table, 3);
+    mico_property_read(context, service_table, 4);
+    mico_property_read(context, service_table, 5);
+    mico_property_read(context, service_table, 6);
+    mico_property_read(context, service_table, 7);
+    mico_property_read(context, service_table, 8);
+    mico_property_read(context, service_table, 9);
+    mico_property_read(context, service_table, 10);
     // send response
     err = kNoErr;
   }
@@ -71,6 +84,17 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg *clou
                      cloud_msg->data_len, cloud_msg->data);
     // parse json data:  { iid:1, iid:2, ...}
     // create response status json data
+    mico_property_write(context, service_table, 2, "TEST", strlen("TEST"));
+    mico_property_write(context, service_table, 3, "WANGESHEN", strlen("WANGESHEN"));
+    
+    //mico_property_write(context, service_table, 5, );
+    mico_property_write(context, service_table, 6, &g_hues, 4);
+    g_hues++;
+    mico_property_write(context, service_table, 7, &g_sat, 4);
+    g_sat++;
+    mico_property_write(context, service_table, 8, &g_bright, 4);
+    g_bright++;
+    
     // send response
     err = kNoErr;
   }
@@ -94,7 +118,7 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg *clou
                      session_id, 
                      cloud_msg->data_len, cloud_msg->data);
     // create report json data
-    create_service_table();
+    /*create_service_table();
     dev_info_json_object = create_dev_info_json_object(service_table, sizeof(service_table));
     if(NULL != dev_info_json_object){
       msg_dispatch_log("report data: %s", json_object_to_json_string(dev_info_json_object));
@@ -111,6 +135,7 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg *clou
       json_object_put(dev_info_json_object);
       dev_info_json_object = NULL;
     }
+    */
   }
   else{
     // unknown topic, ignore msg

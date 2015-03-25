@@ -43,9 +43,9 @@ typedef struct _mico_fogcloud_msg_t{
   unsigned int topic_len;
   unsigned char *data;
   unsigned int data_len;
-}mico_fogcloud_msg;
+}mico_fogcloud_msg_t;
 
 // handle cloud msg here, for example: send to USART or echo to cloud
-OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg *cloud_msg);
+OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cloud_msg);
 
 #endif // __MICO_FOGCLOUD_MSG_DISPATCH_H_

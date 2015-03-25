@@ -33,6 +33,7 @@
 
 
 static easycloud_service_context_t easyCloudContext;
+extern mico_semaphore_t _fogcloud_connect_sem;
 
 WEAK OSStatus MicoFogCloudCloudMsgProcess(mico_Context_t* context, 
                                      const char* topic, const unsigned int topicLen,
@@ -66,6 +67,9 @@ void cloudServiceStatusChangedHandler(void* context, easycloud_service_status_t 
   if (EASYCLOUD_CONNECTED == serviceStateInfo.state){
     cloud_if_log("cloud service connected!");
     inContext->appStatus.fogcloudStatus.isCloudConnected = true;
+    if(NULL != _fogcloud_connect_sem){
+      mico_rtos_set_semaphore(&_fogcloud_connect_sem);
+    }
   }
   else{
     cloud_if_log("cloud service disconnected!");
