@@ -1272,11 +1272,7 @@
           <state>$PROJ_DIR$\..\..\..\..\Platform\Drivers\spi_flash</state>
           <state>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework</state>
           <state>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user</state>
-          <state>$PROJ_DIR$\..\..\..\..\Library\EasyCloud</state>
-          <state>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient</state>
-          <state>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src</state>
-          <state>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTClient-C\src</state>
-          <state>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTClient-C\src\MICO</state>
+          <state>$PROJ_DIR$\..\..\..\..\include\EasyCloud</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2202,7 +2198,7 @@
       <name>$PROJ_DIR$\..\..\..\..\include\MicoAlgorithm.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\include\MicoPlatform.h</name>
+      <name>$PROJ_DIR$\..\..\..\..\include\MICOPlatform.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\include\MICORTOS.h</name>
@@ -2219,101 +2215,11 @@
   </group>
   <group>
     <name>Library</name>
-    <group>
-      <name>EasyCloud</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\EasyCloudMQTTClient.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudService.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudService.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudServiceDef.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudServiceVersion.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudUtils.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudUtils.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTClient-C\src\MQTTClient.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTClient-C\src\MQTTClient.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTConnect.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTConnectClient.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTConnectServer.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTDeserializePublish.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTFormat.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTFormat.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTClient-C\src\MICO\MQTTMICO.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTPacket.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTPacket.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTPublish.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTSerializePublish.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTSubscribe.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTSubscribeClient.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTSubscribeServer.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTUnsubscribe.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTUnsubscribeClient.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\MQTTUnsubscribeServer.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\EasyCloudMQTTClient\MQTTPacket\src\StackTrace.h</name>
-      </file>
-    </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\Library\MICOConfig.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\MicoEasyCloudService_debug.a</name>
-      <excluded>
-        <configuration>MiCOKit-3288</configuration>
-      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\Library\EasyCloud\MicoEasyCloudService_release.a</name>
