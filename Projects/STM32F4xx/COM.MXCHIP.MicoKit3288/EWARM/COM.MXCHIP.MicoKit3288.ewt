@@ -386,6 +386,18 @@
   <group>
     <name>include</name>
     <group>
+      <name>EasyCloud</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\include\EasyCloud\EasyCloudService.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\include\EasyCloud\EasyCloudServiceDef.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\include\EasyCloud\EasyCloudUtils.h</name>
+      </file>
+    </group>
+    <group>
       <name>MicoDriver</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\include\MicoDrivers\MICODriverAdc.h</name>
@@ -428,7 +440,7 @@
       <name>$PROJ_DIR$\..\..\..\..\include\MicoAlgorithm.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\include\MICOPlatform.h</name>
+      <name>$PROJ_DIR$\..\..\..\..\include\MicoPlatform.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\include\MICORTOS.h</name>

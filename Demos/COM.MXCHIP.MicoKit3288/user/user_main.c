@@ -94,8 +94,8 @@ OSStatus user_main( mico_Context_t * const inContext )
     
   // loop for handling msg
   while(1){
-    user_log("user_main working...");
-    mico_thread_sleep(10);
+    //user_log("user_main working...");
+    mico_thread_msleep(100);
 
     // recv FogCloud msg, blocking
 //    err = MicoFogCloudMsgRecv(inContext, &FogCloudMsg, NULL);

@@ -21,6 +21,7 @@
 
 #include "MICODefine.h"
 //#include "MICOAppDefine.h"
+#include "JSON-C/json.h"
 
 #ifndef __MICO_DEVICE_PROPERTIES_H_
 #define __MICO_DEVICE_PROPERTIES_H_
@@ -43,18 +44,22 @@ enum mico_prop_data_type_t{
 #define MICO_PROP_PERMS_RW    0x03
 #define MICO_PROP_PERMS_EV    0x04
 
+// status code
+
+#define MICO_PROP_READ_FAILED  -70401
+
 // property type
 struct mico_prop_t{
   const char *type;
   //uint32_t iid;                // auto calcuate
-  void* value;
-  uint32_t *value_len;   
+  void* value;                   // current property data
+  uint32_t *value_len;           // current property data len
   enum mico_prop_data_type_t format;                    // bool, int, float, string
-  uint8_t perms;                 // RO | WO | RW | EV
-  int (*set)(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len);  // set value, schedure
-  int (*get)(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len);  // get value, schedure status
-  void *arg;                     // arg for set or get or notify watch
-  int (*notify)(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len);  // create notify data
+  uint8_t perms;                 // data permission: RO | WO | RW | EV
+  int (*set)(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len);  // hardware operation, update prop.value if succeed.
+  int (*get)(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len);  // get hardware status value
+  void *arg;                     // arg for set or get or notify function
+  int (*notify_check)(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len);  // check data to notify
   bool *event;                   // notification status flag
   void *maxValue;                // max value for int or float
   void *minValue;                // min value for int or float
@@ -71,10 +76,28 @@ struct mico_prop_t{
 
 // property notify
 OSStatus  mico_property_notify(mico_Context_t * const inContext, struct mico_service_t *service_table);
-// property read
+
+// read multiple properties
+json_object*  mico_read_properties(mico_Context_t * const inContext, 
+                               struct mico_service_t *service_table, 
+                               json_object *prop_read_list_obj);
+// write multiple properties
+json_object*  mico_write_properties(mico_Context_t * const inContext, 
+                               struct mico_service_t *service_table, 
+                               json_object *prop_write_list_obj);
+
+// read single property
 OSStatus  mico_property_read(mico_Context_t * const inContext, struct mico_service_t *service_table, int iid);
-// property write
+// property single write
 OSStatus  mico_property_write(mico_Context_t * const inContext, struct mico_service_t *service_table, 
                               int iid, void *val, uint32_t val_len);
+
+json_object* create_dev_info_json_object(struct mico_service_t service_table[]);
+OSStatus add_top(json_object **outTop, char* const service_name, json_object* services);
+OSStatus add_service(json_object* services, 
+                     const char* type_name,  const char* type_content, 
+                     const char* iid_name,  int iid_value,
+                     const char* properties_name,  json_object *properties);
+OSStatus add_property(json_object* properties,  struct mico_prop_t property, int iid);
 
 #endif // __MICO_DEVICE_PROPERTIES_H_

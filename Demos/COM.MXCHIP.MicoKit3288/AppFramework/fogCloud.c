@@ -115,6 +115,8 @@ OSStatus fogCloudInit(mico_Context_t* const inContext)
           inContext->flashContentInRam.appConfig.fogcloudConfig.deviceId, MAX_SIZE_DEVICE_ID);
   strncpy(easyCloudContext.service_status.masterDeviceKey, 
           inContext->flashContentInRam.appConfig.fogcloudConfig.masterDeviceKey, MAX_SIZE_DEVICE_KEY);
+  strncpy(easyCloudContext.service_status.device_name, 
+          DEFAULT_DEVICE_NAME, MAX_SIZE_DEVICE_NAME);
   
   cloudServiceLibVersion = EasyCloudServiceVersion(&easyCloudContext);
   cloud_if_log("EasyCloud library version: %d.%d.%d", 

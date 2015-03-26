@@ -41,7 +41,6 @@
 // rgb led
  struct rgb_led_t {
   bool sw;
-  bool sw_ev;
   int hues;
   int saturation;
   int brightness;

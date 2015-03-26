@@ -40,12 +40,14 @@
 #define STACK_SIZE_USER_MAIN_THREAD         0x1000
 
 /*User provided configurations*/
-#define CONFIGURATION_VERSION               0x00000003 // if default configuration is changed, update this number
+#define CONFIGURATION_VERSION               0x00000004 // if default configuration is changed, update this number
 
 /* product type */
 #define PRODUCT_ID                          "d64f517c"
 #define PRODUCT_KEY                         "e935ef56-1d03-4432-9524-8d4a691a26ec"
 #define DEFAULT_ROM_VERSION                 "v0.0.1"
+
+#define DEFAULT_DEVICE_NAME                 "MicoKit3288"
 
 #endif  // __USER_CONFIG_H_
 
