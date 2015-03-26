@@ -55,7 +55,7 @@ struct rgb_led_t rgb_led = {
   .brightness = 0
 };
 
-// set swtich status function
+// swtich function
 int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 {
   int ret = 0;
@@ -65,11 +65,61 @@ int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_
   return ret;
 }
 
-// get swtich status function
 int rgb_led_sw_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
   properties_user_log("rgb_led get: val=%d, val_len=%d.", *((bool*)prop->value), *(uint32_t*)prop->value_len );
+  return ret;
+}
+
+// hues function
+int rgb_led_hues_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
+{
+  int ret = 0;
+  properties_user_log("rgb_led_hues_set: val=%d, val_len=%d.", *((int*)val), val_len);
+  *((int*)prop->value) = *((int*)val);
+  
+  return ret;
+}
+
+int rgb_led_hues_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  int ret = 0;
+  properties_user_log("rgb_led_hues_get: val=%d, val_len=%d.", *((int*)prop->value), *(uint32_t*)prop->value_len );
+  return ret;
+}
+
+// saturation function
+int rgb_led_saturation_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
+{
+  int ret = 0;
+  properties_user_log("rgb_led_saturation_set: val=%d, val_len=%d.", *((int*)val), val_len);
+  *((int*)prop->value) = *((int*)val);
+  
+  return ret;
+}
+
+int rgb_led_saturation_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  int ret = 0;
+  properties_user_log("rgb_led_saturation_get: val=%d, val_len=%d.", *((int*)prop->value), *(uint32_t*)prop->value_len );
+  return ret;
+}
+
+// brightness function
+int rgb_led_brightness_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
+{
+  int ret = 0;
+  properties_user_log("rgb_led_brightness_set: val=%d, val_len=%d.", *((int*)val), val_len);
+  *((int*)prop->value) = *((int*)val);
+  
+  return ret;
+}
+
+int rgb_led_brightness_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  int ret = 0;
+  properties_user_log("rgb_led_brightness_get: val=%d, val_len=%d.", *((int*)prop->value), *(uint32_t*)prop->value_len );
   return ret;
 }
 
@@ -180,9 +230,9 @@ const struct mico_service_t  service_table[] = {
         .value = &(rgb_led.hues),
         .value_len = &int_len,   // int type len
         .format = MICO_PROP_TYPE_INT,
-        .perms = (uint8_t)MICO_PROP_PERMS_RW,
-        .get = NULL,
-        .set = NULL,
+        .perms = (uint8_t)(MICO_PROP_PERMS_RW),
+        .get = rgb_led_hues_get,
+        .set = rgb_led_hues_set,
         .arg = &(rgb_led.hues),  // led hues value
       },
       [2] = {
@@ -191,8 +241,8 @@ const struct mico_service_t  service_table[] = {
         .value_len = &int_len,
         .format = MICO_PROP_TYPE_INT,
         .perms = (uint8_t)(MICO_PROP_PERMS_RW),
-        .get = NULL,
-        .set = NULL,
+        .get = rgb_led_saturation_get,
+        .set = rgb_led_saturation_set,
         .arg = &(rgb_led.saturation),  // led saturation value
       },
       [3] = {
@@ -201,8 +251,8 @@ const struct mico_service_t  service_table[] = {
         .value_len = &int_len,
         .format = MICO_PROP_TYPE_INT,
         .perms = (uint8_t)(MICO_PROP_PERMS_RW),
-        .get = NULL,
-        .set = NULL,
+        .get = rgb_led_brightness_get,
+        .set = rgb_led_brightness_set,
         .arg = &(rgb_led.brightness),  // led brightness value
       },
       [4] = {NULL}

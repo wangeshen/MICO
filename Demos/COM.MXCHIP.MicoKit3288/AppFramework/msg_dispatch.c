@@ -66,25 +66,25 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
     recv_json_object = json_tokener_parse((const char*)(cloud_msg->data));
     require_action(recv_json_object, exit, err = kFormatErr);
     msg_dispatch_log("Recv read object=%s", json_object_to_json_string(recv_json_object));
-    response_json_obj = mico_read_properties(context, service_table, recv_json_object);
+    response_json_obj = mico_read_properties(service_table, recv_json_object);
     
     // send reponse for read data
-    if(NULL != response_json_obj){
-      response_json_string = json_object_to_json_string(response_json_obj);
-      response_topic = ECS_str_replace(response_topic, cloud_msg->topic, 
-                                       cloud_msg->topic_len, "/in/", "/out/");
-      if(NULL == response_topic){
-        msg_dispatch_log("create reponse topic err!");
-        err = kUnsupportedErr;
-        goto exit;
-      }
-      err = MicoFogCloudMsgSend(context, response_topic, 
-                                (unsigned char*)response_json_string, strlen(response_json_string));
-    }
-    else{
+    if(NULL == response_json_obj){
       msg_dispatch_log("ERROR: read properties error!");
+      json_object_object_add(response_json_obj, "MICO_PROP_READ_STATUS", json_object_new_int(MICO_PROP_READ_FAILED));
       err = kReadErr;
     }
+ 
+    response_json_string = json_object_to_json_string(response_json_obj);
+    response_topic = ECS_str_replace(response_topic, cloud_msg->topic, 
+                                     cloud_msg->topic_len, "/in/", "/out/");
+    if(NULL == response_topic){
+      msg_dispatch_log("create reponse topic err!");
+      err = kUnsupportedErr;
+      goto exit;
+    }
+    err = MicoFogCloudMsgSend(context, response_topic, 
+                              (unsigned char*)response_json_string, strlen(response_json_string));
   }
   else if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE, topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE)) ){
     // from /write
@@ -97,7 +97,7 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
     recv_json_object = json_tokener_parse((const char*)(cloud_msg->data));
     require_action(recv_json_object, exit, err = kFormatErr);
     msg_dispatch_log("Recv read object=%s", json_object_to_json_string(recv_json_object));
-    response_json_obj = mico_write_properties(context, service_table, recv_json_object);
+    response_json_obj = mico_write_properties(service_table, recv_json_object);
     
     // send reponse for write status
     if(NULL != response_json_obj){

@@ -46,7 +46,14 @@ enum mico_prop_data_type_t{
 
 // status code
 
-#define MICO_PROP_READ_FAILED  -70401
+#define MICO_PROP_READ_STATUS        "status"
+#define MICO_PROP_WRITE_STATUS       "status"
+#define MICO_PROP_READ_SUCCESS        0
+#define MICO_PROP_WRITE_SUCCESS       0
+#define MICO_PROP_READ_FAILED         -70401
+#define MICO_PROP_WRITE_FAILED        -70402
+#define MICO_PROP_WRITE_NOT_ALLOWED   -70403
+#define MICO_PROP_NOT_FOUND           -70404
 
 // property type
 struct mico_prop_t{
@@ -78,20 +85,13 @@ struct mico_prop_t{
 OSStatus  mico_property_notify(mico_Context_t * const inContext, struct mico_service_t *service_table);
 
 // read multiple properties
-json_object*  mico_read_properties(mico_Context_t * const inContext, 
-                               struct mico_service_t *service_table, 
+json_object*  mico_read_properties(struct mico_service_t *service_table, 
                                json_object *prop_read_list_obj);
 // write multiple properties
-json_object*  mico_write_properties(mico_Context_t * const inContext, 
-                               struct mico_service_t *service_table, 
+json_object*  mico_write_properties(struct mico_service_t *service_table, 
                                json_object *prop_write_list_obj);
 
-// read single property
-OSStatus  mico_property_read(mico_Context_t * const inContext, struct mico_service_t *service_table, int iid);
-// property single write
-OSStatus  mico_property_write(mico_Context_t * const inContext, struct mico_service_t *service_table, 
-                              int iid, void *val, uint32_t val_len);
-
+// create dev_info json data
 json_object* create_dev_info_json_object(struct mico_service_t service_table[]);
 OSStatus add_top(json_object **outTop, char* const service_name, json_object* services);
 OSStatus add_service(json_object* services, 
