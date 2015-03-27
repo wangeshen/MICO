@@ -52,7 +52,6 @@ OSStatus  mico_property_notify(mico_Context_t * const inContext, struct mico_ser
   char iid_str[16] = {0};
   json_object *notify_obj = NULL;
   const char *notify_json_string = NULL;
-  char *notify_topic = NULL;
   bool need_notify = false;
   
   notify_obj = json_object_new_object();
@@ -116,30 +115,15 @@ OSStatus  mico_property_notify(mico_Context_t * const inContext, struct mico_ser
   
   // send notify message to cloud
   if((NULL != notify_obj) && (need_notify)){
-    notify_topic = (char*)malloc(strlen(inContext->flashContentInRam.appConfig.fogcloudConfig.deviceId) + strlen("/out/read") +1);
-    if(NULL != notify_topic){
-      sprintf(notify_topic, "%s%s", inContext->flashContentInRam.appConfig.fogcloudConfig.deviceId, 
-              "/out/read");
-    }else{
-      properties_log("ERROR: malloc memory error for notify_topic!");
-      err = kNoMemoryErr;
-      goto exit;
-    }
-      
     notify_json_string = json_object_to_json_string(notify_obj);
-    err = MicoFogCloudMsgSend(inContext, notify_topic, 
+    err = MicoFogCloudMsgSend(inContext, "read", 
                               (unsigned char*)notify_json_string, strlen(notify_json_string));
-
   }
 
 exit:
   if(NULL != notify_obj){
     json_object_put(notify_obj);
     notify_obj = NULL;
-  }
-  if(NULL != notify_topic){
-    free(notify_topic);
-    notify_topic = NULL;
   }
   return err;
 }
@@ -160,17 +144,16 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
       properties_log("service got: %s, iid=%d", service_table[i].type, iid_tmp);
       iid_tmp++;   // jump to prop iid
       for(j = 0; NULL != service_table[i].properties[j].type; j++){
-        //        properties_log("service[%d]: %s, property[%d]: %s", 
-        //                       i, service_table[i].type,
-        //                       j, service_table[i].properties[j].type);
         if( MICO_PROP_PERMS_RO & (service_table[i].properties[j].perms)){
+          // add iid as response key
+          memset(iid_str, '\0', sizeof(iid_str));
+          Int2Str((uint8_t*)iid_str, iid_tmp);
+          // add response value
           switch(service_table[i].properties[j].format){
           case MICO_PROP_TYPE_INT:{
             properties_log("prop got: %s, iid=%d, value=%d", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((int*)service_table[i].properties[j].value));
-            memset(iid_str, '\0', sizeof(iid_str));
-            Int2Str((uint8_t*)iid_str, iid_tmp);
             json_object_object_add(outJsonObj, iid_str, json_object_new_int(*((int*)service_table[i].properties[j].value)));
             break;
           }
@@ -178,8 +161,6 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
             properties_log("prop got: %s, iid=%d, value=%f", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((float*)service_table[i].properties[j].value));
-            memset(iid_str, '\0', sizeof(iid_str));
-            Int2Str((uint8_t*)iid_str, iid_tmp);
             json_object_object_add(outJsonObj, iid_str, json_object_new_double(*((float*)service_table[i].properties[j].value)));
             break;
           }
@@ -187,8 +168,6 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
             properties_log("prop got: %s, iid=%d, value=%s", 
                            service_table[i].properties[j].type, iid_tmp, 
                            (char*)service_table[i].properties[j].value);
-            memset(iid_str, '\0', sizeof(iid_str));
-            Int2Str((uint8_t*)iid_str, iid_tmp);
             json_object_object_add(outJsonObj, iid_str, json_object_new_string((char*)service_table[i].properties[j].value));
             break;
           }
@@ -196,8 +175,6 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
             properties_log("prop got: %s, iid=%d, value=%d", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((bool*)service_table[i].properties[j].value));
-            memset(iid_str, '\0', sizeof(iid_str));
-            Int2Str((uint8_t*)iid_str, iid_tmp);
             json_object_object_add(outJsonObj, iid_str, json_object_new_boolean(*((bool*)service_table[i].properties[j].value)));
             break;
           }
@@ -223,13 +200,13 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
         //                       i, service_table[i].type,
         //                       j, service_table[i].properties[j].type);
         if( MICO_PROP_PERMS_RO & (service_table[i].properties[j].perms)){
+          memset(iid_str, '\0', sizeof(iid_str));
+          Int2Str((uint8_t*)iid_str, iid_tmp);
           switch(service_table[i].properties[j].format){
           case MICO_PROP_TYPE_INT:{
             properties_log("prop got: %s, iid=%d, value=%d", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((int*)service_table[i].properties[j].value));
-            memset(iid_str, '\0', sizeof(iid_str));
-            Int2Str((uint8_t*)iid_str, iid_tmp);
             json_object_object_add(outJsonObj, iid_str, json_object_new_int(*((int*)service_table[i].properties[j].value)));
             break;
           }
@@ -237,8 +214,6 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
             properties_log("prop got: %s, iid=%d, value=%f", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((float*)service_table[i].properties[j].value));
-            memset(iid_str, '\0', sizeof(iid_str));
-            Int2Str((uint8_t*)iid_str, iid_tmp);
             json_object_object_add(outJsonObj, iid_str, json_object_new_double(*((float*)service_table[i].properties[j].value)));
             break;
           }
@@ -246,8 +221,6 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
             properties_log("prop got: %s, iid=%d, value=%s", 
                            service_table[i].properties[j].type, iid_tmp, 
                            (char*)service_table[i].properties[j].value);
-            memset(iid_str, '\0', sizeof(iid_str));
-            Int2Str((uint8_t*)iid_str, iid_tmp);
             json_object_object_add(outJsonObj, iid_str, json_object_new_string((char*)service_table[i].properties[j].value));
             break;
           }
@@ -255,8 +228,6 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
             properties_log("prop got: %s, iid=%d, value=%d", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((bool*)service_table[i].properties[j].value));
-            memset(iid_str, '\0', sizeof(iid_str));
-            Int2Str((uint8_t*)iid_str, iid_tmp);
             json_object_object_add(outJsonObj, iid_str, json_object_new_boolean(*((bool*)service_table[i].properties[j].value)));
             break;
           }

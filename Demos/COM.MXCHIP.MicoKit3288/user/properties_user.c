@@ -170,7 +170,7 @@ int notify_check_adc_data(struct mico_prop_t *prop, void *arg, void *val, uint32
   
   // check notify
   //if(adc_data != *((int*)(prop->value))){  // changed
-  if( ((adc_data - *((int*)(prop->value))) >= 5) || ((*((int*)(prop->value)) - adc_data) >= 5) ){  // abs >=5
+  if( ((adc_data - *((int*)(prop->value))) >= 20) || ((*((int*)(prop->value)) - adc_data) >= 20) ){  // abs >=10
     properties_user_log("adc_data changed: %d -> %d", *((int*)prop->value), adc_data);
     // update prop->value
     *((int*)prop->value) = adc_data;

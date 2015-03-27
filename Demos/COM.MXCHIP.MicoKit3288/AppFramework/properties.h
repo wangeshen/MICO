@@ -81,7 +81,7 @@ struct mico_prop_t{
   struct mico_prop_t  properties[MAX_PROP_NUMBER];
 };
 
-// property notify
+// property notify check
 OSStatus  mico_property_notify(mico_Context_t * const inContext, struct mico_service_t *service_table);
 
 // read multiple properties
@@ -93,6 +93,10 @@ json_object*  mico_write_properties(struct mico_service_t *service_table,
 
 // create dev_info json data
 json_object* create_dev_info_json_object(struct mico_service_t service_table[]);
+
+/****
+ * internal functions
+ */
 OSStatus add_top(json_object **outTop, char* const service_name, json_object* services);
 OSStatus add_service(json_object* services, 
                      const char* type_name,  const char* type_content, 

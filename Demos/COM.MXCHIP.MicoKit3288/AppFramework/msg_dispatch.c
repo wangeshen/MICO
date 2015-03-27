@@ -39,11 +39,12 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
 {
   msg_dispatch_log_trace();
   OSStatus err = kNoErr;
-  char* topic_ptr = NULL;
-  char* session_id = NULL;  // just for debug log
+  char* recv_sub_topic_ptr = NULL;
+  int recv_sub_topic_len = 0;
+//  char* session_id = NULL;  // just for debug log
   
   json_object *recv_json_object = NULL;
-  char* response_topic = NULL;
+  char* response_sub_topic = NULL;
   json_object *response_json_obj = NULL;
   const char *response_json_string = NULL;
   
@@ -51,16 +52,29 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
        return kParamErr;
   }
   
-  // strip <device_id>/in
-  topic_ptr = (char*)(cloud_msg->topic) + strlen(context->flashContentInRam.appConfig.fogcloudConfig.deviceId) + 3;
+  // strip "<device_id>/in"
+  recv_sub_topic_ptr = (char*)(cloud_msg->topic) + strlen(context->flashContentInRam.appConfig.fogcloudConfig.deviceId) +3;
+  recv_sub_topic_len = (int)cloud_msg->topic_len - (strlen(context->flashContentInRam.appConfig.fogcloudConfig.deviceId) +3);
+//  response_sub_topic = ECS_str_replace(response_sub_topic, recv_sub_topic_ptr, 
+//                                     recv_sub_topic_len, "/in/", "/out/");
+  response_sub_topic = (char*)malloc(recv_sub_topic_len);   // response to where msg come from, remove leading '/'
+  if(NULL == response_sub_topic){
+    msg_dispatch_log("get reponse topic err!");
+    err = kUnsupportedErr;
+    goto exit;
+  }
+  memset(response_sub_topic, '\0', recv_sub_topic_len);
+  strncpy(response_sub_topic, recv_sub_topic_ptr + 1, recv_sub_topic_len-1);  // remove leading '/' as send sub-topic
+  msg_dispatch_log("recv_sub_topic[%d]=[%.*s]", recv_sub_topic_len, recv_sub_topic_len, recv_sub_topic_ptr);  
+  msg_dispatch_log("response_sub_topic[%d]=[%s]", strlen(response_sub_topic), response_sub_topic);  
   
   // parse sub topic string
-  if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_READ, topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_READ)) ){
+  if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_READ, recv_sub_topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_READ)) ){
     // from /read
-    session_id = topic_ptr + strlen((char*)FOGCLOUD_MSG_TOPIC_IN_READ);
-    msg_dispatch_log("Recv from: %s, session_id: %s, data[%d]: %s", 
-                     FOGCLOUD_MSG_TOPIC_IN_READ, 
-                     session_id, cloud_msg->data_len, cloud_msg->data);
+    //session_id = recv_sub_topic_ptr + strlen((char*)FOGCLOUD_MSG_TOPIC_IN_READ);
+    msg_dispatch_log("Recv from: %.*s, data[%d]: %s",
+                     recv_sub_topic_len, recv_sub_topic_ptr,
+                     cloud_msg->data_len, cloud_msg->data);
     
     // read properties && create response json object
     recv_json_object = json_tokener_parse((const char*)(cloud_msg->data));
@@ -74,24 +88,23 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
       json_object_object_add(response_json_obj, "MICO_PROP_READ_STATUS", json_object_new_int(MICO_PROP_READ_FAILED));
       err = kReadErr;
     }
- 
     response_json_string = json_object_to_json_string(response_json_obj);
-    response_topic = ECS_str_replace(response_topic, cloud_msg->topic, 
-                                     cloud_msg->topic_len, "/in/", "/out/");
-    if(NULL == response_topic){
-      msg_dispatch_log("create reponse topic err!");
-      err = kUnsupportedErr;
-      goto exit;
-    }
-    err = MicoFogCloudMsgSend(context, response_topic, 
+//    response_sub_topic = ECS_str_replace(response_sub_topic, cloud_msg->topic, 
+//                                     recv_sub_topic_len, "/in/", "/out/");
+//    if(NULL == response_sub_topic){
+//      msg_dispatch_log("create reponse topic err!");
+//      err = kUnsupportedErr;
+//      goto exit;
+//    }
+    err = MicoFogCloudMsgSend(context, response_sub_topic, 
                               (unsigned char*)response_json_string, strlen(response_json_string));
   }
-  else if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE, topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE)) ){
+  else if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE, recv_sub_topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE)) ){
     // from /write
-    session_id = topic_ptr + strlen((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE);
-    msg_dispatch_log("Recv from: %s, session_id: %s, data[%d]: %s", 
-                     FOGCLOUD_MSG_TOPIC_IN_WRITE, 
-                     session_id, cloud_msg->data_len, cloud_msg->data);
+    //session_id = recv_sub_topic_ptr + strlen((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE);
+    msg_dispatch_log("Recv from: %.*s, data[%d]: %s",
+                     recv_sub_topic_len, recv_sub_topic_ptr,
+                     cloud_msg->data_len, cloud_msg->data);
     
     // write properties && create response json object
     recv_json_object = json_tokener_parse((const char*)(cloud_msg->data));
@@ -102,14 +115,14 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
     // send reponse for write status
     if(NULL != response_json_obj){
       response_json_string = json_object_to_json_string(response_json_obj);
-      response_topic = ECS_str_replace(response_topic, cloud_msg->topic, 
-                                       cloud_msg->topic_len, "/in/", "/out/");
-      if(NULL == response_topic){
-        msg_dispatch_log("create reponse topic err!");
-        err = kUnsupportedErr;
-        goto exit;
-      }
-      err = MicoFogCloudMsgSend(context, response_topic, 
+//      response_sub_topic = ECS_str_replace(response_sub_topic, cloud_msg->topic, 
+//                                       recv_sub_topic_len, "/in/", "/out/");
+//      if(NULL == response_sub_topic){
+//        msg_dispatch_log("create reponse topic err!");
+//        err = kUnsupportedErr;
+//        goto exit;
+//      }
+      err = MicoFogCloudMsgSend(context, response_sub_topic, 
                                 (unsigned char*)response_json_string, strlen(response_json_string));
     }
     else{
@@ -117,23 +130,21 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
       err = kWriteErr;
     }
   }
-  else if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_CHAT, topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_CHAT)) ){
+  else if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_CHAT, recv_sub_topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_CHAT)) ){
     // from /chat
-    session_id = topic_ptr + strlen((char*)FOGCLOUD_MSG_TOPIC_IN_CHAT);
-    msg_dispatch_log("Recv from: %s, session_id: %s, data[%d]: %s", 
-                     FOGCLOUD_MSG_TOPIC_IN_CHAT, 
-                     session_id,
+    //session_id = recv_sub_topic_ptr + strlen((char*)FOGCLOUD_MSG_TOPIC_IN_CHAT);
+    msg_dispatch_log("Recv from: %.*s, data[%d]: %s",
+                     recv_sub_topic_len, recv_sub_topic_ptr,
                      cloud_msg->data_len, cloud_msg->data);
     
     // just send to message to usart
     err = user_uartSend(cloud_msg->data, cloud_msg->data_len);
   }
-  else if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_INFO, topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_INFO)) ){
+  else if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_INFO, recv_sub_topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_INFO)) ){
     // from /info
-    session_id = topic_ptr + strlen((char*)FOGCLOUD_MSG_TOPIC_IN_INFO);
-    msg_dispatch_log("Recv from: %s, session_id: %s, data[%d]: %s", 
-                     FOGCLOUD_MSG_TOPIC_IN_INFO, 
-                     session_id, 
+    //session_id = recv_sub_topic_ptr + strlen((char*)FOGCLOUD_MSG_TOPIC_IN_INFO);
+    msg_dispatch_log("Recv from: %.*s, data[%d]: %s",
+                     recv_sub_topic_len, recv_sub_topic_ptr,
                      cloud_msg->data_len, cloud_msg->data);
     
     // create report json data
@@ -141,14 +152,14 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
     if(NULL != response_json_obj){
       response_json_string = json_object_to_json_string(response_json_obj);
       msg_dispatch_log("report data: %s", response_json_string);
-      response_topic = ECS_str_replace(response_topic, cloud_msg->topic, 
-                                       cloud_msg->topic_len, "/in/", "/out/");
-      if(NULL == response_topic){
-        msg_dispatch_log("create reponse topic err!");
-        err = kUnsupportedErr;
-        goto exit;
-      }
-      err = MicoFogCloudMsgSend(context, response_topic, 
+//      response_sub_topic = ECS_str_replace(response_sub_topic, cloud_msg->topic, 
+//                                       recv_sub_topic_len, "/in/", "/out/");
+//      if(NULL == response_sub_topic){
+//        msg_dispatch_log("create reponse topic err!");
+//        err = kUnsupportedErr;
+//        goto exit;
+//      }
+      err = MicoFogCloudMsgSend(context, response_sub_topic, 
                                 (unsigned char*)response_json_string, strlen(response_json_string));
     }
     else{
@@ -160,7 +171,7 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
     // unknown topic, ignore msg
     err = kUnsupportedErr;
     msg_dispatch_log("ERROR: Message from unknown topic: %.*s \t data[%d]: %s, ignored.", 
-                     cloud_msg->topic_len, cloud_msg->topic,
+                     recv_sub_topic_len, cloud_msg->topic,
                      cloud_msg->data_len, cloud_msg->data);
   }
   
@@ -173,9 +184,9 @@ exit:
     json_object_put(response_json_obj);
     response_json_obj = NULL;
   }
-  if(NULL != response_topic){
-    free(response_topic);
-    response_topic = NULL;
+  if(NULL != response_sub_topic){
+    free(response_sub_topic);
+    response_sub_topic = NULL;
   }
   return err;
 }
