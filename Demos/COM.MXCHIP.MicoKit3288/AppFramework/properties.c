@@ -128,8 +128,9 @@ exit:
   return err;
 }
 
-OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid, 
-                                   const char *key, json_object *outJsonObj)
+// add json object if read success, if faild no return json object add, return err.
+OSStatus mico_property_read_create(struct mico_service_t *service_table,  
+                                   const char *key, int iid, json_object *outJsonObj)
 {
   OSStatus err = kNotFoundErr;
   int i = 0; 
@@ -137,10 +138,11 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
   int iid_tmp = 1;
   char iid_str[16] = {0};
   
-  //properties_log("properties read iid=%d.", iid);
+  require_action( service_table, exit, err = kParamErr);
+  require_action( outJsonObj, exit, err = kParamErr);
+  
   for(i = 0; NULL != service_table[i].type; i++){
-    // if read a service, get all properties of the service
-    if(iid == iid_tmp){
+    if(iid == iid_tmp){  // if read a service, get all properties of the service
       properties_log("service got: %s, iid=%d", service_table[i].type, iid_tmp);
       iid_tmp++;   // jump to prop iid
       for(j = 0; NULL != service_table[i].properties[j].type; j++){
@@ -149,6 +151,7 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
           memset(iid_str, '\0', sizeof(iid_str));
           Int2Str((uint8_t*)iid_str, iid_tmp);
           // add response value
+          err = kNoErr;
           switch(service_table[i].properties[j].format){
           case MICO_PROP_TYPE_INT:{
             properties_log("prop got: %s, iid=%d, value=%d", 
@@ -179,15 +182,18 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
             break;
           }
           default:
-            properties_log("ERROR: Unsupported format!");
+            properties_log("ERROR: property format unsupported!");
+            err = kReadErr;
             break;
           }
         }
         else{
+          properties_log("ERROR: property is not readable!");
+          err = kNotReadableErr;
         }
         iid_tmp++;
       }
-      return kNoErr;
+      return err;
     }
     else{
       iid_tmp++;  // next service or property
@@ -196,12 +202,10 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
     // if read single property
     for(j = 0; NULL != service_table[i].properties[j].type; j++){
       if(iid == iid_tmp){
-        //        properties_log("service[%d]: %s, property[%d]: %s", 
-        //                       i, service_table[i].type,
-        //                       j, service_table[i].properties[j].type);
         if( MICO_PROP_PERMS_RO & (service_table[i].properties[j].perms)){
           memset(iid_str, '\0', sizeof(iid_str));
           Int2Str((uint8_t*)iid_str, iid_tmp);
+          err = kNoErr;
           switch(service_table[i].properties[j].format){
           case MICO_PROP_TYPE_INT:{
             properties_log("prop got: %s, iid=%d, value=%d", 
@@ -232,7 +236,8 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
             break;
           }
           default:
-            properties_log("ERROR: Unsupported format!");
+            properties_log("ERROR: property format unsupported !");
+            err = kReadErr;
             break;
           }
         }
@@ -240,12 +245,13 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table, int iid
           properties_log("ERROR: property is not readable!");
           err = kNotReadableErr;
         }
-        return kNoErr;
+        return err;
       }
       iid_tmp++;   // next property
     }
   }
-  
+ 
+exit:
   return err;
 }
 
@@ -266,15 +272,15 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
   require_action(service_table, exit, err = kParamErr);
   require_action(key, exit, err = kParamErr);
   require_action(val, exit, err = kParamErr);
+  require_action(outJsonObj, exit, err = kParamErr);
   
   Str2Int((uint8_t*)key, &iid);
   properties_log("properties write iid=%d.", iid);
   for(i = 0; NULL != service_table[i].type; i++){
-    // if is a service, error operation
-    if(iid == iid_tmp){
-      properties_log("ERROR: write service: %s, iid=%d", service_table[i].type, iid_tmp);
+    if(iid == iid_tmp){  // if is a service, error operation
+      properties_log("ERROR: can not write service: %s, iid=%d", service_table[i].type, iid_tmp);
       json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_NOT_ALLOWED));
-      return kWriteErr;
+      return kNotWritableErr;
     }
     else{
       iid_tmp++;  // next service or property
@@ -292,7 +298,9 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
                            *((int*)service_table[i].properties[j].value));
             // write prop
             int_value = json_object_get_int(val);
-            ret = service_table[i].properties[j].set(&service_table[i].properties[j], NULL, (void*)&int_value, sizeof(int));
+            ret = service_table[i].properties[j].set(&service_table[i].properties[j],
+                                                     service_table[i].properties[j].arg,
+                                                     (void*)&int_value, sizeof(int));
             if (0 != ret){
               json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
               err = kWriteErr;
@@ -310,7 +318,9 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
                            *((float*)service_table[i].properties[j].value));
             //json_object_object_add(outJsonObj, key, json_object_new_double(*((float*)service_table[i].properties[j].value)));
             float_value = json_object_get_double(val);
-            ret = service_table[i].properties[j].set(&service_table[i].properties[j], NULL, (void*)&float_value, sizeof(double));
+            ret = service_table[i].properties[j].set(&service_table[i].properties[j], 
+                                                     service_table[i].properties[j].arg,
+                                                     (void*)&float_value, sizeof(double));
             if (0 != ret){
               json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
               err = kWriteErr;
@@ -327,7 +337,9 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
                            service_table[i].properties[j].type, iid_tmp, 
                            (char*)service_table[i].properties[j].value);
             //json_object_object_add(outJsonObj, key, json_object_new_string((char*)service_table[i].properties[j].value));
-            ret = service_table[i].properties[j].set(&service_table[i].properties[j], NULL, (void*)(json_object_get_string(val)), strlen(json_object_get_string(val)));
+            ret = service_table[i].properties[j].set(&service_table[i].properties[j], 
+                                                     service_table[i].properties[j].arg,
+                                                     (void*)(json_object_get_string(val)), strlen(json_object_get_string(val)));
             if (0 != ret){
               json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
               err = kWriteErr;
@@ -346,7 +358,9 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
                            *((bool*)service_table[i].properties[j].value));
             //json_object_object_add(outJsonObj, key, json_object_new_boolean(*((bool*)service_table[i].properties[j].value)));
             boolean_value = json_object_get_boolean(val);
-            ret = service_table[i].properties[j].set(&service_table[i].properties[j], NULL, (void*)&boolean_value, sizeof(bool));
+            ret = service_table[i].properties[j].set(&service_table[i].properties[j], 
+                                                     service_table[i].properties[j].arg,
+                                                     (void*)&boolean_value, sizeof(bool));
             if (0 != ret){
               json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
               err = kWriteErr;
@@ -380,7 +394,6 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
   if(kNotFoundErr == err){
     properties_log("ERROR: property not found!");
     json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_NOT_FOUND));
-    err = kNotFoundErr;
   }
   
 exit:
@@ -541,37 +554,46 @@ exit:
   return mainObject;
 }
 
-// read multiple properties,
-// return success read properties' value, ignore falied properties
+/* read multiple properties;
+* input:  json object of property iids to read, like {"1":1, "2":2}, 
+*   NOTE: function get iid from value of key:value pair.
+* return: success read properties json object like {"1":100, "2":99}
+*         if no property read success, return null object "{}",
+*         if error, return value is NULL.
+*/
 json_object*  mico_read_properties(struct mico_service_t *service_table, 
                                    json_object *prop_read_list_obj)
 {
-  //OSStatus err = kUnknownErr;
   json_object *outJsonObj = NULL;
   int iid = 0;
-  require( prop_read_list_obj, exit );
+  
   require( service_table, exit );
+  require( prop_read_list_obj, exit );
   
   outJsonObj = json_object_new_object();
   require( outJsonObj, exit );
   
   json_object_object_foreach(prop_read_list_obj, key, val) {
     iid = json_object_get_int(val);
-    mico_property_read_create(service_table, iid, key, outJsonObj);
+    mico_property_read_create(service_table, key, iid, outJsonObj);
   }
   
 exit:
   return outJsonObj;
 }
 
-// write multiple properties
-// return write falied properties, or return write all ok status.
+/* write multiple properties
+* input:  json object of property iids to write, like {"1":100, "2":99},
+* return: if all write succeed return status {"status": 0},
+*         else return properties && status paris of properties wrote failed, like: {"1": -70401}
+*         if error, return value is NULL.
+*/
 json_object*  mico_write_properties(struct mico_service_t *service_table, 
                                     json_object *prop_write_list_obj)
 {
   OSStatus err = kUnknownErr;
   json_object *outJsonObj = NULL;
-  bool write_succeed = true;
+  bool all_write_succeed = true;
   
   require( service_table, exit );
   require( prop_write_list_obj, exit );
@@ -582,13 +604,12 @@ json_object*  mico_write_properties(struct mico_service_t *service_table,
   json_object_object_foreach(prop_write_list_obj, key, val) {
     err = mico_property_write_create(service_table, key, val, outJsonObj);
     if(kNoErr != err){
-      // not all property write success
-      write_succeed = false;
+      all_write_succeed = false;  // not all property write success
     }
   }
   
-  // write all success report
-  if(write_succeed){
+  // all properties wrote success report
+  if(all_write_succeed){
     json_object_object_add(outJsonObj, MICO_PROP_WRITE_STATUS, json_object_new_int(MICO_PROP_WRITE_SUCCESS));
   }
   
