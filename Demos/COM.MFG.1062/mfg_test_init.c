@@ -1,0 +1,79 @@
+/*
+ * Copyright 2013, Broadcom Corporation
+ * All Rights Reserved.
+ *
+ * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Broadcom Corporation;
+ * the contents of this file may not be disclosed to third parties, copied
+ * or duplicated in any form, in whole or in part, without the prior
+ * written permission of Broadcom Corporation.
+ */
+
+/**
+ * @file
+ * This is the main file for the manufacturing test app
+ *
+ * To use the manufacturing test application, please
+ * read the instructions in the WICED Manufacturing
+ * Test User Guide provided in the <WICED-SDK>/Doc
+ * directory: WICED-MFG2xx-R.pdf
+ *
+ */
+
+#include <stdio.h>
+#include "MICO.h"
+
+/******************************************************
+ *                      Macros
+ ******************************************************/
+
+/******************************************************
+ *                    Constants
+ ******************************************************/
+
+/******************************************************
+ *                   Enumerations
+ ******************************************************/
+
+/******************************************************
+ *                 Type Definitions
+ ******************************************************/
+
+/******************************************************
+ *                    Structures
+ ******************************************************/
+typedef struct
+{
+    int         state;
+    int         country_code;
+    uint32_t    keep_wlan_awake;
+} wlan_status_t;
+
+/******************************************************
+ *               Function Declarations
+ ******************************************************/
+
+extern int remote_server_exec(int argc, char **argv, void *ifr);
+
+/******************************************************
+ *               Variable Definitions
+ ******************************************************/
+
+/******************************************************
+ *               Function Definitions
+ ******************************************************/
+
+extern wlan_status_t wiced_wlan_status;
+void application_start( )
+{
+    int argc = 2;
+    char *argv[] = { "", "" };
+    
+    wiced_init( );
+    setvbuf(stdin, NULL, _IONBF, 0);
+   setvbuf(stdout, NULL, _IONBF, 0);
+   setvbuf(stderr, NULL, _IONBF, 0);
+    ++wiced_wlan_status.keep_wlan_awake;
+    /* Main server process for all transport types */
+    remote_server_exec(argc, argv, NULL);
+}
+
