@@ -60,7 +60,9 @@ int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_
 {
   int ret = 0;
   properties_user_log("rgb_led set: val=%d, val_len=%d.", *((bool*)val), val_len);
-  *((bool*)prop->value) = *((bool*)val);
+  // control hardware
+  // ...
+  //*((bool*)prop->value) = *((bool*)val);
   
   return ret;
 }
@@ -69,6 +71,8 @@ int rgb_led_sw_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val
 {
   int ret = 0;
   properties_user_log("rgb_led get: val=%d, val_len=%d.", *((bool*)prop->value), *(uint32_t*)prop->value_len );
+  // read hardware status
+  // ...
   return ret;
 }
 
@@ -77,7 +81,9 @@ int rgb_led_hues_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
 {
   int ret = 0;
   properties_user_log("rgb_led_hues_set: val=%d, val_len=%d.", *((int*)val), val_len);
-  *((int*)prop->value) = *((int*)val);
+  // control hardware
+  // ...
+  //*((int*)prop->value) = *((int*)val);
   
   return ret;
 }
@@ -86,6 +92,8 @@ int rgb_led_hues_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *v
 {
   int ret = 0;
   properties_user_log("rgb_led_hues_get: val=%d, val_len=%d.", *((int*)prop->value), *(uint32_t*)prop->value_len );
+  // get hardware status
+  // ...
   return ret;
 }
 
@@ -94,7 +102,9 @@ int rgb_led_saturation_set(struct mico_prop_t *prop, void *arg, void *val, uint3
 {
   int ret = 0;
   properties_user_log("rgb_led_saturation_set: val=%d, val_len=%d.", *((int*)val), val_len);
-  *((int*)prop->value) = *((int*)val);
+  // control hardware
+  // ...
+  //*((int*)prop->value) = *((int*)val);
   
   return ret;
 }
@@ -103,25 +113,31 @@ int rgb_led_saturation_get(struct mico_prop_t *prop, void *arg, void *val, uint3
 {
   int ret = 0;
   properties_user_log("rgb_led_saturation_get: val=%d, val_len=%d.", *((int*)prop->value), *(uint32_t*)prop->value_len );
+  // get hardware status
+  // ...
   return ret;
 }
 
 // brightness function
-int rgb_led_brightness_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
-{
-  int ret = 0;
-  properties_user_log("rgb_led_brightness_set: val=%d, val_len=%d.", *((int*)val), val_len);
-  *((int*)prop->value) = *((int*)val);
-  
-  return ret;
-}
-
-int rgb_led_brightness_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
-{
-  int ret = 0;
-  properties_user_log("rgb_led_brightness_get: val=%d, val_len=%d.", *((int*)prop->value), *(uint32_t*)prop->value_len );
-  return ret;
-}
+//int rgb_led_brightness_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
+//{
+//  int ret = 0;
+//  properties_user_log("rgb_led_brightness_set: val=%d, val_len=%d.", *((int*)val), val_len);
+//  // control hardware
+//  // ...
+//  //*((int*)prop->value) = *((int*)val);
+//  
+//  return ret;
+//}
+//
+//int rgb_led_brightness_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+//{
+//  int ret = 0;
+//  properties_user_log("rgb_led_brightness_get: val=%d, val_len=%d.", *((int*)prop->value), *(uint32_t*)prop->value_len );
+//  // get hardware status
+//  // ...
+//  return ret;
+//}
 
 /************adc************************/
 // adc data
@@ -170,7 +186,7 @@ int notify_check_adc_data(struct mico_prop_t *prop, void *arg, void *val, uint32
   
   // check notify
   //if(adc_data != *((int*)(prop->value))){  // changed
-  if( ((adc_data - *((int*)(prop->value))) >= 20) || ((*((int*)(prop->value)) - adc_data) >= 20) ){  // abs >=10
+  if( ((adc_data - *((int*)(prop->value))) >= 1) || ((*((int*)(prop->value)) - adc_data) >= 1) ){  // abs >=10
     properties_user_log("adc_data changed: %d -> %d", *((int*)prop->value), adc_data);
     // update prop->value
     *((int*)prop->value) = adc_data;
@@ -251,8 +267,8 @@ const struct mico_service_t  service_table[] = {
         .value_len = &int_len,
         .format = MICO_PROP_TYPE_INT,
         .perms = (uint8_t)(MICO_PROP_PERMS_RW),
-        .get = rgb_led_brightness_get,
-        .set = rgb_led_brightness_set,
+        .get = NULL,
+        .set = NULL,
         .arg = &(rgb_led.brightness),  // led brightness value
       },
       [4] = {NULL}

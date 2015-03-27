@@ -95,7 +95,7 @@ OSStatus user_main( mico_Context_t * const inContext )
   // loop for handling msg
   while(1){
     //user_log("user_main working...");
-    mico_thread_msleep(100);
+    mico_thread_msleep(500);
 
     // recv FogCloud msg, blocking
 //    err = MicoFogCloudMsgRecv(inContext, &FogCloudMsg, NULL);
@@ -112,7 +112,10 @@ OSStatus user_main( mico_Context_t * const inContext )
 //    {}
     
       // prop notify
-      err = mico_property_notify(inContext, service_table);
+      err = mico_properties_notify(inContext);
+      if(kNoErr != err){
+        user_log("ERROR: properties notify failed! err = %d", err);
+      }
   }
 
   // never get here only if fatal err && exit.

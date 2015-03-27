@@ -81,8 +81,8 @@ struct mico_prop_t{
   struct mico_prop_t  properties[MAX_PROP_NUMBER];
 };
 
-// property notify check
-OSStatus  mico_property_notify(mico_Context_t * const inContext, struct mico_service_t *service_table);
+// property update check
+json_object*  mico_properties_update_check(mico_Context_t * const inContext, struct mico_service_t *service_table);
 
 // read multiple properties
 json_object*  mico_read_properties(struct mico_service_t *service_table, 

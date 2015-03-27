@@ -190,3 +190,36 @@ exit:
   }
   return err;
 }
+
+// properties notify task
+OSStatus  mico_properties_notify(mico_Context_t * const inContext)
+{
+  OSStatus err = kUnknownErr;
+  json_object *notify_obj = NULL;
+  const char *notify_json_string = NULL;
+  
+  require_action(inContext, exit, err = kParamErr);
+  
+  // properties update check
+  notify_obj = mico_properties_update_check(inContext, service_table);
+  
+  // send notify message to cloud
+  if(NULL != notify_obj){
+    notify_json_string = json_object_to_json_string(notify_obj);
+    // notify to topic: <device_id>/out/read
+    err = MicoFogCloudMsgSend(inContext, "read", 
+                              (unsigned char*)notify_json_string, strlen(notify_json_string));
+  }
+  else{
+    // no update msg
+    err = kNoErr;
+  }
+
+exit:
+  if(NULL != notify_obj){
+    json_object_put(notify_obj);
+    notify_obj = NULL;
+  }
+  return err;
+}
+

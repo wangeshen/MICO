@@ -41,91 +41,90 @@ int notify_check_default(struct mico_prop_t *prop, void *arg, void *val, uint32_
   return ret;
 }
 
-// property notify task
-OSStatus  mico_property_notify(mico_Context_t * const inContext, struct mico_service_t *service_table)
+/* property update check
+* check update status of all properties in service_table
+* input: mico context;
+*        service table
+* return: json object contains properties updated, like {k:v, k:v}
+*         if no update or error, return NULL
+*/
+json_object* mico_properties_update_check(mico_Context_t * const inContext, struct mico_service_t *service_table)
 {
-  OSStatus err = kUnknownErr;
   int i = 0; 
   int j = 0;
   int ret = 0;
   int iid = 1;
   char iid_str[16] = {0};
   json_object *notify_obj = NULL;
-  const char *notify_json_string = NULL;
-  bool need_notify = false;
+  int updated_prop_cnt = 0;
+  
+  require(inContext, exit);
+  require(service_table, exit);
   
   notify_obj = json_object_new_object();
-  require_action(notify_obj, exit, err = kNoMemoryErr);
+  require(notify_obj, exit);
   
-  //properties_log("properties notify task...");
+  properties_log("properties update check...");
   for(i = 0; NULL != service_table[i].type; i++){
-    iid++;
+    iid++;  // next service or property
     for(j = 0; NULL != service_table[i].properties[j].type; j++){
       memset((void*)iid_str, '\0', sizeof(iid_str));
       Int2Str((uint8_t*)iid_str, iid);
-      // call property notify_check func
-      if((NULL != service_table[i].properties[j].event) && (*(service_table[i].properties[j].event))){
-        if(NULL != service_table[i].properties[j].notify_check){
-          ret = service_table[i].properties[j].notify_check(&(service_table[i].properties[j]), NULL, NULL, NULL);
-          if(1 == ret){
-            //            properties_log("[Notify]service[%d]: %s, property[%d]: %s", 
-            //                           i, service_table[i].type,
-            //                           j, service_table[i].properties[j].type);
-            if( MICO_PROP_PERMS_RO & (service_table[i].properties[j].perms)){
+      
+      if( MICO_PROP_PERMS_EV & (service_table[i].properties[j].perms)){  // prop has event
+        if((NULL != service_table[i].properties[j].event) && (*(service_table[i].properties[j].event))){  // prop event on
+          if(NULL != service_table[i].properties[j].notify_check){
+            // do prop update check
+            ret = service_table[i].properties[j].notify_check(&(service_table[i].properties[j]), 
+                                                              service_table[i].properties[j].arg, NULL, NULL);
+            if(1 == ret){
+              // prop updated, add to notify list
               switch(service_table[i].properties[j].format){
               case MICO_PROP_TYPE_INT:{
-                need_notify = true;
                 json_object_object_add(notify_obj, iid_str, json_object_new_int(*((int*)service_table[i].properties[j].value)));
+                updated_prop_cnt++;
                 break;
               }
               case MICO_PROP_TYPE_FLOAT:{
-                need_notify = true;
                 json_object_object_add(notify_obj, iid_str, json_object_new_double(*((float*)service_table[i].properties[j].value)));
+                updated_prop_cnt++;
                 break;
               }
               case MICO_PROP_TYPE_STRING:{
-                need_notify = true;
                 json_object_object_add(notify_obj, iid_str, json_object_new_string((char*)service_table[i].properties[j].value));
+                updated_prop_cnt++;
                 break;
               }
               case MICO_PROP_TYPE_BOOL:{
-                need_notify = true;
                 json_object_object_add(notify_obj, iid_str, json_object_new_boolean(*((bool*)service_table[i].properties[j].value)));
+                updated_prop_cnt++;
                 break;
               }
               default:
-                properties_log("ERROR: Unsupported format!");
+                properties_log("ERROR: prop format unsupport!");
                 break;
               }
             }
-            else{
-              properties_log("ERROR: property is not readable!");
-              err = kNotReadableErr;
+          }
+          else{
+            // use defalut update check(prop changed), if user not set func prop->notify_check
+            ret = notify_check_default(&(service_table[i].properties[j]),NULL,NULL,NULL);
+            if(1 == ret){
+              // prop value changed
             }
-            
           }
         }
-        else{
-          notify_check_default(&(service_table[i].properties[j]),NULL,NULL,NULL);
-        }
       }
-      iid++;
+      iid++;  // next property
     }
   }
   
-  // send notify message to cloud
-  if((NULL != notify_obj) && (need_notify)){
-    notify_json_string = json_object_to_json_string(notify_obj);
-    err = MicoFogCloudMsgSend(inContext, "read", 
-                              (unsigned char*)notify_json_string, strlen(notify_json_string));
-  }
-
 exit:
-  if(NULL != notify_obj){
+  if( (NULL != notify_obj) && ( 0 == updated_prop_cnt)){
     json_object_put(notify_obj);
     notify_obj = NULL;
   }
-  return err;
+  return notify_obj;
 }
 
 // add json object if read success, if faild no return json object add, return err.
@@ -157,6 +156,12 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
             properties_log("prop got: %s, iid=%d, value=%d", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((int*)service_table[i].properties[j].value));
+            // prop->get (read hardware status)
+            if(NULL != service_table[i].properties[j].get){
+              service_table[i].properties[j].get(&service_table[i].properties[j], service_table[i].properties[j].arg,
+                                                 service_table[i].properties[j].value, service_table[i].properties[j].value_len);
+            }
+            // return value
             json_object_object_add(outJsonObj, iid_str, json_object_new_int(*((int*)service_table[i].properties[j].value)));
             break;
           }
@@ -164,6 +169,12 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
             properties_log("prop got: %s, iid=%d, value=%f", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((float*)service_table[i].properties[j].value));
+            // prop->get (read hardware status)
+            if(NULL != service_table[i].properties[j].get){
+              service_table[i].properties[j].get(&service_table[i].properties[j], service_table[i].properties[j].arg,
+                                                 service_table[i].properties[j].value, service_table[i].properties[j].value_len);
+            }
+            // return value
             json_object_object_add(outJsonObj, iid_str, json_object_new_double(*((float*)service_table[i].properties[j].value)));
             break;
           }
@@ -171,6 +182,12 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
             properties_log("prop got: %s, iid=%d, value=%s", 
                            service_table[i].properties[j].type, iid_tmp, 
                            (char*)service_table[i].properties[j].value);
+            // prop->get (read hardware status)
+            if(NULL != service_table[i].properties[j].get){
+              service_table[i].properties[j].get(&service_table[i].properties[j], service_table[i].properties[j].arg,
+                                                 service_table[i].properties[j].value, service_table[i].properties[j].value_len);
+            }
+            // return value
             json_object_object_add(outJsonObj, iid_str, json_object_new_string((char*)service_table[i].properties[j].value));
             break;
           }
@@ -178,6 +195,12 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
             properties_log("prop got: %s, iid=%d, value=%d", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((bool*)service_table[i].properties[j].value));
+            // prop->get (read hardware status)
+            if(NULL != service_table[i].properties[j].get){
+              service_table[i].properties[j].get(&service_table[i].properties[j], service_table[i].properties[j].arg,
+                                                 service_table[i].properties[j].value, service_table[i].properties[j].value_len);
+            }
+            // return value
             json_object_object_add(outJsonObj, iid_str, json_object_new_boolean(*((bool*)service_table[i].properties[j].value)));
             break;
           }
@@ -211,6 +234,12 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
             properties_log("prop got: %s, iid=%d, value=%d", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((int*)service_table[i].properties[j].value));
+            // prop->get (read hardware status)
+            if(NULL != service_table[i].properties[j].get){
+              service_table[i].properties[j].get(&service_table[i].properties[j], service_table[i].properties[j].arg,
+                                                 service_table[i].properties[j].value, service_table[i].properties[j].value_len);
+            }
+            // return value
             json_object_object_add(outJsonObj, iid_str, json_object_new_int(*((int*)service_table[i].properties[j].value)));
             break;
           }
@@ -218,6 +247,12 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
             properties_log("prop got: %s, iid=%d, value=%f", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((float*)service_table[i].properties[j].value));
+            // prop->get (read hardware status)
+            if(NULL != service_table[i].properties[j].get){
+              service_table[i].properties[j].get(&service_table[i].properties[j], service_table[i].properties[j].arg,
+                                                 service_table[i].properties[j].value, service_table[i].properties[j].value_len);
+            }
+            // return value
             json_object_object_add(outJsonObj, iid_str, json_object_new_double(*((float*)service_table[i].properties[j].value)));
             break;
           }
@@ -225,6 +260,12 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
             properties_log("prop got: %s, iid=%d, value=%s", 
                            service_table[i].properties[j].type, iid_tmp, 
                            (char*)service_table[i].properties[j].value);
+            // prop->get (read hardware status)
+            if(NULL != service_table[i].properties[j].get){
+              service_table[i].properties[j].get(&service_table[i].properties[j], service_table[i].properties[j].arg,
+                                                 service_table[i].properties[j].value, service_table[i].properties[j].value_len);
+            }
+            // return value
             json_object_object_add(outJsonObj, iid_str, json_object_new_string((char*)service_table[i].properties[j].value));
             break;
           }
@@ -232,6 +273,12 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
             properties_log("prop got: %s, iid=%d, value=%d", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((bool*)service_table[i].properties[j].value));
+            // prop->get (read hardware status)
+            if(NULL != service_table[i].properties[j].get){
+              service_table[i].properties[j].get(&service_table[i].properties[j], service_table[i].properties[j].arg,
+                                                 service_table[i].properties[j].value, service_table[i].properties[j].value_len);
+            }
+            // return value
             json_object_object_add(outJsonObj, iid_str, json_object_new_boolean(*((bool*)service_table[i].properties[j].value)));
             break;
           }
@@ -250,7 +297,7 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
       iid_tmp++;   // next property
     }
   }
- 
+  
 exit:
   return err;
 }
@@ -296,14 +343,21 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
             properties_log("prop got: %s, iid=%d, value=%d", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((int*)service_table[i].properties[j].value));
-            // write prop
+            // property set(hardware operation)
             int_value = json_object_get_int(val);
-            ret = service_table[i].properties[j].set(&service_table[i].properties[j],
-                                                     service_table[i].properties[j].arg,
-                                                     (void*)&int_value, sizeof(int));
-            if (0 != ret){
-              json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
-              err = kWriteErr;
+            if(NULL != service_table[i].properties[j].set){
+              ret = service_table[i].properties[j].set(&service_table[i].properties[j],
+                                                       service_table[i].properties[j].arg,
+                                                       (void*)&int_value, sizeof(int));
+              if (0 != ret){
+                json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
+                err = kWriteErr;
+              }
+              else{
+                // update property value
+                *((int*)service_table[i].properties[j].value) =  int_value;
+                err = kNoErr;
+              }
             }
             else{
               // update property value
@@ -316,14 +370,21 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
             properties_log("prop got: %s, iid=%d, value=%f", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((float*)service_table[i].properties[j].value));
-            //json_object_object_add(outJsonObj, key, json_object_new_double(*((float*)service_table[i].properties[j].value)));
+            // property set(hardware operation)
             float_value = json_object_get_double(val);
-            ret = service_table[i].properties[j].set(&service_table[i].properties[j], 
-                                                     service_table[i].properties[j].arg,
-                                                     (void*)&float_value, sizeof(double));
-            if (0 != ret){
-              json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
-              err = kWriteErr;
+            if(NULL != service_table[i].properties[j].set){
+              ret = service_table[i].properties[j].set(&service_table[i].properties[j], 
+                                                       service_table[i].properties[j].arg,
+                                                       (void*)&float_value, sizeof(double));
+              if (0 != ret){
+                json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
+                err = kWriteErr;
+              }
+              else{
+                // update property value
+                *((float*)service_table[i].properties[j].value) =  float_value;
+                err = kNoErr;
+              }
             }
             else{
               // update property value
@@ -336,15 +397,22 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
             properties_log("prop got: %s, iid=%d, value=%s", 
                            service_table[i].properties[j].type, iid_tmp, 
                            (char*)service_table[i].properties[j].value);
-            //json_object_object_add(outJsonObj, key, json_object_new_string((char*)service_table[i].properties[j].value));
-            ret = service_table[i].properties[j].set(&service_table[i].properties[j], 
-                                                     service_table[i].properties[j].arg,
-                                                     (void*)(json_object_get_string(val)), strlen(json_object_get_string(val)));
-            if (0 != ret){
-              json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
-              err = kWriteErr;
-            }
-            else{
+            // property set(hardware operation)
+            if(NULL != service_table[i].properties[j].set){
+              ret = service_table[i].properties[j].set(&service_table[i].properties[j], 
+                                                       service_table[i].properties[j].arg,
+                                                       (void*)(json_object_get_string(val)), strlen(json_object_get_string(val)));
+              if (0 != ret){
+                json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
+                err = kWriteErr;
+              }
+              else{
+                // update property value
+                memset((char*)(service_table[i].properties[j].value), '\0', strlen((char*)(service_table[i].properties[j].value)));
+                strncpy((char*)(service_table[i].properties[j].value), json_object_get_string(val), strlen(json_object_get_string(val)));
+                err = kNoErr;
+              }
+            }else{
               // update property value
               memset((char*)(service_table[i].properties[j].value), '\0', strlen((char*)(service_table[i].properties[j].value)));
               strncpy((char*)(service_table[i].properties[j].value), json_object_get_string(val), strlen(json_object_get_string(val)));
@@ -356,16 +424,22 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
             properties_log("prop got: %s, iid=%d, value=%d", 
                            service_table[i].properties[j].type, iid_tmp, 
                            *((bool*)service_table[i].properties[j].value));
-            //json_object_object_add(outJsonObj, key, json_object_new_boolean(*((bool*)service_table[i].properties[j].value)));
+            // property set(hardware operation)
             boolean_value = json_object_get_boolean(val);
-            ret = service_table[i].properties[j].set(&service_table[i].properties[j], 
-                                                     service_table[i].properties[j].arg,
-                                                     (void*)&boolean_value, sizeof(bool));
-            if (0 != ret){
-              json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
-              err = kWriteErr;
-            }
-            else{
+            if(NULL != service_table[i].properties[j].set){
+              ret = service_table[i].properties[j].set(&service_table[i].properties[j], 
+                                                       service_table[i].properties[j].arg,
+                                                       (void*)&boolean_value, sizeof(bool));
+              if (0 != ret){
+                json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
+                err = kWriteErr;
+              }
+              else{
+                // update property value
+                *((bool*)service_table[i].properties[j].value) =  boolean_value;
+                err = kNoErr;
+              }
+            }else{
               // update property value
               *((bool*)service_table[i].properties[j].value) =  boolean_value;
               err = kNoErr;

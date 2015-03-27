@@ -48,4 +48,7 @@ typedef struct _mico_fogcloud_msg_t{
 // handle cloud msg here, for example: send to USART or echo to cloud
 OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cloud_msg);
 
+// property notify check
+OSStatus mico_properties_notify(mico_Context_t * const inContext);
+
 #endif // __MICO_FOGCLOUD_MSG_DISPATCH_H_
