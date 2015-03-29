@@ -50,11 +50,15 @@
 #define MICO_PROP_CODE_WRITE_SUCCESS          (0)
 #define MICO_PROP_CODE_READ_FAILED            (-70401)
 #define MICO_PROP_CODE_WRITE_FAILED           (-70402)
-#define MICO_PROP_CODE_NOT_WRITABLE           (-70403)
-#define MICO_PROP_CODE_NOT_FOUND              (-70404)
-#define MICO_PROP_CODE_NO_GET_FUNC            (-70405)
-#define MICO_PROP_CODE_NO_SET_FUNC            (-70406)
-#define MICO_PROP_CODE_DATA_FORMAT_ERR        (-70407)
+#define MICO_PROP_CODE_NOT_READABLE           (-70403)
+#define MICO_PROP_CODE_NOT_WRITABLE           (-70404)
+#define MICO_PROP_CODE_NOT_FOUND              (-70405)
+#define MICO_PROP_CODE_NO_GET_FUNC            (-70406)
+#define MICO_PROP_CODE_NO_SET_FUNC            (-70407)
+#define MICO_PROP_CODE_DATA_FORMAT_ERR        (-70408)
+#define MICO_PROP_CODE_NO_NOTIFY_FUNC         (-70409)
+#define MICO_PROP_CODE_NOT_SUPPORTED          (-70410)
+   
 
 /*******************************************************************************
  * STRUCTURES

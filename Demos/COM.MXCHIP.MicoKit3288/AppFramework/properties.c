@@ -391,12 +391,14 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
       }
       default:
         properties_log("ERROR: property format unsupported!");
+        json_object_object_add(outJsonObj, iid_str, json_object_new_int(MICO_PROP_CODE_DATA_FORMAT_ERR));
         err = kUnsupportedDataErr;
         break;
       }
     }
     else{
-      properties_log("ERROR: property is not readable!");
+      properties_log("ERROR: property %d is not readable!", iid);
+      json_object_object_add(outJsonObj, iid_str, json_object_new_int(MICO_PROP_CODE_NOT_READABLE));
       err = kNotReadableErr;
     }
     break;
@@ -411,10 +413,16 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
                              json_object_new_boolean(*(service_table[service_index].properties[property_index].event)));
       err = kNoErr;
     }
+    else{
+      properties_log("ERROR: read event not supported.");
+      json_object_object_add(outJsonObj, iid_str, json_object_new_int(MICO_PROP_CODE_NOT_SUPPORTED));
+      err = kUnsupportedDataErr;
+    }
     break;
   }
   default:
     properties_log("ERROR: read sub_type not supported (only value/event).");
+    json_object_object_add(outJsonObj, iid_str, json_object_new_int(MICO_PROP_CODE_NOT_SUPPORTED));
     err = kUnsupportedDataErr;
     break;
   }
