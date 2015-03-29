@@ -321,7 +321,7 @@ const struct mico_service_t  service_table[] = {
         .minValue.intValue = 0,
         .minStep.intValue = 1,
         .maxStringLen = 0,
-        .unit = "h"
+        .unit = "degree"
       },
       [2] = {
         .type = "public.map.property.saturation",  // led saturation
@@ -339,7 +339,7 @@ const struct mico_service_t  service_table[] = {
         .minValue.intValue = 0,
         .minStep.intValue = 1,
         .maxStringLen = 0,
-        .unit = "s"
+        .unit = "percentage"
       },
       [3] = {
         .type = "public.map.property.brightness",  // led brightness
@@ -356,7 +356,7 @@ const struct mico_service_t  service_table[] = {
         .minValue.intValue = 0,
         .minStep.intValue = 1,
         .maxStringLen = 0,
-        .unit = "b"
+        .unit = "percentage"
       },
       [4] = {NULL}
     }

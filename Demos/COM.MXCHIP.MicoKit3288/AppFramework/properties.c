@@ -787,6 +787,29 @@ OSStatus add_property(json_object* properties,  struct mico_prop_t property, int
   }
   json_object_object_add(object, "perms", perms_array);
   
+  // meta data: maxValue/minValue/minStep
+  if(property.hasMeta){
+    if(MICO_PROP_TYPE_INT == property.format){  
+      json_object_object_add(object, "maxValue", json_object_new_int(property.maxValue.intValue));
+      json_object_object_add(object, "minValue", json_object_new_int(property.minValue.intValue));
+      json_object_object_add(object, "minStep", json_object_new_int(property.minStep.intValue));
+    }else if(MICO_PROP_TYPE_FLOAT == property.format){
+      json_object_object_add(object, "maxValue", json_object_new_double(property.maxValue.floatValue));
+      json_object_object_add(object, "maxValue", json_object_new_double(property.minValue.floatValue));
+      json_object_object_add(object, "maxValue", json_object_new_double(property.minStep.floatValue));
+    }
+  }
+  
+  // maxStringLen
+  if(MICO_PROP_TYPE_STRING == property.format){
+    json_object_object_add(object, "maxStringLen", json_object_new_int(property.maxStringLen));
+  }
+  
+  // uint
+  if(NULL != property.unit){
+    json_object_object_add(object, "unit", json_object_new_string(property.unit));    
+  }
+  
   // add to property table
   json_object_array_add(properties, object);
   err = kNoErr;
