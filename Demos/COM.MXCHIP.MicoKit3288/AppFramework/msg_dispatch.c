@@ -81,11 +81,11 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
     msg_dispatch_log("Recv read object=%s", json_object_to_json_string(recv_json_object));
     //create response json object
     // strip /read, get '/value' or '/event'
-    if(0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_SUB_VALUE, recv_sub_topic_ptr + 5, 
+    if(0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_SUB_VALUE, recv_sub_topic_ptr + strlen(FOGCLOUD_MSG_TOPIC_IN_READ), 
                     strlen((char*)FOGCLOUD_MSG_TOPIC_IN_SUB_VALUE))){
       read_type = MICO_PROP_SUB_TYPE_VALUE;
     }
-    else if(0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_SUB_EVENT, recv_sub_topic_ptr + 5, 
+    else if(0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_SUB_EVENT, recv_sub_topic_ptr + strlen(FOGCLOUD_MSG_TOPIC_IN_READ), 
                          strlen((char*)FOGCLOUD_MSG_TOPIC_IN_SUB_EVENT))){
       read_type = MICO_PROP_SUB_TYPE_EVENT;
     }
@@ -119,11 +119,11 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
     msg_dispatch_log("Recv read object=%s", json_object_to_json_string(recv_json_object));
     //create response json object
     // strip '/write', get '/value' or '/event'
-    if(0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_SUB_VALUE, recv_sub_topic_ptr + 6, 
+    if(0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_SUB_VALUE, recv_sub_topic_ptr + strlen(FOGCLOUD_MSG_TOPIC_IN_WRITE), 
                     strlen((char*)FOGCLOUD_MSG_TOPIC_IN_SUB_VALUE))){
       read_type = MICO_PROP_SUB_TYPE_VALUE;
     }
-    else if(0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_SUB_EVENT, recv_sub_topic_ptr + 5, 
+    else if(0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_SUB_EVENT, recv_sub_topic_ptr + strlen(FOGCLOUD_MSG_TOPIC_IN_WRITE), 
                          strlen((char*)FOGCLOUD_MSG_TOPIC_IN_SUB_EVENT))){
       read_type = MICO_PROP_SUB_TYPE_EVENT;
     }

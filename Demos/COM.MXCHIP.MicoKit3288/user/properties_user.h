@@ -29,10 +29,13 @@
  * MODULE DATA DEFINE
  ******************************************************************************/
 
+#define MAX_DEVICE_NAME_SIZE         16
+#define MAX_DEVICE_MANUFACTORY_SIZE  16
+   
 // device info
  struct dev_info_t {
-  char name[16];
-  char manufactory[16];
+  char name[MAX_DEVICE_NAME_SIZE+1];
+  char manufactory[MAX_DEVICE_MANUFACTORY_SIZE+1];
   
   uint32_t name_len;
   uint32_t manufactory_len;

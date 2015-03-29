@@ -56,7 +56,9 @@ int string_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len
     return -1;
   }
   
+  // may read from flash if nessary
   uint32_t copy_len = ((*val_len > *(prop->value_len)) ? *(prop->value_len) : *val_len);
+  //memset(val, '\0', *val_len);
   strncpy(val, (char*)prop->value, copy_len);
   *val_len = copy_len;
   
@@ -69,16 +71,17 @@ int string_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 {
   int ret = 0;
 
-  if((NULL == prop) || (NULL == val)){
+  if(NULL == prop){
     return -1;
   }
   
-  uint32_t copy_len = ((val_len > *(prop->value_len)) ? *(prop->value_len) : val_len);
-  memset(prop->value, '\0', *(prop->value_len));
+  // write string (write to flash if nessary)
+  uint32_t copy_len = ((val_len > prop->maxStringLen) ? prop->maxStringLen : val_len);
+  memset(prop->value, '\0', prop->maxStringLen);
   strncpy((char*)prop->value, val, copy_len);
   *(prop->value_len) = copy_len;
   
-  properties_user_log("string_set: val=%s, val_len=%d.", (char*)prop->value, prop->value_len);
+  properties_user_log("string_set: val=%s, val_len=%d.", (char*)prop->value, *(prop->value_len));
   
   return ret;
 }
@@ -263,7 +266,7 @@ const struct mico_service_t  service_table[] = {
         .arg = &(dev_info.name),            // get/set string pointer (device name)
         .event = NULL,                      // not notifiable
         .hasMeta = false,                   // no max/min/step
-        .maxStringLen = 16,                 // max length of device name string
+        .maxStringLen = MAX_DEVICE_NAME_SIZE,  // max length of device name string
         .unit = NULL                        // no unit
       },
       [1] = {
@@ -273,12 +276,12 @@ const struct mico_service_t  service_table[] = {
         .format = MICO_PROP_TYPE_STRING,
         .perms = MICO_PROP_PERMS_RO,
         .get = string_get,                  // get string func to get manufactory
-        .set = string_set,                  // set sring func to change manufactory
+        .set = NULL      ,                  // set sring func to change manufactory
         .notify_check = NULL,               // not notifiable
         .arg = &(dev_info.manufactory),
         .event = NULL,                      // not notifiable
         .hasMeta = false,
-        .maxStringLen = 16,                 // max length of device manufactory
+        .maxStringLen = MAX_DEVICE_MANUFACTORY_SIZE,  // max length of device manufactory
         .unit = NULL                        // no unit
       },
       [2] = {NULL}                          // end flag

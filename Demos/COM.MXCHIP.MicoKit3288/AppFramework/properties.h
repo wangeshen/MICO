@@ -39,7 +39,7 @@
 #define MICO_PROP_PERMS_EV                     (0x04)  // can notification
 
 #define MICO_PROP_PERMS_READABLE(perms_u8)     ( MICO_PROP_PERMS_RO == (uint8_t)(perms_u8 & MICO_PROP_PERMS_RO) )
-#define MICO_PROP_PERMS_WRITABLE(perms_u8)     ( MICO_PROP_PERMS_RO == (uint8_t)(perms_u8 & MICO_PROP_PERMS_WO) )
+#define MICO_PROP_PERMS_WRITABLE(perms_u8)     ( MICO_PROP_PERMS_WO == (uint8_t)(perms_u8 & MICO_PROP_PERMS_WO) )
 #define MICO_PROP_PERMS_NOTIFIABLE(perms_u8)   ( MICO_PROP_PERMS_EV == (uint8_t)(perms_u8 & MICO_PROP_PERMS_EV) )
 
 // status code
@@ -50,8 +50,11 @@
 #define MICO_PROP_CODE_WRITE_SUCCESS          (0)
 #define MICO_PROP_CODE_READ_FAILED            (-70401)
 #define MICO_PROP_CODE_WRITE_FAILED           (-70402)
-#define MICO_PROP_CODE_WRITE_NOT_ALLOWED      (-70403)
+#define MICO_PROP_CODE_NOT_WRITABLE           (-70403)
 #define MICO_PROP_CODE_NOT_FOUND              (-70404)
+#define MICO_PROP_CODE_NO_GET_FUNC            (-70405)
+#define MICO_PROP_CODE_NO_SET_FUNC            (-70406)
+#define MICO_PROP_CODE_DATA_FORMAT_ERR        (-70407)
 
 /*******************************************************************************
  * STRUCTURES
