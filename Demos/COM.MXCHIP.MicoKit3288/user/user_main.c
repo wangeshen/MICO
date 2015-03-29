@@ -96,24 +96,10 @@ OSStatus user_main( mico_Context_t * const inContext )
   while(1){
     //user_log("user_main working...");
     mico_thread_msleep(500);
-
-    // recv FogCloud msg, blocking
-//    err = MicoFogCloudMsgRecv(inContext, &FogCloudMsg, NULL);
-//    if(err){
-//    }
-//    else
-//    {}
-//    
-//    // msg handler
-//    err = cloudMsgDispatch(inContext, FogCloudMsg);    
-//    if(err){
-//    }
-//    else
-//    {}
     
-      // prop notify
-      err = mico_properties_notify(inContext);
-      if(kNoErr != err){
+    // prop notify
+    err = mico_properties_notify(inContext);
+    if(kNoErr != err){
         user_log("ERROR: properties notify failed! err = %d", err);
       }
   }

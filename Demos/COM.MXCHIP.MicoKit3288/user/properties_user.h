@@ -20,7 +20,6 @@
   */ 
 
 #include "MICODefine.h"
-//#include "MICOAppDefine.h"
 
 #ifndef __MICO_DEVICE_PROPERTIES_USER_H_
 #define __MICO_DEVICE_PROPERTIES_USER_H_

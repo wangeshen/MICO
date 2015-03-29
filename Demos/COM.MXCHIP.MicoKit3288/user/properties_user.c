@@ -20,7 +20,6 @@
 */ 
 
 #include "MICODefine.h"
-//#include "MICOAppDefine.h"
 #include "properties.h"
 #include "properties_user.h"
 #include "JSON-C/json.h"
