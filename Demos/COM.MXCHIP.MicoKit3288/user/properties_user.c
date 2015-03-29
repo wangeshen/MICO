@@ -32,13 +32,14 @@
 * PROPERTIES
 *******************************************************************************/
 
-// fixed type data len
+// fixed data type length
 uint32_t bool_len = sizeof(bool);
 uint32_t int_len = sizeof(int);
 uint32_t float_len = sizeof(float);
 
 /************dev_info************************/
 
+// dev_info data
 struct dev_info_t dev_info = {
   .name = "MicoKit3288",
   .name_len = 11,
@@ -46,7 +47,44 @@ struct dev_info_t dev_info = {
   .manufactory_len = 6
 };
 
+// no set/get function
+int string_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  int ret = 0;
+
+  if((NULL == prop) || (NULL == val)){
+    return -1;
+  }
+  
+  uint32_t copy_len = ((*val_len > *(prop->value_len)) ? *(prop->value_len) : *val_len);
+  strncpy(val, (char*)prop->value, copy_len);
+  *val_len = copy_len;
+  
+  properties_user_log("string_get: val=%s, val_len=%d.", (char*)val, *val_len);
+  
+  return ret;
+}
+
+int string_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
+{
+  int ret = 0;
+
+  if((NULL == prop) || (NULL == val)){
+    return -1;
+  }
+  
+  uint32_t copy_len = ((val_len > *(prop->value_len)) ? *(prop->value_len) : val_len);
+  memset(prop->value, '\0', *(prop->value_len));
+  strncpy((char*)prop->value, val, copy_len);
+  *(prop->value_len) = copy_len;
+  
+  properties_user_log("string_set: val=%s, val_len=%d.", (char*)prop->value, prop->value_len);
+  
+  return ret;
+}
+
 /************rgb_led************************/
+
 // led data
 struct rgb_led_t rgb_led = {
   .sw = false,
@@ -59,10 +97,10 @@ struct rgb_led_t rgb_led = {
 int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 {
   int ret = 0;
-  properties_user_log("rgb_led set: val=%d, val_len=%d.", *((bool*)val), val_len);
+  properties_user_log("rgb_led_sw_set: val=%d, val_len=%d.", *((bool*)val), val_len);
   // control hardware
-  // ...
-  //*((bool*)prop->value) = *((bool*)val);
+  *((bool*)(prop->value)) = *((bool*)val);  // for test
+  *(prop->value_len) = val_len;
   
   return ret;
 }
@@ -70,9 +108,12 @@ int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_
 int rgb_led_sw_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
-  properties_user_log("rgb_led get: val=%d, val_len=%d.", *((bool*)prop->value), *(uint32_t*)prop->value_len );
   // read hardware status
-  // ...
+  *((bool*)val) = *(bool*)(prop->value);  // for test
+  *val_len = *(prop->value_len);
+  
+  properties_user_log("rgb_led_sw_get: val=%d, val_len=%d.", *((bool*)val), *((uint32_t*)val_len) );
+
   return ret;
 }
 
@@ -82,8 +123,8 @@ int rgb_led_hues_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
   int ret = 0;
   properties_user_log("rgb_led_hues_set: val=%d, val_len=%d.", *((int*)val), val_len);
   // control hardware
-  // ...
-  //*((int*)prop->value) = *((int*)val);
+  *((int*)(prop->value)) = *((int*)val);  // for test
+  *(prop->value_len) = val_len;
   
   return ret;
 }
@@ -91,9 +132,12 @@ int rgb_led_hues_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
 int rgb_led_hues_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
-  properties_user_log("rgb_led_hues_get: val=%d, val_len=%d.", *((int*)prop->value), *(uint32_t*)prop->value_len );
   // get hardware status
-  // ...
+  *((int*)val) = *(int*)(prop->value);  // for test
+  *val_len = *(prop->value_len);
+  
+  properties_user_log("rgb_led_hues_get: val=%d, val_len=%d.", *((int*)val), *(uint32_t*)val_len );
+  
   return ret;
 }
 
@@ -103,8 +147,8 @@ int rgb_led_saturation_set(struct mico_prop_t *prop, void *arg, void *val, uint3
   int ret = 0;
   properties_user_log("rgb_led_saturation_set: val=%d, val_len=%d.", *((int*)val), val_len);
   // control hardware
-  // ...
-  //*((int*)prop->value) = *((int*)val);
+  *((int*)(prop->value)) = *((int*)val);  // for test
+  *(prop->value_len) = val_len;
   
   return ret;
 }
@@ -112,32 +156,37 @@ int rgb_led_saturation_set(struct mico_prop_t *prop, void *arg, void *val, uint3
 int rgb_led_saturation_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
-  properties_user_log("rgb_led_saturation_get: val=%d, val_len=%d.", *((int*)prop->value), *(uint32_t*)prop->value_len );
   // get hardware status
-  // ...
+  *(int*)val = *(int*)(prop->value);  // for test
+  *val_len = *(prop->value_len);
+  properties_user_log("rgb_led_saturation_get: val=%d, val_len=%d.", *((int*)val), *(uint32_t*)val_len );
+  
   return ret;
 }
 
 // brightness function
-//int rgb_led_brightness_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
-//{
-//  int ret = 0;
-//  properties_user_log("rgb_led_brightness_set: val=%d, val_len=%d.", *((int*)val), val_len);
-//  // control hardware
-//  // ...
-//  //*((int*)prop->value) = *((int*)val);
-//  
-//  return ret;
-//}
-//
-//int rgb_led_brightness_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
-//{
-//  int ret = 0;
-//  properties_user_log("rgb_led_brightness_get: val=%d, val_len=%d.", *((int*)prop->value), *(uint32_t*)prop->value_len );
-//  // get hardware status
-//  // ...
-//  return ret;
-//}
+int rgb_led_brightness_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
+{
+  int ret = 0;
+  properties_user_log("rgb_led_brightness_set: val=%d, val_len=%d.", *((int*)val), val_len);
+  // control hardware
+  *((int*)(prop->value)) = *((int*)val);  // for test
+  *(prop->value_len) = val_len;
+  
+  return ret;
+}
+
+int rgb_led_brightness_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  int ret = 0;
+  // get hardware status
+  *(int*)val = *(int*)(prop->value);  // for test
+  *val_len = *(prop->value_len);
+  
+  properties_user_log("rgb_led_brightness_get: val=%d, val_len=%d.", *((int*)val), *(uint32_t*)val_len );
+  
+  return ret;
+}
 
 /************adc************************/
 // adc data
@@ -147,21 +196,17 @@ struct adc_t adc = {
 };
 
 // get adc data function
-int adc_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+int adc_data_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
   uint16_t adc_data = 0;
   OSStatus err = kUnknownErr;
 
-  // get ADC data  ==> prop->value
+  // get ADC data
   err = MicoAdcTakeSample(MICO_ADC_1, &adc_data);
   if(kNoErr == err){
-    *((int*)val) = (int)adc_data;
-    *val_len = sizeof(int);
-    
-    // update prop->value
-    //*((int*)prop->value) = (int)adc_data;
-    //properties_user_log("adc get: val=%d, val_len=%d.", *((int*)prop->value), *((uint32_t*)(prop->value_len)) );
+    *((uint16_t*)val) = adc_data;
+    *val_len = sizeof(adc_data);
     ret = 0;   // get data succeed
   }
   else{
@@ -175,27 +220,28 @@ int adc_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 int notify_check_adc_data(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
-  int adc_data = 0;
+  uint16_t adc_data = 0;
   uint32_t adc_data_len = 0;
   
   // get adc data
-  ret = prop->get(prop, NULL, &adc_data, &adc_data_len);
+  ret = prop->get(prop, arg, &adc_data, &adc_data_len);
   if(0 != ret){
     return -1;   // get value error
   }
   
-  // check notify
-  //if(adc_data != *((int*)(prop->value))){  // changed
-  if( ((adc_data - *((int*)(prop->value))) >= 1) || ((*((int*)(prop->value)) - adc_data) >= 1) ){  // abs >=10
-    properties_user_log("adc_data changed: %d -> %d", *((int*)prop->value), adc_data);
-    // update prop->value
-    *((int*)prop->value) = adc_data;
-    *(prop->value_len) = adc_data_len;
+  // update check (diff get_data and prop->value)
+  //if(adc_data != *((uint16_t*)(prop->value))){  // changed
+  if( (((int)adc_data - *((int*)(prop->value))) >= 10) || ((*((int*)(prop->value)) - (int)adc_data) >= 10) ){  // abs >=10
+    properties_user_log("adc_data changed: %d -> %d", *((int*)prop->value), (int)adc_data);   
     ret = 1;  // value changed, need to send notify message
   }
   else{
     ret = 0;  // not changed, not need to notify
   }
+  
+  // return new value to update prop value && len
+  *((int*)val) = (int)adc_data;  
+  *val_len = adc_data_len;
   
   return ret;
 }
@@ -203,91 +249,135 @@ int notify_check_adc_data(struct mico_prop_t *prop, void *arg, void *val, uint32
 /************ service_table ***********/
 const struct mico_service_t  service_table[] = {
   [0] = {  // dev_info
-    .type = "public.map.service.dev_info",    // dev_info
+    .type = "public.map.service.dev_info",    // dev_info  uuid
     .properties = {
       [0] = {
-        .type = "public.map.property.name",  // device name
+        .type = "public.map.property.name",  // device name uuid
         .value = &(dev_info.name),
         .value_len = &(dev_info.name_len),
         .format = MICO_PROP_TYPE_STRING,
-        .perms = (uint8_t)(MICO_PROP_PERMS_RO),
-        .get = NULL,                        // get function defined by user
-        .set = NULL,                        // RO£¬write not available
-        .arg = &(dev_info.name),        // user defined string to stroe get value
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
+        .get = string_get,                  // get string func to get device name
+        .set = string_set,                  // set sring func to change device name
+        .notify_check = NULL,               // not notifiable
+        .arg = &(dev_info.name),            // get/set string pointer (device name)
+        .event = NULL,                      // not notifiable
+        .hasMeta = false,                   // no max/min/step
+        .maxStringLen = 16,                 // max length of device name string
+        .unit = NULL                        // no unit
       },
       [1] = {
-        .type = "public.map.property.manufactory",  // device manufactory
+        .type = "public.map.property.manufactory",  // device manufactory uuid
         .value = &(dev_info.manufactory),
         .value_len = &(dev_info.manufactory_len),
         .format = MICO_PROP_TYPE_STRING,
-        .perms = (uint8_t)(MICO_PROP_PERMS_RO),
-        .get = NULL,
-        .set = NULL,
+        .perms = MICO_PROP_PERMS_RO,
+        .get = string_get,                  // get string func to get manufactory
+        .set = string_set,                  // set sring func to change manufactory
+        .notify_check = NULL,               // not notifiable
         .arg = &(dev_info.manufactory),
+        .event = NULL,                      // not notifiable
+        .hasMeta = false,
+        .maxStringLen = 16,                 // max length of device manufactory
+        .unit = NULL                        // no unit
       },
-      [2] = {NULL}
+      [2] = {NULL}                          // end flag
     }
   },
   [1] = {
-    .type = "public.map.service.led",   // rgb led
+    .type = "public.map.service.led",       // rgb led uuid
     .properties = {
       [0] = {
-        .type = "public.map.property.switch",  // led switch
+        .type = "public.map.property.switch",  // led switch uuid
         .value = &(rgb_led.sw),
-        .value_len = &bool_len,   // bool type len
+        .value_len = &bool_len,             // bool type len
         .format = MICO_PROP_TYPE_BOOL,
-        .perms = (uint8_t)(MICO_PROP_PERMS_RW),
-        .get = rgb_led_sw_get,    // get led switch status function
-        .set = rgb_led_sw_set,    // set led switch status function
-        .arg = &(rgb_led.sw),     // led switch status
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
+        .get = rgb_led_sw_get,              // get led switch status function
+        .set = rgb_led_sw_set,              // set led switch status function
+        .notify_check = NULL,               // not notifiable
+        .arg = &(rgb_led.sw),               // led switch status
+        .event = NULL,
+        .hasMeta = false,
+        .maxStringLen = 0,
+        .unit = NULL
       },
       [1] = {
         .type = "public.map.property.hues",  // led hues
         .value = &(rgb_led.hues),
         .value_len = &int_len,   // int type len
         .format = MICO_PROP_TYPE_INT,
-        .perms = (uint8_t)(MICO_PROP_PERMS_RW),
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
         .get = rgb_led_hues_get,
         .set = rgb_led_hues_set,
+        .notify_check = NULL,               // not notifiable
         .arg = &(rgb_led.hues),  // led hues value
+        .event = NULL,
+        .hasMeta = true,
+        .maxValue.intValue = 360,
+        .minValue.intValue = 0,
+        .minStep.intValue = 1,
+        .maxStringLen = 0,
+        .unit = "h"
       },
       [2] = {
         .type = "public.map.property.saturation",  // led saturation
         .value = &(rgb_led.saturation),
         .value_len = &int_len,
         .format = MICO_PROP_TYPE_INT,
-        .perms = (uint8_t)(MICO_PROP_PERMS_RW),
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
         .get = rgb_led_saturation_get,
         .set = rgb_led_saturation_set,
+        .notify_check = NULL,               // not notifiable
         .arg = &(rgb_led.saturation),  // led saturation value
+        .event = NULL,
+        .hasMeta = true,
+        .maxValue.intValue = 100,
+        .minValue.intValue = 0,
+        .minStep.intValue = 1,
+        .maxStringLen = 0,
+        .unit = "s"
       },
       [3] = {
         .type = "public.map.property.brightness",  // led brightness
         .value = &(rgb_led.brightness),
         .value_len = &int_len,
         .format = MICO_PROP_TYPE_INT,
-        .perms = (uint8_t)(MICO_PROP_PERMS_RW),
-        .get = NULL,
-        .set = NULL,
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
+        .get = rgb_led_brightness_get,
+        .set = rgb_led_brightness_set,
         .arg = &(rgb_led.brightness),  // led brightness value
+        .event = NULL,
+        .hasMeta = true,
+        .maxValue.intValue = 100,
+        .minValue.intValue = 0,
+        .minStep.intValue = 1,
+        .maxStringLen = 0,
+        .unit = "b"
       },
       [4] = {NULL}
     }
   },
   [2] = {
-    .type = "public.map.service.adc",   //  ADC
+    .type = "public.map.service.adc",   //  ADC uuid
     .properties = {
       [0] = {
-        .type = "public.map.property.value",  // adc value
+        .type = "public.map.property.value",  // adc value uuid
         .value = &(adc.data),
         .value_len = &int_len,
         .format = MICO_PROP_TYPE_INT,
-        .perms = (uint8_t)(MICO_PROP_PERMS_RO | MICO_PROP_PERMS_EV),
-        .get = adc_get,
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_EV),
+        .get = adc_data_get,
         .set = NULL,
+        .notify_check = notify_check_adc_data,  // check notify for adc data
         .arg = &(adc.data),         // adc sample data
         .event = &(adc.event),      // event flag
-        .notify_check = notify_check_adc_data,  // check notify for adc data
+        .hasMeta = true,
+        .maxValue.intValue = 4095,
+        .minValue.intValue = 0,
+        .minStep.intValue = 1,
+        .maxStringLen = 0,
+        .unit = NULL
       },
       [1] = {NULL}
     }

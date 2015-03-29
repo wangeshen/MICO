@@ -20,22 +20,28 @@
   */ 
 
 #include "MICODefine.h"
-//#include "MICOAppDefine.h"
 
 #ifndef __MICO_FOGCLOUD_MSG_DISPATCH_H_
 #define __MICO_FOGCLOUD_MSG_DISPATCH_H_
 
 // recv topic
-#define FOGCLOUD_MSG_TOPIC_IN_READ       "/read/"
-#define FOGCLOUD_MSG_TOPIC_IN_WRITE      "/write/"
-#define FOGCLOUD_MSG_TOPIC_IN_CHAT       "/chat/"
-#define FOGCLOUD_MSG_TOPIC_IN_INFO       "/info/"
+#define FOGCLOUD_MSG_TOPIC_IN_READ       "/read"
+#define FOGCLOUD_MSG_TOPIC_IN_WRITE      "/write"
+#define FOGCLOUD_MSG_TOPIC_IN_CHAT       "/chat"
+#define FOGCLOUD_MSG_TOPIC_IN_INFO       "/info"
 
 // send topic
-#define FOGCLOUD_MSG_TOPIC_OUT_READ      "/read/"
-#define FOGCLOUD_MSG_TOPIC_OUT_WRITE     "/write/"
-#define FOGCLOUD_MSG_TOPIC_OUT_CHAT      "/chat/"
-#define FOGCLOUD_MSG_TOPIC_OUT_INFO      "/info/"
+#define FOGCLOUD_MSG_TOPIC_OUT_READ      "/read"
+#define FOGCLOUD_MSG_TOPIC_OUT_WRITE     "/write"
+#define FOGCLOUD_MSG_TOPIC_OUT_CHAT      "/chat"
+#define FOGCLOUD_MSG_TOPIC_OUT_INFO      "/info"
+
+// sub topic
+#define FOGCLOUD_MSG_TOPIC_IN_SUB_VALUE  "/value"
+#define FOGCLOUD_MSG_TOPIC_IN_SUB_EVENT  "/event"
+
+#define FOGCLOUD_MSG_TOPIC_OUT_SUB_VALUE  "/value"
+#define FOGCLOUD_MSG_TOPIC_OUT_SUB_EVENT  "/event"
 
 // msg data
 typedef struct _mico_fogcloud_msg_t{
@@ -48,7 +54,7 @@ typedef struct _mico_fogcloud_msg_t{
 // handle cloud msg here, for example: send to USART or echo to cloud
 OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cloud_msg);
 
-// property notify check
+// property notify
 OSStatus mico_properties_notify(mico_Context_t * const inContext);
 
 #endif // __MICO_FOGCLOUD_MSG_DISPATCH_H_

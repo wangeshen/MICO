@@ -20,18 +20,32 @@
 */ 
 
 #include "MICODefine.h"
-#include "properties.h"
 #include "JSON-C/json.h"
 #include "StringUtils.h"
-//#include "MICOAppDefine.h"
-#include "MicoFogCloud.h"
+#include "properties.h"
 
 #define properties_log(M, ...) custom_log("DEV_PROPERTIES", M, ##__VA_ARGS__)
 #define properties_log_trace() custom_log_trace("DEV_PROPERTIES")
 
 
 /*******************************************************************************
-* PROPERTIES API
+ * DEFINES && STRUCTURES
+ ******************************************************************************/
+
+// notify list node
+typedef struct _mico_prop_notify_node_t{
+  int iid;
+  int s_idx;
+  int p_idx;
+  struct _mico_prop_notify_node_t *next;
+} mico_prop_notify_node_t;
+
+// notify list
+bool notify_list_inited = false;
+mico_prop_notify_node_t *g_notify_list = NULL;
+
+/*******************************************************************************
+* FUNCTIONS
 *******************************************************************************/
 
 int notify_check_default(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
@@ -41,95 +55,255 @@ int notify_check_default(struct mico_prop_t *prop, void *arg, void *val, uint32_
   return ret;
 }
 
-/* property update check
-* check update status of all properties in service_table
-* input: mico context;
-*        service table
-* return: json object contains properties updated, like {k:v, k:v}
-*         if no update or error, return NULL
-*/
-json_object* mico_properties_update_check(mico_Context_t * const inContext, struct mico_service_t *service_table)
+OSStatus FindPropertyByIID(struct mico_service_t *service_table, int iid, 
+                       int *service_index, int *property_index)
 {
-  int i = 0; 
-  int j = 0;
-  int ret = 0;
-  int iid = 1;
-  char iid_str[16] = {0};
-  json_object *notify_obj = NULL;
-  int updated_prop_cnt = 0;
-  
-  require(inContext, exit);
-  require(service_table, exit);
-  
-  notify_obj = json_object_new_object();
-  require(notify_obj, exit);
-  
-  properties_log("properties update check...");
-  for(i = 0; NULL != service_table[i].type; i++){
-    iid++;  // next service or property
-    for(j = 0; NULL != service_table[i].properties[j].type; j++){
-      memset((void*)iid_str, '\0', sizeof(iid_str));
-      Int2Str((uint8_t*)iid_str, iid);
-      
-      if( MICO_PROP_PERMS_EV & (service_table[i].properties[j].perms)){  // prop has event
-        if((NULL != service_table[i].properties[j].event) && (*(service_table[i].properties[j].event))){  // prop event on
-          if(NULL != service_table[i].properties[j].notify_check){
-            // do prop update check
-            ret = service_table[i].properties[j].notify_check(&(service_table[i].properties[j]), 
-                                                              service_table[i].properties[j].arg, NULL, NULL);
-            if(1 == ret){
-              // prop updated, add to notify list
-              switch(service_table[i].properties[j].format){
-              case MICO_PROP_TYPE_INT:{
-                json_object_object_add(notify_obj, iid_str, json_object_new_int(*((int*)service_table[i].properties[j].value)));
-                updated_prop_cnt++;
-                break;
-              }
-              case MICO_PROP_TYPE_FLOAT:{
-                json_object_object_add(notify_obj, iid_str, json_object_new_double(*((float*)service_table[i].properties[j].value)));
-                updated_prop_cnt++;
-                break;
-              }
-              case MICO_PROP_TYPE_STRING:{
-                json_object_object_add(notify_obj, iid_str, json_object_new_string((char*)service_table[i].properties[j].value));
-                updated_prop_cnt++;
-                break;
-              }
-              case MICO_PROP_TYPE_BOOL:{
-                json_object_object_add(notify_obj, iid_str, json_object_new_boolean(*((bool*)service_table[i].properties[j].value)));
-                updated_prop_cnt++;
-                break;
-              }
-              default:
-                properties_log("ERROR: prop format unsupport!");
-                break;
-              }
-            }
-          }
-          else{
-            // use defalut update check(prop changed), if user not set func prop->notify_check
-            ret = notify_check_default(&(service_table[i].properties[j]),NULL,NULL,NULL);
-            if(1 == ret){
-              // prop value changed
-            }
-          }
-        }
+  int s_idx = 0, p_idx = 0, tmpIID = 1;
+  *service_index = 0;
+  *property_index = 0;
+
+  for(s_idx = 0; NULL != service_table[s_idx].type; s_idx++){
+    if( tmpIID > iid){
+      return kNotFoundErr;
+    }
+    
+    if(tmpIID == iid){
+      *service_index = s_idx;
+      return kParamErr;  // is a service
+    }
+    tmpIID ++;
+    
+    for(p_idx = 0; NULL != service_table[s_idx].properties[p_idx].type; p_idx++){
+      if( tmpIID > iid){
+        return kNotFoundErr;
       }
+      
+      if(tmpIID == iid){
+        *service_index = s_idx;
+        *property_index = p_idx;
+        return kNoErr;
+      }
+      tmpIID ++;
+    }
+  }
+  
+  return kNotFoundErr;
+}
+
+OSStatus PropertyNotifyListAdd(int iid, int service_index, int property_index,
+                               mico_prop_notify_node_t **p_notify_list )
+{
+  OSStatus err = kNoErr;
+  mico_prop_notify_node_t *plist = *p_notify_list;
+  mico_prop_notify_node_t *plist_next = *p_notify_list;
+  mico_prop_notify_node_t *notify = NULL;
+
+  // create node
+  notify = (mico_prop_notify_node_t *)malloc(sizeof(mico_prop_notify_node_t)); 
+  require_action(notify, exit, err = kNoMemoryErr);
+  
+  notify->iid = iid;
+  notify->s_idx = service_index;
+  notify->p_idx = property_index;
+  notify->next = NULL;
+    
+  if(NULL == *p_notify_list){  // add to first node
+    *p_notify_list = notify;
+    properties_log("notify add: iid=%d, s_id=%d, p_id=%d.", 
+                   plist->iid, plist->s_idx, plist->p_idx);
+    return kNoErr;  
+  }
+  else{  // add to node to the end
+    do{
+      if(plist->iid == iid){
+        plist->s_idx = service_index;
+        plist->p_idx = property_index;
+        free(notify);
+        return kNoErr;   // Nodify already exist, update index
+      }
+      plist_next = plist->next;
+    }while(NULL != plist_next);  // get to end
+    
+    // add node
+    plist->next = notify;
+    
+    properties_log("notify add: iid=%d, s_id=%d, p_id=%d.", 
+                   plist->next->iid, plist->next->s_idx, plist->next->p_idx);
+  }
+
+exit:
+  return err;
+}
+
+
+OSStatus getNextNotify( mico_prop_notify_node_t *p_notify_list, 
+                        int *iid, int *s_idx, int *p_idx, 
+                        mico_prop_notify_node_t **outNextNotifyList )
+{
+  if(NULL == outNextNotifyList){
+    return kParamErr;
+  }
+  
+  if(NULL == p_notify_list){
+    return kNotFoundErr;
+  }
+  
+  *iid = p_notify_list->iid;
+  *s_idx = p_notify_list->s_idx;
+  *p_idx = p_notify_list->p_idx;
+  *outNextNotifyList = p_notify_list->next;
+  
+  return kNoErr;
+}
+
+OSStatus PropertyNotifyListClean(mico_prop_notify_node_t **p_notify_list )
+{
+  mico_prop_notify_node_t* temp = *p_notify_list;
+  mico_prop_notify_node_t* temp_next;
+  
+  if(NULL == *p_notify_list){
+    return kNoErr;
+  }
+  
+  do{
+    temp_next = temp->next;
+    free(temp);
+    temp = temp_next;
+  }while(NULL != temp);    
+
+  *p_notify_list = NULL;
+  
+  properties_log("notify list clean ok.");
+  
+  return kNoErr;
+}
+
+/* create notify list from service_table
+ * input: service_table
+ * return: notify list
+ */
+OSStatus create_notify_list(struct mico_service_t *service_table,
+                             mico_prop_notify_node_t **outNotifyList)
+{
+  OSStatus err = kNoErr;
+  int iid = 1, s_idx = 0, p_idx = 0;
+  
+  require_action(outNotifyList, exit, err = kParamErr);
+  require_action(service_table, exit, err = kParamErr);
+  
+  properties_log("create notify list...");
+  for(s_idx = 0; NULL != service_table[s_idx].type; s_idx++){
+    iid++;  // is a service, jump to next service or property
+    for(p_idx = 0; NULL != service_table[s_idx].properties[p_idx].type; p_idx++){     
+      if( MICO_PROP_PERMS_NOTIFIABLE( service_table[s_idx].properties[p_idx].perms ) &&
+         (NULL != service_table[s_idx].properties[p_idx].notify_check) ){  //must set notify_check func
+           // add to notify list
+           err = PropertyNotifyListAdd(iid, s_idx, p_idx, outNotifyList);
+           require_noerr(err, exit);
+         }
       iid++;  // next property
     }
   }
   
 exit:
-  if( (NULL != notify_obj) && ( 0 == updated_prop_cnt)){
-    json_object_put(notify_obj);
-    notify_obj = NULL;
+  if(kNoErr != err){
+    properties_log("ERROR: create notify list failed, err = %d.", err);
+    PropertyNotifyListClean(outNotifyList);
   }
-  return notify_obj;
+  properties_log("notify list create ok.");
+  return err;
+}
+
+/* property notify check
+* description: check update of all properties in notify list, 
+*              if notify list is not created, create is first from service_table.
+* input: mico context;
+*        service table
+* output: json object contains properties updated, like {k:v, k:v}
+*         if no update or error, return NULL
+* return: kNoErr if succeed.
+*/
+OSStatus mico_properties_notify_check(mico_Context_t * const inContext, struct mico_service_t *service_table,
+                                      json_object* notify_obj)
+{
+  OSStatus err = kNoErr;
+  int s_idx = 0; 
+  int p_idx = 0;
+  int iid = 0;
+  char iid_str[16] = {0};
+  int ret = 0;
+  mico_prop_notify_node_t *_notify_list = NULL;
+  
+  require_action(inContext, exit, err = kParamErr);
+  require_action(service_table, exit, err = kParamErr);
+  require_action(notify_obj, exit, err = kParamErr);
+  
+  properties_log("properties update check...");
+  
+  // if notify list not created, create it the first time
+  if(!notify_list_inited){
+    if(NULL != g_notify_list){
+      PropertyNotifyListClean(&g_notify_list);  // clean g_notify_list  
+    }
+    err = create_notify_list(service_table, &g_notify_list);
+    require_noerr(err, exit);
+    notify_list_inited = true;
+  }
+  
+  _notify_list = g_notify_list;
+  // search notify list
+  while(getNextNotify(_notify_list, &iid, &s_idx, &p_idx, &_notify_list) == kNoErr){
+    properties_log("notify prop check: iid=%d, s_idx=%d, p_idx=%d.", iid, s_idx, p_idx);
+    // get key string
+    memset((void*)iid_str, '\0', sizeof(iid_str));
+    Int2Str((uint8_t*)iid_str, iid);
+    
+    // add updated property to json object
+    if((NULL != service_table[s_idx].properties[p_idx].event) &&
+       (*(service_table[s_idx].properties[p_idx].event)) ){  // prop event enable
+         // do prop update check && update prop value && len
+         ret = service_table[s_idx].properties[p_idx].notify_check(&(service_table[s_idx].properties[p_idx]), 
+                                                           service_table[s_idx].properties[p_idx].arg, 
+                                                           service_table[s_idx].properties[p_idx].value, 
+                                                           service_table[s_idx].properties[p_idx].value_len);
+         if(1 == ret){  // prop updated, add new value to notify json object
+           switch(service_table[s_idx].properties[p_idx].format){
+           case MICO_PROP_TYPE_INT:{
+             json_object_object_add(notify_obj, iid_str, 
+                                    json_object_new_int(*((int*)(service_table[s_idx].properties[p_idx].value))));
+             break;
+           }
+           case MICO_PROP_TYPE_FLOAT:{
+             json_object_object_add(notify_obj, iid_str, 
+                                    json_object_new_double(*((float*)service_table[s_idx].properties[p_idx].value)));
+             break;
+           }
+           case MICO_PROP_TYPE_STRING:{
+             json_object_object_add(notify_obj, iid_str, 
+                                    json_object_new_string((char*)service_table[s_idx].properties[p_idx].value));
+             break;
+           }
+           case MICO_PROP_TYPE_BOOL:{
+             json_object_object_add(notify_obj, iid_str, 
+                                    json_object_new_boolean(*((bool*)service_table[s_idx].properties[p_idx].value)));
+             break;
+           }
+           default:
+             properties_log("ERROR: prop format unsupport!");
+             break;
+           }
+         }
+       }
+  }
+  
+exit:
+  return err;
 }
 
 // add json object if read success, if faild no return json object add, return err.
-OSStatus mico_property_read_create(struct mico_service_t *service_table,  
-                                   const char *key, int iid, json_object *outJsonObj)
+OSStatus mico_property_read_create(struct mico_service_t *service_table, 
+                                   const char *key, int iid, enum mico_prop_sub_type_t sub_type,
+                                   json_object *outJsonObj)
 {
   OSStatus err = kNotFoundErr;
   int i = 0; 
@@ -303,7 +477,8 @@ exit:
 }
 
 OSStatus mico_property_write_create(struct mico_service_t *service_table, 
-                                    char *key, json_object *val, json_object *outJsonObj)
+                                    char *key, json_object *val, enum mico_prop_sub_type_t sub_type,
+                                    json_object *outJsonObj)
 {
   OSStatus err = kNotFoundErr;
   int i = 0; 
@@ -326,7 +501,7 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
   for(i = 0; NULL != service_table[i].type; i++){
     if(iid == iid_tmp){  // if is a service, error operation
       properties_log("ERROR: can not write service: %s, iid=%d", service_table[i].type, iid_tmp);
-      json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_NOT_ALLOWED));
+      json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_WRITE_NOT_ALLOWED));
       return kNotWritableErr;
     }
     else{
@@ -350,7 +525,7 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
                                                        service_table[i].properties[j].arg,
                                                        (void*)&int_value, sizeof(int));
               if (0 != ret){
-                json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
+                json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_WRITE_FAILED));
                 err = kWriteErr;
               }
               else{
@@ -377,7 +552,7 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
                                                        service_table[i].properties[j].arg,
                                                        (void*)&float_value, sizeof(double));
               if (0 != ret){
-                json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
+                json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_WRITE_FAILED));
                 err = kWriteErr;
               }
               else{
@@ -403,7 +578,7 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
                                                        service_table[i].properties[j].arg,
                                                        (void*)(json_object_get_string(val)), strlen(json_object_get_string(val)));
               if (0 != ret){
-                json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
+                json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_WRITE_FAILED));
                 err = kWriteErr;
               }
               else{
@@ -431,7 +606,7 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
                                                        service_table[i].properties[j].arg,
                                                        (void*)&boolean_value, sizeof(bool));
               if (0 != ret){
-                json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
+                json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_WRITE_FAILED));
                 err = kWriteErr;
               }
               else{
@@ -448,14 +623,14 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
           }
           default:
             properties_log("ERROR: Unsupported format!");
-            json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_FAILED));
+            json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_WRITE_FAILED));
             err = kWriteErr;
             break;
           }
         }
         else{
           properties_log("ERROR: property is read only!");
-          json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_WRITE_NOT_ALLOWED));
+          json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_WRITE_NOT_ALLOWED));
           err = kNotWritableErr;
         }
         return err;
@@ -467,7 +642,7 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
   // property not found
   if(kNotFoundErr == err){
     properties_log("ERROR: property not found!");
-    json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_NOT_FOUND));
+    json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_NOT_FOUND));
   }
   
 exit:
@@ -586,11 +761,11 @@ exit:
   return err;
 }
 
-json_object* create_dev_info_json_object(struct mico_service_t service_table[])
+json_object* mico_get_device_info(struct mico_service_t service_table[])
 {
   OSStatus err = kUnknownErr;
   properties_log_trace();
-  json_object *properties = NULL, *services = NULL, *mainObject = NULL;
+  json_object *dev_info_obj = NULL, *services = NULL, *properties = NULL;
   int i = 0, j = 0;
   const char *pServiceType = NULL;
   const char *pPropertyType = NULL;
@@ -598,7 +773,7 @@ json_object* create_dev_info_json_object(struct mico_service_t service_table[])
   
   services = json_object_new_array();
   require( services, exit );
-  err = add_top(&mainObject, "services", services);
+  err = add_top(&dev_info_obj, "services", services);
   
   for(i = 0, pServiceType = service_table[0].type; NULL != pServiceType; ){
     properties = json_object_new_array();
@@ -621,11 +796,11 @@ json_object* create_dev_info_json_object(struct mico_service_t service_table[])
   }
   
 exit:
-  if(err != kNoErr && mainObject){
-    json_object_put(mainObject);
-    mainObject = NULL;
+  if(err != kNoErr && dev_info_obj){
+    json_object_put(dev_info_obj);
+    dev_info_obj = NULL;
   }
-  return mainObject;
+  return dev_info_obj;
 }
 
 /* read multiple properties;
@@ -636,7 +811,7 @@ exit:
 *         if error, return value is NULL.
 */
 json_object*  mico_read_properties(struct mico_service_t *service_table, 
-                                   json_object *prop_read_list_obj)
+                                   json_object *prop_read_list_obj, enum mico_prop_sub_type_t sub_type)
 {
   json_object *outJsonObj = NULL;
   int iid = 0;
@@ -649,7 +824,7 @@ json_object*  mico_read_properties(struct mico_service_t *service_table,
   
   json_object_object_foreach(prop_read_list_obj, key, val) {
     iid = json_object_get_int(val);
-    mico_property_read_create(service_table, key, iid, outJsonObj);
+    mico_property_read_create(service_table, key, iid, sub_type, outJsonObj);
   }
   
 exit:
@@ -663,7 +838,7 @@ exit:
 *         if error, return value is NULL.
 */
 json_object*  mico_write_properties(struct mico_service_t *service_table, 
-                                    json_object *prop_write_list_obj)
+                                    json_object *prop_write_list_obj, enum mico_prop_sub_type_t sub_type)
 {
   OSStatus err = kUnknownErr;
   json_object *outJsonObj = NULL;
@@ -676,7 +851,7 @@ json_object*  mico_write_properties(struct mico_service_t *service_table,
   require( outJsonObj, exit );
   
   json_object_object_foreach(prop_write_list_obj, key, val) {
-    err = mico_property_write_create(service_table, key, val, outJsonObj);
+    err = mico_property_write_create(service_table, key, val, sub_type, outJsonObj);
     if(kNoErr != err){
       all_write_succeed = false;  // not all property write success
     }
@@ -684,7 +859,7 @@ json_object*  mico_write_properties(struct mico_service_t *service_table,
   
   // all properties wrote success report
   if(all_write_succeed){
-    json_object_object_add(outJsonObj, MICO_PROP_WRITE_STATUS, json_object_new_int(MICO_PROP_WRITE_SUCCESS));
+    json_object_object_add(outJsonObj, MICO_PROP_KEY_WRITE_STATUS, json_object_new_int(MICO_PROP_CODE_WRITE_SUCCESS));
   }
   
 exit:
