@@ -607,6 +607,7 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
                 memset((char*)(service_table[service_index].properties[property_index].value), '\0', service_table[service_index].properties[property_index].maxStringLen);
                 strncpy((char*)(service_table[service_index].properties[property_index].value), json_object_get_string(val), 
                         set_string_len > service_table[service_index].properties[property_index].maxStringLen ? service_table[service_index].properties[property_index].maxStringLen : set_string_len);
+                *(service_table[service_index].properties[property_index].value_len) = set_string_len;
                 json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_WRITE_SUCCESS));
                 err = kNoErr;
               }

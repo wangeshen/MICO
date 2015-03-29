@@ -1977,6 +1977,12 @@
         <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\properties_user.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\rgb_led.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\rgb_led.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\user_config.h</name>
       </file>
       <file>

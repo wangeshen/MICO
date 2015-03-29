@@ -24,6 +24,7 @@
 #include "properties.h"
 #include "properties_user.h"
 #include "JSON-C/json.h"
+#include "rgb_led.h"
 
 #define properties_user_log(M, ...) custom_log("DEV_PROPERTIES_USER", M, ##__VA_ARGS__)
 #define properties_user_log_trace() custom_log_trace("DEV_PROPERTIES_USER")
@@ -100,10 +101,22 @@ struct rgb_led_t rgb_led = {
 int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 {
   int ret = 0;
+  bool set_sw_state = *((bool*)val);
+  float color[3] = {0};
   properties_user_log("rgb_led_sw_set: val=%d, val_len=%d.", *((bool*)val), val_len);
+  properties_user_log("h=%d, s=%d, b=%d", rgb_led.hues, rgb_led.saturation, rgb_led.brightness);
   // control hardware
-  *((bool*)(prop->value)) = *((bool*)val);  // for test
-  *(prop->value_len) = val_len;
+  if(set_sw_state){
+    properties_user_log("Open LED.");
+    H2R_HSBtoRGB((float)rgb_led.hues, (float)rgb_led.saturation, (float)rgb_led.brightness, color);
+    OpenLED_RGB(color);
+  }
+  else{
+    properties_user_log("Close LED.");
+    //CloseLED_RGB();   // bug ??? set bright = 0 instead for temp
+    H2R_HSBtoRGB((float)rgb_led.hues, (float)rgb_led.saturation, (float)0, color);
+    OpenLED_RGB(color);
+  }
   
   return ret;
 }
@@ -112,8 +125,6 @@ int rgb_led_sw_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val
 {
   int ret = 0;
   // read hardware status
-  *((bool*)val) = *(bool*)(prop->value);  // for test
-  *val_len = *(prop->value_len);
   
   properties_user_log("rgb_led_sw_get: val=%d, val_len=%d.", *((bool*)val), *((uint32_t*)val_len) );
 
@@ -124,10 +135,13 @@ int rgb_led_sw_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val
 int rgb_led_hues_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 {
   int ret = 0;
+  float color[3] = {0};
+  int hues = *((int*)val);
   properties_user_log("rgb_led_hues_set: val=%d, val_len=%d.", *((int*)val), val_len);
+  
   // control hardware
-  *((int*)(prop->value)) = *((int*)val);  // for test
-  *(prop->value_len) = val_len;
+  H2R_HSBtoRGB((float)hues, (float)rgb_led.saturation, (float)rgb_led.brightness, color);
+  OpenLED_RGB(color);
   
   return ret;
 }
@@ -136,8 +150,6 @@ int rgb_led_hues_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *v
 {
   int ret = 0;
   // get hardware status
-  *((int*)val) = *(int*)(prop->value);  // for test
-  *val_len = *(prop->value_len);
   
   properties_user_log("rgb_led_hues_get: val=%d, val_len=%d.", *((int*)val), *(uint32_t*)val_len );
   
@@ -148,10 +160,13 @@ int rgb_led_hues_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *v
 int rgb_led_saturation_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 {
   int ret = 0;
+  float color[3] = {0};
+  int saturation = *((int*)val);
   properties_user_log("rgb_led_saturation_set: val=%d, val_len=%d.", *((int*)val), val_len);
+  
   // control hardware
-  *((int*)(prop->value)) = *((int*)val);  // for test
-  *(prop->value_len) = val_len;
+  H2R_HSBtoRGB((float)rgb_led.hues, (float)saturation, (float)rgb_led.brightness, color);
+  OpenLED_RGB(color);
   
   return ret;
 }
@@ -160,8 +175,7 @@ int rgb_led_saturation_get(struct mico_prop_t *prop, void *arg, void *val, uint3
 {
   int ret = 0;
   // get hardware status
-  *(int*)val = *(int*)(prop->value);  // for test
-  *val_len = *(prop->value_len);
+  
   properties_user_log("rgb_led_saturation_get: val=%d, val_len=%d.", *((int*)val), *(uint32_t*)val_len );
   
   return ret;
@@ -171,10 +185,14 @@ int rgb_led_saturation_get(struct mico_prop_t *prop, void *arg, void *val, uint3
 int rgb_led_brightness_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 {
   int ret = 0;
+  float color[3] = {0};
+  int brightness = *((int*)val);
+  
   properties_user_log("rgb_led_brightness_set: val=%d, val_len=%d.", *((int*)val), val_len);
+
   // control hardware
-  *((int*)(prop->value)) = *((int*)val);  // for test
-  *(prop->value_len) = val_len;
+  H2R_HSBtoRGB((float)rgb_led.hues, (float)rgb_led.saturation, (float)brightness, color);
+  OpenLED_RGB(color);
   
   return ret;
 }
@@ -183,8 +201,6 @@ int rgb_led_brightness_get(struct mico_prop_t *prop, void *arg, void *val, uint3
 {
   int ret = 0;
   // get hardware status
-  *(int*)val = *(int*)(prop->value);  // for test
-  *val_len = *(prop->value_len);
   
   properties_user_log("rgb_led_brightness_get: val=%d, val_len=%d.", *((int*)val), *(uint32_t*)val_len );
   
