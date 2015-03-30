@@ -465,13 +465,15 @@ exit:
 
 
 // add json object if read success, if faild no return json object add, return err.
+// NOTE: val is not used.
 OSStatus mico_property_read_create(struct mico_service_t *service_table, 
-                                   const char *key, int iid, enum mico_prop_sub_type_t sub_type,
+                                   const char *key, int val, enum mico_prop_sub_type_t sub_type,
                                    json_object *outJsonObj)
 {
   OSStatus err = kUnknownErr;
   int service_index = 0; 
   int property_index = 0;
+  int iid = 0;
   int tmp_iid = 0;
   char iid_str[16] = {0};
   const char* pProertyType = NULL;
@@ -479,6 +481,7 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
   require_action( service_table, exit, err = kParamErr);
   require_action( outJsonObj, exit, err = kParamErr);
   
+  Str2Int((uint8_t*)key, &iid);
   err = getIndexByIID(service_table, iid, &service_index, &property_index);
   require_noerr(err, exit);
   
@@ -489,7 +492,7 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
       memset(iid_str, '\0', sizeof(iid_str));
       Int2Str((uint8_t*)iid_str, tmp_iid);
       
-      err = mico_property_read_create_by_index(service_table, iid_str, iid, 
+      err = mico_property_read_create_by_index(service_table, iid_str, tmp_iid, 
                                                service_index, property_index, 
                                                sub_type, outJsonObj);
       tmp_iid++;
@@ -498,16 +501,18 @@ OSStatus mico_property_read_create(struct mico_service_t *service_table,
     }
   }
   else{  // is a property
-    // iid as response key
-    memset(iid_str, '\0', sizeof(iid_str));
-    Int2Str((uint8_t*)iid_str, iid);
-  
-    err = mico_property_read_create_by_index(service_table, iid_str, iid, 
+    err = mico_property_read_create_by_index(service_table, key, iid, 
                                              service_index, property_index, 
                                              sub_type, outJsonObj);
   }
   
 exit:
+  if(kNotFoundErr == err){
+    json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_NOT_FOUND));
+  }
+  if(kParamErr == err){
+    json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_DATA_FORMAT_ERR));
+  }
   return err;
 }
 
@@ -535,7 +540,7 @@ OSStatus mico_property_write_create(struct mico_service_t *service_table,
   properties_log("properties write iid=%d.", iid);
   
   err = FindPropertyByIID(service_table, iid, &service_index, &property_index);
-  require_noerr_action(err, exit, err = kNotFoundErr);
+  require_noerr(err, exit);
   
   switch(sub_type){
   case MICO_PROP_SUB_TYPE_VALUE:{  // add response value
@@ -690,6 +695,10 @@ exit:
   if(kNotFoundErr == err){   // property not found
     properties_log("ERROR: property not found!");
     json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_NOT_FOUND));
+  }
+  if(kRequestErr == err){   // service can not be set
+    properties_log("ERROR: service can not be set!");
+    json_object_object_add(outJsonObj, key, json_object_new_int(MICO_PROP_CODE_NOT_SUPPORTED));
   }
   return err;
 }
@@ -911,7 +920,7 @@ json_object*  mico_write_properties(struct mico_service_t *service_table,
 {
   OSStatus err = kUnknownErr;
   json_object *outJsonObj = NULL;
-  bool all_write_succeed = true;
+//  bool all_write_succeed = true;
   
   require( service_table, exit );
   require( prop_write_list_obj, exit );
@@ -922,14 +931,15 @@ json_object*  mico_write_properties(struct mico_service_t *service_table,
   json_object_object_foreach(prop_write_list_obj, key, val) {
     err = mico_property_write_create(service_table, key, val, sub_type, outJsonObj);
     if(kNoErr != err){
-      all_write_succeed = false;  // not all property write success
+      //all_write_succeed = false;  // not all property write success
+      properties_log("ERROR: mico_property_write_create err = %d.", err);
     }
   }
   
-  // all properties wrote success report
-  if(all_write_succeed){
-    json_object_object_add(outJsonObj, MICO_PROP_KEY_WRITE_STATUS, json_object_new_int(MICO_PROP_CODE_WRITE_SUCCESS));
-  }
+//  // all properties wrote success report
+//  if(all_write_succeed){
+//    json_object_object_add(outJsonObj, MICO_PROP_KEY_WRITE_STATUS, json_object_new_int(MICO_PROP_CODE_WRITE_SUCCESS));
+//  }
   
 exit:
   return outJsonObj;
