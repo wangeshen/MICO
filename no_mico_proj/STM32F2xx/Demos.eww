@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<workspace>
+  <project>
+    <path>$WS_DIR$\bootloader\EWARM\Bootloader.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\COM.MFG.1062\EWARM\COM.MFG.1062.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\NO_MICO\EWARM\NO.MICO.ewp</path>
+  </project>
+  <batchBuild>
+    <batchDefinition>
+      <name>all</name>
+      <member>
+        <project>Bootloader</project>
+        <configuration>MiCOKit-3161</configuration>
+      </member>
+      <member>
+        <project>Bootloader</project>
+        <configuration>MiCOKit-3162</configuration>
+      </member>
+      <member>
+        <project>Bootloader</project>
+        <configuration>MICOKit-F205</configuration>
+      </member>
+      <member>
+        <project>COM.Apple.HomeKit</project>
+        <configuration>MiCOKit-3162</configuration>
+      </member>
+      <member>
+        <project>COM.Apple.HomeKit</project>
+        <configuration>MiCOKit-F205</configuration>
+      </member>
+      <member>
+        <project>COM.MXCHIP.EASYCLOUD</project>
+        <configuration>MiCOKit-3162</configuration>
+      </member>
+      <member>
+        <project>COM.MXCHIP.EASYCLOUD</project>
+        <configuration>MiCOKit-F205</configuration>
+      </member>
+      <member>
+        <project>COM.MXCHIP.SPP</project>
+        <configuration>MiCOKit-3161</configuration>
+      </member>
+      <member>
+        <project>COM.MXCHIP.SPP</project>
+        <configuration>MiCOKit-3162</configuration>
+      </member>
+      <member>
+        <project>COM.MXCHIP.SPP</project>
+        <configuration>MiCOKit-F205</configuration>
+      </member>
+      <member>
+        <project>COM.WECHAT.SPP</project>
+        <configuration>MiCOKit-3162</configuration>
+      </member>
+      <member>
+        <project>COM.WECHAT.SPP</project>
+        <configuration>MiCOKit-F205</configuration>
+      </member>
+    </batchDefinition>
+  </batchBuild>
+</workspace>
+
+

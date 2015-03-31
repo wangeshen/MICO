@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<workspace>
+  <project>
+    <path>$WS_DIR$\bootloader\EWARM\Bootloader.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\COM.MFG.1062\EWARM\COM.MFG.1062.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\COM.MFG.1088\EWARM\COM.MFG.1088.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\easylink_conn\EWARM\easylink_conn.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\helloworld\EWARM\helloworld.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\softap_scan\EWARM\softap_scan.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\station\EWARM\station.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\tcp_client\EWARM\tcp_client.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\tcp_server\EWARM\tcp_server.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\udp_client\EWARM\udp_client.ewp</path>
+  </project>
+  <batchBuild/>
+</workspace>
+
+
