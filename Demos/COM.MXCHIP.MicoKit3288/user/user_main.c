@@ -25,7 +25,7 @@
 #include "MicoFogCloud.h"
 #include "user_uart.h"
 #include "msg_dispatch.h"
-#include "properties.h"
+#include "properties_user.h"
 
 #define user_log(M, ...) custom_log("USER", M, ##__VA_ARGS__)
 #define user_log_trace() custom_log_trace("USER")
@@ -60,7 +60,7 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* context,
   fogcloud_msg.data = inBuf;
   fogcloud_msg.data_len = inBufLen;
   
-  err = mico_cloudmsg_dispatch(context, &fogcloud_msg);    
+  err = mico_cloudmsg_dispatch(context, service_table, &fogcloud_msg);    
   if(kNoErr != err){
     user_log("ERROR: mico_cloudmsg_dispatch error, err=%d", err);
   }
@@ -118,7 +118,7 @@ OSStatus user_main( mico_Context_t * const inContext )
     mico_thread_msleep(500);
     
     // prop notify
-    err = mico_properties_notify(inContext);
+    err = mico_properties_notify(inContext, service_table);
     if(kNoErr != err){
         user_log("ERROR: properties notify failed! err = %d", err);
       }

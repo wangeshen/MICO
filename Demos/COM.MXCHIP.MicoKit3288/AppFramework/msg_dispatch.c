@@ -20,20 +20,14 @@
   */ 
 
 #include "MICODefine.h"
-//#include "MICOAppDefine.h"
-//#include "user_main.h"
-//#include "MicoFogCloud.h"
-#include "msg_dispatch.h"
 #include "JSON-C/json.h"
-#include "user_uart.h"
 #include "properties.h"
 #include "MicoFogCloud.h"
+#include "msg_dispatch.h"
 
 #define msg_dispatch_log(M, ...) custom_log("MSG_DISPATCH", M, ##__VA_ARGS__)
 #define msg_dispatch_log_trace() custom_log_trace("MSG_DISPATCH")
 
-// global device service table
-extern struct mico_service_t  service_table[];
 
 // override by user customized topic message handler in user_main.c
 WEAK OSStatus user_customized_topic_msg_handler(mico_Context_t* context, 
@@ -48,7 +42,8 @@ WEAK OSStatus user_customized_topic_msg_handler(mico_Context_t* context,
 }
 
 // handle cloud msg here, for example: send to USART or echo to cloud
-OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cloud_msg)
+OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  service_table[],
+                                mico_fogcloud_msg_t *cloud_msg)
 {
   msg_dispatch_log_trace();
   OSStatus err = kNoErr;
@@ -212,7 +207,7 @@ exit:
 }
 
 // properties notify task
-OSStatus  mico_properties_notify(mico_Context_t * const inContext)
+OSStatus  mico_properties_notify(mico_Context_t * const inContext, struct mico_service_t  service_table[])
 {
   OSStatus err = kUnknownErr;
   json_object *notify_obj = NULL;

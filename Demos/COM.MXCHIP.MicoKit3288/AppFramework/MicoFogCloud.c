@@ -27,8 +27,6 @@ operation
 #include "MicoFogCloud.h"
 #include "fogCloud.h"
 #include "EasyCloudUtils.h"
-#include "user_main.h"
-
 
 #define fogcloud_log(M, ...) custom_log("MicoFogCloud", M, ##__VA_ARGS__)
 #define fogcloud_log_trace() custom_log_trace("MicoFogCloud")

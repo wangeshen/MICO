@@ -20,6 +20,7 @@
   */ 
 
 #include "MICODefine.h"
+#include "properties.h"
 
 #ifndef __MICO_FOGCLOUD_MSG_DISPATCH_H_
 #define __MICO_FOGCLOUD_MSG_DISPATCH_H_
@@ -52,10 +53,11 @@ typedef struct _mico_fogcloud_msg_t{
 }mico_fogcloud_msg_t;
 
 // handle cloud msg here, for example: send to USART or echo to cloud
-OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cloud_msg);
+OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t service_table[],
+                                mico_fogcloud_msg_t *cloud_msg);
 
 // property notify
-OSStatus mico_properties_notify(mico_Context_t * const inContext);
+OSStatus mico_properties_notify(mico_Context_t * const inContext, struct mico_service_t service_table[]);
 
 /*******************************************************************************
 * INTERNAL FUNCTIONS
