@@ -278,7 +278,7 @@ OSStatus mico_properties_notify_check(mico_Context_t * const inContext, struct m
   require_action(service_table, exit, err = kParamErr);
   require_action(notify_obj, exit, err = kParamErr);
   
-  properties_log("properties update check...");
+  //properties_log("properties update check...");
   
   // if notify list not created, create it the first time
   if(!notify_list_inited){
@@ -293,7 +293,7 @@ OSStatus mico_properties_notify_check(mico_Context_t * const inContext, struct m
   _notify_list = g_notify_list;
   // search notify list
   while(getNextNotify(_notify_list, &iid, &s_idx, &p_idx, &_notify_list) == kNoErr){
-    properties_log("notify prop check: iid=%d, s_idx=%d, p_idx=%d.", iid, s_idx, p_idx);
+    //properties_log("notify prop check: iid=%d, s_idx=%d, p_idx=%d.", iid, s_idx, p_idx);
     // get key string
     memset((void*)iid_str, '\0', sizeof(iid_str));
     Int2Str((uint8_t*)iid_str, iid);

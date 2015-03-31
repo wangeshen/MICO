@@ -39,6 +39,7 @@ WEAK OSStatus MicoFogCloudCloudMsgProcess(mico_Context_t* context,
                                      const char* topic, const unsigned int topicLen,
                                      unsigned char *inBuf, unsigned int inBufLen)
 {
+  cloud_if_log("WARNING: MicoFogCloudCloudMsgProcess not override, use default functon. do nothing.");
   return kNoErr;
 }
 

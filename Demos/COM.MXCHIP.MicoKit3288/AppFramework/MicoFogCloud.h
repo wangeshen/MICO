@@ -87,11 +87,10 @@ OSStatus MicoFogCloudGetState(mico_Context_t* const context,
 * INTERNAL FUNCTIONS
 *******************************************************************************/
 
-///* message transmit protocol */
-//// Cloud => MCU, called by cloudMsgArrivedHandler (when recv msg from cloud)
-//OSStatus MicoFogCloudCloudMsgProcess(mico_Context_t* const context, 
-//                            const char* topic, const unsigned int topicLen,
-//                            unsigned char *inBuf, unsigned int inBufLen);
+// override by user in user_main.c
+WEAK OSStatus user_fogcloud_msg_handler(mico_Context_t* context, 
+                                        const char* topic, const unsigned int topicLen,
+                                        unsigned char *inBuf, unsigned int inBufLen);
 
 #endif
 

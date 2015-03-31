@@ -57,4 +57,11 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
 // property notify
 OSStatus mico_properties_notify(mico_Context_t * const inContext);
 
+/*******************************************************************************
+* INTERNAL FUNCTIONS
+*******************************************************************************/
+WEAK OSStatus user_customized_topic_msg_handler(mico_Context_t* context, 
+                                                const char* topic, const unsigned int topicLen,
+                                                unsigned char *inBuf, unsigned int inBufLen);
+
 #endif // __MICO_FOGCLOUD_MSG_DISPATCH_H_

@@ -63,4 +63,11 @@ OSStatus fogCloudStop(mico_Context_t* const inContext);
 OSStatus fogCloudDeinit(mico_Context_t* const inContext);
 OSStatus fogCloudPrintVersion(void);
 
+/*******************************************************************************
+* INTERNAL FUNCTIONS
+*******************************************************************************/
+WEAK OSStatus MicoFogCloudCloudMsgProcess(mico_Context_t* context, 
+                                          const char* topic, const unsigned int topicLen,
+                                          unsigned char *inBuf, unsigned int inBufLen);
+
 #endif  // __FOGCLOUD_INTERFACES_H_

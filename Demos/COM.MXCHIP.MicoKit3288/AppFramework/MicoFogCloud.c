@@ -65,10 +65,12 @@ mico_semaphore_t _fogcloud_connect_sem = NULL;
 
 extern OSStatus MicoStartFogCloudConfigServer ( mico_Context_t * const inContext );
 
+// override by user in user_main.c
 WEAK OSStatus user_fogcloud_msg_handler(mico_Context_t* context, 
                             const char* topic, const unsigned int topicLen,
                             unsigned char *inBuf, unsigned int inBufLen)
 {
+  fogcloud_log("WARNING: user_fogcloud_msg_handler not override, use default, do nothing.");
   return kNoErr;
 }
 

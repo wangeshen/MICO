@@ -35,6 +35,18 @@
 // global device service table
 extern struct mico_service_t  service_table[];
 
+// override by user customized topic message handler in user_main.c
+WEAK OSStatus user_customized_topic_msg_handler(mico_Context_t* context, 
+                                           const char* topic, const unsigned int topicLen,
+                                           unsigned char *inBuf, unsigned int inBufLen)
+{
+  OSStatus err = kNoErr;
+  msg_dispatch_log("WARNING: message from user customized topic unhandled!\r\ntopic=%.*s\tmsg=%.*s",
+                   topicLen, topic,  inBufLen, inBuf);
+  
+  return err;
+}
+
 // handle cloud msg here, for example: send to USART or echo to cloud
 OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cloud_msg)
 {
@@ -152,7 +164,9 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, mico_fogcloud_msg_t *cl
                      cloud_msg->data_len, cloud_msg->data);
     
     // just send to message to usart
-    err = user_uartSend(cloud_msg->data, cloud_msg->data_len);
+    //err = user_uartSend(cloud_msg->data, cloud_msg->data_len);
+    err = user_customized_topic_msg_handler(context, cloud_msg->topic, cloud_msg->topic_len,
+                                      cloud_msg->data, cloud_msg->data_len);
   }
   else if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_INFO, recv_sub_topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_INFO)) ){
     // from /info
