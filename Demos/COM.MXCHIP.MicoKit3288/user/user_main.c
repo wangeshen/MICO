@@ -74,6 +74,8 @@ OSStatus user_main( mico_Context_t * const inContext )
 {
   user_log_trace();
   OSStatus err = kNoErr;
+  
+  user_log("Enter user_main.");
     
   require_action(inContext, exit, err = kParamErr);
   
@@ -87,10 +89,6 @@ OSStatus user_main( mico_Context_t * const inContext )
   
   /* LED init */
   // ...
-  
-  // wait semaphore for cloud connection
-  mico_fogcloud_waitfor_connect(inContext, MICO_WAIT_FOREVER);  // block to wait fogcloud connect
-  user_log("fogcloud connected.");
     
   // loop for handling msg
   while(1){

@@ -30,7 +30,8 @@
 /* default callback function */
 WEAK OSStatus user_main( mico_Context_t * const inContext )
 {
-  return kNoErr;
+  app_log("ERROR: user_main undefined!");
+  return kNotHandledErr;
 }
 
 WEAK void userRestoreDefault_callback(mico_Context_t *inContext)
@@ -42,6 +43,10 @@ void user_thread(void* arg)
 {
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = (mico_Context_t *)arg;
+  
+  // wait semaphore for cloud connection
+  mico_fogcloud_waitfor_connect(inContext, MICO_WAIT_FOREVER);  // block to wait fogcloud connect
+  app_log("fogcloud connected.");
   
   // loop in user mian function && must not return
   err = user_main(inContext);
