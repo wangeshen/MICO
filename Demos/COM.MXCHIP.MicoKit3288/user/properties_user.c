@@ -136,10 +136,16 @@ int rgb_led_hues_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
   int ret = 0;
   float color[3] = {0};
   int hues = *((int*)val);
+  struct rgb_led_t *rgb_led = (struct rgb_led_t*)arg;
   properties_user_log("rgb_led_hues_set: val=%d, val_len=%d.", *((int*)val), val_len);
   
   // control hardware
-  H2R_HSBtoRGB((float)hues, (float)rgb_led.saturation, (float)rgb_led.brightness, color);
+  if(rgb_led->sw){
+  H2R_HSBtoRGB((float)hues, (float)rgb_led->saturation, (float)rgb_led->brightness, color);
+  }else
+  {
+    H2R_HSBtoRGB((float)hues, (float)rgb_led->saturation, (float)0, color);
+  }
   OpenLED_RGB(color);
   
   return ret;
@@ -161,10 +167,16 @@ int rgb_led_saturation_set(struct mico_prop_t *prop, void *arg, void *val, uint3
   int ret = 0;
   float color[3] = {0};
   int saturation = *((int*)val);
+  struct rgb_led_t *rgb_led = (struct rgb_led_t*)arg;
   properties_user_log("rgb_led_saturation_set: val=%d, val_len=%d.", *((int*)val), val_len);
   
   // control hardware
-  H2R_HSBtoRGB((float)rgb_led.hues, (float)saturation, (float)rgb_led.brightness, color);
+  if(rgb_led->sw){
+    H2R_HSBtoRGB((float)rgb_led->hues, (float)saturation, (float)rgb_led->brightness, color);
+  }
+  else{
+    H2R_HSBtoRGB((float)rgb_led->hues, (float)saturation, (float)0, color);
+  }
   OpenLED_RGB(color);
   
   return ret;
@@ -186,11 +198,16 @@ int rgb_led_brightness_set(struct mico_prop_t *prop, void *arg, void *val, uint3
   int ret = 0;
   float color[3] = {0};
   int brightness = *((int*)val);
-  
+  struct rgb_led_t *rgb_led = (struct rgb_led_t*)arg;
   properties_user_log("rgb_led_brightness_set: val=%d, val_len=%d.", *((int*)val), val_len);
 
   // control hardware
-  H2R_HSBtoRGB((float)rgb_led.hues, (float)rgb_led.saturation, (float)brightness, color);
+  if(rgb_led->sw){
+    H2R_HSBtoRGB((float)rgb_led->hues, (float)rgb_led->saturation, (float)brightness, color);
+  }
+  else{
+    H2R_HSBtoRGB((float)rgb_led->hues, (float)rgb_led->saturation, (float)0, color);
+  }
   OpenLED_RGB(color);
   
   return ret;
@@ -314,7 +331,7 @@ const struct mico_service_t  service_table[] = {
         .get = rgb_led_sw_get,              // get led switch status function
         .set = rgb_led_sw_set,              // set led switch status function
         .notify_check = NULL,               // not notifiable
-        .arg = &(rgb_led.sw),               // led switch status
+        .arg = &rgb_led,               // led switch status
         .event = NULL,
         .hasMeta = false,
         .maxStringLen = 0,
@@ -329,7 +346,7 @@ const struct mico_service_t  service_table[] = {
         .get = rgb_led_hues_get,
         .set = rgb_led_hues_set,
         .notify_check = NULL,               // not notifiable
-        .arg = &(rgb_led.hues),  // led hues value
+        .arg = &rgb_led,  // led hues value
         .event = NULL,
         .hasMeta = true,
         .maxValue.intValue = 360,
@@ -347,7 +364,7 @@ const struct mico_service_t  service_table[] = {
         .get = rgb_led_saturation_get,
         .set = rgb_led_saturation_set,
         .notify_check = NULL,               // not notifiable
-        .arg = &(rgb_led.saturation),  // led saturation value
+        .arg = &rgb_led,  // led saturation value
         .event = NULL,
         .hasMeta = true,
         .maxValue.intValue = 100,
@@ -364,7 +381,7 @@ const struct mico_service_t  service_table[] = {
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
         .get = rgb_led_brightness_get,
         .set = rgb_led_brightness_set,
-        .arg = &(rgb_led.brightness),  // led brightness value
+        .arg = &rgb_led,  // led brightness value
         .event = NULL,
         .hasMeta = true,
         .maxValue.intValue = 100,
@@ -388,7 +405,7 @@ const struct mico_service_t  service_table[] = {
         .get = adc_data_get,
         .set = NULL,
         .notify_check = notify_check_adc_data,  // check notify for adc data
-        .arg = &(adc.data),         // adc sample data
+        .arg = &adc,         // adc sample data
         .event = &(adc.event),      // event flag
         .hasMeta = true,
         .maxValue.intValue = 4095,
