@@ -12,8 +12,13 @@
   </project>
 
   <project>
-    <PathAndName>.\COM.MFG.1088\RVMDK\COM.MFG.1088.uvprojx</PathAndName>
+    <PathAndName>.\COM.MXCHIP.SPP\RVMDK\COM.MXCHIP.SPP.uvprojx</PathAndName>
     <NodeIsExpanded>1</NodeIsExpanded>
+  </project>
+
+  <project>
+    <PathAndName>.\COM.MFG.1088\RVMDK\COM.MFG.1088.uvprojx</PathAndName>
+    <NodeIsActive>1</NodeIsActive>
   </project>
 
 </ProjectWorkspace>

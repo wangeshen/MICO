@@ -164,16 +164,16 @@ int application_start()
 	}
 	sdiopkt = (SDIOPkt *) local_outbuf;
 
- 
-    /*UART receive thread*/
-    uart_config.baud_rate    = 115200;
-    uart_config.data_width   = DATA_WIDTH_8BIT;
-    uart_config.parity       = NO_PARITY;
-    uart_config.stop_bits    = STOP_BITS_1;
-    uart_config.flow_control = FLOW_CONTROL_DISABLED;
-    uart_config.flags = UART_WAKEUP_DISABLE;
-    ring_buffer_init  ( (ring_buffer_t *)&rx_buffer, (uint8_t *)rx_data, UART_BUFFER_LENGTH );
-    MicoUartInitialize( UART_INDEX, &uart_config, (ring_buffer_t *)&rx_buffer );
+// 
+//    /*UART receive thread*/
+//    uart_config.baud_rate    = 115200;
+//    uart_config.data_width   = DATA_WIDTH_8BIT;
+//    uart_config.parity       = NO_PARITY;
+//    uart_config.stop_bits    = STOP_BITS_1;
+//    uart_config.flow_control = FLOW_CONTROL_DISABLED;
+//    uart_config.flags = UART_WAKEUP_DISABLE;
+//    ring_buffer_init  ( (ring_buffer_t *)&rx_buffer, (uint8_t *)rx_data, UART_BUFFER_LENGTH );
+//    MicoUartInitialize( UART_INDEX, &uart_config, (ring_buffer_t *)&rx_buffer );
   
 	rx_buf = malloc(BUF_LEN);
 	if (rx_buf == NULL)

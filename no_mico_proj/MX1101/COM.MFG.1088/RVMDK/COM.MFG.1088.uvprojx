@@ -309,7 +309,7 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0xd000</StartAddress>
+                <StartAddress>0x5b000</StartAddress>
                 <Size>0xc0000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
@@ -363,7 +363,7 @@
             <useXO>0</useXO>
             <VariousControls>
               <MiscControls>--diag_suppress=1,1293</MiscControls>
-              <Define>DEBUG</Define>
+              <Define>DEBUG MFG_MODE</Define>
               <Undefine></Undefine>
               <IncludePath>..\..\..\..\Demos\COM.MXCHIP.SPP;..\..\..\..\include;..\..\..\..\MICO;..\..\..\..\External;..\..\..\..\Support;..\..\..\..\Board\MicoKit-3088;..\..\..\..\Platform\include;..\..\..\..\Platform\Cortex-M3;..\..\..\..\Platform\Cortex-M3\CMSIS;..\..\..\..\Platform\MCU\MX1101\peripherals\Libraries\inc;..\..\..\..\Platform\MCU\MX1101\peripherals</IncludePath>
             </VariousControls>
