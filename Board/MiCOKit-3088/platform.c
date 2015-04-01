@@ -114,7 +114,7 @@ const platform_pin_mapping_t gpio_mapping[] =
 //  [WL_GPIO0]                          = {GPIOB, 12,  RCC_AHB1Periph_GPIOB},
   [WL_GPIO1]                            = {GPIOA,  10},
 //  [WL_REG]                            = {GPIOC,  1,  RCC_AHB1Periph_GPIOC},
-  [WL_REG]                            = {GPIOB,  5},
+  [WL_REG]                            = {GPIOB,  20},
   [MICO_SYS_LED]                        = {GPIOA,  3 }, 
   [MICO_RF_LED]                         = {GPIOA,  4 }, 
 //  [BOOT_SEL]                          = {GPIOB,  1,  RCC_AHB1Periph_GPIOB}, 
@@ -122,8 +122,8 @@ const platform_pin_mapping_t gpio_mapping[] =
   [EasyLink_BUTTON]                     = {GPIOA,  5}, 
   [STDIO_UART_RX]                       = {GPIOB,  6},
   [STDIO_UART_TX]                       = {GPIOB,  7},
-  [SDIO_INT]                            = {GPIOA,  22},
-  //[USB_DETECT]                          = {GPIOA,  22},
+  [SDIO_INT]                            = {GPIOA,  24},
+  [USB_DETECT]                          = {GPIOA,  22},
 
 //  /* GPIOs for external use */
   [APP_UART_RX]                         = {GPIOB, 29},
