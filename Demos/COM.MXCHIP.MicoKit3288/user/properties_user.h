@@ -58,9 +58,9 @@
 
 // uart
  struct uart_t {
-  char buf[MAX_USER_UART_BUF_SIZE];   // use a buffer to store data to send or received
-  uint32_t data_len;                  // uart data len to send or received
-  bool recv_event;                    //
+  char rx_buf[MAX_USER_UART_BUF_SIZE];   // use a buffer to store data received
+  uint32_t rx_data_len;                  // uart data len received
+  bool rx_event;                       // recv notify flag
 };
 
 #endif // __MICO_DEVICE_PROPERTIES_USER_H_

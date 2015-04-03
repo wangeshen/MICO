@@ -310,9 +310,9 @@ int event_status_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
 
 /******************* uart for user ***************/
 struct uart_t user_uart = {
-  .buf = {0},
-  .data_len = 0,
-  .recv_event = true   // true for always recv data
+  .rx_buf = {0},
+  .rx_data_len = 0,
+  .rx_event = true   // true for always recv data
 };
 
 // get: recv uart data
@@ -356,12 +356,8 @@ int uart_data_send(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_
   send_len = ((val_len > prop->maxStringLen) ? prop->maxStringLen : val_len);
   err = user_uartSend((unsigned char*)val, send_len);
   if(kNoErr == err){
-    memset(prop->value, '\0', prop->maxStringLen);
-    strncpy((char*)prop->value, val, send_len);
-    *(prop->value_len) = send_len;
+    properties_user_log("uart_data_send: val=%s, val_len=%d.", (char*)val, val_len);
     ret = 0;  // set ok
-    
-    properties_user_log("uart_data_send: val=%s, val_len=%d.", (char*)prop->value, *(prop->value_len));
   }
   else{
    ret = -1;
@@ -561,15 +557,15 @@ const struct mico_service_t  service_table[] = {
     .properties = {
       [0] = {
         .type = "public.map.property.message",  // uart message uuid
-        .value = &(user_uart.buf),
-        .value_len = &(user_uart.data_len),
+        .value = &(user_uart.rx_buf),
+        .value_len = &(user_uart.rx_data_len),
         .format = MICO_PROP_TYPE_STRING,
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO | MICO_PROP_PERMS_EV),
         .get = uart_data_recv,
         .set = uart_data_send,
         .notify_check = uart_data_recv_check,   // check recv data
         .arg = &user_uart,
-        .event = &(user_uart.recv_event),       // event flag
+        .event = &(user_uart.rx_event),       // event flag
         .hasMeta = false,
 //        .maxValue.intValue = 4095,
 //        .minValue.intValue = 0,
