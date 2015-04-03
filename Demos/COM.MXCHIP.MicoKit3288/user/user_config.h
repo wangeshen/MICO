@@ -49,5 +49,8 @@
 
 #define DEFAULT_DEVICE_NAME                 "MicoKit3288"
 
+#define MICO_PROPERTIES_NOTIFY_INTERVAL     1000      // 1000ms
+#define STACK_SIZE_NOTIFY_THREAD            0x400
+
 #endif  // __USER_CONFIG_H_
 

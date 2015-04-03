@@ -44,6 +44,8 @@
 #define FOGCLOUD_MSG_TOPIC_OUT_SUB_VALUE  "/value"
 #define FOGCLOUD_MSG_TOPIC_OUT_SUB_EVENT  "/event"
 
+#define FOGCLOUD_MSG_TOPIC_OUT_NOTIFY    "read"
+
 // msg data
 typedef struct _mico_fogcloud_msg_t{
   const char *topic;
@@ -57,7 +59,8 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t s
                                 mico_fogcloud_msg_t *cloud_msg);
 
 // property notify
-OSStatus mico_properties_notify(mico_Context_t * const inContext, struct mico_service_t service_table[]);
+OSStatus mico_start_properties_notify(mico_Context_t * const inContext, struct mico_service_t service_table[],
+                                      uint32_t period_ms, uint32_t statck_size);
 
 /*******************************************************************************
 * INTERNAL FUNCTIONS

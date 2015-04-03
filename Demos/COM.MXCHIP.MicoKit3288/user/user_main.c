@@ -111,17 +111,17 @@ OSStatus user_main( mico_Context_t * const inContext )
   
   /* LED init */
   // ...
+  
+  /* start properties notify task */
+  err = mico_start_properties_notify(inContext, service_table, 
+                                     MICO_PROPERTIES_NOTIFY_INTERVAL, 
+                                     STACK_SIZE_NOTIFY_THREAD);
+  require_noerr_action( err, exit, user_log("ERROR: mico_start_properties_notify err=%d", err) );
     
   // loop for handling msg
   while(1){
-    //user_log("user_main working...");
-    mico_thread_msleep(500);
-    
-    // prop notify
-    err = mico_properties_notify(inContext, service_table);
-    if(kNoErr != err){
-        user_log("ERROR: properties notify failed! err = %d", err);
-      }
+    user_log("user_main working...");
+    mico_thread_msleep(10000);
   }
 
   // never get here only if fatal err && exit.

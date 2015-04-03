@@ -29,6 +29,16 @@
 #define msg_dispatch_log_trace() custom_log_trace("MSG_DISPATCH")
 
 
+// notify data
+typedef struct _mico_notify_thread_data_t{
+  mico_Context_t* context;
+  struct mico_service_t* p_service_table;
+  uint32_t notify_interval;
+}mico_notify_thread_data_t;
+
+mico_notify_thread_data_t g_notify_thread_data;
+
+
 // override by user customized topic message handler in user_main.c
 WEAK OSStatus user_customized_topic_msg_handler(mico_Context_t* context, 
                                            const char* topic, const unsigned int topicLen,
@@ -206,8 +216,8 @@ exit:
   return err;
 }
 
-// properties notify task
-OSStatus  mico_properties_notify(mico_Context_t * const inContext, struct mico_service_t  service_table[])
+
+OSStatus  _properties_notify(mico_Context_t * const inContext, struct mico_service_t service_table[])
 {
   OSStatus err = kUnknownErr;
   json_object *notify_obj = NULL;
@@ -226,7 +236,7 @@ OSStatus  mico_properties_notify(mico_Context_t * const inContext, struct mico_s
   if( NULL != (json_object_get_object(notify_obj)->head) ){
     notify_json_string = json_object_to_json_string(notify_obj);
     // notify to topic: <device_id>/out/read
-    err = MicoFogCloudMsgSend(inContext, "read/value", 
+    err = MicoFogCloudMsgSend(inContext, FOGCLOUD_MSG_TOPIC_OUT_NOTIFY, 
                               (unsigned char*)notify_json_string, strlen(notify_json_string));
   }
   else{
@@ -236,7 +246,7 @@ OSStatus  mico_properties_notify(mico_Context_t * const inContext, struct mico_s
 
 exit:
   if(kNoErr != err){
-    msg_dispatch_log("ERROR: mico_properties_notify error, err = %d", err);
+    msg_dispatch_log("ERROR: _properties_notify error, err = %d", err);
   }
   if(NULL != notify_obj){
     json_object_put(notify_obj);
@@ -245,3 +255,47 @@ exit:
   return err;
 }
 
+// properties notify task
+void notify_thread(void* arg)
+{
+  OSStatus err = kUnknownErr;
+  mico_notify_thread_data_t *p_notify_thread_data;
+  
+  p_notify_thread_data = (mico_notify_thread_data_t*)arg;
+  require_action(p_notify_thread_data, exit, err = kParamErr);
+  
+  while(1){
+    err = _properties_notify(p_notify_thread_data->context, p_notify_thread_data->p_service_table);
+    if(kNoErr != err){
+      msg_dispatch_log("ERROR: properties notify failed! err = %d", err);
+    }
+    
+    mico_thread_msleep(p_notify_thread_data->notify_interval);
+  }
+  
+exit:  
+  // never get here only if notify work err && exit.
+  msg_dispatch_log("ERROR: notify thread exit err=%d.", err);
+  mico_rtos_delete_thread(NULL);
+  return;
+}
+
+OSStatus mico_start_properties_notify(mico_Context_t * const inContext, struct mico_service_t service_table[],
+                                      uint32_t period_ms, uint32_t stack_size)
+{
+  msg_dispatch_log_trace();
+  OSStatus err = kUnknownErr;
+  
+  require_action(inContext, exit, err = kParamErr);
+  
+  g_notify_thread_data.context = inContext;
+  g_notify_thread_data.p_service_table = service_table;
+  g_notify_thread_data.notify_interval = period_ms;
+  
+  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "user_main", 
+                                notify_thread, stack_size, 
+                                (void*)&g_notify_thread_data );
+  
+exit:
+  return err; 
+}
