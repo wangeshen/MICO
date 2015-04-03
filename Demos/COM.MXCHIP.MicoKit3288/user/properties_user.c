@@ -123,7 +123,9 @@ int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_
 int rgb_led_sw_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
-  // read hardware status
+  // read hardware status, no hardware status to read, just return prop->value
+  *((bool*)val) = *((bool*)prop->value);  
+  *val_len = *(prop->value_len);
   
   properties_user_log("rgb_led_sw_get: val=%d, val_len=%d.", *((bool*)val), *((uint32_t*)val_len) );
   
@@ -154,7 +156,9 @@ int rgb_led_hues_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
 int rgb_led_hues_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
-  // get hardware status
+  // get hardware status, no hardware status to read, just return prop->value
+  *((int*)val) = *((int*)prop->value);  
+  *val_len = *(prop->value_len);
   
   properties_user_log("rgb_led_hues_get: val=%d, val_len=%d.", *((int*)val), *(uint32_t*)val_len );
   
@@ -185,7 +189,9 @@ int rgb_led_saturation_set(struct mico_prop_t *prop, void *arg, void *val, uint3
 int rgb_led_saturation_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
-  // get hardware status
+  // get hardware status, no hardware status to read, just return prop->value
+  *((int*)val) = *((int*)prop->value);  
+  *val_len = *(prop->value_len);
   
   properties_user_log("rgb_led_saturation_get: val=%d, val_len=%d.", *((int*)val), *(uint32_t*)val_len );
   
@@ -216,7 +222,9 @@ int rgb_led_brightness_set(struct mico_prop_t *prop, void *arg, void *val, uint3
 int rgb_led_brightness_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
-  // get hardware status
+  // get hardware status, no hardware status to read, just return prop->value
+  *((int*)val) = *((int*)prop->value);  
+  *val_len = *(prop->value_len);
   
   properties_user_log("rgb_led_brightness_get: val=%d, val_len=%d.", *((int*)val), *(uint32_t*)val_len );
   
@@ -357,7 +365,7 @@ const struct mico_service_t  service_table[] = {
         .get = rgb_led_sw_get,              // get led switch status function
         .set = rgb_led_sw_set,              // set led switch status function
         .notify_check = NULL,               // not notifiable
-        .arg = &rgb_led,               // led switch status
+        .arg = &rgb_led,                   // led data
         .event = NULL,
         .hasMeta = false,
 //        .maxValue.intValue = 0,

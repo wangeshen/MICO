@@ -150,7 +150,7 @@ OSStatus PropertyNotifyListAdd(int iid, int service_index, int property_index,
   if(NULL == *p_notify_list){  // add to first node
     *p_notify_list = notify;
     properties_log("notify add: iid=%d, s_id=%d, p_id=%d.", 
-                   plist->iid, plist->s_idx, plist->p_idx);
+                   (*p_notify_list)->iid, (*p_notify_list)->s_idx, (*p_notify_list)->p_idx);
     return kNoErr;  
   }
   else{  // add to node to the end
