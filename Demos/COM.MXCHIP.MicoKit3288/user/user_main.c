@@ -70,27 +70,6 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* context,
   return err;
 }
 
-// override user customized topic message handler
-OSStatus user_customized_topic_msg_handler(mico_Context_t* context, 
-                                           const char* topic, const unsigned int topicLen,
-                                           unsigned char *inBuf, unsigned int inBufLen)
-{
-  user_log_trace();
-  OSStatus err = kUnknownErr;
-  
-  if((NULL == context) || (NULL == topic) || (0 == topicLen) ) {
-    user_log("ERROR: user_customized_topic_msg_handler param error, err=%d", err);
-    return kParamErr;
-  }
-  
-  // just send the message to usart
-  err = user_uartSend(inBuf, inBufLen);
-  if(kNoErr != err){
-    user_log("ERROR: user customized msg send to usart error, err=%d", err);
-  }
-  
-  return err;
-}
 
 OSStatus user_main( mico_Context_t * const inContext )
 {

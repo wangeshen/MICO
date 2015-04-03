@@ -28,21 +28,6 @@
 // recv topic
 #define FOGCLOUD_MSG_TOPIC_IN_READ       "/read"
 #define FOGCLOUD_MSG_TOPIC_IN_WRITE      "/write"
-#define FOGCLOUD_MSG_TOPIC_IN_CHAT       "/chat"
-#define FOGCLOUD_MSG_TOPIC_IN_INFO       "/info"
-
-// send topic
-#define FOGCLOUD_MSG_TOPIC_OUT_READ      "/read"
-#define FOGCLOUD_MSG_TOPIC_OUT_WRITE     "/write"
-#define FOGCLOUD_MSG_TOPIC_OUT_CHAT      "/chat"
-#define FOGCLOUD_MSG_TOPIC_OUT_INFO      "/info"
-
-// sub topic
-#define FOGCLOUD_MSG_TOPIC_IN_SUB_VALUE  "/value"
-#define FOGCLOUD_MSG_TOPIC_IN_SUB_EVENT  "/event"
-
-#define FOGCLOUD_MSG_TOPIC_OUT_SUB_VALUE  "/value"
-#define FOGCLOUD_MSG_TOPIC_OUT_SUB_EVENT  "/event"
 
 #define FOGCLOUD_MSG_TOPIC_OUT_NOTIFY    "read"
 
@@ -61,12 +46,5 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t s
 // property notify
 OSStatus mico_start_properties_notify(mico_Context_t * const inContext, struct mico_service_t service_table[],
                                       uint32_t period_ms, uint32_t statck_size);
-
-/*******************************************************************************
-* INTERNAL FUNCTIONS
-*******************************************************************************/
-WEAK OSStatus user_customized_topic_msg_handler(mico_Context_t* context, 
-                                                const char* topic, const unsigned int topicLen,
-                                                unsigned char *inBuf, unsigned int inBufLen);
 
 #endif // __MICO_FOGCLOUD_MSG_DISPATCH_H_

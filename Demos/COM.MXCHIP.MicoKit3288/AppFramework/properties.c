@@ -884,6 +884,7 @@ exit:
 /* read multiple properties;
 * input:  json object of property iids to read, like {"1":1, "2":2}, 
 *   NOTE: function get iid from value of key:value pair.
+*         if input is {}, means read device meta data.
 * return: success read properties json object like {"1":100, "2":99}
 *         if no property read success, return null object "{}",
 *         if error, return value is NULL.
@@ -897,12 +898,27 @@ json_object*  mico_read_properties(struct mico_service_t *service_table,
   require( service_table, exit );
   require( prop_read_list_obj, exit );
   
-  outJsonObj = json_object_new_object();
-  require( outJsonObj, exit );
-  
-  json_object_object_foreach(prop_read_list_obj, key, val) {
-    iid = json_object_get_int(val);
-    mico_property_read_create(service_table, key, iid, sub_type, outJsonObj);
+  // read meata data
+  if( (NULL == json_object_get_object(prop_read_list_obj)->head) ){  // input: {}
+       // create report json data
+       outJsonObj = mico_get_device_info(service_table);
+       if(NULL == outJsonObj){
+         properties_log("ERROR: mico_get_device_info error!");
+         outJsonObj = json_object_new_object();
+         require( outJsonObj, exit );
+         json_object_object_add(outJsonObj, "MICO_PROP_CODE_READ_STATUS", json_object_new_int(MICO_PROP_CODE_READ_FAILED));
+       }
+     }
+  else{
+    
+    // read properties
+    outJsonObj = json_object_new_object();
+    require( outJsonObj, exit );
+    
+    json_object_object_foreach(prop_read_list_obj, key, val) {
+      iid = json_object_get_int(val);
+      mico_property_read_create(service_table, key, iid, sub_type, outJsonObj);
+    }
   }
   
 exit:
