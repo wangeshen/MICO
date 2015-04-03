@@ -24,6 +24,7 @@
 #include "properties_user.h"
 #include "JSON-C/json.h"
 #include "rgb_led.h"
+#include "user_uart.h"
 
 #define properties_user_log(M, ...) custom_log("DEV_PROPERTIES_USER", M, ##__VA_ARGS__)
 #define properties_user_log_trace() custom_log_trace("DEV_PROPERTIES_USER")
@@ -47,7 +48,7 @@ struct dev_info_t dev_info = {
   .manufactory_len = 6
 };
 
-// no set/get function
+// dev_info set/get function
 int string_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
@@ -307,6 +308,89 @@ int event_status_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
   return 0;  // get ok
 }
 
+/******************* uart for user ***************/
+struct uart_t user_uart = {
+  .buf = {0},
+  .data_len = 0,
+  .recv_event = true   // true for always recv data
+};
+
+// get: recv uart data
+int uart_data_recv(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  int ret = 0;  
+  uint32_t recv_len = 0;
+  
+  if((NULL == prop) || (NULL == val)){
+    return -1;
+  }
+  
+  // recv data from uart
+  memset(val, '\0', prop->maxStringLen);
+  recv_len = user_uartRecv((unsigned char*)val, MAX_USER_UART_BUF_SIZE);
+  if(recv_len > 0){
+    *val_len = recv_len;
+    ret = 0;
+    properties_user_log("uart_data_recv: val=%s, val_len=%d.", (char*)val, *val_len);
+  }
+  else{
+    *val_len = 0;
+    ret = -1;
+  }
+  
+  return ret;
+}
+
+// set: send data to uart
+int uart_data_send(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
+{
+  int ret = 0;
+  OSStatus err = kUnknownErr;
+  uint32_t send_len = 0;
+  
+  if(NULL == prop){
+    return -1;
+  }
+  
+  // write string (write to flash if nessary)
+  send_len = ((val_len > prop->maxStringLen) ? prop->maxStringLen : val_len);
+  err = user_uartSend((unsigned char*)val, send_len);
+  if(kNoErr == err){
+    memset(prop->value, '\0', prop->maxStringLen);
+    strncpy((char*)prop->value, val, send_len);
+    *(prop->value_len) = send_len;
+    ret = 0;  // set ok
+    
+    properties_user_log("uart_data_send: val=%s, val_len=%d.", (char*)prop->value, *(prop->value_len));
+  }
+  else{
+   ret = -1;
+  }
+  
+  return ret;
+}
+
+// notify_check: check uart data recv
+int uart_data_recv_check(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  int ret = 0;
+  
+  // get adc data
+  ret = prop->get(prop, arg, val, val_len);
+  if(0 != ret){
+    return -1;   // get value error
+  }
+  
+  // update check (uart data recieved)
+  ret = 1;
+  
+  // return new value to update prop value && len
+//  *((int*)val) = (int)adc_data;  
+//  *val_len = adc_data_len;
+  
+  return ret;
+}
+
 /*******************************************************************************
 * service_table: list all serivices && properties for the device
  ******************************************************************************/
@@ -472,5 +556,29 @@ const struct mico_service_t  service_table[] = {
       [2] = {NULL}
     }
   },
-  [3] = {NULL}
+  [3] = {
+    .type = "public.map.service.uart",   //  service 3: ADC (uuid)
+    .properties = {
+      [0] = {
+        .type = "public.map.property.message",  // uart message uuid
+        .value = &(user_uart.buf),
+        .value_len = &(user_uart.data_len),
+        .format = MICO_PROP_TYPE_STRING,
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO | MICO_PROP_PERMS_EV),
+        .get = uart_data_recv,
+        .set = uart_data_send,
+        .notify_check = uart_data_recv_check,   // check recv data
+        .arg = &user_uart,
+        .event = &(user_uart.recv_event),       // event flag
+        .hasMeta = false,
+//        .maxValue.intValue = 4095,
+//        .minValue.intValue = 0,
+//        .minStep.intValue = 1,
+        .maxStringLen = MAX_USER_UART_BUF_SIZE,
+        .unit = "byte"
+      },
+      [1] = {NULL}
+    },
+  },
+  [4] = {NULL}
 };

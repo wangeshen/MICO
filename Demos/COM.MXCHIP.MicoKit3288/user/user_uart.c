@@ -34,6 +34,7 @@
 volatile ring_buffer_t  rx_buffer;
 volatile uint8_t        rx_data[UART_BUFFER_LENGTH];
 
+/*
 //extern void uartRecv_thread(void *inContext);
 static size_t _uart_get_one_packet(uint8_t* buf, int maxlen);
 
@@ -59,11 +60,12 @@ void uartRecv_thread(void *inContext)
 exit:
   if(inDataBuffer) free(inDataBuffer);
 }
+*/
 
 /* Packet format: BB 00 CMD(2B) Status(2B) datalen(2B) data(x) checksum(2B)
 * copy to buf, return len = datalen+10
 */
-size_t _uart_get_one_packet(uint8_t* inBuf, int inBufLen)
+/*size_t _uart_get_one_packet(uint8_t* inBuf, int inBufLen)
 {
   user_uart_log_trace();
 
@@ -81,7 +83,7 @@ size_t _uart_get_one_packet(uint8_t* inBuf, int inBufLen)
      }
    }  
   } 
-}
+}*/
 
 
 /*******************************************************************************
@@ -90,7 +92,7 @@ size_t _uart_get_one_packet(uint8_t* inBuf, int inBufLen)
 
 OSStatus user_uartInit(mico_Context_t* const inContext)
 {
-  OSStatus err = kUnknownErr;
+ // OSStatus err = kUnknownErr;
   mico_uart_config_t uart_config;
   
   //USART init
@@ -107,15 +109,15 @@ OSStatus user_uartInit(mico_Context_t* const inContext)
   
   MicoUartInitialize( UART_FOR_USER, &uart_config, (ring_buffer_t *)&rx_buffer );
   
-  //USART receive thread
-  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART Recv", 
-                                uartRecv_thread, STACK_SIZE_USART_RECV_THREAD, 
-                                (void*)inContext );
-  require_noerr_action( err, exit, user_uart_log("ERROR: Unable to start the USART recv thread.") );
+//  //USART receive thread
+//  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "UART Recv", 
+//                                uartRecv_thread, STACK_SIZE_USART_RECV_THREAD, 
+//                                (void*)inContext );
+//  require_noerr_action( err, exit, user_uart_log("ERROR: Unable to start the USART recv thread.") );
   return kNoErr;
   
-exit:
-  return err;
+//exit:
+//  return err;
 }
 
 OSStatus user_uartSend(unsigned char *inBuf, unsigned int inBufLen)
@@ -129,4 +131,24 @@ OSStatus user_uartSend(unsigned char *inBuf, unsigned int inBufLen)
   
 exit:
   return err;
+}
+
+uint32_t user_uartRecv(unsigned char *outBuf, unsigned int getLen)
+{
+  unsigned int data_len = 0;
+
+  if( MicoUartRecv( UART_FOR_USER, outBuf, getLen, UART_RECV_TIMEOUT) == kNoErr){
+    data_len = getLen;
+  }
+  else{
+    data_len = MicoUartGetLengthInBuffer( UART_FOR_USER );
+    if(data_len){
+      MicoUartRecv(UART_FOR_USER, outBuf, data_len, UART_RECV_TIMEOUT);
+    }
+    else{
+      data_len = 0;
+    }
+  }
+  
+  return data_len;
 }

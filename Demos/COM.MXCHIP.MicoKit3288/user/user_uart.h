@@ -31,8 +31,8 @@
  ******************************************************************************/
 #define UART_FOR_USER                       MICO_UART_1
 #define UART_RECV_TIMEOUT                   100
-#define UART_ONE_PACKAGE_LENGTH             1024
-#define UART_BUFFER_LENGTH                  2048
+#define UART_ONE_PACKAGE_LENGTH             512
+#define UART_BUFFER_LENGTH                  1024
    
 #define STACK_SIZE_USART_RECV_THREAD        0x500
 
@@ -43,5 +43,6 @@
 
 OSStatus user_uartInit(mico_Context_t* const inContext);
 OSStatus user_uartSend(unsigned char *inBuf, unsigned int inBufLen);
+uint32_t user_uartRecv(unsigned char *outBuf, unsigned int getLen);
 
 #endif  // __USER_UART_H_

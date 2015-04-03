@@ -102,8 +102,8 @@ OSStatus user_main( mico_Context_t * const inContext )
   require_action(inContext, exit, err = kParamErr);
   
   // uart init
-  //err = user_uartInit(inContext);
-  //require_noerr_action( err, exit, user_log("ERROR: user uart init failed!") );
+  err = user_uartInit(inContext);
+  require_noerr_action( err, exit, user_log("ERROR: user uart init failed!") );
   
   /* ADC init */
   err = MicoAdcInitialize(MICO_ADC_1, 3);

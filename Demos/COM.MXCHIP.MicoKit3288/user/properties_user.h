@@ -30,6 +30,8 @@
 
 #define MAX_DEVICE_NAME_SIZE         16
 #define MAX_DEVICE_MANUFACTORY_SIZE  16
+
+#define MAX_USER_UART_BUF_SIZE       512
    
 // device info
  struct dev_info_t {
@@ -52,6 +54,13 @@
  struct adc_t {
   int data;
   bool event;   // event flag
+};
+
+// uart
+ struct uart_t {
+  char buf[MAX_USER_UART_BUF_SIZE];   // use a buffer to store data to send or received
+  uint32_t data_len;                  // uart data len to send or received
+  bool recv_event;                    //
 };
 
 #endif // __MICO_DEVICE_PROPERTIES_USER_H_
