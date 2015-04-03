@@ -51,7 +51,7 @@ struct dev_info_t dev_info = {
 int string_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
-
+  
   if((NULL == prop) || (NULL == val)){
     return -1;
   }
@@ -70,7 +70,7 @@ int string_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len
 int string_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 {
   int ret = 0;
-
+  
   if(NULL == prop){
     return -1;
   }
@@ -126,7 +126,7 @@ int rgb_led_sw_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val
   // read hardware status
   
   properties_user_log("rgb_led_sw_get: val=%d, val_len=%d.", *((bool*)val), *((uint32_t*)val_len) );
-
+  
   return ret;
 }
 
@@ -141,7 +141,7 @@ int rgb_led_hues_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
   
   // control hardware
   if(rgb_led->sw){
-  H2R_HSBtoRGB((float)hues, (float)rgb_led->saturation, (float)rgb_led->brightness, color);
+    H2R_HSBtoRGB((float)hues, (float)rgb_led->saturation, (float)rgb_led->brightness, color);
   }else
   {
     H2R_HSBtoRGB((float)hues, (float)rgb_led->saturation, (float)0, color);
@@ -200,7 +200,7 @@ int rgb_led_brightness_set(struct mico_prop_t *prop, void *arg, void *val, uint3
   int brightness = *((int*)val);
   struct rgb_led_t *rgb_led = (struct rgb_led_t*)arg;
   properties_user_log("rgb_led_brightness_set: val=%d, val_len=%d.", *((int*)val), val_len);
-
+  
   // control hardware
   if(rgb_led->sw){
     H2R_HSBtoRGB((float)rgb_led->hues, (float)rgb_led->saturation, (float)brightness, color);
@@ -236,7 +236,7 @@ int adc_data_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_l
   int ret = 0;
   uint16_t adc_data = 0;
   OSStatus err = kUnknownErr;
-
+  
   // get ADC data
   err = MicoAdcTakeSample(MICO_ADC_1, &adc_data);
   if(kNoErr == err){
@@ -281,10 +281,30 @@ int notify_check_adc_data(struct mico_prop_t *prop, void *arg, void *val, uint32
   return ret;
 }
 
-/************ service_table ***********/
+int event_status_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  // get event value
+  *(bool*)val = *((bool*)prop->value);
+  *val_len = *(prop->value_len);
+  
+  return 0;  // get ok
+}
+
+int event_status_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
+{
+  // set event value
+  *((bool*)prop->value) = *((bool*)val);
+  *(prop->value_len) = val_len;
+  
+  return 0;  // get ok
+}
+
+/*******************************************************************************
+* service_table: list all serivices && properties for the device
+ ******************************************************************************/
 const struct mico_service_t  service_table[] = {
-  [0] = {  // dev_info
-    .type = "public.map.service.dev_info",    // dev_info  uuid
+  [0] = {
+    .type = "public.map.service.dev_info",    // service 1: dev_info (uuid)
     .properties = {
       [0] = {
         .type = "public.map.property.name",  // device name uuid
@@ -298,6 +318,9 @@ const struct mico_service_t  service_table[] = {
         .arg = &(dev_info.name),            // get/set string pointer (device name)
         .event = NULL,                      // not notifiable
         .hasMeta = false,                   // no max/min/step
+//        .maxValue.intValue = 0,
+//        .minValue.intValue = 0,
+//        .minStep.intValue = 0,  
         .maxStringLen = MAX_DEVICE_NAME_SIZE,  // max length of device name string
         .unit = NULL                        // no unit
       },
@@ -313,6 +336,9 @@ const struct mico_service_t  service_table[] = {
         .arg = &(dev_info.manufactory),
         .event = NULL,                      // not notifiable
         .hasMeta = false,
+//        .maxValue.intValue = 0,
+//        .minValue.intValue = 0,
+//        .minStep.intValue = 0,  
         .maxStringLen = MAX_DEVICE_MANUFACTORY_SIZE,  // max length of device manufactory
         .unit = NULL                        // no unit
       },
@@ -320,7 +346,7 @@ const struct mico_service_t  service_table[] = {
     }
   },
   [1] = {
-    .type = "public.map.service.led",       // rgb led uuid
+    .type = "public.map.service.led",       // service 2: rgb led (uuid)
     .properties = {
       [0] = {
         .type = "public.map.property.switch",  // led switch uuid
@@ -334,6 +360,9 @@ const struct mico_service_t  service_table[] = {
         .arg = &rgb_led,               // led switch status
         .event = NULL,
         .hasMeta = false,
+//        .maxValue.intValue = 0,
+//        .minValue.intValue = 0,
+//        .minStep.intValue = 0,     
         .maxStringLen = 0,
         .unit = NULL
       },
@@ -394,7 +423,7 @@ const struct mico_service_t  service_table[] = {
     }
   },
   [2] = {
-    .type = "public.map.service.adc",   //  ADC uuid
+    .type = "public.map.service.adc",   //  service 3: ADC (uuid)
     .properties = {
       [0] = {
         .type = "public.map.property.value",  // adc value uuid
@@ -414,7 +443,25 @@ const struct mico_service_t  service_table[] = {
         .maxStringLen = 0,
         .unit = NULL
       },
-      [1] = {NULL}
+      [1] = {
+        .type = "public.map.property.value.event",  // adc value event (uuid)
+        .value = &(adc.event),
+        .value_len = &bool_len,
+        .format = MICO_PROP_TYPE_BOOL,
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
+        .get = event_status_get,
+        .set = event_status_set,
+        .notify_check = NULL,
+        .arg = &adc,           // adc data
+        .event = NULL,
+        .hasMeta = false,
+//        .maxValue.intValue = 0,
+//        .minValue.intValue = 0,
+//        .minStep.intValue = 0,
+        .maxStringLen = 0,
+        .unit = NULL
+      },
+      [2] = {NULL}
     }
   },
   [3] = {NULL}
