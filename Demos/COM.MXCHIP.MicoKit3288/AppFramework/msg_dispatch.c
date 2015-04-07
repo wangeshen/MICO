@@ -51,7 +51,6 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
   char* response_sub_topic = NULL;
   json_object *response_json_obj = NULL;
   const char *response_json_string = NULL;
-  enum mico_prop_sub_type_t req_sub_type = MICO_PROP_SUB_TYPE_UNUSED;
   
   if((NULL == context) || (NULL == cloud_msg->topic) || (0 == cloud_msg->topic_len) ) {
     return kParamErr;
@@ -83,9 +82,8 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
     recv_json_object = json_tokener_parse((const char*)(cloud_msg->data));
     require_action(recv_json_object, exit, err = kFormatErr);
     msg_dispatch_log("Recv read object=%s", json_object_to_json_string(recv_json_object));
-    //create response json object
-    req_sub_type = MICO_PROP_SUB_TYPE_VALUE;         
-    response_json_obj = mico_read_properties(service_table, recv_json_object, req_sub_type);
+    //create response json object       
+    response_json_obj = mico_read_properties(service_table, recv_json_object);
     
     // send reponse for read data
     if(NULL == response_json_obj){
@@ -108,8 +106,7 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
     require_action(recv_json_object, exit, err = kFormatErr);
     msg_dispatch_log("Recv read object=%s", json_object_to_json_string(recv_json_object));
     //create response json object
-    req_sub_type = MICO_PROP_SUB_TYPE_VALUE;
-    response_json_obj = mico_write_properties(service_table, recv_json_object, req_sub_type);
+    response_json_obj = mico_write_properties(service_table, recv_json_object);
     
     // send reponse for write status
     if(NULL == response_json_obj){

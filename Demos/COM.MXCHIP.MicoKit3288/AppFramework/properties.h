@@ -73,14 +73,6 @@ enum mico_prop_format_t{
   MICO_PROP_TYPE_MAX
 };
 
-// property sub type
-enum mico_prop_sub_type_t{
-  MICO_PROP_SUB_TYPE_UNUSED = -1,
-  MICO_PROP_SUB_TYPE_VALUE = 0,
-  MICO_PROP_SUB_TYPE_EVENT = 1,
-  MICO_PROP_SUB_TYPE_MAX
-};
-
 // property type
 struct mico_prop_t{
   const char *type;
@@ -135,10 +127,10 @@ json_object* mico_get_device_info(struct mico_service_t service_table[]);
 
 // read multiple properties
 json_object* mico_read_properties(struct mico_service_t *service_table, 
-                               json_object *prop_read_list_obj, enum mico_prop_sub_type_t sub_type);
+                               json_object *prop_read_list_obj);
 // write multiple properties
 json_object* mico_write_properties(struct mico_service_t *service_table, 
-                               json_object *prop_write_list_obj, enum mico_prop_sub_type_t sub_type);
+                               json_object *prop_write_list_obj);
 
 // properties update check
 OSStatus mico_properties_notify_check(mico_Context_t * const inContext, struct mico_service_t *service_table,
