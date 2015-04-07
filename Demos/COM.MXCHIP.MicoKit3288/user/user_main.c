@@ -25,7 +25,7 @@
 #include "MicoFogCloud.h"
 #include "user_uart.h"
 #include "msg_dispatch.h"
-#include "properties_user.h"
+#include "user_properties.h"
 
 #define user_log(M, ...) custom_log("USER", M, ##__VA_ARGS__)
 #define user_log_trace() custom_log_trace("USER")

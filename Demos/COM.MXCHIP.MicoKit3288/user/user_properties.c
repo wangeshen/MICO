@@ -21,7 +21,7 @@
 
 #include "MICODefine.h"
 #include "properties.h"
-#include "properties_user.h"
+#include "user_properties.h"
 #include "JSON-C/json.h"
 #include "rgb_led.h"
 #include "user_uart.h"
@@ -532,7 +532,7 @@ const struct mico_service_t  service_table[] = {
         .unit = NULL
       },
       [1] = {
-        .type = "public.map.property.value.event",  // adc value event (uuid)
+        .type = "public.map.property.event",  // adc value event (uuid)
         .value = &(adc.event),
         .value_len = &bool_len,
         .format = MICO_PROP_TYPE_BOOL,
