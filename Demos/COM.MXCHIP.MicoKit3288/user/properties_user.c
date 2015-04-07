@@ -44,8 +44,8 @@ uint32_t float_len = sizeof(float);
 struct dev_info_t dev_info = {
   .name = "MicoKit3288",
   .name_len = 11,
-  .manufactory = "MXCHIP",
-  .manufactory_len = 6
+  .manufacturer = "MXCHIP",
+  .manufacturer_len = 6
 };
 
 // dev_info set/get function
@@ -413,28 +413,28 @@ const struct mico_service_t  service_table[] = {
         .unit = NULL                        // no unit
       },
       [1] = {
-        .type = "public.map.property.manufactory",  // device manufactory uuid
-        .value = &(dev_info.manufactory),
-        .value_len = &(dev_info.manufactory_len),
+        .type = "public.map.property.manufacturer",  // device manufacturer uuid
+        .value = &(dev_info.manufacturer),
+        .value_len = &(dev_info.manufacturer_len),
         .format = MICO_PROP_TYPE_STRING,
         .perms = MICO_PROP_PERMS_RO,
-        .get = string_get,                  // get string func to get manufactory
-        .set = NULL      ,                  // set sring func to change manufactory
+        .get = string_get,                  // get string func to get manufacturer
+        .set = NULL      ,                  // set sring func to change manufacturer
         .notify_check = NULL,               // not notifiable
-        .arg = &(dev_info.manufactory),
+        .arg = &(dev_info.manufacturer),
         .event = NULL,                      // not notifiable
         .hasMeta = false,
 //        .maxValue.intValue = 0,
 //        .minValue.intValue = 0,
 //        .minStep.intValue = 0,  
-        .maxStringLen = MAX_DEVICE_MANUFACTORY_SIZE,  // max length of device manufactory
+        .maxStringLen = MAX_DEVICE_MANUFACTURER_SIZE,  // max length of device manufacturer
         .unit = NULL                        // no unit
       },
       [2] = {NULL}                          // end flag
     }
   },
   [1] = {
-    .type = "public.map.service.led",       // service 2: rgb led (uuid)
+    .type = "public.map.service.rgb_led",       // service 2: rgb led (uuid)
     .properties = {
       [0] = {
         .type = "public.map.property.switch",  // led switch uuid

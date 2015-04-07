@@ -29,17 +29,17 @@
  ******************************************************************************/
 
 #define MAX_DEVICE_NAME_SIZE         16
-#define MAX_DEVICE_MANUFACTORY_SIZE  16
+#define MAX_DEVICE_MANUFACTURER_SIZE  16
 
 #define MAX_USER_UART_BUF_SIZE       512
    
 // device info
  struct dev_info_t {
   char name[MAX_DEVICE_NAME_SIZE+1];
-  char manufactory[MAX_DEVICE_MANUFACTORY_SIZE+1];
+  char manufacturer[MAX_DEVICE_MANUFACTURER_SIZE+1];
   
   uint32_t name_len;
-  uint32_t manufactory_len;
+  uint32_t manufacturer_len;
 };
 
 // rgb led
