@@ -855,7 +855,6 @@ json_object*  mico_read_properties(struct mico_service_t *service_table,
     }
   }
   else{
-    
     // read properties
     outJsonObj = json_object_new_object();
     require( outJsonObj, exit );

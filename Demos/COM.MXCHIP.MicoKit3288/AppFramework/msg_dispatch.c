@@ -57,8 +57,8 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
   }
   
   // strip "<device_id>/in"
-  recv_sub_topic_ptr = (char*)(cloud_msg->topic) + strlen(context->flashContentInRam.appConfig.fogcloudConfig.deviceId) +3;
-  recv_sub_topic_len = (int)cloud_msg->topic_len - (strlen(context->flashContentInRam.appConfig.fogcloudConfig.deviceId) +3);
+  recv_sub_topic_ptr = (char*)(cloud_msg->topic) + strlen(context->flashContentInRam.appConfig.fogcloudConfig.deviceId) + strlen(FOGCLOUD_MSG_TOPIC_IN);
+  recv_sub_topic_len = (int)cloud_msg->topic_len - (strlen(context->flashContentInRam.appConfig.fogcloudConfig.deviceId) + strlen(FOGCLOUD_MSG_TOPIC_IN));
   
   response_sub_topic = (char*)malloc(recv_sub_topic_len);   // response to where msg come from, remove leading '/'
   if(NULL == response_sub_topic){

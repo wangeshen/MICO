@@ -26,6 +26,9 @@
 #define __MICO_FOGCLOUD_MSG_DISPATCH_H_
 
 // recv topic
+#define FOGCLOUD_MSG_TOPIC_IN            "/in"
+#define FOGCLOUD_MSG_TOPIC_OUT           "/out"
+
 #define FOGCLOUD_MSG_TOPIC_IN_READ       "/read"
 #define FOGCLOUD_MSG_TOPIC_IN_WRITE      "/write"
 
