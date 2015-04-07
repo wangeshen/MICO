@@ -875,6 +875,12 @@ json_object*  mico_read_properties(struct mico_service_t *service_table,
       json_object_object_add(outJsonObj, MICO_PROP_KEY_RESP_ERROR, out_err_obj);
       json_object_object_add(out_err_obj, MICO_PROP_KEY_RESP_STATUS, json_object_new_int(MICO_PROP_CODE_READ_FAILED));
     }
+    else{
+      out_err_obj = json_object_new_object();
+      require( out_err_obj, exit );
+      json_object_object_add(outJsonObj, MICO_PROP_KEY_RESP_ERROR, out_err_obj);
+      json_object_object_add(out_err_obj, MICO_PROP_KEY_RESP_STATUS, json_object_new_int(MICO_PROP_CODE_READ_SUCCESS));
+    }
   }
   else{
     // create "read" && "err" sub-obj
@@ -900,6 +906,7 @@ json_object*  mico_read_properties(struct mico_service_t *service_table,
     
     // "status" obj for read status code
     if( (NULL == json_object_get_object(out_err_prop_obj)->head) ){  // no err
+      json_object_object_del(out_err_obj, MICO_PROP_KEY_RESP_ERROR_PROPERTIES);  // remove empty "properties" sub-obj
       json_object_object_add(out_err_obj,
                              MICO_PROP_KEY_RESP_STATUS, json_object_new_int(MICO_PROP_CODE_READ_SUCCESS));
     }
@@ -961,6 +968,7 @@ json_object*  mico_write_properties(struct mico_service_t *service_table,
   
   // "status" obj for write status code
   if( (NULL == json_object_get_object(out_err_prop_obj)->head) ){  // no err
+    json_object_object_del(out_err_obj, MICO_PROP_KEY_RESP_ERROR_PROPERTIES);  // remove empty "properties" sub-obj
     json_object_object_add(out_err_obj,
                            MICO_PROP_KEY_RESP_STATUS, json_object_new_int(MICO_PROP_CODE_WRITE_SUCCESS));
   }

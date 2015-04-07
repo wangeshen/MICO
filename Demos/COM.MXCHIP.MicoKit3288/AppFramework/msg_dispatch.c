@@ -115,7 +115,7 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
         err = MicoFogCloudMsgSend(context, response_sub_topic, 
                                   (unsigned char*)response_json_string, strlen(response_json_string));
       }
-      
+
       // send err code
       response_err_obj = json_object_object_get(response_json_obj, MICO_PROP_KEY_RESP_ERROR);
       if( (NULL !=  response_err_obj) && (NULL != json_object_get_object(response_err_obj)->head) ){
@@ -123,7 +123,7 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
         err = MicoFogCloudMsgSend(context, FOGCLOUD_MSG_TOPIC_OUT_ERROR, 
                                   (unsigned char*)response_json_string, strlen(response_json_string));
       }
-
+      
       // send read ok value
       response_prop_obj = json_object_object_get(response_json_obj, MICO_PROP_KEY_RESP_READ);
       if( (NULL !=  response_prop_obj) && (NULL != json_object_get_object(response_prop_obj)->head) ){
