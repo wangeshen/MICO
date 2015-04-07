@@ -33,6 +33,7 @@
 #define FOGCLOUD_MSG_TOPIC_IN_WRITE      "/write"
 
 #define FOGCLOUD_MSG_TOPIC_OUT_NOTIFY    "read"
+#define FOGCLOUD_MSG_TOPIC_OUT_ERROR     "err"
 
 // msg data
 typedef struct _mico_fogcloud_msg_t{

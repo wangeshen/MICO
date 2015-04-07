@@ -45,6 +45,7 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
 {
   msg_dispatch_log_trace();
   OSStatus err = kNoErr;
+  
   char* recv_sub_topic_ptr = NULL;
   int recv_sub_topic_len = 0;  
   json_object *recv_json_object = NULL;
@@ -52,11 +53,15 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
   json_object *response_json_obj = NULL;
   const char *response_json_string = NULL;
   
+  json_object *response_services_obj = NULL;
+  json_object *response_prop_obj = NULL;
+  json_object *response_err_obj = NULL;
+  
   if((NULL == context) || (NULL == cloud_msg->topic) || (0 == cloud_msg->topic_len) ) {
     return kParamErr;
   }
   
-  // strip "<device_id>/in"
+  // strip "<device_id>/in" to get response sub-topic, then response to:  "<device_id>/out/<sub-topic>"
   recv_sub_topic_ptr = (char*)(cloud_msg->topic) + strlen(context->flashContentInRam.appConfig.fogcloudConfig.deviceId) + strlen(FOGCLOUD_MSG_TOPIC_IN);
   recv_sub_topic_len = (int)cloud_msg->topic_len - (strlen(context->flashContentInRam.appConfig.fogcloudConfig.deviceId) + strlen(FOGCLOUD_MSG_TOPIC_IN));
   
@@ -75,25 +80,58 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
   if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_READ, recv_sub_topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_READ)) ){
     // from /read
     msg_dispatch_log("Recv from: %.*s, data[%d]: %s",
-                     recv_sub_topic_len, recv_sub_topic_ptr,
-                     cloud_msg->data_len, cloud_msg->data);
-    
-    // read properties
+                     recv_sub_topic_len, recv_sub_topic_ptr, cloud_msg->data_len, cloud_msg->data);
+   
+    // parse input json data
     recv_json_object = json_tokener_parse((const char*)(cloud_msg->data));
-    require_action(recv_json_object, exit, err = kFormatErr);
+    if (NULL == recv_json_object){  // input json format error, response to sub-topic "err" with error code
+      response_err_obj = json_object_new_object();
+      require( response_err_obj, exit );
+      json_object_object_add(response_err_obj, MICO_PROP_KEY_RESP_STATUS, json_object_new_int(MICO_PROP_CODE_DATA_FORMAT_ERR));
+      
+      response_json_string = json_object_to_json_string(response_err_obj);
+      err = MicoFogCloudMsgSend(context, FOGCLOUD_MSG_TOPIC_OUT_ERROR, 
+                                (unsigned char*)response_json_string, strlen(response_json_string));
+      goto exit;
+    }
     msg_dispatch_log("Recv read object=%s", json_object_to_json_string(recv_json_object));
-    //create response json object       
+        
+    // read properties, return "services/read/err" sub-obj in response_json_obj
     response_json_obj = mico_read_properties(service_table, recv_json_object);
     
     // send reponse for read data
-    if(NULL == response_json_obj){
+    if(NULL == response_json_obj){  // read failed
       msg_dispatch_log("ERROR: read properties error!");
-      json_object_object_add(response_json_obj, "MICO_PROP_READ_STATUS", json_object_new_int(MICO_PROP_CODE_READ_FAILED));
-      err = kReadErr;
+      json_object_object_add(response_err_obj, MICO_PROP_KEY_RESP_STATUS, json_object_new_int(MICO_PROP_CODE_READ_FAILED));
+      response_json_string = json_object_to_json_string(response_err_obj);
+      err = MicoFogCloudMsgSend(context, FOGCLOUD_MSG_TOPIC_OUT_ERROR, 
+                                  (unsigned char*)response_json_string, strlen(response_json_string));
     }
-    response_json_string = json_object_to_json_string(response_json_obj);
-    err = MicoFogCloudMsgSend(context, response_sub_topic, 
-                              (unsigned char*)response_json_string, strlen(response_json_string));
+    else {
+      // send services info msg
+      response_services_obj = json_object_object_get(response_json_obj, MICO_PROP_KEY_RESP_SERVICES);
+      if(NULL != response_services_obj){
+        response_json_string = json_object_to_json_string(response_json_obj);
+        err = MicoFogCloudMsgSend(context, response_sub_topic, 
+                                  (unsigned char*)response_json_string, strlen(response_json_string));
+      }
+      
+      // send err code
+      response_err_obj = json_object_object_get(response_json_obj, MICO_PROP_KEY_RESP_ERROR);
+      if( (NULL !=  response_err_obj) && (NULL != json_object_get_object(response_err_obj)->head) ){
+        response_json_string = json_object_to_json_string(response_err_obj);
+        err = MicoFogCloudMsgSend(context, FOGCLOUD_MSG_TOPIC_OUT_ERROR, 
+                                  (unsigned char*)response_json_string, strlen(response_json_string));
+      }
+
+      // send read ok value
+      response_prop_obj = json_object_object_get(response_json_obj, MICO_PROP_KEY_RESP_READ);
+      if( (NULL !=  response_prop_obj) && (NULL != json_object_get_object(response_prop_obj)->head) ){
+        response_json_string = json_object_to_json_string(response_prop_obj);
+        err = MicoFogCloudMsgSend(context, response_sub_topic, 
+                                  (unsigned char*)response_json_string, strlen(response_json_string));
+      }
+    } 
   }
   else if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE, recv_sub_topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE)) ){
     // from /write
@@ -101,23 +139,47 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
                      recv_sub_topic_len, recv_sub_topic_ptr,
                      cloud_msg->data_len, cloud_msg->data);
     
-    // write properties
+    // parse input json data
     recv_json_object = json_tokener_parse((const char*)(cloud_msg->data));
-    require_action(recv_json_object, exit, err = kFormatErr);
-    msg_dispatch_log("Recv read object=%s", json_object_to_json_string(recv_json_object));
-    //create response json object
+    if (NULL == recv_json_object){  // input json format error, response to sub-topic "err" with error code
+      response_err_obj = json_object_new_object();
+      require( response_err_obj, exit );
+      json_object_object_add(response_err_obj, MICO_PROP_KEY_RESP_STATUS, json_object_new_int(MICO_PROP_CODE_DATA_FORMAT_ERR));
+      
+      response_json_string = json_object_to_json_string(response_err_obj);
+      err = MicoFogCloudMsgSend(context, FOGCLOUD_MSG_TOPIC_OUT_ERROR, 
+                                (unsigned char*)response_json_string, strlen(response_json_string));
+      goto exit;
+    }
+    msg_dispatch_log("Recv write object=%s", json_object_to_json_string(recv_json_object));
+        
+    // write properties, return "write/err" sub-obj in response_json_obj
     response_json_obj = mico_write_properties(service_table, recv_json_object);
     
-    // send reponse for write status
-    if(NULL == response_json_obj){
+    // send reponse for write data
+    if(NULL == response_json_obj){  // write failed
       msg_dispatch_log("ERROR: write properties error!");
-      json_object_object_add(response_json_obj, "MICO_PROP_CODE_WRITE_STATUS", json_object_new_int(MICO_PROP_CODE_WRITE_FAILED));
-      err = kWriteErr;
+      json_object_object_add(response_err_obj, MICO_PROP_KEY_RESP_STATUS, json_object_new_int(MICO_PROP_CODE_WRITE_FAILED));
+      response_json_string = json_object_to_json_string(response_err_obj);
+      err = MicoFogCloudMsgSend(context, FOGCLOUD_MSG_TOPIC_OUT_ERROR, 
+                                  (unsigned char*)response_json_string, strlen(response_json_string));
     }
-    response_json_string = json_object_to_json_string(response_json_obj);
-    err = MicoFogCloudMsgSend(context, response_sub_topic, 
-                              (unsigned char*)response_json_string, strlen(response_json_string));
-    
+    else {
+      // send err code
+      response_err_obj = json_object_object_get(response_json_obj, MICO_PROP_KEY_RESP_ERROR);
+      if( (NULL !=  response_err_obj) && (NULL != json_object_get_object(response_err_obj)->head) ){
+        response_json_string = json_object_to_json_string(response_err_obj);
+        err = MicoFogCloudMsgSend(context, FOGCLOUD_MSG_TOPIC_OUT_ERROR, 
+                                  (unsigned char*)response_json_string, strlen(response_json_string));
+      }
+      // send write ok value
+      response_prop_obj = json_object_object_get(response_json_obj, MICO_PROP_KEY_RESP_WRITE);
+      if( (NULL !=  response_prop_obj) && (NULL != json_object_get_object(response_prop_obj)->head) ){
+        response_json_string = json_object_to_json_string(response_prop_obj);
+        err = MicoFogCloudMsgSend(context, response_sub_topic, 
+                                  (unsigned char*)response_json_string, strlen(response_json_string));
+      }
+    }
   }
   else{
     // unknown topic, ignore msg
