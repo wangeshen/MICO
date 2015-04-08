@@ -460,6 +460,7 @@ exit:
 
 void host_platform_reset_wifi( bool reset_asserted )
 {
+return;
   if ( reset_asserted == true )
   {
     MicoGpioOutputLow( (mico_gpio_t)WL_RESET );  
@@ -472,6 +473,8 @@ void host_platform_reset_wifi( bool reset_asserted )
 
 void host_platform_power_wifi( bool power_enabled )
 {
+    return;
+
   if ( power_enabled == true )
   {
     MicoGpioOutputLow( (mico_gpio_t)WL_REG );  

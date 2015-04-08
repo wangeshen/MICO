@@ -257,7 +257,7 @@
   <group>
     <name>Application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\Demos\helloworld\main.c</name>
+      <name>$PROJ_DIR$\..\..\..\..\Demos\station\main.c</name>
     </file>
   </group>
   <group>

@@ -257,7 +257,7 @@
   <group>
     <name>Application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\Demos\helloworld\main.c</name>
+      <name>$PROJ_DIR$\..\..\..\..\Demos\softap_scan\main.c</name>
     </file>
   </group>
   <group>

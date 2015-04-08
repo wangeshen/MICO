@@ -281,8 +281,9 @@ static void _easylinkConnectWiFi( mico_Context_t * const inContext)
 
   wNetConfig.wifi_retry_interval = 100;
   mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
-  micoWlanStartAdv(&wNetConfig);
   easylink_log("connect to %s.....", wNetConfig.ap_info.ssid);
+  micoWlanStartAdv(&wNetConfig);
+  easylink_log("connecting", wNetConfig.ap_info.ssid);
 }
 
 static void _easylinkStartSoftAp( mico_Context_t * const inContext)

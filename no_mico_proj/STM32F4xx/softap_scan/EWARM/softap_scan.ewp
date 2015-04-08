@@ -607,7 +607,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>helloworld.bin</state>
+          <state>softap_scan.bin</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -1927,15 +1927,15 @@
         <debug>0</debug>
         <option>
           <name>ExePath</name>
-          <state>..\..\..\..\Build\COM.MXCHIP.SPP\Output\EMW5288</state>
+          <state>..\..\..\..\Build\softap_scan\Output\EMW5288</state>
         </option>
         <option>
           <name>ObjPath</name>
-          <state>..\..\..\..\Build\COM.MXCHIP.SPP\EMW5288\Obj_EWARM</state>
+          <state>..\..\..\..\Build\softap_scan\EMW5288\Obj_EWARM</state>
         </option>
         <option>
           <name>ListPath</name>
-          <state>..\..\..\..\Build\COM.MXCHIP.SPP\EMW5288\List_EWARM</state>
+          <state>..\..\..\..\Build\softap_scan\EMW5288\List_EWARM</state>
         </option>
         <option>
           <name>Variant</name>
@@ -2213,7 +2213,7 @@
         </option>
         <option>
           <name>CCIncludePath2</name>
-          <state>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.SPP</state>
+          <state>$PROJ_DIR$\..\..\..\..\Demos\softap_scan</state>
           <state>$PROJ_DIR$\..\..\..\..\include</state>
           <state>$PROJ_DIR$\..\..\..\..\MICO</state>
           <state>$PROJ_DIR$\..\..\..\..\Support</state>
@@ -2517,7 +2517,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>COM.MXCHIP.SPP.bin</state>
+          <state>softap_scan.bin</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -2870,7 +2870,7 @@
   <group>
     <name>Application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\Demos\helloworld\main.c</name>
+      <name>$PROJ_DIR$\..\..\..\..\Demos\softap_scan\main.c</name>
     </file>
   </group>
   <group>

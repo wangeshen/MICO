@@ -52,11 +52,11 @@
 
 /************************************************************************
  * Uncomment to disable MCU powersave API functions */
-//#define MICO_DISABLE_MCU_POWERSAVE
+#define MICO_DISABLE_MCU_POWERSAVE
 
 /************************************************************************
  * Uncomment to enable MCU real time clock */
-#define MICO_ENABLE_MCU_RTC
+//#define MICO_ENABLE_MCU_RTC
 
 
 #define MCU_CLOCK_HZ            100000000
@@ -123,6 +123,8 @@ typedef enum
 #define MICO_GPIO_WLAN_POWERSAVE_CLOCK MICO_GPIO_UNUSED
 #define WL_REG MICO_GPIO_2
 #define WL_RESET MICO_GPIO_UNUSED
+#define Standby_SEL MICO_GPIO_UNUSED
+
 //#define MICO_SYS_LED MICO_GPIO_UNUSED
 //#define MICO_RF_LED MICO_GPIO_UNUSED
 

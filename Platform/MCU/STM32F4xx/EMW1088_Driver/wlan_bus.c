@@ -296,7 +296,7 @@ bool host_platform_is_sdio_int_asserted(void)
         return true; // SDIO D1 is low, data need read
 }
 
-
+#ifndef SDIO_1_BIT
 uint8_t host_platform_get_oob_interrupt_pin( void )
 {
     if ( ( gpio_mapping[ WL_GPIO1 ].bank == SDIO_OOB_IRQ_BANK ) && ( gpio_mapping[ WL_GPIO1 ].number == SDIO_OOB_IRQ_PIN ) )
@@ -310,22 +310,24 @@ uint8_t host_platform_get_oob_interrupt_pin( void )
         return 0;
     }
 }
-
+#endif
 static void sdio_gpio_deinit(void)
 {
      /* Clear GPIO pins for SDIO data & clock */
     SDIO_CMD_BANK->MODER  &= ((uint32_t) ~(3 << (2*SDIO_CMD_PIN)));
     SDIO_CLK_BANK->MODER  &= ((uint32_t) ~(3 << (2*SDIO_CLK_PIN)));
     SDIO_D0_BANK->MODER   &= ((uint32_t) ~(3 << (2*SDIO_D0_PIN )));
-    SDIO_D1_BANK->MODER   &= ((uint32_t) ~(3 << (2*SDIO_D1_PIN )));
-    SDIO_D2_BANK->MODER   &= ((uint32_t) ~(3 << (2*SDIO_D2_PIN )));
-    SDIO_D3_BANK->MODER   &= ((uint32_t) ~(3 << (2*SDIO_D3_PIN )));
     SDIO_CMD_BANK->OTYPER &= ((uint32_t) ~(GPIO_OType_OD << SDIO_CMD_PIN));
     SDIO_CLK_BANK->OTYPER &= ((uint32_t) ~(GPIO_OType_OD << SDIO_CLK_PIN));
     SDIO_D0_BANK->OTYPER  &= ((uint32_t) ~(GPIO_OType_OD << SDIO_D0_PIN ));
+#ifndef SDIO_1_BIT    
+    SDIO_D1_BANK->MODER   &= ((uint32_t) ~(3 << (2*SDIO_D1_PIN )));
+    SDIO_D2_BANK->MODER   &= ((uint32_t) ~(3 << (2*SDIO_D2_PIN )));
+    SDIO_D3_BANK->MODER   &= ((uint32_t) ~(3 << (2*SDIO_D3_PIN )));
     SDIO_D1_BANK->OTYPER  &= ((uint32_t) ~(GPIO_OType_OD << SDIO_D1_PIN ));
     SDIO_D2_BANK->OTYPER  &= ((uint32_t) ~(GPIO_OType_OD << SDIO_D2_PIN ));
     SDIO_D3_BANK->OTYPER  &= ((uint32_t) ~(GPIO_OType_OD << SDIO_D3_PIN ));
+#endif    
 }
 
 OSStatus host_platform_bus_init( void )
@@ -360,8 +362,12 @@ OSStatus host_platform_bus_init( void )
     nvic_init_structure.NVIC_IRQChannelCmd                = ENABLE;
     NVIC_Init( &nvic_init_structure );
 
+#ifdef SDIO_1_BIT
+    RCC_AHB1PeriphClockCmd( SDIO_CMD_BANK_CLK | SDIO_CLK_BANK_CLK | SDIO_D0_BANK_CLK, ENABLE );
+#else
     RCC_AHB1PeriphClockCmd( SDIO_CMD_BANK_CLK | SDIO_CLK_BANK_CLK | SDIO_D0_BANK_CLK | SDIO_D1_BANK_CLK | SDIO_D2_BANK_CLK | SDIO_D3_BANK_CLK, ENABLE );
-
+#endif
+    
     /* Set GPIO_B[1:0] to 00 to put WLAN module into SDIO mode */
     
     MicoGpioInitialize( (mico_gpio_t)WL_GPIO0, OUTPUT_PUSH_PULL );
@@ -394,10 +400,12 @@ OSStatus host_platform_bus_init( void )
     SDIO_CMD_BANK->PUPDR |= (GPIO_PuPd_UP << (2*SDIO_CMD_PIN));
     SDIO_CLK_BANK->PUPDR |= (GPIO_PuPd_UP << (2*SDIO_CLK_PIN));
     SDIO_D0_BANK->PUPDR  |= (GPIO_PuPd_UP << (2*SDIO_D0_PIN));
+#ifndef SDIO_1_BIT    
     SDIO_D1_BANK->PUPDR  |= (GPIO_PuPd_UP << (2*SDIO_D1_PIN));
     SDIO_D2_BANK->PUPDR  |= (GPIO_PuPd_UP << (2*SDIO_D2_PIN));
     SDIO_D3_BANK->PUPDR  |= (GPIO_PuPd_UP << (2*SDIO_D3_PIN));
-
+#endif
+    
     SDIO_CMD_BANK->AFR[SDIO_CMD_PIN >> 0x03] |= (GPIO_AF_SDIO << (4*(SDIO_CMD_PIN & 0x07)));
     SDIO_CLK_BANK->AFR[SDIO_CLK_PIN >> 0x03] |= (GPIO_AF_SDIO << (4*(SDIO_CLK_PIN & 0x07)));
     SDIO_D0_BANK->AFR[SDIO_D0_PIN >> 0x03]   |= (GPIO_AF_SDIO << (4*(SDIO_D0_PIN & 0x07)));

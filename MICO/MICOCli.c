@@ -13,6 +13,7 @@ int cli_getchar(char *inbuf);
 #define SEND_WAIT MICO_WAIT_FOREVER
 
 #define END_CHAR		'\r'
+#define RET_CHAR        '\n'
 #define PROMPT			"\r\n# "
 #define EXIT_MSG		"exit"
 #define NUM_BUFFERS		1
@@ -101,7 +102,11 @@ static int handle_input(char *inbuf)
   
   memset((void *)&argv, 0, sizeof(argv));
   memset(&stat, 0, sizeof(stat));
-  
+
+  if (inbuf[i] == RET_CHAR) {
+    inbuf[i] = 0;
+    i++;
+  }
   do {
     switch (inbuf[i]) {
     case '\0':
@@ -242,6 +247,7 @@ static int get_input(char *inbuf, unsigned int *bp)
       *bp = 0;
       return 1;
     }
+
     
     if ((inbuf[*bp] == 0x08) ||	/* backspace */
         (inbuf[*bp] == 0x7f)) {	/* DEL */

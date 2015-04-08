@@ -257,7 +257,10 @@
   <group>
     <name>Application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\Demos\helloworld\main.c</name>
+      <name>$PROJ_DIR$\..\..\..\..\Demos\tcp_client\main.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\..\MICO\MICOCli.c</name>
     </file>
   </group>
   <group>
