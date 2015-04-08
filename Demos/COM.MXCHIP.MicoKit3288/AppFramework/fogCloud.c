@@ -1,6 +1,6 @@
 /**
 ******************************************************************************
-* @file    fogCloud.h 
+* @file    fogcloud.c 
 * @author  Eshen Wang
 * @version V0.1.0
 * @date    17-Mar-2015
@@ -23,9 +23,8 @@
 
 #include "MICODefine.h"
 
-#include "fogCloud.h"   
+#include "fogcloud.h"   
 #include "EasyCloudService.h"
-//#include "MicoFogCloud.h"
 
 
 #define cloud_if_log(M, ...) custom_log("FOGCLOUD_IF", M, ##__VA_ARGS__)
@@ -85,6 +84,7 @@ OSStatus fogCloudPrintVersion(void)
   cloud_if_log("fogCloudPrintVersion");
   
   cloudServiceLibVersion = EasyCloudServiceVersion(&easyCloudContext);
+  UNUSED_PARAMETER(cloudServiceLibVersion);
   cloud_if_log("EasyCloud library version: v%d.%d.%d", 
                (cloudServiceLibVersion & 0x00FF0000) >> 16,
                (cloudServiceLibVersion & 0x0000FF00) >> 8,
@@ -120,6 +120,7 @@ OSStatus fogCloudInit(mico_Context_t* const inContext)
           DEFAULT_DEVICE_NAME, MAX_SIZE_DEVICE_NAME);
   
   cloudServiceLibVersion = EasyCloudServiceVersion(&easyCloudContext);
+  UNUSED_PARAMETER(cloudServiceLibVersion);
   cloud_if_log("EasyCloud library version: %d.%d.%d", 
                (cloudServiceLibVersion & 0x00FF0000) >> 16,
                (cloudServiceLibVersion & 0x0000FF00) >> 8,

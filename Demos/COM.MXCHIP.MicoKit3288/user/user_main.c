@@ -22,7 +22,7 @@
 #include "MICODefine.h"
 #include "user_main.h"
 #include "MicoFogCloud.h"
-#include "msg_dispatch.h"
+#include "fogcloud_msg_dispatch.h"
 #include "user_properties.h"
 #include "uart.h"
 

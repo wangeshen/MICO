@@ -250,6 +250,7 @@ int ECS_SocketReadHTTPHeaderEx( int inSock, ECS_HTTPHeader_t *inHeader )
     rom_wrote_size += inHeader->extraDataLen;
     easycloud_utils_log("OTA[%lld/%lld][Header][%d]", rom_wrote_size, 
                         rom_total_size, inHeader->extraDataLen);  
+    UNUSED_PARAMETER(rom_total_size);
     // update MD5
     //InitMd5(&md5);
     Md5Update(&md5, (uint8_t *)end, inHeader->extraDataLen);

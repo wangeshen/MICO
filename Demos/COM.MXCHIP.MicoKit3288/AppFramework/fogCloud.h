@@ -1,6 +1,6 @@
 /**
 ******************************************************************************
-* @file    fogCloud.h 
+* @file    fogcloud.h 
 * @author  Eshen Wang
 * @version V0.1.0
 * @date    17-Mar-2015

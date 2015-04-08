@@ -1,10 +1,10 @@
 /**
 ******************************************************************************
-* @file RemoteTcpClient.c
-* @author William Xu
-* @version V1.0.0
-* @date 05-May-2014
-* @brief Create a TCP client thread, and connect to a remote server.
+* @file    rgb_led.c
+* @author  Eshen Wang
+* @version V0.1.0
+* @date    17-Mar-2015
+* @brief   converts HSB color values to RGB colors. 
 ******************************************************************************
 * @attention
 *
@@ -21,11 +21,10 @@
 
 #include "MICOAppDefine.h"
 #include "MICODefine.h"
-//#include "stm32f4xx.h"
 #include "rgb_led.h"
 
-#define rgb_log(M, ...) custom_log("rgb", M, ##__VA_ARGS__)
-#define rgb_log_trace() custom_log_trace("rgb")
+#define rgb_led_log(M, ...) custom_log("rgb_led", M, ##__VA_ARGS__)
+#define rgb_led_log_trace() custom_log_trace("rgb_led")
 
 float constrain(float value, float min, float max){
   if(value >= max)

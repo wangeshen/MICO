@@ -1,6 +1,6 @@
 /**
 ******************************************************************************
-* @file    msg_dispatch.c 
+* @file    fogcloud_msg_dispatch.c 
 * @author  Eshen Wang
 * @version V0.1.0
 * @date    18-Mar-2015
@@ -23,7 +23,7 @@
 #include "JSON-C/json.h"
 #include "properties.h"
 #include "MicoFogCloud.h"
-#include "msg_dispatch.h"
+#include "fogcloud_msg_dispatch.h"
 
 #define msg_dispatch_log(M, ...) custom_log("MSG_DISPATCH", M, ##__VA_ARGS__)
 #define msg_dispatch_log_trace() custom_log_trace("MSG_DISPATCH")

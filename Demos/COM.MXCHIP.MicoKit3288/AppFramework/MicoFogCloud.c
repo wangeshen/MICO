@@ -25,7 +25,7 @@ operation
 #include "MICONotificationCenter.h"
 
 #include "MicoFogCloud.h"
-#include "fogCloud.h"
+#include "fogcloud.h"
 #include "EasyCloudUtils.h"
 
 #define fogcloud_log(M, ...) custom_log("MicoFogCloud", M, ##__VA_ARGS__)

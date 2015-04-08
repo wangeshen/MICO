@@ -41,7 +41,7 @@
 #endif
 
 #ifndef SERIAL_NUMBER
-  #define SERIAL_NUMBER       "20150317"
+  #define SERIAL_NUMBER       "20150408"
 #endif
 
 #ifndef PROTOCOL
@@ -64,7 +64,7 @@
 #endif
 
 #ifndef STACK_SIZE_USER_MAIN_THREAD
-  #define STACK_SIZE_USER_MAIN_THREAD           0x1000
+  #define STACK_SIZE_USER_MAIN_THREAD           0x800
 #endif
 
 /*User provided configurations*/

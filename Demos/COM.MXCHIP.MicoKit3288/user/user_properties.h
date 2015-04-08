@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    properties.h
+  * @file    user_properties.h
   * @author  Eshen Wang
   * @version V0.1.0
   * @date    18-Mar-2015
-  * @brief   device properties operations.
+  * @brief   device properties data.
   ******************************************************************************
   * @attention
   *
