@@ -40,7 +40,7 @@
 #define STACK_SIZE_USER_MAIN_THREAD         0x1000
 
 /*User provided configurations*/
-#define CONFIGURATION_VERSION               0x00000004 // if default configuration is changed, update this number
+#define CONFIGURATION_VERSION               0x00000002 // if default configuration is changed, update this number
 
 /* product type */
 #define PRODUCT_ID                          "d64f517c"

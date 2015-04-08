@@ -78,16 +78,14 @@ void mvdNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inConte
   (void)inContext;
   switch (event) {
   case NOTIFY_STATION_UP:
-    //    MVDCloudDevInterfaceSend(DEFAULT_MicoFogCloud_STATION_UP_MSG_2MCU, 
-    //                        strlen(DEFAULT_MicoFogCloud_STATION_UP_MSG_2MCU));
+    inContext->appStatus.isWifiConnected = true;
     if(NULL == _wifi_station_on_sem){
       mico_rtos_init_semaphore(&_wifi_station_on_sem, 1);
     }
     mico_rtos_set_semaphore(&_wifi_station_on_sem);
     break;
   case NOTIFY_STATION_DOWN:
-    //    MVDCloudDevInterfaceSend(DEFAULT_MicoFogCloud_STATION_DOWN_MSG_2MCU, 
-    //                        strlen(DEFAULT_MicoFogCloud_STATION_DOWN_MSG_2MCU));
+    inContext->appStatus.isWifiConnected = false;
     break;
   case NOTIFY_AP_UP:
     break;

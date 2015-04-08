@@ -104,6 +104,7 @@ typedef struct
 
 /*Running status*/
 typedef struct _current_app_status_t {
+  bool isWifiConnected;                     // wifi station connect status
   fogcloud_status_t fogcloudStatus;         // fogcloud status
 } current_app_status_t;
 
