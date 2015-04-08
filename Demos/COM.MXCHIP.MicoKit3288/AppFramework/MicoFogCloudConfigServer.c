@@ -37,7 +37,7 @@
 #define fogcloud_config_log(M, ...) custom_log("FogCloud_ConfigServer", M, ##__VA_ARGS__)
 #define fogcloud_config_log_trace() custom_log_trace("FogCloud_ConfigServer")
 
-#define STACK_SIZE_FOGCLOUD_CONFIG_SERVER_THREAD   0x180
+#define STACK_SIZE_FOGCLOUD_CONFIG_SERVER_THREAD   0x300
 #define STACK_SIZE_FOGCLOUD_CONFIG_CLIENT_THREAD   0x800
 
 #define kCONFIGURLDevState "/dev-state"
