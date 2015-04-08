@@ -36,7 +36,7 @@ typedef struct _mico_notify_thread_data_t{
   uint32_t notify_interval;
 }mico_notify_thread_data_t;
 
-mico_notify_thread_data_t g_notify_thread_data;
+static mico_notify_thread_data_t g_notify_thread_data;
 
 
 // handle cloud msg here, for example: send to USART or echo to cloud
@@ -108,19 +108,19 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
                                   (unsigned char*)response_json_string, strlen(response_json_string));
     }
     else {
-      // send services info msg
-      response_services_obj = json_object_object_get(response_json_obj, MICO_PROP_KEY_RESP_SERVICES);
-      if(NULL != response_services_obj){
-        response_json_string = json_object_to_json_string(response_json_obj);
-        err = MicoFogCloudMsgSend(context, response_sub_topic, 
-                                  (unsigned char*)response_json_string, strlen(response_json_string));
-      }
-
       // send err code
       response_err_obj = json_object_object_get(response_json_obj, MICO_PROP_KEY_RESP_ERROR);
       if( (NULL !=  response_err_obj) && (NULL != json_object_get_object(response_err_obj)->head) ){
         response_json_string = json_object_to_json_string(response_err_obj);
         err = MicoFogCloudMsgSend(context, FOGCLOUD_MSG_TOPIC_OUT_ERROR, 
+                                  (unsigned char*)response_json_string, strlen(response_json_string));
+      }
+      
+      // send services info msg
+      response_services_obj = json_object_object_get(response_json_obj, MICO_PROP_KEY_RESP_SERVICES);
+      if(NULL != response_services_obj){
+        response_json_string = json_object_to_json_string(response_json_obj);
+        err = MicoFogCloudMsgSend(context, response_sub_topic, 
                                   (unsigned char*)response_json_string, strlen(response_json_string));
       }
       

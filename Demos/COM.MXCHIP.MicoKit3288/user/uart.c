@@ -25,7 +25,7 @@
 #include "MICODefine.h"
 #include "MicoPlatform.h"
 
-#include "user_uart.h"
+#include "uart.h"
 #include "MicoFogCloud.h"
 
 #define user_uart_log(M, ...) custom_log("USER_UART", M, ##__VA_ARGS__)

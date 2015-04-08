@@ -20,16 +20,16 @@
   */ 
 
 #include "MICODefine.h"
-//#include "MICOAppDefine.h"
 #include "user_main.h"
 #include "MicoFogCloud.h"
-#include "user_uart.h"
 #include "msg_dispatch.h"
 #include "user_properties.h"
+#include "uart.h"
 
 #define user_log(M, ...) custom_log("USER", M, ##__VA_ARGS__)
 #define user_log_trace() custom_log_trace("USER")
 
+// device services &&¡¡properties table defined by user in user_properties.c
 extern struct mico_service_t  service_table[];
 
 
@@ -41,7 +41,8 @@ void userRestoreDefault_callback(mico_Context_t *inContext)
   user_log("restore user config.");
 }
 
-// handle cloud msg here, for example: send to USART or echo to cloud
+/* FogCloud message receive callback: handle cloud messages here
+ */
 OSStatus user_fogcloud_msg_handler(mico_Context_t* context, 
                             const char* topic, const unsigned int topicLen,
                             unsigned char *inBuf, unsigned int inBufLen)
@@ -70,17 +71,15 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* context,
   return err;
 }
 
-
+/* user main function, called by AppFramework after FogCloud connected.
+ */
 OSStatus user_main( mico_Context_t * const inContext )
 {
   user_log_trace();
   OSStatus err = kNoErr;
-  
-  user_log("Enter user_main.");
-    
   require_action(inContext, exit, err = kParamErr);
   
-  // uart init
+  /* uart init */
   err = user_uartInit(inContext);
   require_noerr_action( err, exit, user_log("ERROR: user uart init failed!") );
   
@@ -97,13 +96,13 @@ OSStatus user_main( mico_Context_t * const inContext )
                                      STACK_SIZE_NOTIFY_THREAD);
   require_noerr_action( err, exit, user_log("ERROR: mico_start_properties_notify err=%d", err) );
     
-  // loop for handling msg
+  // loop
   while(1){
     user_log("user_main working...");
     mico_thread_msleep(10000);
   }
 
-  // never get here only if fatal err && exit.
+  // never getting here only if fatal error.
 exit:
   user_log("ERROR: user_main exit, err=%d.", err);
   return err;

@@ -50,11 +50,16 @@ void user_thread(void* arg)
   
   // loop in user mian function && must not return
   err = user_main(inContext);
+  UNUSED_PARAMETER(err);
   
   // never get here only if user work err && exit.
   app_log("ERROR: user thread exit err=%d.", err);
-  mico_rtos_delete_thread(NULL);
-  return;
+  
+  while(1){
+    // endless loop to trigger watchdog to restart.
+  };
+  //mico_rtos_delete_thread(NULL);
+  //return;
 }
 
 OSStatus startUserThread(mico_Context_t *inContext)
