@@ -69,6 +69,7 @@ typedef struct _fogcloud_config_t
 /* device status */
 typedef struct _fogcloud_status_t
 {
+  bool isActivated;                     // device activate status in ram
   bool              isCloudConnected;   // cloud service connect status
   uint64_t          RecvRomFileSize;    // return OTA data size for bootTable.length, 0 means not need to update
 } fogcloud_status_t;

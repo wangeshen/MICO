@@ -180,11 +180,10 @@ void MicoFogCloudMainThread(void *arg)
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = (mico_Context_t *)arg;
   
-//  bool connected = false;
   MVDOTARequestData_t devOTARequestData;
  // MVDActivateRequestData_t devDefaultActivateData;
   
-  fogcloud_log("MicoFogCloud main thread start.");
+  fogcloud_log("MicoFogCloud main thread start, wait for wifi...");
   // wait for station on
   while(kNoErr != mico_rtos_get_semaphore(&_wifi_station_on_sem, MICO_WAIT_FOREVER));
   
@@ -203,8 +202,13 @@ void MicoFogCloudMainThread(void *arg)
          inContext->flashContentInRam.appConfig.fogcloudConfig.isActivated = false;
          err = MICOUpdateConfiguration(inContext);
          mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
-         fogcloud_log("MicoFogCloud Cloud reset success!");
-         goto exit;  // do nothing after reset, please press reset button.
+         fogcloud_log("MicoFogCloud Cloud reset success, system reboot...");
+         // reset success, system restart
+         inContext->micoStatus.sys_state = eState_Software_Reset;
+         if(inContext->micoStatus.sys_state_change_sem != NULL ){
+           mico_rtos_set_semaphore(&inContext->micoStatus.sys_state_change_sem);
+         }
+         mico_thread_sleep(MICO_WAIT_FOREVER);
        }
        else{
          fogcloud_log("MicoFogCloud Cloud reset failed!");
@@ -289,35 +293,6 @@ void MicoFogCloudMainThread(void *arg)
   require_noerr_action(err, exit, 
                        fogcloud_log("ERROR: MicoFogCloudCloudInterfaceStart failed!") );
   
-  /* loop connect status */
-/*  while(1)
-  {
-    if(inContext->appStatus.fogcloudStatus.isCloudConnected){
-      if (!connected){
-        connected = true;
-        
-        fogcloud_log("Cloud: connected");
-        //        MicoFogCloudDevInterfaceSend(DEFAULT_MicoFogCloud_CLOUD_CONNECTED_MSG_2MCU, 
-        //                            strlen(DEFAULT_MicoFogCloud_CLOUD_CONNECTED_MSG_2MCU));
-        fogCloudSendtoChannel(PUBLISH_TOPIC_CHANNEL_STATUS,
-                                       DEFAULT_MicoFogCloud_CLOUD_CONNECTED_MSG_2CLOUD, 
-                                       strlen(DEFAULT_MicoFogCloud_CLOUD_CONNECTED_MSG_2CLOUD));  
-      }
-    }
-    else{
-      if (connected){
-        connected = false;
-        
-        fogcloud_log("Cloud: disconnected");
-        //        MicoFogCloudDevInterfaceSend(DEFAULT_MicoFogCloud_CLOUD_DISCONNECTED_MSG_2MCU, 
-        //                            strlen(DEFAULT_MicoFogCloud_CLOUD_DISCONNECTED_MSG_2MCU));
-      }
-    }
-    
-    mico_thread_sleep(1);
-  }
-  */
-  
 exit:
   fogcloud_log("[MicoFogCloud]MicoFogCloudMainThread exit err=%d.", err);
   mico_rtos_delete_thread(NULL);
@@ -334,7 +309,7 @@ void MicoFogCloudRestoreDefault(mico_Context_t* const context)
   bool need_reset = false;
   
   // save reset flag
-  if(context->flashContentInRam.appConfig.fogcloudConfig.isActivated){
+  if(context->appStatus.fogcloudStatus.isActivated){
     need_reset = true;
   }
   
@@ -368,6 +343,7 @@ OSStatus MicoStartFogCloudService(mico_Context_t* const inContext)
   //init MicoFogCloud status
   inContext->appStatus.fogcloudStatus.isCloudConnected = false;
   inContext->appStatus.fogcloudStatus.RecvRomFileSize = 0;
+  inContext->appStatus.fogcloudStatus.isActivated = inContext->flashContentInRam.appConfig.fogcloudConfig.isActivated;
   
   //init cloud service interface
   err = fogCloudInit(inContext);

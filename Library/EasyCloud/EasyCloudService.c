@@ -483,7 +483,7 @@ OSStatus EasyCloudDeviceReset(easycloud_service_context_t* const context)
                                context->service_config_info.productKey,
                                device_token);
   require_noerr(err, exit);
-  easycloud_service_log("authorize: device_token[%d]=%s",
+  easycloud_service_log("reset: device_token[%d]=%s",
                         strlen(device_token), device_token);
   
   object = json_object_new_object();

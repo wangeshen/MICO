@@ -252,6 +252,8 @@ OSStatus fogCloudDevActivate(mico_Context_t* const inContext,
   require_noerr_action(err, exit, 
                        cloud_if_log("ERROR: fogCloudDevActivate failed! err=%d", err) );
   
+  inContext->appStatus.fogcloudStatus.isActivated = true;
+  
   // write activate data back to flash
   mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
   inContext->flashContentInRam.appConfig.fogcloudConfig.isActivated = true;
@@ -411,6 +413,8 @@ OSStatus fogCloudResetCloudDevInfo(mico_Context_t* const inContext,
   
   err = EasyCloudDeviceReset(&easyCloudContext);
   require_noerr_action( err, exit, cloud_if_log("ERROR: EasyCloudDeviceReset failed! err=%d", err) );
+  
+  inContext->appStatus.fogcloudStatus.isActivated = false;
   
   mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
   inContext->flashContentInRam.appConfig.fogcloudConfig.isActivated = false;  // need to reActivate

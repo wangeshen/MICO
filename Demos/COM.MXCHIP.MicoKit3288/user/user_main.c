@@ -99,7 +99,7 @@ OSStatus user_main( mico_Context_t * const inContext )
   /* main loop */
   while(1){
     MicoGpioOutputTrigger((mico_gpio_t)MICO_SYS_LED);  // system led blink
-    mico_thread_msleep(2000);
+    mico_thread_msleep(3000);
   }
 
   // never getting here only if fatal error.
