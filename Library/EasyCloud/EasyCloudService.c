@@ -870,7 +870,6 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
                          remoteTcpClient_fd);
   
   // send request data
-  easycloud_service_log("tcp client send activate request...");
   err = ECS_CreateHTTPMessageEx(ECS_kHTTPPostMethod, 
                             host, request_url,
                             ECS_kMIMEType_JSON, 
@@ -1309,8 +1308,7 @@ static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
   FD_ZERO(&readfds);
   FD_SET(tcpClient_fd, &readfds);
   err = select(1, &readfds, NULL, NULL, &t);
-  require(err >= 1, exit);
-  //easycloud_service_log("select return ok.");
+  require_action(err >= 1, exit, err = kResponseErr);
   
   if (FD_ISSET(tcpClient_fd, &readfds)) {
     err = ECS_SocketReadHTTPHeader( tcpClient_fd, httpHeader );             

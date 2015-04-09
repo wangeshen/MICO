@@ -464,10 +464,15 @@ OSStatus MicoFogCloudAuthorize(mico_Context_t* const context,
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = context;
   
-  err = fogCloudDevAuthorize(inContext, authorizeData);
-  require_noerr_action(err, exit, 
-                       fogcloud_log("ERROR: device authorize failed! err=%d", err) );
-  return kNoErr;
+  if(context->flashContentInRam.appConfig.fogcloudConfig.isActivated){
+    err = fogCloudDevAuthorize(inContext, authorizeData);
+    require_noerr_action(err, exit, 
+                         fogcloud_log("ERROR: device authorize failed! err=%d", err) );
+  }
+  else{
+    fogcloud_log("ERROR: device not activate!");
+    err = kStateErr;
+  }
   
 exit:
   return err;

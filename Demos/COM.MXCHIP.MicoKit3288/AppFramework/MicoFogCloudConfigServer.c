@@ -197,6 +197,7 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, ECS_HTTPHeader_t* inHeader, 
   uint8_t *httpResponse = NULL;
   size_t httpResponseLen = 0;
   json_object* report = NULL;
+  char err_msg[32] = {0};
   
   MVDActivateRequestData_t devActivateRequestData;
   MVDAuthorizeRequestData_t devAuthorizeRequestData;
@@ -350,8 +351,11 @@ OSStatus _LocalConfigRespondInComingMessage(int fd, ECS_HTTPHeader_t* inHeader, 
   
 exit:
   if((kNoErr != err) && (fd > 0)){
-    ECS_CreateSimpleHTTPFailedMessage( &httpResponse, &httpResponseLen );
-    //require_noerr( err, exit ); // keep previous err num
+    //ECS_CreateSimpleHTTPFailedMessage( &httpResponse, &httpResponseLen );
+    sprintf(err_msg, "{\"error\": %d}", err);
+    ECS_CreateHTTPFailedMessage("500", "FAILED", ECS_kMIMEType_JSON, strlen(err_msg),
+                                (uint8_t*)err_msg, strlen(err_msg),
+                                &httpResponse, &httpResponseLen );
     require( httpResponse, exit );
     SocketSend( fd, httpResponse, httpResponseLen );
     SocketClose(&fd);

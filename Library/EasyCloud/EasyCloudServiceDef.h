@@ -24,7 +24,6 @@
 #ifndef __EASYEASYCLOUD_SERVICE_DEF_H_
 #define __EASYEASYCLOUD_SERVICE_DEF_H_
 
-
 #include "Common.h"
 
 /*******************************************************************************
@@ -65,7 +64,7 @@
 #define DEFAULT_MQTT_SERVER             "api.easylink.io"
 #define DEFAULT_MQTT_PORT               1883
 #define DEFAULT_MQTT_PORT_SSL           8883
-// in seconds, here set 60s
+// in seconds, here set 30s
 #define DEFAULT_MQTT_CLLIENT_KEEPALIVE_INTERVAL    30
 
  /*******************************************************************************

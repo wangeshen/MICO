@@ -481,7 +481,7 @@ OSStatus getMVDAuthorizeRequestData(const char *input, MVDAuthorizeRequestData_t
   config_delegate_log_trace();
   new_obj = json_tokener_parse(input);
   require_action(new_obj, exit, err = kUnknownErr);
-  config_delegate_log("Recv activate object=%s", json_object_to_json_string(new_obj));
+  config_delegate_log("Recv authorize object=%s", json_object_to_json_string(new_obj));
   json_object_object_foreach(new_obj, key, val) {
     if(!strcmp(key, "login_id")){
       strncpy(authorizeData->loginId, json_object_get_string(val), MAX_SIZE_LOGIN_ID);
