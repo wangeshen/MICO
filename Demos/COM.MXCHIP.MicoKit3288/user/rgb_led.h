@@ -2,7 +2,7 @@
 ******************************************************************************
 * @file    rgb_led.h 
 * @author  Eshen Wang
-* @version V0.1.0
+* @version V1.0.0
 * @date    17-Mar-2015
 * @brief   converts HSB color values to RGB colors. 
   operation
@@ -22,6 +22,7 @@
 
 #ifndef __RGB_LED_H_
 #define __RGB_LED_H_
+
 #define H2R_MAX_RGB_val 255.0
 
 void H2R_HSBtoRGB(float hue, float sat, float bright, float *color);

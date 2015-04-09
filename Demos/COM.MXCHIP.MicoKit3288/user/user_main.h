@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    user_main.h
   * @author  Eshen Wang
-  * @version V0.1.0
+  * @version V1.0.0
   * @date    17-Mar-2015
   * @brief   user main functons prototype in user_main thread.
   ******************************************************************************
@@ -24,7 +24,7 @@
 
 #include "MICODefine.h"
 
-// cloud msg recv handler
+// FOGCLOUD message recv callback: handle messages from fogcloud.
 OSStatus user_fogcloud_msg_handler(mico_Context_t* context, 
                             const char* topic, const unsigned int topicLen,
                             unsigned char *inBuf, unsigned int inBufLen);
@@ -32,7 +32,7 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* context,
 // MICO user config callback: Restore default configuration provided by application
 void userRestoreDefault_callback(mico_Context_t *inContext);
 
-// user main function
+// MICO AppFramework callback: user main function to do user work
 OSStatus user_main( mico_Context_t * const inContext );
 
 #endif  // __MICO_USER_MAIN_H_

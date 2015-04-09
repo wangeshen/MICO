@@ -2,7 +2,7 @@
 ******************************************************************************
 * @file    MicoFogCloudDef.h 
 * @author  Eshen Wang
-* @version V0.1.0
+* @version V1.0.0
 * @date    17-Mar-2015
 * @brief   This header contains the defines of MICO FogCloud. 
   operation

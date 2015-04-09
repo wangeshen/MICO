@@ -2,7 +2,7 @@
 ******************************************************************************
 * @file    uart.h 
 * @author  Eshen Wang
-* @version V0.1.0
+* @version V1.0.0
 * @date    17-Mar-2015
 * @brief   This header contains the uart interfaces for user. 
   operation
@@ -20,7 +20,6 @@
 ******************************************************************************
 */ 
 
-
 #ifndef __USER_UART_H_
 #define __USER_UART_H_
 
@@ -35,7 +34,6 @@
 #define UART_BUFFER_LENGTH                  1024
    
 #define STACK_SIZE_USART_RECV_THREAD        0x500
-
 
 /*******************************************************************************
  * INTERFACES

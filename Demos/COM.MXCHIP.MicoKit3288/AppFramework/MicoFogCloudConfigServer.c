@@ -2,7 +2,7 @@
 ******************************************************************************
 * @file MicoFogCloudConfigServer.c
 * @author Eshen Wang
-* @version V0.1.0
+* @version V1.0.0
 * @date 17-Mar-2015
 * @brief Local TCP server for fogcloud configuration
 ******************************************************************************
@@ -40,11 +40,11 @@
 #define STACK_SIZE_FOGCLOUD_CONFIG_SERVER_THREAD   0x300
 #define STACK_SIZE_FOGCLOUD_CONFIG_CLIENT_THREAD   0x800
 
-#define kCONFIGURLDevState "/dev-state"
-#define kCONFIGURLDevActivate "/dev-activate"
-#define kCONFIGURLDevAuthorize "/dev-authorize"
-#define kCONFIGURLResetCloudDevInfo "/dev-cloud_reset"
-#define kCONFIGURLDevFWUpdate "/dev-fw_update"
+#define kCONFIGURLDevState               "/dev-state"
+#define kCONFIGURLDevActivate            "/dev-activate"
+#define kCONFIGURLDevAuthorize           "/dev-authorize"
+#define kCONFIGURLResetCloudDevInfo      "/dev-cloud_reset"
+#define kCONFIGURLDevFWUpdate            "/dev-fw_update"
 
 extern OSStatus ConfigIncommingJsonMessage( const char *input, mico_Context_t * const inContext );
 extern json_object* ConfigCreateReportJsonMessage( mico_Context_t * const inContext );

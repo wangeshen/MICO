@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    properties.h
   * @author  Eshen Wang
-  * @version V0.1.0
+  * @version V1.0.0
   * @date    18-Mar-2015
   * @brief   device properties operations.
   ******************************************************************************
@@ -43,27 +43,27 @@
 #define MICO_PROP_PERMS_NOTIFIABLE(perms_u8)   ( MICO_PROP_PERMS_EV == (uint8_t)(perms_u8 & MICO_PROP_PERMS_EV) )
 
 // status code
-#define MICO_PROP_KEY_RESP_STATUS             "status"
-#define MICO_PROP_KEY_RESP_SERVICES           "services"
-#define MICO_PROP_KEY_RESP_READ               "read"
-#define MICO_PROP_KEY_RESP_WRITE              "write"
-#define MICO_PROP_KEY_RESP_ERROR              "err"
-#define MICO_PROP_KEY_RESP_ERROR_PROPERTIES   "properties"
+#define MICO_PROP_KEY_RESP_STATUS              "status"
+#define MICO_PROP_KEY_RESP_SERVICES            "services"
+#define MICO_PROP_KEY_RESP_READ                "read"
+#define MICO_PROP_KEY_RESP_WRITE               "write"
+#define MICO_PROP_KEY_RESP_ERROR               "err"
+#define MICO_PROP_KEY_RESP_ERROR_PROPERTIES    "properties"
 
-#define MICO_PROP_CODE_READ_SUCCESS           (0)
-#define MICO_PROP_CODE_WRITE_SUCCESS          (0)
-#define MICO_PROP_CODE_READ_FAILED            (-70101)
-#define MICO_PROP_CODE_WRITE_FAILED           (-70102)
-#define MICO_PROP_CODE_READ_PARTIAL_FAILED    (-70103)
-#define MICO_PROP_CODE_WRITE_PARTIAL_FAILED   (-70104)
-#define MICO_PROP_CODE_NOT_READABLE           (-70401)
-#define MICO_PROP_CODE_NOT_WRITABLE           (-70402)
-#define MICO_PROP_CODE_NOT_FOUND              (-70403)
-#define MICO_PROP_CODE_NO_GET_FUNC            (-70404)
-#define MICO_PROP_CODE_NO_SET_FUNC            (-70405)
-#define MICO_PROP_CODE_NO_NOTIFY_FUNC         (-70406)
-#define MICO_PROP_CODE_DATA_FORMAT_ERR        (-70501)
-#define MICO_PROP_CODE_NOT_SUPPORTED          (-70502)
+#define MICO_PROP_CODE_READ_SUCCESS            (0)
+#define MICO_PROP_CODE_WRITE_SUCCESS           (0)
+#define MICO_PROP_CODE_READ_FAILED             (-70101)
+#define MICO_PROP_CODE_WRITE_FAILED            (-70102)
+#define MICO_PROP_CODE_READ_PARTIAL_FAILED     (-70103)
+#define MICO_PROP_CODE_WRITE_PARTIAL_FAILED    (-70104)
+#define MICO_PROP_CODE_NOT_READABLE            (-70401)
+#define MICO_PROP_CODE_NOT_WRITABLE            (-70402)
+#define MICO_PROP_CODE_NOT_FOUND               (-70403)
+#define MICO_PROP_CODE_NO_GET_FUNC             (-70404)
+#define MICO_PROP_CODE_NO_SET_FUNC             (-70405)
+#define MICO_PROP_CODE_NO_NOTIFY_FUNC          (-70406)
+#define MICO_PROP_CODE_DATA_FORMAT_ERR         (-70501)
+#define MICO_PROP_CODE_NOT_SUPPORTED           (-70502)
    
 
 /*******************************************************************************
@@ -139,7 +139,8 @@ json_object* mico_write_properties(struct mico_service_t *service_table,
                                json_object *prop_write_list_obj);
 
 // properties update check
-OSStatus mico_properties_notify_check(mico_Context_t * const inContext, struct mico_service_t *service_table,
+OSStatus mico_properties_notify_check(mico_Context_t * const inContext, 
+                                      struct mico_service_t *service_table,
                                       json_object* notify_obj);
 
 #endif // __MICO_DEVICE_PROPERTIES_H_

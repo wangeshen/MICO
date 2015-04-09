@@ -2,7 +2,7 @@
 ******************************************************************************
 * @file    uart.h 
 * @author  Eshen Wang
-* @version V0.1.0
+* @version V1.0.0
 * @date    17-Mar-2015
 * @brief   This file contains the implementations of uart interfaces for user. 
   operation

@@ -2,7 +2,7 @@
 ******************************************************************************
 * @file    MicoFogCloud.h 
 * @author  Eshen Wang
-* @version V0.1.0
+* @version V1.0.0
 * @date    17-Mar-2015
 * @brief   This header contains the cloud service interfaces 
 *          for MICO. 
@@ -21,15 +21,12 @@
 ******************************************************************************
 */ 
 
-
 #ifndef __MICO_FOGCLOUD_H_
 #define __MICO_FOGCLOUD_H_
 
-
 #include "MICODefine.h"
-#include "EasyCloudServiceDef.h"
-#include "EasyCloudUtils.h"
 #include "MicoFogCloudDef.h"
+#include "EasyCloudUtils.h"
 
 /*******************************************************************************
  * DEFINES

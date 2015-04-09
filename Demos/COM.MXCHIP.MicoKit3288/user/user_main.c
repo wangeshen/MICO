@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    user_main.c 
   * @author  Eshen Wang
-  * @version V0.1.0
+  * @version V1.0.0
   * @date    17-Mar-2015
   * @brief   user main functons in user_main thread.
   ******************************************************************************
@@ -38,7 +38,7 @@ extern struct mico_service_t  service_table[];
  */
 void userRestoreDefault_callback(mico_Context_t *inContext)
 {
-  user_log("restore user config.");
+  user_log("INFO: restore user configuration, do nothing.");
 }
 
 /* FogCloud message receive callback: handle cloud messages here
@@ -92,14 +92,14 @@ OSStatus user_main( mico_Context_t * const inContext )
   
   /* start properties notify task */
   err = mico_start_properties_notify(inContext, service_table, 
-                                     MICO_PROPERTIES_NOTIFY_INTERVAL, 
+                                     MICO_PROPERTIES_NOTIFY_INTERVAL_MS, 
                                      STACK_SIZE_NOTIFY_THREAD);
   require_noerr_action( err, exit, user_log("ERROR: mico_start_properties_notify err=%d", err) );
     
-  // loop
+  /* main loop */
   while(1){
-    user_log("user_main working...");
-    mico_thread_msleep(10000);
+    MicoGpioOutputTrigger((mico_gpio_t)MICO_SYS_LED);  // system led blink
+    mico_thread_msleep(2000);
   }
 
   // never getting here only if fatal error.

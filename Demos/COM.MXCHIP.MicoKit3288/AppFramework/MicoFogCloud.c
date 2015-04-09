@@ -2,7 +2,7 @@
 ******************************************************************************
 * @file    MicoFogCloud.c 
 * @author  Eshen Wang
-* @version V0.1.0
+* @version V1.0.0
 * @date    17-Mar-2015
 * @brief   This file contains the implementations of cloud service interfaces 
 *          for MICO.
@@ -151,10 +151,7 @@ void MicoFogCloudDevCloudInfoResetThread(void *arg)
   // stop EasyCloud service first
   err = fogCloudStop(inContext);
   require_noerr_action( err, exit, fogcloud_log("ERROR: stop EasyCloud service failed!") );
-  
-  // cloud reset request
-  //  MicoFogCloudDevInterfaceSend(DEFAULT_MicoFogCloud_RESET_CLOUD_INFO_START_MSG_2MCU, 
-  //                      strlen(DEFAULT_MicoFogCloud_RESET_CLOUD_INFO_START_MSG_2MCU));     
+      
   err = easycloud_reset_cloud_info(inContext);
   if(kNoErr == err){
     inContext->appStatus.fogcloudStatus.isCloudConnected = false;
@@ -165,8 +162,6 @@ void MicoFogCloudDevCloudInfoResetThread(void *arg)
     mico_rtos_unlock_mutex(&inContext->flashContentInRam_mutex);
     
     fogcloud_log("[MicoFogCloud]MicoFogCloudDevCloudInfoResetThread: cloud reset success!");
-    //    MicoFogCloudDevInterfaceSend(DEFAULT_MicoFogCloud_RESET_CLOUD_INFO_OK_MSG_2MCU, 
-    //                        strlen(DEFAULT_MicoFogCloud_RESET_CLOUD_INFO_OK_MSG_2MCU));
     
     // send ok semaphore
     mico_rtos_set_semaphore(&_reset_cloud_info_sem);
@@ -175,8 +170,6 @@ void MicoFogCloudDevCloudInfoResetThread(void *arg)
 exit:
   if(kNoErr != err){
     fogcloud_log("MicoFogCloudDevCloudInfoResetThread EXIT: err=%d",err);
-    //    MicoFogCloudDevInterfaceSend(DEFAULT_MicoFogCloud_RESET_CLOUD_INFO_FAILED_MSG_2MCU, 
-    //                        strlen(DEFAULT_MicoFogCloud_RESET_CLOUD_INFO_FAILED_MSG_2MCU));
   }
   mico_rtos_delete_thread(NULL);
   return;
@@ -220,8 +213,6 @@ void MicoFogCloudMainThread(void *arg)
   
   /* check OTA when wifi on */
   fogcloud_log(DEFAULT_MicoFogCloud_OTA_CHECK_MSG_2MCU);
-  //  MicoFogCloudDevInterfaceSend(DEFAULT_MicoFogCloud_OTA_CHECK_MSG_2MCU, 
-  //                        strlen(DEFAULT_MicoFogCloud_OTA_CHECK_MSG_2MCU));
   memset((void*)&devOTARequestData, 0, sizeof(devOTARequestData));
   strncpy(devOTARequestData.loginId,
           inContext->flashContentInRam.appConfig.fogcloudConfig.loginId,
@@ -236,8 +227,6 @@ void MicoFogCloudMainThread(void *arg)
   if(kNoErr == err){
     if(inContext->appStatus.fogcloudStatus.RecvRomFileSize > 0){
       fogcloud_log(DEFAULT_MicoFogCloud_OTA_UPDATE_MSG_2MCU);
-      //      MVDCloudDevInterfaceSend(DEFAULT_MicoFogCloud_OTA_UPDATE_MSG_2MCU, 
-      //                        strlen(DEFAULT_MicoFogCloud_OTA_UPDATE_MSG_2MCU));
       // set bootloader to reboot && update app fw
       mico_rtos_lock_mutex(&inContext->flashContentInRam_mutex);
       memset(&inContext->flashContentInRam.bootTable, 0, sizeof(boot_table_t));
@@ -257,14 +246,10 @@ void MicoFogCloudMainThread(void *arg)
     }
     else{
       fogcloud_log(DEFAULT_MicoFogCloud_OTA_UP_TO_DATE_MSG_2MCU);
-      //      MicoFogCloudDevInterfaceSend(DEFAULT_MicoFogCloud_OTA_UP_TO_DATE_MSG_2MCU, 
-      //                        strlen(DEFAULT_MicoFogCloud_OTA_UP_TO_DATE_MSG_2MCU));
     }
   }
   else{
     fogcloud_log(DEFAULT_MicoFogCloud_OTA_DOWNLOAD_FAILED_MSG_2MCU);
-    //    MicoFogCloudDevInterfaceSend(DEFAULT_MicoFogCloud_OTA_DOWNLOAD_FAILED_MSG_2MCU, 
-    //                        strlen(DEFAULT_MicoFogCloud_OTA_DOWNLOAD_FAILED_MSG_2MCU));
   }
   
   /* activate when wifi on */
@@ -339,7 +324,6 @@ exit:
   return;
 }
 
-
 /*******************************************************************************
 * FogCloud  interfaces init
 ******************************************************************************/
@@ -357,8 +341,6 @@ void MicoFogCloudRestoreDefault(mico_Context_t* const context)
   // reset all MicoFogCloud config params
   memset((void*)&(context->flashContentInRam.appConfig.fogcloudConfig), 
          0, sizeof(fogcloud_config_t));
-  
-  //context->flashContentInRam.appConfig.fogcloudConfig.USART_BaudRate = 115200;
   
   context->flashContentInRam.appConfig.fogcloudConfig.isActivated = false;
   sprintf(context->flashContentInRam.appConfig.fogcloudConfig.deviceId, DEFAULT_DEVICE_ID);
@@ -420,7 +402,8 @@ exit:
 
 /*******************************************************************************
 * MicoFogCloud get state
-******************************************************************************/
+*******************************************************************************/
+
 // cloud connect state
 bool MicoFogCloudIsConnect(mico_Context_t* const context)
 {

@@ -20,7 +20,6 @@
   ******************************************************************************
   */ 
 
-
 #ifndef __MICOAPPDEFINE_H
 #define __MICOAPPDEFINE_H
 
@@ -28,6 +27,10 @@
 #include "MicoFogCloudDef.h"
 #include "user_config.h"
 
+/*******************************************************************************
+ *                            DEFAULT SETTING
+ ******************************************************************************/
+    
 #ifndef APP_INFO
   #define APP_INFO   "mxchipWNet MicoKit Demo based on MICO OS"
 #endif
@@ -54,9 +57,9 @@
 #endif
 
 /* Define MICO cloud type */
-#define CLOUD_NO                                (0)
-#define CLOUD_FOGCLOUD                          (1)
-#define CLOUD_ALINK                             (2)
+#define CLOUD_DISABLED                         (0)
+#define CLOUD_FOGCLOUD                         (1)
+#define CLOUD_ALINK                            (2)
     
 /* MICO cloud service type */
 #ifndef MICO_CLOUD_TYPE
@@ -72,8 +75,8 @@
   #define CONFIGURATION_VERSION                 0x00000001 // if default configuration is changed, update this number
 #endif
 
-#ifndef LOCAL_PORT
-  #define LOCAL_PORT                            8080       // bonjour service port
+#ifndef BONJOUR_SERVICE_PORT
+  #define BONJOUR_SERVICE_PORT                  8080
 #endif
 
 #ifndef BONJOUR_SERVICE
@@ -93,21 +96,23 @@
   #define DEFAULT_ROM_VERSION                 "v1.0.0"
 #endif
 
-/*Application's configuration stores in flash*/
+/*******************************************************************************
+ *                              APP CONTEXT
+ ******************************************************************************/
+    
+/* Application's configuration stores in flash */
 typedef struct
 {
   uint32_t          configDataVer;           // config param update number
-  uint32_t          localServerPort;         // for bonjour service port
+  uint32_t          bonjourServicePort;      // for bonjour service port
 
   fogcloud_config_t fogcloudConfig;          // fogcloud settings
 } application_config_t;
 
-/*Running status*/
+/* Running status */
 typedef struct _current_app_status_t {
   bool isWifiConnected;                     // wifi station connect status
   fogcloud_status_t fogcloudStatus;         // fogcloud status
 } current_app_status_t;
 
-
 #endif
-

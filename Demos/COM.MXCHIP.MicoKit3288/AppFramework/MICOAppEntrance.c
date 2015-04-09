@@ -27,19 +27,21 @@
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)
 #define app_log_trace() custom_log_trace("APP")
 
-/* default callback function */
+/* default user_main callback function, this must be override by user. */
 WEAK OSStatus user_main( mico_Context_t * const inContext )
 {
   app_log("ERROR: user_main undefined!");
   return kNotHandledErr;
 }
 
+/* default user_main callback function, this may be override by user. */
 WEAK void userRestoreDefault_callback(mico_Context_t *inContext)
 {
+  app_log("INFO: call default userRestoreDefault_callback, do nothing!");
 }
 
-/* user thread created by MICO */
-void user_thread(void* arg)
+/* user main thread created by MICO APP thread */
+void user_main_thread(void* arg)
 {
   OSStatus err = kUnknownErr;
   mico_Context_t *inContext = (mico_Context_t *)arg;
@@ -54,12 +56,9 @@ void user_thread(void* arg)
   
   // never get here only if user work err && exit.
   app_log("ERROR: user thread exit err=%d.", err);
-  
   while(1){
     // endless loop to trigger watchdog to restart.
   };
-  //mico_rtos_delete_thread(NULL);
-  //return;
 }
 
 OSStatus startUserThread(mico_Context_t *inContext)
@@ -69,9 +68,8 @@ OSStatus startUserThread(mico_Context_t *inContext)
   require_action(inContext, exit, err = kParamErr);
   
   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "user_main", 
-                                user_thread, STACK_SIZE_USER_MAIN_THREAD, 
+                                user_main_thread, STACK_SIZE_USER_MAIN_THREAD, 
                                 inContext );
-  
 exit:
   return err;
 }
@@ -80,7 +78,7 @@ exit:
 void appRestoreDefault_callback(mico_Context_t *inContext)
 {
   inContext->flashContentInRam.appConfig.configDataVer = CONFIGURATION_VERSION;
-  inContext->flashContentInRam.appConfig.localServerPort = LOCAL_PORT;
+  inContext->flashContentInRam.appConfig.bonjourServicePort = BONJOUR_SERVICE_PORT;
   
   // restore fogcloud config
   MicoFogCloudRestoreDefault(inContext);
@@ -105,9 +103,9 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
 #if (MICO_CLOUD_TYPE == CLOUD_FOGCLOUD)
   err = MicoStartFogCloudService( inContext );
   require_noerr_action( err, exit, app_log("ERROR: Unable to start FogCloud service.") );
-#elif (CLOUD_ALINK)
+#elif (MICO_CLOUD_TYPE == CLOUD_ALINK)
   app_log("MICO CloudService: Ali.");
-#elif (MICO_CLOUD_TYPE == CLOUD_NO)
+#elif (MICO_CLOUD_TYPE == CLOUD_DISABLED)
   app_log("MICO CloudService disabled.");
 #else
   #error "MICO cloud service type is not defined"?
