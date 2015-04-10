@@ -1128,7 +1128,6 @@
         <option>
           <name>CCDefines</name>
           <state>USE_STDPERIPH_DRIVER</state>
-          <state>DEBUG</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -2042,6 +2041,9 @@
     <name>External</name>
     <group>
       <name>Curve25519</name>
+      <excluded>
+        <configuration>MiCOKit-3288</configuration>
+      </excluded>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\External\Curve25519\curve25519-donna.c</name>
       </file>
@@ -2131,6 +2133,9 @@
     </group>
     <group>
       <name>SHAUtils</name>
+      <excluded>
+        <configuration>MiCOKit-3288</configuration>
+      </excluded>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\External\SHAUtils\hkdf.c</name>
       </file>
@@ -2636,6 +2641,9 @@
     <name>Support</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\Library\support\AESUtils.c</name>
+      <excluded>
+        <configuration>MiCOKit-3288</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\Library\support\HTTPUtils.c</name>
@@ -2648,9 +2656,15 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\Library\support\SecurityUtils.c</name>
+      <excluded>
+        <configuration>MiCOKit-3288</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\Library\support\SHAUtils.c</name>
+      <excluded>
+        <configuration>MiCOKit-3288</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\Library\support\SocketUtils.c</name>
@@ -2660,9 +2674,15 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\Library\support\TimeUtils.c</name>
+      <excluded>
+        <configuration>MiCOKit-3288</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\Library\support\TLVUtils.c</name>
+      <excluded>
+        <configuration>MiCOKit-3288</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\Library\support\URLUtils.c</name>
