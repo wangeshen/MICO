@@ -31,6 +31,9 @@
   <project>
     <path>$WS_DIR$\udp_client\EWARM\udp_client.ewp</path>
   </project>
+    <project>
+    <path>$WS_DIR$\http\EWARM\http.ewp</path>
+  </project>
   <batchBuild/>
 </workspace>
 
