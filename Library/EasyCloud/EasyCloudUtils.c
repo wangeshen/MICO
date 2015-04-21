@@ -181,6 +181,43 @@ exit:
   return err;
 }
 
+OSStatus ECS_CreateHTTPFailedMessage(const uint8_t *errCode, const uint8_t *errMsg,
+                                     const char *contentType, size_t contentLen,
+                                     uint8_t *errData, size_t errDataLen, 
+                                     uint8_t **outMessage, size_t *outMessageSize )
+{
+  uint8_t *endOfHTTPHeader;
+  OSStatus err = kParamErr;
+
+  require( contentType, exit );
+
+  err = kNoMemoryErr;
+  *outMessage = malloc( errDataLen + 200 );
+  require( *outMessage, exit );
+  memset(*outMessage, 0, errDataLen + 200);
+
+  // Create HTTP Response
+  sprintf( (char*)*outMessage,
+          "%s %s %s %s%s %s %s%s %d %s",
+          "HTTP/1.1", errCode, errMsg, ECS_kCRLFNewLine,
+          "Content-Type:", contentType, ECS_kCRLFNewLine,
+          "Content-Length:", contentLen, ECS_kCRLFLineEnding
+          );
+  *outMessageSize = strlen( (char*)*outMessage );
+
+  // outMessageSize will be the length of the HTTP Header plus the data length
+  *outMessageSize = strlen( (char*)*outMessage ) + errDataLen;
+
+  endOfHTTPHeader = *outMessage + strlen( (char*)*outMessage );
+  if ((NULL != errData) && (errDataLen > 0)){
+    memcpy( endOfHTTPHeader, errData, errDataLen );
+  }
+  err = kNoErr;
+
+exit:
+  return err;
+}
+
 int ECS_SocketReadHTTPHeaderEx( int inSock, ECS_HTTPHeader_t *inHeader )
 {
   int        err =0;
@@ -250,6 +287,7 @@ int ECS_SocketReadHTTPHeaderEx( int inSock, ECS_HTTPHeader_t *inHeader )
     rom_wrote_size += inHeader->extraDataLen;
     easycloud_utils_log("OTA[%lld/%lld][Header][%d]", rom_wrote_size, 
                         rom_total_size, inHeader->extraDataLen);  
+    UNUSED_PARAMETER(rom_total_size);
     // update MD5
     //InitMd5(&md5);
     Md5Update(&md5, (uint8_t *)end, inHeader->extraDataLen);
