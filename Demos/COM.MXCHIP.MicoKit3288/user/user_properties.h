@@ -34,33 +34,40 @@
 #define MAX_USER_UART_BUF_SIZE       512
    
 // device info
- struct dev_info_t {
+ typedef struct _dev_info_t {
   char name[MAX_DEVICE_NAME_SIZE+1];
   char manufacturer[MAX_DEVICE_MANUFACTURER_SIZE+1];
   
   uint32_t name_len;
   uint32_t manufacturer_len;
-};
+}dev_info_t;
 
 // rgb led
- struct rgb_led_t {
+ typedef struct _rgb_led_t {
   bool sw;
   int hues;
   int saturation;
   int brightness;
-};
+}rgb_led_t;
 
 // adc
- struct adc_t {
+ typedef struct _adc_t {
   int data;
   bool event;   // event flag
-};
+}adc_t;
 
 // uart
- struct uart_t {
+typedef struct _uart_t {
   char rx_buf[MAX_USER_UART_BUF_SIZE];   // use a buffer to store data received
   uint32_t rx_data_len;                  // uart data len received
   bool rx_event;                       // recv notify flag
-};
+}uart_t;
+
+typedef struct _user_context_t {
+  dev_info_t dev_info;
+  rgb_led_t rgb_led;
+  adc_t adc;
+  uart_t uart;
+}user_context_t;
 
 #endif // __MICO_DEVICE_PROPERTIES_USER_H_

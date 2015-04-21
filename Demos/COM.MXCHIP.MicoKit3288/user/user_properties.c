@@ -41,12 +41,12 @@ uint32_t float_len = sizeof(float);
 /************dev_info************************/
 
 // dev_info data
-struct dev_info_t dev_info = {
-  .name = "MicoKit3288",
-  .name_len = 11,
-  .manufacturer = "MXCHIP",
-  .manufacturer_len = 6
-};
+//struct dev_info_t dev_info = {
+//  .name = "MicoKit3288",
+//  .name_len = 11,
+//  .manufacturer = "MXCHIP",
+//  .manufacturer_len = 6
+//};
 
 // dev_info set/get function
 int string_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
@@ -90,12 +90,12 @@ int string_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 /************rgb_led************************/
 
 // led data
-struct rgb_led_t rgb_led = {
-  .sw = false,
-  .hues = 0,
-  .saturation = 0,
-  .brightness = 0
-};
+//struct rgb_led_t rgb_led = {
+//  .sw = false,
+//  .hues = 0,
+//  .saturation = 0,
+//  .brightness = 0
+//};
 
 // swtich function
 int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
@@ -103,18 +103,20 @@ int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_
   int ret = 0;
   bool set_sw_state = *((bool*)val);
   float color[3] = {0};
+  
+  rgb_led_t *rgb_led = (rgb_led_t*)arg;
   properties_user_log("rgb_led_sw_set: val=%d, val_len=%d.", *((bool*)val), val_len);
-  properties_user_log("h=%d, s=%d, b=%d", rgb_led.hues, rgb_led.saturation, rgb_led.brightness);
+  properties_user_log("h=%d, s=%d, b=%d", rgb_led->hues, rgb_led->saturation, rgb_led->brightness);
   // control hardware
   if(set_sw_state){
     properties_user_log("Open LED.");
-    H2R_HSBtoRGB((float)rgb_led.hues, (float)rgb_led.saturation, (float)rgb_led.brightness, color);
+    H2R_HSBtoRGB((float)rgb_led->hues, (float)rgb_led->saturation, (float)rgb_led->brightness, color);
     OpenLED_RGB(color);
   }
   else{
     properties_user_log("Close LED.");
     //CloseLED_RGB();   // bug ??? set bright = 0 instead for temp
-    H2R_HSBtoRGB((float)rgb_led.hues, (float)rgb_led.saturation, (float)0, color);
+    H2R_HSBtoRGB((float)rgb_led->hues, (float)rgb_led->saturation, (float)0, color);
     OpenLED_RGB(color);
   }
   
@@ -139,7 +141,7 @@ int rgb_led_hues_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
   int ret = 0;
   float color[3] = {0};
   int hues = *((int*)val);
-  struct rgb_led_t *rgb_led = (struct rgb_led_t*)arg;
+  rgb_led_t *rgb_led = (rgb_led_t*)arg;
   properties_user_log("rgb_led_hues_set: val=%d, val_len=%d.", *((int*)val), val_len);
   
   // control hardware
@@ -172,7 +174,7 @@ int rgb_led_saturation_set(struct mico_prop_t *prop, void *arg, void *val, uint3
   int ret = 0;
   float color[3] = {0};
   int saturation = *((int*)val);
-  struct rgb_led_t *rgb_led = (struct rgb_led_t*)arg;
+  rgb_led_t *rgb_led = ( rgb_led_t*)arg;
   properties_user_log("rgb_led_saturation_set: val=%d, val_len=%d.", *((int*)val), val_len);
   
   // control hardware
@@ -205,7 +207,7 @@ int rgb_led_brightness_set(struct mico_prop_t *prop, void *arg, void *val, uint3
   int ret = 0;
   float color[3] = {0};
   int brightness = *((int*)val);
-  struct rgb_led_t *rgb_led = (struct rgb_led_t*)arg;
+   rgb_led_t *rgb_led = ( rgb_led_t*)arg;
   properties_user_log("rgb_led_brightness_set: val=%d, val_len=%d.", *((int*)val), val_len);
   
   // control hardware
@@ -234,10 +236,10 @@ int rgb_led_brightness_get(struct mico_prop_t *prop, void *arg, void *val, uint3
 
 /************adc************************/
 // adc data
-struct adc_t adc = {
-  .data = 0,
-  .event = true
-};
+//struct adc_t adc = {
+//  .data = 0,
+//  .event = true
+//};
 
 // get adc data function
 int adc_data_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
@@ -309,11 +311,11 @@ int event_status_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
 }
 
 /******************* uart for user ***************/
-struct uart_t user_uart = {
-  .rx_buf = {0},
-  .rx_data_len = 0,
-  .rx_event = true   // true for always recv data
-};
+//struct uart_t user_uart = {
+//  .rx_buf = {0},
+//  .rx_data_len = 0,
+//  .rx_event = true   // true for always recv data
+//};
 
 // get: recv uart data
 int uart_data_recv(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
@@ -388,6 +390,34 @@ int uart_data_recv_check(struct mico_prop_t *prop, void *arg, void *val, uint32_
 }
 
 /*******************************************************************************
+ * user config data in flash
+ ******************************************************************************/
+
+static user_context_t user_config = {
+  .dev_info = {
+    .name = "MicoKit3288",
+    .name_len = 11,
+    .manufacturer = "MXCHIP",
+    .manufacturer_len = 6
+  },
+  .rgb_led = {
+    .sw = false,
+    .hues = 0,
+    .saturation = 0,
+    .brightness = 0
+  },
+  .adc = {
+    .data = 0,
+    .event = true
+  },
+  .uart = {
+    .rx_buf = {0},
+    .rx_data_len = 0,
+    .rx_event = true   // true for always recv data
+  }
+};
+
+/*******************************************************************************
 * service_table: list all serivices && properties for the device
  ******************************************************************************/
 const struct mico_service_t  service_table[] = {
@@ -396,14 +426,14 @@ const struct mico_service_t  service_table[] = {
     .properties = {
       [0] = {
         .type = "public.map.property.name",  // device name uuid
-        .value = &(dev_info.name),
-        .value_len = &(dev_info.name_len),
+        .value = &(user_config.dev_info.name),
+        .value_len = &(user_config.dev_info.name_len),
         .format = MICO_PROP_TYPE_STRING,
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
         .get = string_get,                  // get string func to get device name
         .set = string_set,                  // set sring func to change device name
         .notify_check = NULL,               // not notifiable
-        .arg = &(dev_info.name),            // get/set string pointer (device name)
+        .arg = &(user_config.dev_info.name),            // get/set string pointer (device name)
         .event = NULL,                      // not notifiable
         .hasMeta = false,                   // no max/min/step
 //        .maxValue.intValue = 0,
@@ -414,14 +444,14 @@ const struct mico_service_t  service_table[] = {
       },
       [1] = {
         .type = "public.map.property.manufacturer",  // device manufacturer uuid
-        .value = &(dev_info.manufacturer),
-        .value_len = &(dev_info.manufacturer_len),
+        .value = &(user_config.dev_info.manufacturer),
+        .value_len = &(user_config.dev_info.manufacturer_len),
         .format = MICO_PROP_TYPE_STRING,
         .perms = MICO_PROP_PERMS_RO,
         .get = string_get,                  // get string func to get manufacturer
         .set = NULL      ,                  // set sring func to change manufacturer
         .notify_check = NULL,               // not notifiable
-        .arg = &(dev_info.manufacturer),
+        .arg = &(user_config.dev_info.manufacturer),
         .event = NULL,                      // not notifiable
         .hasMeta = false,
 //        .maxValue.intValue = 0,
@@ -438,14 +468,14 @@ const struct mico_service_t  service_table[] = {
     .properties = {
       [0] = {
         .type = "public.map.property.switch",  // led switch uuid
-        .value = &(rgb_led.sw),
+        .value = &(user_config.rgb_led.sw),
         .value_len = &bool_len,             // bool type len
         .format = MICO_PROP_TYPE_BOOL,
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
         .get = rgb_led_sw_get,              // get led switch status function
         .set = rgb_led_sw_set,              // set led switch status function
         .notify_check = NULL,               // not notifiable
-        .arg = &rgb_led,                   // led data
+        .arg = &(user_config.rgb_led),                   // led data
         .event = NULL,
         .hasMeta = false,
 //        .maxValue.intValue = 0,
@@ -456,14 +486,14 @@ const struct mico_service_t  service_table[] = {
       },
       [1] = {
         .type = "public.map.property.hues",  // led hues
-        .value = &(rgb_led.hues),
+        .value = &(user_config.rgb_led.hues),
         .value_len = &int_len,   // int type len
         .format = MICO_PROP_TYPE_INT,
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
         .get = rgb_led_hues_get,
         .set = rgb_led_hues_set,
         .notify_check = NULL,               // not notifiable
-        .arg = &rgb_led,  // led hues value
+        .arg = &(user_config.rgb_led),  // led hues value
         .event = NULL,
         .hasMeta = true,
         .maxValue.intValue = 360,
@@ -474,14 +504,14 @@ const struct mico_service_t  service_table[] = {
       },
       [2] = {
         .type = "public.map.property.saturation",  // led saturation
-        .value = &(rgb_led.saturation),
+        .value = &(user_config.rgb_led.saturation),
         .value_len = &int_len,
         .format = MICO_PROP_TYPE_INT,
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
         .get = rgb_led_saturation_get,
         .set = rgb_led_saturation_set,
         .notify_check = NULL,               // not notifiable
-        .arg = &rgb_led,  // led saturation value
+        .arg = &(user_config.rgb_led),  // led saturation value
         .event = NULL,
         .hasMeta = true,
         .maxValue.intValue = 100,
@@ -492,13 +522,13 @@ const struct mico_service_t  service_table[] = {
       },
       [3] = {
         .type = "public.map.property.brightness",  // led brightness
-        .value = &(rgb_led.brightness),
+        .value = &(user_config.rgb_led.brightness),
         .value_len = &int_len,
         .format = MICO_PROP_TYPE_INT,
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
         .get = rgb_led_brightness_get,
         .set = rgb_led_brightness_set,
-        .arg = &rgb_led,  // led brightness value
+        .arg = &(user_config.rgb_led),  // led brightness value
         .event = NULL,
         .hasMeta = true,
         .maxValue.intValue = 100,
@@ -515,15 +545,15 @@ const struct mico_service_t  service_table[] = {
     .properties = {
       [0] = {
         .type = "public.map.property.value",  // adc value uuid
-        .value = &(adc.data),
+        .value = &(user_config.adc.data),
         .value_len = &int_len,
         .format = MICO_PROP_TYPE_INT,
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_EV),
         .get = adc_data_get,
         .set = NULL,
         .notify_check = notify_check_adc_data,  // check notify for adc data
-        .arg = &adc,         // adc sample data
-        .event = &(adc.event),      // event flag
+        .arg = &(user_config.adc),         // adc sample data
+        .event = &(user_config.adc.event),      // event flag
         .hasMeta = true,
         .maxValue.intValue = 4095,
         .minValue.intValue = 0,
@@ -533,14 +563,14 @@ const struct mico_service_t  service_table[] = {
       },
       [1] = {
         .type = "public.map.property.event",  // adc value event (uuid)
-        .value = &(adc.event),
+        .value = &(user_config.adc.event),
         .value_len = &bool_len,
         .format = MICO_PROP_TYPE_BOOL,
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
         .get = event_status_get,
         .set = event_status_set,
         .notify_check = NULL,
-        .arg = &adc,           // adc data
+        .arg = &(user_config.adc),           // adc data
         .event = NULL,
         .hasMeta = false,
 //        .maxValue.intValue = 0,
@@ -557,15 +587,15 @@ const struct mico_service_t  service_table[] = {
     .properties = {
       [0] = {
         .type = "public.map.property.message",  // uart message uuid
-        .value = &(user_uart.rx_buf),
-        .value_len = &(user_uart.rx_data_len),
+        .value = &(user_config.uart.rx_buf),
+        .value_len = &(user_config.uart.rx_data_len),
         .format = MICO_PROP_TYPE_STRING,
         .perms = ( MICO_PROP_PERMS_WO | MICO_PROP_PERMS_EV ),
         .get = uart_data_recv,
         .set = uart_data_send,
         .notify_check = uart_data_recv_check,   // check recv data
-        .arg = &user_uart,
-        .event = &(user_uart.rx_event),       // event flag
+        .arg = &(user_config.uart),
+        .event = &(user_config.uart.rx_event),       // event flag
         .hasMeta = false,
 //        .maxValue.intValue = 0,
 //        .minValue.intValue = 0,

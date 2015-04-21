@@ -219,6 +219,9 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework\properties.h</name>
       </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework\user_para_storage.c</name>
+      </file>
     </group>
     <group>
       <name>User</name>
