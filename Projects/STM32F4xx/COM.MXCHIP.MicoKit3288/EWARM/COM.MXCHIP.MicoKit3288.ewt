@@ -175,10 +175,10 @@
     <group>
       <name>AppFramework</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework\fogcloud.c</name>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework\fogCloud.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework\fogcloud.h</name>
+        <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework\fogCloud.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\AppFramework\fogcloud_msg_dispatch.c</name>
@@ -391,18 +391,6 @@
   </group>
   <group>
     <name>include</name>
-    <group>
-      <name>EasyCloud</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\include\EasyCloud\EasyCloudService.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\include\EasyCloud\EasyCloudServiceDef.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\..\include\EasyCloud\EasyCloudUtils.h</name>
-      </file>
-    </group>
     <group>
       <name>MicoDriver</name>
       <file>

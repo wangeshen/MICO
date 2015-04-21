@@ -186,7 +186,7 @@ MQTTClientRestart:
       break;
  
     mico_mqtt_client_log("MQTT socket network connect failed, rc = %d", rc);
-    //mico_thread_msleep(500);
+    mico_thread_msleep(100);
   }
   mico_mqtt_client_log("MQTT socket network connect OK!");
 
@@ -214,7 +214,7 @@ MQTTClientRestart:
       break;
     
     mico_mqtt_client_log("MQTT client connect failed, rc = %d\r\nRetry ...", rc);
-    //mico_thread_msleep(500);
+    mico_thread_msleep(100);
   }
   mico_mqtt_client_log("MQTT client connect OK!");
   
@@ -234,7 +234,7 @@ MQTTClientRestart:
     
     mico_mqtt_client_log("MQTT client subscribe [%s] failed, rc = %d\r\nRetry ...",
                          mqttClientContext.client_config_info.subtopic, rc);
-    //mico_thread_msleep(500);
+    mico_thread_msleep(100);
   }
   mico_mqtt_client_log("MQTT client subscribed [%s] OK!", mqttClientContext.client_config_info.subtopic);
   
@@ -294,6 +294,11 @@ MQTTClientRestart:
           }
           else{}
         }
+         
+        if(kNoErr != err){
+          mico_mqtt_client_log("ERROR: Publish data failed, err=%d.", err);
+        }
+        
         // free buffer
         if(NULL != recvPubTopic){
           free(recvPubTopic);

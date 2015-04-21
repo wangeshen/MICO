@@ -45,11 +45,11 @@
 #define MAX_SIZE_MQTT_SUBSCRIBE_TOPIC         256
 #define MAX_SIZE_MQTT_PUBLISH_TOPIC           256
 
-#define MAX_PLAYLOAD_SIZE                     4096
+#define MAX_PLAYLOAD_SIZE                     2048
 #define DEFAULT_MICO_MQTT_BUF_SIZE            (MAX_PLAYLOAD_SIZE + MAX_SIZE_MQTT_PUBLISH_TOPIC)
 #define DEFAULT_MICO_MQTT_READBUF_SIZE        (1024 + MAX_SIZE_MQTT_SUBSCRIBE_TOPIC)
 #define MAX_LOOPBACK_BUF_SIZE                 (DEFAULT_MICO_MQTT_BUF_SIZE + 15)   // 15 is loopback head && tail(13)
-#define STACK_SIZE_MQTT_CLIENT_THREAD         0x3000
+#define STACK_SIZE_MQTT_CLIENT_THREAD         0x2000
 
 #define RECVED_DATA_LOOPBACK_PORT             9001
 #define SEND_DATA_LOOPBACK_PORT               9002
