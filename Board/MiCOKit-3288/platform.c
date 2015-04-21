@@ -93,10 +93,10 @@ const platform_pin_mapping_t gpio_mapping[] =
   [WL_GPIO1]                          = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
 #endif
   [MICO_SYS_LED]                      = {GPIOB,  12, RCC_AHB1Periph_GPIOB}, 
-  [MICO_RF_LED]                       = {GPIOB,  13, RCC_AHB1Periph_GPIOB},
+  [MICO_RF_LED]                       = {GPIOB,  6, RCC_AHB1Periph_GPIOB},
   [BOOT_SEL]                          = {GPIOB,  2,  RCC_AHB1Periph_GPIOB}, 
   [MFG_SEL]                           = {GPIOA,  4,  RCC_AHB1Periph_GPIOA}, 
-  [EasyLink_BUTTON]                   = {GPIOB,  14, RCC_AHB1Periph_GPIOA}, 
+  [EasyLink_BUTTON]                   = {GPIOB,  4, RCC_AHB1Periph_GPIOA}, 
   [STDIO_UART_RX]                     = {GPIOA,  3,  RCC_AHB1Periph_GPIOA},  
   [STDIO_UART_TX]                     = {GPIOA,  2,  RCC_AHB1Periph_GPIOA},  
 
