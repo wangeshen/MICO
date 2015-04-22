@@ -133,10 +133,10 @@ json_object* mico_get_device_info(struct mico_service_t service_table[]);
 
 // read multiple properties
 json_object* mico_read_properties(struct mico_service_t *service_table, 
-                               json_object *prop_read_list_obj);
+                                  json_object *prop_read_list_obj);
 // write multiple properties
-json_object* mico_write_properties(struct mico_service_t *service_table, 
-                               json_object *prop_write_list_obj);
+json_object* mico_write_properties(struct mico_service_t *service_table,
+                                   json_object *prop_write_list_obj);
 
 // properties update check
 OSStatus mico_properties_notify_check(mico_Context_t * const inContext, 

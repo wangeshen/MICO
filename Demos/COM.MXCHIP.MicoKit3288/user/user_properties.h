@@ -27,9 +27,9 @@
 /*******************************************************************************
  * DEFINES
  ******************************************************************************/
-#define MAX_DEVICE_NAME_SIZE         16
-#define MAX_DEVICE_MANUFACTURER_SIZE  16
-#define MAX_USER_UART_BUF_SIZE       512
+#define MAX_DEVICE_NAME_SIZE            16
+#define MAX_DEVICE_MANUFACTURER_SIZE    16
+#define MAX_USER_UART_BUF_SIZE          512
  
 /*******************************************************************************
  * USER CONTEXT
@@ -50,10 +50,10 @@ typedef struct _user_config_t {
   int rgb_led_brightness;
   
   // adc
-  bool adc_event;               // adc upload event flag
+  bool adc_event;                             // adc upload event flag
     
   // uart
-  bool uart_rx_event;           // recv notify flag
+  bool uart_rx_event;                         // recv notify flag
   
 }user_config_t;
 
@@ -69,10 +69,10 @@ typedef struct _user_status_t {
 
 // user context
 typedef struct _user_context_t {
-  user_config_t config;            // config params in flash
-  mico_mutex_t config_mutex;  // mutex for write flash
+  user_config_t config;                       // config params in flash
+  mico_mutex_t config_mutex;                  // mutex for write flash
   
-  user_status_t status;            // running status
+  user_status_t status;                       // running status
 }user_context_t;
 
 #endif // __MICO_DEVICE_PROPERTIES_USER_H_

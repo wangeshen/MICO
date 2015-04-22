@@ -56,7 +56,7 @@ void mico_fogcloud_waitfor_connect(mico_Context_t* const context, uint32_t timeo
 /****** send && recv message ******/
 // Module <=> Cloud
 OSStatus MicoFogCloudMsgSend(mico_Context_t* const context, const char* topic,
-                       unsigned char *inBuf, unsigned int inBufLen);
+                             unsigned char *inBuf, unsigned int inBufLen);
 
 //OSStatus MicoFogCloudMsgRecv(mico_Context_t* const context, void *fogcloudMsg.
 //                             int *timeout_ms);
@@ -90,4 +90,3 @@ WEAK OSStatus user_fogcloud_msg_handler(mico_Context_t* context,
                                         unsigned char *inBuf, unsigned int inBufLen);
 
 #endif
-

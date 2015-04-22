@@ -43,21 +43,21 @@ OSStatus fogCloudStart(mico_Context_t* const inContext);
 easycloud_service_state_t fogCloudGetState(void);
 OSStatus fogCloudSend(unsigned char *inBuf, unsigned int inBufLen);
 OSStatus fogCloudSendto(const char* topic, 
-                                 unsigned char *inBuf, unsigned int inBufLen);
+                        unsigned char *inBuf, unsigned int inBufLen);
 // send to sub-level, topic "device_id/out/<level>"
 OSStatus fogCloudSendtoChannel(const char* channel, 
-                                      unsigned char *inBuf, unsigned int inBufLen);
+                               unsigned char *inBuf, unsigned int inBufLen);
 
 // cloud specifical interfaces
 OSStatus fogCloudDevActivate(mico_Context_t* const inContext,
-                                      MVDActivateRequestData_t devActivateReqData);
+                             MVDActivateRequestData_t devActivateReqData);
 OSStatus fogCloudDevAuthorize(mico_Context_t* const inContext,
-                                       MVDAuthorizeRequestData_t devAuthorizeReqData);
+                              MVDAuthorizeRequestData_t devAuthorizeReqData);
 
 OSStatus fogCloudDevFirmwareUpdate(mico_Context_t* const inContext,
-                                            MVDOTARequestData_t devOTARequestData);
+                                   MVDOTARequestData_t devOTARequestData);
 OSStatus fogCloudResetCloudDevInfo(mico_Context_t* const inContext,
-                                            MVDResetRequestData_t devResetRequestData);
+                                   MVDResetRequestData_t devResetRequestData);
 
 OSStatus fogCloudStop(mico_Context_t* const inContext);
 OSStatus fogCloudDeinit(mico_Context_t* const inContext);

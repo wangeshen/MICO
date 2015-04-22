@@ -102,15 +102,16 @@ OSStatus user_main( mico_Context_t * const mico_context )
   err = userParams_Read(mico_context, &user_context);
   require_noerr_action( err, exit, user_log("ERROR: read user param from flash failed! err=%d.", err) );
   
-  /* uart init */
+  /* user modules init */
+  // uart init
   err = user_uartInit(mico_context);
   require_noerr_action( err, exit, user_log("ERROR: user uart init failed! err = %d.", err) );
   
-  /* ADC init */
+  // ADC init
   err = MicoAdcInitialize(MICO_ADC_1, 3);
   require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1 err = %d.", err) );
   
-  /* LED init */
+  // LED init
   if(user_context.config.rgb_led_sw){
     rgb_led_open((float)(user_context.config.rgb_led_hues), 
                  (float)(user_context.config.rgb_led_saturation), 
