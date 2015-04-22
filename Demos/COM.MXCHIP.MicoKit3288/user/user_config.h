@@ -37,6 +37,7 @@
 
 #define DEFAULT_ROM_VERSION                "v1.0.0"
 #define DEFAULT_DEVICE_NAME                "MicoKit3288"  // device name upload to cloud
+#define DEFAULT_MANUFACTURER               "MXCHIP"       // device manufacturer
 
 /*******************************************************************************
  *                             CONNECTING
@@ -55,6 +56,6 @@
 #define MICO_PROPERTIES_NOTIFY_INTERVAL_MS  200
 
 /*User provided configurations*/
-#define CONFIGURATION_VERSION               0x00000001 // if default configuration is changed, update this number
+#define CONFIGURATION_VERSION               0x00000005 // if default configuration is changed, update this number
 
 #endif  // __USER_CONFIG_H_

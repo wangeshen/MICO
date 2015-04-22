@@ -140,3 +140,19 @@ void CloseLED_RGB(){
 //void CloseLED_C(){
 // MicoPwmStop((mico_pwm_t)MICO_PWM_C);
 //}
+
+void rgb_led_open(float hues, float saturation, float brightness)
+{
+  float color[3] = {0};
+  H2R_HSBtoRGB(hues, saturation, brightness, color);
+  OpenLED_RGB(color);
+}
+
+void rgb_led_close(void)
+{
+  float color[3] = {0};
+  H2R_HSBtoRGB(0, 0, 0, color);
+  OpenLED_RGB(color);
+  
+  CloseLED_RGB();  // not work ???
+}

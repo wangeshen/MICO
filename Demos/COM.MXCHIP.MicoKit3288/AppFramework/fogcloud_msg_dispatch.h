@@ -19,11 +19,11 @@
   ******************************************************************************
   */ 
 
-#include "MICODefine.h"
-#include "properties.h"
-
 #ifndef __MICO_FOGCLOUD_MSG_DISPATCH_H_
 #define __MICO_FOGCLOUD_MSG_DISPATCH_H_
+
+#include "MICODefine.h"
+#include "properties.h"
 
 // recv topic
 #define FOGCLOUD_MSG_TOPIC_IN            "/in"
@@ -35,6 +35,12 @@
 #define FOGCLOUD_MSG_TOPIC_OUT_NOTIFY    "read"
 #define FOGCLOUD_MSG_TOPIC_OUT_ERROR     "err"
 
+// msg handle result
+#define MSG_PROP_UNPROCESSED             0
+#define MSG_PROP_READ                    1
+#define MSG_PROP_WROTE                   2
+
+
 // msg data
 typedef struct _mico_fogcloud_msg_t{
   const char *topic;
@@ -44,8 +50,8 @@ typedef struct _mico_fogcloud_msg_t{
 }mico_fogcloud_msg_t;
 
 // handle cloud msg here, for example: send to USART or echo to cloud
-OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t service_table[],
-                                mico_fogcloud_msg_t *cloud_msg);
+OSStatus mico_fogcloud_msg_dispatch(mico_Context_t* context, struct mico_service_t service_table[],
+                                mico_fogcloud_msg_t *cloud_msg, int* ret_status);
 
 // property notify
 OSStatus mico_start_properties_notify(mico_Context_t * const inContext, struct mico_service_t service_table[],

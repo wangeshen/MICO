@@ -25,14 +25,14 @@
 #include "MICODefine.h"
 
 // FOGCLOUD message recv callback: handle messages from fogcloud.
-OSStatus user_fogcloud_msg_handler(mico_Context_t* context, 
+OSStatus user_fogcloud_msg_handler(mico_Context_t* mico_context, 
                             const char* topic, const unsigned int topicLen,
                             unsigned char *inBuf, unsigned int inBufLen);
 
 // MICO user config callback: Restore default configuration provided by application
-void userRestoreDefault_callback(mico_Context_t *inContext);
+void userRestoreDefault_callback(mico_Context_t *mico_context);
 
 // MICO AppFramework callback: user main function to do user work
-OSStatus user_main( mico_Context_t * const inContext );
+OSStatus user_main( mico_Context_t * const mico_context );
 
 #endif  // __MICO_USER_MAIN_H_

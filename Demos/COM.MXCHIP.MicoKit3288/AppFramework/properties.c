@@ -586,8 +586,7 @@ OSStatus _property_write_create_response(struct mico_service_t *service_table,
                                                                           (void*)set_string, set_string_len);
         if (0 == ret){  // set ok, update property value
           memset((char*)(service_table[service_index].properties[property_index].value), '\0', service_table[service_index].properties[property_index].maxStringLen);
-          strncpy((char*)(service_table[service_index].properties[property_index].value), set_string, 
-                  set_string_len > service_table[service_index].properties[property_index].maxStringLen ? service_table[service_index].properties[property_index].maxStringLen : set_string_len);
+          strncpy((char*)(service_table[service_index].properties[property_index].value), set_string, set_string_len);
           *(service_table[service_index].properties[property_index].value_len) = set_string_len;
           json_object_object_add(out_write_obj, key, json_object_new_string(set_string));
           err = kNoErr;

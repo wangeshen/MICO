@@ -19,11 +19,11 @@
   ******************************************************************************
   */ 
 
-#include "MICODefine.h"
-#include "JSON-C/json.h"
-
 #ifndef __MICO_DEVICE_PROPERTIES_H_
 #define __MICO_DEVICE_PROPERTIES_H_
+
+#include "MICODefine.h"
+#include "JSON-C/json.h"
 
 /*******************************************************************************
  * DEFINES

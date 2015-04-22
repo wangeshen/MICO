@@ -28,14 +28,14 @@
 #define app_log_trace() custom_log_trace("APP")
 
 /* default user_main callback function, this must be override by user. */
-WEAK OSStatus user_main( mico_Context_t * const inContext )
+WEAK OSStatus user_main( mico_Context_t * const mico_context )
 {
   app_log("ERROR: user_main undefined!");
   return kNotHandledErr;
 }
 
 /* default user_main callback function, this may be override by user. */
-WEAK void userRestoreDefault_callback(mico_Context_t *inContext)
+WEAK void userRestoreDefault_callback(mico_Context_t *mico_context)
 {
   app_log("INFO: call default userRestoreDefault_callback, do nothing!");
 }
@@ -44,14 +44,14 @@ WEAK void userRestoreDefault_callback(mico_Context_t *inContext)
 void user_main_thread(void* arg)
 {
   OSStatus err = kUnknownErr;
-  mico_Context_t *inContext = (mico_Context_t *)arg;
+  mico_Context_t *mico_context = (mico_Context_t *)arg;
   
   // wait semaphore for cloud connection
-  mico_fogcloud_waitfor_connect(inContext, MICO_WAIT_FOREVER);  // block to wait fogcloud connect
+  mico_fogcloud_waitfor_connect(mico_context, MICO_WAIT_FOREVER);  // block to wait fogcloud connect
   app_log("fogcloud connected.");
   
   // loop in user mian function && must not return
-  err = user_main(inContext);
+  err = user_main(mico_context);
   UNUSED_PARAMETER(err);
   
   // never get here only if user work err && exit.
@@ -61,47 +61,47 @@ void user_main_thread(void* arg)
   };
 }
 
-OSStatus startUserThread(mico_Context_t *inContext)
+OSStatus startUserThread(mico_Context_t *mico_context)
 {
   app_log_trace();
   OSStatus err = kNoErr;
-  require_action(inContext, exit, err = kParamErr);
+  require_action(mico_context, exit, err = kParamErr);
   
   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "user_main", 
                                 user_main_thread, STACK_SIZE_USER_MAIN_THREAD, 
-                                inContext );
+                                mico_context );
 exit:
   return err;
 }
 
 /* MICO system callback: Restore default configuration provided by application */
-void appRestoreDefault_callback(mico_Context_t *inContext)
+void appRestoreDefault_callback(mico_Context_t *mico_context)
 {
-  inContext->flashContentInRam.appConfig.configDataVer = CONFIGURATION_VERSION;
-  inContext->flashContentInRam.appConfig.bonjourServicePort = BONJOUR_SERVICE_PORT;
+  mico_context->flashContentInRam.appConfig.configDataVer = CONFIGURATION_VERSION;
+  mico_context->flashContentInRam.appConfig.bonjourServicePort = BONJOUR_SERVICE_PORT;
   
   // restore fogcloud config
-  MicoFogCloudRestoreDefault(inContext);
+  MicoFogCloudRestoreDefault(mico_context);
   // restore user config
-  userRestoreDefault_callback(inContext);
+  userRestoreDefault_callback(mico_context);
 }
 
 /* MICO APP entrance */
-OSStatus MICOStartApplication( mico_Context_t * const inContext )
+OSStatus MICOStartApplication( mico_Context_t * const mico_context )
 {
   app_log_trace();
   OSStatus err = kNoErr;
     
-  require_action(inContext, exit, err = kParamErr);
+  require_action(mico_context, exit, err = kParamErr);
   
   /* Bonjour for service searching */
-  if(inContext->flashContentInRam.micoSystemConfig.bonjourEnable == true) {
-    MICOStartBonjourService( Station, inContext );
+  if(mico_context->flashContentInRam.micoSystemConfig.bonjourEnable == true) {
+    MICOStartBonjourService( Station, mico_context );
   }
 
   /* start cloud service */
 #if (MICO_CLOUD_TYPE == CLOUD_FOGCLOUD)
-  err = MicoStartFogCloudService( inContext );
+  err = MicoStartFogCloudService( mico_context );
   require_noerr_action( err, exit, app_log("ERROR: Unable to start FogCloud service.") );
 #elif (MICO_CLOUD_TYPE == CLOUD_ALINK)
   app_log("MICO CloudService: Ali.");
@@ -112,7 +112,7 @@ OSStatus MICOStartApplication( mico_Context_t * const inContext )
 #endif
   
   /* start user thread */
-  err = startUserThread( inContext );
+  err = startUserThread( mico_context );
   require_noerr_action( err, exit, app_log("ERROR: start user thread failed!") );
 
 exit:

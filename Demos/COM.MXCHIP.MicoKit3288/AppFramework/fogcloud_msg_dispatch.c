@@ -40,8 +40,8 @@ static mico_notify_thread_data_t g_notify_thread_data;
 
 
 // handle cloud msg here, for example: send to USART or echo to cloud
-OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  service_table[],
-                                mico_fogcloud_msg_t *cloud_msg)
+OSStatus mico_fogcloud_msg_dispatch(mico_Context_t* context, struct mico_service_t  service_table[],
+                                mico_fogcloud_msg_t *cloud_msg, int* ret_status)
 {
   msg_dispatch_log_trace();
   OSStatus err = kNoErr;
@@ -56,6 +56,8 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
   json_object *response_services_obj = NULL;
   json_object *response_prop_obj = NULL;
   json_object *response_err_obj = NULL;
+  
+  *ret_status = MSG_PROP_UNPROCESSED;
   
   if((NULL == context) || (NULL == cloud_msg->topic) || (0 == cloud_msg->topic_len) ) {
     return kParamErr;
@@ -132,6 +134,9 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
         err = MicoFogCloudMsgSend(context, response_sub_topic, 
                                   (unsigned char*)response_json_string, strlen(response_json_string));
       }
+      
+      // return process result
+      *ret_status = MSG_PROP_READ;
     } 
   }
   else if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE, recv_sub_topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE)) ){
@@ -180,6 +185,9 @@ OSStatus mico_cloudmsg_dispatch(mico_Context_t* context, struct mico_service_t  
         err = MicoFogCloudMsgSend(context, response_sub_topic, 
                                   (unsigned char*)response_json_string, strlen(response_json_string));
       }
+      
+      // return process result
+      *ret_status = MSG_PROP_WROTE;
     }
   }
   else{

@@ -19,55 +19,60 @@
   ******************************************************************************
   */ 
 
-#include "MICODefine.h"
-
 #ifndef __MICO_DEVICE_PROPERTIES_USER_H_
 #define __MICO_DEVICE_PROPERTIES_USER_H_
 
-/*******************************************************************************
- * MODULE DATA DEFINE
- ******************************************************************************/
+#include "MICODefine.h"
 
+/*******************************************************************************
+ * DEFINES
+ ******************************************************************************/
 #define MAX_DEVICE_NAME_SIZE         16
 #define MAX_DEVICE_MANUFACTURER_SIZE  16
-
 #define MAX_USER_UART_BUF_SIZE       512
-   
-// device info
- typedef struct _dev_info_t {
-  char name[MAX_DEVICE_NAME_SIZE+1];
-  char manufacturer[MAX_DEVICE_MANUFACTURER_SIZE+1];
+ 
+/*******************************************************************************
+ * USER CONTEXT
+ ******************************************************************************/
+
+// user module config params in flash
+typedef struct _user_config_t {
+  // dev_info
+  char dev_name[MAX_DEVICE_NAME_SIZE+1];
+  uint32_t dev_name_len; 
+  char dev_manufacturer[MAX_DEVICE_MANUFACTURER_SIZE+1];
+  uint32_t dev_manufacturer_len;
   
-  uint32_t name_len;
-  uint32_t manufacturer_len;
-}dev_info_t;
+  // rgb led
+  bool rgb_led_sw;
+  int rgb_led_hues;
+  int rgb_led_saturation;
+  int rgb_led_brightness;
+  
+  // adc
+  bool adc_event;               // adc upload event flag
+    
+  // uart
+  bool uart_rx_event;           // recv notify flag
+  
+}user_config_t;
 
-// rgb led
- typedef struct _rgb_led_t {
-  bool sw;
-  int hues;
-  int saturation;
-  int brightness;
-}rgb_led_t;
+// user module status
+typedef struct _user_status_t {
+  // adc
+  int adc_data;
+  
+  // uart
+  char uart_rx_buf[MAX_USER_UART_BUF_SIZE];   // use a buffer to store data received
+  uint32_t uart_rx_data_len;                  // uart data len received
+}user_status_t;
 
-// adc
- typedef struct _adc_t {
-  int data;
-  bool event;   // event flag
-}adc_t;
-
-// uart
-typedef struct _uart_t {
-  char rx_buf[MAX_USER_UART_BUF_SIZE];   // use a buffer to store data received
-  uint32_t rx_data_len;                  // uart data len received
-  bool rx_event;                       // recv notify flag
-}uart_t;
-
+// user context
 typedef struct _user_context_t {
-  dev_info_t dev_info;
-  rgb_led_t rgb_led;
-  adc_t adc;
-  uart_t uart;
+  user_config_t config;            // config params in flash
+  mico_mutex_t config_mutex;  // mutex for write flash
+  
+  user_status_t status;            // running status
 }user_context_t;
 
 #endif // __MICO_DEVICE_PROPERTIES_USER_H_

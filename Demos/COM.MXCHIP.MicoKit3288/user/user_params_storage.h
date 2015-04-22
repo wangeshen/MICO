@@ -1,11 +1,10 @@
 /**
 ******************************************************************************
-* @file    rgb_led.h 
+* @file    user_params_storage.h
 * @author  Eshen Wang
 * @version V1.0.0
-* @date    17-Mar-2015
-* @brief   converts HSB color values to RGB colors. 
-  operation
+* @date    22-Apr-2015
+* @brief   user params storage function.
 ******************************************************************************
 * @attention
 *
@@ -20,26 +19,22 @@
 ******************************************************************************
 */ 
 
-#ifndef __RGB_LED_H_
-#define __RGB_LED_H_
+#ifndef __USER_PARAMS_STORAGE_H_
+#define __USER_PARAMS_STORAGE_H_
 
-#define H2R_MAX_RGB_val 255.0
+#include "MICODefine.h"
+#include "user_properties.h"
 
-/* high level interfaces
- */
+/*******************************************************************************
+* FUNCTIONS
+******************************************************************************/
 
-void rgb_led_open(float hues, float saturation, float brightness);
-void rgb_led_close(void);
+// restore user params
+OSStatus userParams_RestoreDefault(mico_Context_t *mico_context, user_context_t *user_context);
+// read user params from flash
+OSStatus userParams_Read(mico_Context_t *mico_context, user_context_t *user_context);
+// write user config back into flash
+OSStatus userParams_Update(mico_Context_t *mico_context, user_context_t *user_context);
 
-/* low level interfaces
- */
-void H2R_HSBtoRGB(float hue, float sat, float bright, float *color);
-void OpenLED_RGB(float *color);
-void CloseLED_RGB();
-//void OpenLED_W(float Size);
-//void CloseLED_W();
-//
-//void OpenLED_C(float Size);
-//void CloseLED_C();
 
-#endif
+#endif // __USER_PARAMS_STORAGE_H_
