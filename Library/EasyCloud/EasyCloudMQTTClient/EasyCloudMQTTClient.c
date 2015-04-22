@@ -269,7 +269,7 @@ MQTTClientRestart:
         // parse pubtopic && msg
         err = internal_parse_topic_msg((const unsigned char*)(&recvDataBuffer[0]), recvDataLen, 
                                        &recvPubTopic, &recvPubTopicLen, &level_flag, &recvMsg, &recvMsgLen);
-        mico_mqtt_client_log("DATA_TO_PUBLISH[%d][%.*s]", recvDataLen, recvDataLen, recvDataBuffer);
+        //mico_mqtt_client_log("DATA_TO_PUBLISH[%d][%.*s]", recvDataLen, recvDataLen, recvDataBuffer);
         if(kNoErr == err){
           if(0 == recvPubTopicLen){
             // default topic "device_id/out"
@@ -540,7 +540,7 @@ static OSStatus internal_loopbackMsg(const unsigned char *sendBuf, int sendBufLe
     return kNoResourcesErr;
   }
   
-  mico_mqtt_client_log("LOOPBACK_SEND:[%d][%s]", sendBufLen, sendBuf);
+  //mico_mqtt_client_log("LOOPBACK_SEND:[%d][%s]", sendBufLen, sendBuf);
   addr.s_port = RECVED_DATA_LOOPBACK_PORT;
   ret = sendto(send_loopback_fd, sendBuf, sendBufLen, 0, &addr, sizeof(addr));
   if(ret != sendBufLen){
@@ -586,7 +586,7 @@ OSStatus EasyCloudMQTTClientPublish(const unsigned char* msg, int msglen)
   if(kNoErr != err){
     return kNoMemoryErr;
   }
-  mico_mqtt_client_log("LOOPBACK_FORMAT:[%d][%s]", sendBufLen, sendBuf+10);
+  //mico_mqtt_client_log("LOOPBACK_FORMAT:[%d][%s]", sendBufLen, sendBuf+10);
  
   // send loopback msg
   err = internal_loopbackMsg(sendBuf ,sendBufLen);
@@ -672,7 +672,7 @@ OSStatus EasyCloudMQTTClientPublishtoChannel(const char* channel,
   if(kNoErr != err){
     return kNoMemoryErr;
   }
-  mico_mqtt_client_log("LOOPBACK_FORMAT:[%d][%s]", sendBufLen, sendBuf+10);
+  //mico_mqtt_client_log("LOOPBACK_FORMAT:[%d][%s]", sendBufLen, sendBuf+10);
   
   // send loopback msg
   err = internal_loopbackMsg(sendBuf, sendBufLen);
