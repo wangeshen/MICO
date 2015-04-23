@@ -889,15 +889,13 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
   FD_ZERO(&readfds);
   FD_SET(remoteTcpClient_fd, &readfds);
   err = select(1, &readfds, NULL, NULL, &t);
-  require(err >= 1, exit);
-  //easycloud_service_log("select return ok.");
+  require_action(err >=1, exit, err = kTimeoutErr);
   
   if (FD_ISSET(remoteTcpClient_fd, &readfds)) {
     err = ECS_SocketReadHTTPHeader( remoteTcpClient_fd, httpHeader );             
     switch ( err )
     {
     case kNoErr:
-      //easycloud_service_log("read httpheader OK!");
       //easycloud_service_log("httpHeader->buf:\r\n%s", httpHeader->buf);
       
       // statusCode check
