@@ -703,22 +703,22 @@ OSStatus add_property(json_object* properties,  struct mico_prop_t property, int
   // value && format
   switch(property.format){
   case MICO_PROP_TYPE_INT:{
-    json_object_object_add(object, "value", json_object_new_int( *((int*)(property.value)) ) );
+    //json_object_object_add(object, "value", json_object_new_int( *((int*)(property.value)) ) );
     json_object_object_add(object, "format", json_object_new_string("int"));
     break;
   }
   case MICO_PROP_TYPE_STRING:{
-    json_object_object_add(object, "value", json_object_new_string( (char*)(property.value)) );
+    //json_object_object_add(object, "value", json_object_new_string( (char*)(property.value)) );
     json_object_object_add(object, "format", json_object_new_string("string"));
     break;
   }
   case MICO_PROP_TYPE_FLOAT:{
-    json_object_object_add(object, "value", json_object_new_double( *((double*)(property.value))) );
+    //json_object_object_add(object, "value", json_object_new_double( *((double*)(property.value))) );
     json_object_object_add(object, "format", json_object_new_string("float"));
     break;
   }
   case MICO_PROP_TYPE_BOOL:{
-    json_object_object_add(object, "value", json_object_new_boolean( *((bool*)(property.value))) );
+    //json_object_object_add(object, "value", json_object_new_boolean( *((bool*)(property.value))) );
     json_object_object_add(object, "format", json_object_new_string("bool"));
     break;
   }
