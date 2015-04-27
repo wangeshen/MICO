@@ -356,9 +356,9 @@ OSStatus _property_read_create_response_by_index(struct mico_service_t *service_
   if( MICO_PROP_PERMS_READABLE (service_table[service_index].properties[property_index].perms) ){
     switch(service_table[service_index].properties[property_index].format){
     case MICO_PROP_TYPE_INT:{
-      properties_log("prop got: %s, iid=%d, value=%d", 
-                     service_table[service_index].properties[property_index].type, iid, 
-                     *((int*)service_table[service_index].properties[property_index].value));
+      //properties_log("prop got: %s, iid=%d, value=%d", 
+      //               service_table[service_index].properties[property_index].type, iid, 
+      //               *((int*)service_table[service_index].properties[property_index].value));
       // prop->get (read hardware status)
       if(NULL != service_table[service_index].properties[property_index].get){
         service_table[service_index].properties[property_index].get(&service_table[service_index].properties[property_index], 
@@ -372,9 +372,9 @@ OSStatus _property_read_create_response_by_index(struct mico_service_t *service_
       break;
     }
     case MICO_PROP_TYPE_FLOAT:{
-      properties_log("prop got: %s, iid=%d, value=%f", 
-                     service_table[service_index].properties[property_index].type, iid, 
-                     *((float*)service_table[service_index].properties[property_index].value));
+      //properties_log("prop got: %s, iid=%d, value=%f", 
+      //               service_table[service_index].properties[property_index].type, iid, 
+      //               *((float*)service_table[service_index].properties[property_index].value));
       // prop->get (read hardware status)
       if(NULL != service_table[service_index].properties[property_index].get){
         service_table[service_index].properties[property_index].get(&service_table[service_index].properties[property_index], 
@@ -388,9 +388,9 @@ OSStatus _property_read_create_response_by_index(struct mico_service_t *service_
       break;
     }
     case MICO_PROP_TYPE_STRING:{
-      properties_log("prop got: %s, iid=%d, value=%s", 
-                     service_table[service_index].properties[property_index].type, iid, 
-                     (char*)service_table[service_index].properties[property_index].value);
+      //properties_log("prop got: %s, iid=%d, value=%s", 
+      //               service_table[service_index].properties[property_index].type, iid, 
+      //               (char*)service_table[service_index].properties[property_index].value);
       // prop->get (read hardware status)
       if(NULL != service_table[service_index].properties[property_index].get){
         service_table[service_index].properties[property_index].get(&service_table[service_index].properties[property_index], 
@@ -404,9 +404,9 @@ OSStatus _property_read_create_response_by_index(struct mico_service_t *service_
       break;
     }
     case MICO_PROP_TYPE_BOOL:{
-      properties_log("prop got: %s, iid=%d, value=%d", 
-                     service_table[service_index].properties[property_index].type, iid, 
-                     *((bool*)service_table[service_index].properties[property_index].value));
+      //properties_log("prop got: %s, iid=%d, value=%d", 
+      //               service_table[service_index].properties[property_index].type, iid, 
+      //               *((bool*)service_table[service_index].properties[property_index].value));
       // prop->get (read hardware status)
       if(NULL != service_table[service_index].properties[property_index].get){
         service_table[service_index].properties[property_index].get(&service_table[service_index].properties[property_index], 
@@ -513,7 +513,7 @@ OSStatus _property_write_create_response(struct mico_service_t *service_table,
   require_action(out_err_prop_obj, exit, err = kParamErr);
   
   Str2Int((uint8_t*)key, &iid);
-  properties_log("properties write iid=%d.", iid);
+  //properties_log("properties write iid=%d.", iid);
   
   err = FindPropertyByIID(service_table, iid, &service_index, &property_index);
   require_noerr(err, exit);
@@ -521,9 +521,9 @@ OSStatus _property_write_create_response(struct mico_service_t *service_table,
   if( MICO_PROP_PERMS_WRITABLE (service_table[service_index].properties[property_index].perms) ){
     switch(service_table[service_index].properties[property_index].format){
     case MICO_PROP_TYPE_INT:{
-      properties_log("prop got: %s, iid=%d, value=%d", 
-                     service_table[service_index].properties[property_index].type, iid, 
-                     *((int*)service_table[service_index].properties[property_index].value));
+      //properties_log("prop got: %s, iid=%d, value=%d", 
+      //               service_table[service_index].properties[property_index].type, iid, 
+      //               *((int*)service_table[service_index].properties[property_index].value));
       // property set (hardware operation)
       if(NULL != service_table[service_index].properties[property_index].set){
         int_value = json_object_get_int(val);
@@ -547,9 +547,9 @@ OSStatus _property_write_create_response(struct mico_service_t *service_table,
       break;
     }
     case MICO_PROP_TYPE_FLOAT:{
-      properties_log("prop got: %s, iid=%d, value=%f", 
-                     service_table[service_index].properties[property_index].type, iid, 
-                     *((float*)service_table[service_index].properties[property_index].value));
+      //properties_log("prop got: %s, iid=%d, value=%f", 
+      //               service_table[service_index].properties[property_index].type, iid, 
+      //               *((float*)service_table[service_index].properties[property_index].value));
       // property set(hardware operation)
       if(NULL != service_table[service_index].properties[property_index].set){
         float_value = json_object_get_double(val);
@@ -573,9 +573,9 @@ OSStatus _property_write_create_response(struct mico_service_t *service_table,
       break;
     }
     case MICO_PROP_TYPE_STRING:{
-      properties_log("prop got: %s, iid=%d, value=%s", 
-                     service_table[service_index].properties[property_index].type, iid, 
-                     (char*)service_table[service_index].properties[property_index].value);
+      //properties_log("prop got: %s, iid=%d, value=%s", 
+      //               service_table[service_index].properties[property_index].type, iid, 
+      //               (char*)service_table[service_index].properties[property_index].value);
       
       // property set(hardware operation)
       if(NULL != service_table[service_index].properties[property_index].set){
@@ -603,9 +603,9 @@ OSStatus _property_write_create_response(struct mico_service_t *service_table,
       break;
     }
     case MICO_PROP_TYPE_BOOL:{
-      properties_log("prop got: %s, iid=%d, value=%d", 
-                     service_table[service_index].properties[property_index].type, iid, 
-                     *((bool*)service_table[service_index].properties[property_index].value));
+      //properties_log("prop got: %s, iid=%d, value=%d", 
+      //               service_table[service_index].properties[property_index].type, iid, 
+      //               *((bool*)service_table[service_index].properties[property_index].value));
       // property set(hardware operation)
       if(NULL != service_table[service_index].properties[property_index].set){
         boolean_value = json_object_get_boolean(val);

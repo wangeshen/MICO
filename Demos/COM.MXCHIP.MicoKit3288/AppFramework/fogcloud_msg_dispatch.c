@@ -75,13 +75,13 @@ OSStatus mico_fogcloud_msg_dispatch(mico_Context_t* context, struct mico_service
   }
   memset(response_sub_topic, '\0', recv_sub_topic_len);
   strncpy(response_sub_topic, recv_sub_topic_ptr + 1, recv_sub_topic_len-1);  // remove leading '/' as send sub-topic
-  msg_dispatch_log("recv_sub_topic[%d]=[%.*s]", recv_sub_topic_len, recv_sub_topic_len, recv_sub_topic_ptr);  
-  msg_dispatch_log("response_sub_topic[%d]=[%s]", strlen(response_sub_topic), response_sub_topic);  
+  //msg_dispatch_log("recv_sub_topic[%d]=[%.*s]", recv_sub_topic_len, recv_sub_topic_len, recv_sub_topic_ptr);  
+  //msg_dispatch_log("response_sub_topic[%d]=[%s]", strlen(response_sub_topic), response_sub_topic);  
   
   // parse sub topic string
   if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_READ, recv_sub_topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_READ)) ){
     // from /read
-    msg_dispatch_log("Recv from: %.*s, data[%d]: %s",
+    msg_dispatch_log("Recv read cmd: %.*s, data[%d]: %s",
                      recv_sub_topic_len, recv_sub_topic_ptr, cloud_msg->data_len, cloud_msg->data);
    
     // parse input json data
@@ -96,7 +96,7 @@ OSStatus mico_fogcloud_msg_dispatch(mico_Context_t* context, struct mico_service
                                 (unsigned char*)response_json_string, strlen(response_json_string));
       goto exit;
     }
-    msg_dispatch_log("Recv read object=%s", json_object_to_json_string(recv_json_object));
+    //msg_dispatch_log("Recv read object=%s", json_object_to_json_string(recv_json_object));
         
     // read properties, return "services/read/err" sub-obj in response_json_obj
     response_json_obj = mico_read_properties(service_table, recv_json_object);
@@ -141,7 +141,7 @@ OSStatus mico_fogcloud_msg_dispatch(mico_Context_t* context, struct mico_service
   }
   else if( 0 == strncmp((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE, recv_sub_topic_ptr, strlen((char*)FOGCLOUD_MSG_TOPIC_IN_WRITE)) ){
     // from /write
-    msg_dispatch_log("Recv from: %.*s, data[%d]: %s",
+    msg_dispatch_log("Recv write cmd: %.*s, data[%d]: %s",
                      recv_sub_topic_len, recv_sub_topic_ptr,
                      cloud_msg->data_len, cloud_msg->data);
     
@@ -157,7 +157,7 @@ OSStatus mico_fogcloud_msg_dispatch(mico_Context_t* context, struct mico_service
                                 (unsigned char*)response_json_string, strlen(response_json_string));
       goto exit;
     }
-    msg_dispatch_log("Recv write object=%s", json_object_to_json_string(recv_json_object));
+    //msg_dispatch_log("Recv write object=%s", json_object_to_json_string(recv_json_object));
         
     // write properties, return "write/err" sub-obj in response_json_obj
     response_json_obj = mico_write_properties(service_table, recv_json_object);
