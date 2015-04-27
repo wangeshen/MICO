@@ -23,8 +23,8 @@
 #include "properties.h"
 #include "user_properties.h"
 #include "JSON-C/json.h"
-#include "rgb_led.h"
-#include "uart.h"
+#include "drivers/rgb_led.h"
+#include "drivers/uart.h"
 
 #define properties_user_log(M, ...) custom_log("DEV_PROPERTIES_USER", M, ##__VA_ARGS__)
 #define properties_user_log_trace() custom_log_trace("DEV_PROPERTIES_USER")

@@ -26,8 +26,8 @@
 
 #include "user_properties.h"
 #include "user_params_storage.h"
-#include "uart.h"
-#include "rgb_led.h"
+#include "drivers/uart.h"
+#include "drivers/rgb_led.h"
 
 #define user_log(M, ...) custom_log("USER", M, ##__VA_ARGS__)
 #define user_log_trace() custom_log_trace("USER")
