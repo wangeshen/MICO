@@ -61,13 +61,13 @@ OSStatus userParams_RestoreDefault(mico_Context_t *mico_context, user_context_t 
   sprintf(user_context->config.dev_manufacturer, DEFAULT_MANUFACTURER);
   user_context->config.dev_manufacturer_len = strlen(DEFAULT_MANUFACTURER);
   
-//  user_context->config.rgb_led_sw = false;
-//  user_context->config.rgb_led_hues = 0;
-//  user_context->config.rgb_led_saturation = 0;
-//  user_context->config.rgb_led_brightness = 0;
+  user_context->config.rgb_led_sw = false;
+  user_context->config.rgb_led_hues = 0;
+  user_context->config.rgb_led_saturation = 0;
+  user_context->config.rgb_led_brightness = 0;
   
-  user_context->config.adc_event = true;
-  //user_context->config.uart_rx_event = true;
+  user_context->config.light_sensor_event = true;
+  user_context->config.uart_rx_event = true;
   
   /* write flash */
   mico_rtos_lock_mutex(&mico_context->flashContentInRam_mutex);

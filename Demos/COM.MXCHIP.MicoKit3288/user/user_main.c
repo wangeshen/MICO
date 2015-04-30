@@ -130,19 +130,19 @@ OSStatus user_main( mico_Context_t * const mico_context )
   require_action(mico_context, exit, err = kParamErr);
   
   /* read user config params from flash */
-//  if(NULL == user_context.config_mutex){
-//    mico_rtos_init_mutex(&user_context.config_mutex);
-//  }
-//  err = userParams_Read(mico_context, &user_context);
-//  require_noerr_action( err, exit, user_log("ERROR: read user param from flash failed! err=%d.", err) );
-//  
+  if(NULL == user_context.config_mutex){
+    mico_rtos_init_mutex(&user_context.config_mutex);
+  }
+  err = userParams_Read(mico_context, &user_context);
+  require_noerr_action( err, exit, user_log("ERROR: read user param from flash failed! err=%d.", err) );
+  
   /* user modules init */
   // uart init
-  //err = user_uartInit(mico_context);
-  //require_noerr_action( err, exit, user_log("ERROR: user uart init failed! err = %d.", err) );
+  err = user_uartInit(mico_context);
+  require_noerr_action( err, exit, user_log("ERROR: user uart init failed! err = %d.", err) );
   
   // DC Motor pin
-  MicoGpioInitialize( (mico_gpio_t)DC_MOTOR_PIN, OUTPUT_PUSH_PULL );
+  //MicoGpioInitialize( (mico_gpio_t)DC_MOTOR_PIN, OUTPUT_PUSH_PULL );
   
   // Light sensor (ADC1_4) init
   //err = MicoAdcInitialize(MICO_ADC_1, 3);
@@ -155,13 +155,22 @@ OSStatus user_main( mico_Context_t * const mico_context )
   // OLED init
   OLED_Init();
   OLED_Clear();
-  OLED_ShowString(3,0,"M X C H I P");
-  OLED_ShowString(4,3,(uint8_t*)DEFAULT_DEVICE_NAME); 
+  OLED_ShowString(10,0,"M X C H I P");
+  OLED_ShowString(8,3,(uint8_t*)DEFAULT_DEVICE_NAME); 
+  OLED_ShowString(6,6,"T: 25 C, H: 49%");
   
   /* new rgb led */
   hsb2rgb_led_init();
   //hsb2rgb_led_open(240,100,100);
-  rgb_led_open(255,0,0);  // blue
+  if(user_context.config.rgb_led_sw){
+    hsb2rgb_led_open((float)(user_context.config.rgb_led_hues), 
+                 (float)(user_context.config.rgb_led_saturation), 
+                 (float)(user_context.config.rgb_led_brightness));
+  }
+  else{
+    rgb_led_close();
+  }
+  rgb_led_open(0,0,0);  // close
   
   // Environmental Sensor init
   //err = bme280_sensor_init();
@@ -179,29 +188,30 @@ OSStatus user_main( mico_Context_t * const mico_context )
   
   
   /* start properties notify task */
- // err = mico_start_properties_notify(mico_context, service_table, 
- //                                    MICO_PROPERTIES_NOTIFY_INTERVAL_MS, 
- //                                    STACK_SIZE_NOTIFY_THREAD);
- // require_noerr_action( err, exit, user_log("ERROR: mico_start_properties_notify err = %d.", err) );
+  err = mico_start_properties_notify(mico_context, service_table, 
+                                     MICO_PROPERTIES_NOTIFY_INTERVAL_MS, 
+                                     STACK_SIZE_NOTIFY_THREAD);
+  require_noerr_action( err, exit, user_log("ERROR: mico_start_properties_notify err = %d.", err) );
     
   /* main loop */
   while(1){
     
     /*---------- update config params in flash ---------------*/
-//    if(user_params_need_update){
-//      err = userParams_Update(mico_context, &user_context);
-//      if(kNoErr == err){
-//        user_params_need_update = false;
-//      }
-//      else{
-//        user_log("ERROR: update user config into flash failed! err = %d.", err);
-//      }
-//    }
+    if(user_params_need_update){
+      err = userParams_Update(mico_context, &user_context);
+      if(kNoErr == err){
+        user_params_need_update = false;
+      }
+      else{
+        user_log("ERROR: update user config into flash failed! err = %d.", err);
+      }
+    }
     
     mico_thread_msleep(1000);
     
     /*---------------------- sensor data -------------------*/
-    
+
+/*    
     // H/T/P
 //    err = bme280_data_readout(&bme280_temp, &bme280_press, &bme280_hum);
 //    user_log("BME280: nT=%d, nH=%d, nP=%d", bme280_temp, bme280_hum, bme280_press);
@@ -210,32 +220,32 @@ OSStatus user_main( mico_Context_t * const mico_context )
     
     // OLED display
     //OLED_ShowString(0,6,(uint8_t*)temp_hum_str);
-    
+*/    
     // RGB LED
     if(0 == i){
       hue = 0;
       sat = 100;
       bri = 100;
-      //rgb_led_open(255,0,0);  // blue
+      rgb_led_open(254,0,0);  // blue
     }
     else if(1 == i){
       hue = 120;
       sat = 100;
       bri = 100;
-      //rgb_led_open(0,255,0);  // green
+      rgb_led_open(0,255,0);  // green
     }
     else if(2 == i){
       hue = 240;
       sat = 100;
       bri = 100;
-      //rgb_led_open(0,0,255);  // red
+      rgb_led_open(0,0,50);  // red
     }
     i++;
     if(i >= 3){
       i=0;
     }
-    hsb2rgb_led_open(hue, sat, bri);
-    
+    //rgb_led_open(hue, sat, bri);
+/*    
     // Light (ADC1_4) test
 //    err = MicoAdcInitialize(MICO_ADC_1, 3);
 //    //require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1_4 err = %d.", err) );
@@ -251,7 +261,8 @@ OSStatus user_main( mico_Context_t * const mico_context )
 //    if(kNoErr == err){
 //      user_log("Infared(ADC1_1): %d", infared_data);
 //    }
-    
+
+    */    
   }  // while
   
   // never getting here only if fatal error.

@@ -47,8 +47,8 @@ void user_main_thread(void* arg)
   mico_Context_t *mico_context = (mico_Context_t *)arg;
   
   // wait semaphore for cloud connection
-  //mico_fogcloud_waitfor_connect(mico_context, MICO_WAIT_FOREVER);  // block to wait fogcloud connect
-  //app_log("cloud connected.");
+  mico_fogcloud_waitfor_connect(mico_context, MICO_WAIT_FOREVER);  // block to wait fogcloud connect
+  app_log("cloud connected.");
   
   // loop in user mian function && must not return
   err = user_main(mico_context);

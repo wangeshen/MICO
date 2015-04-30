@@ -44,27 +44,27 @@ typedef struct _user_config_t {
   uint32_t dev_manufacturer_len;
   
   // rgb led
-//  bool rgb_led_sw;
-//  int rgb_led_hues;
-//  int rgb_led_saturation;
-//  int rgb_led_brightness;
+  bool rgb_led_sw;
+  int rgb_led_hues;
+  int rgb_led_saturation;
+  int rgb_led_brightness;
   
-  // adc
-  bool adc_event;                             // adc upload event flag
+  // light sensor (ADC1_4)
+  bool light_sensor_event;                             // adc upload event flag
     
   // uart
-  //bool uart_rx_event;                         // recv notify flag
+  bool uart_rx_event;                         // recv notify flag
   
 }user_config_t;
 
 // user module status
 typedef struct _user_status_t {
-  // adc
-  int adc_data;
+  //  light sensor (ADC1_4)
+  int light_sensor_data;
   
   // uart
-  //char uart_rx_buf[MAX_USER_UART_BUF_SIZE];   // use a buffer to store data received
-  //uint32_t uart_rx_data_len;                  // uart data len received
+  char uart_rx_buf[MAX_USER_UART_BUF_SIZE];   // use a buffer to store data received
+  uint32_t uart_rx_data_len;                  // uart data len received
 }user_status_t;
 
 // user context

@@ -23,7 +23,7 @@
 #include "properties.h"
 #include "user_properties.h"
 #include "JSON-C/json.h"
-#include "drivers/rgb_led.h"
+#include "drivers/hsb2rgb_led.h"
 #include "drivers/uart.h"
 
 #define properties_user_log(M, ...) custom_log("DEV_PROPERTIES_USER", M, ##__VA_ARGS__)
@@ -43,7 +43,10 @@ uint32_t float_len = sizeof(float);
  * context.config: user property data, stored in flash extra param area
  * context.status: user property status
  ******************************************************************************/
-user_context_t user_context;
+user_context_t user_context = {
+  .config.light_sensor_event = true,
+  .config.uart_rx_event = true,
+};
 
 /*******************************************************************************
  * DESCRIPTION: get/set/notify_check function defined for each property;
@@ -100,7 +103,7 @@ int string_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 /*
  * MODULE: RGB LED
  */
-/*
+
 // swtich set function
 int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 {
@@ -114,11 +117,11 @@ int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_
   // control hardware
   if(set_sw_state){
     properties_user_log("Open LED.");
-    rgb_led_open((float)uct->config.rgb_led_hues, (float)uct->config.rgb_led_saturation, (float)uct->config.rgb_led_brightness);
+    hsb2rgb_led_open((float)uct->config.rgb_led_hues, (float)uct->config.rgb_led_saturation, (float)uct->config.rgb_led_brightness);
   }
   else{
     properties_user_log("Close LED.");
-    rgb_led_close();
+    hsb2rgb_led_close();
   }
   
   return ret;  // return 0, succeed.
@@ -149,10 +152,10 @@ int rgb_led_hues_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
   
   // control hardware
   if(uct->config.rgb_led_sw){
-    rgb_led_open((float)hues, (float)uct->config.rgb_led_saturation, (float)uct->config.rgb_led_brightness);
+    hsb2rgb_led_open((float)hues, (float)uct->config.rgb_led_saturation, (float)uct->config.rgb_led_brightness);
   }
   else{
-    rgb_led_close();
+    hsb2rgb_led_close();
   }
   
   return ret;  // return 0, succeed.
@@ -183,10 +186,10 @@ int rgb_led_saturation_set(struct mico_prop_t *prop, void *arg, void *val, uint3
   
   // control hardware
   if(uct->config.rgb_led_sw){
-    rgb_led_open((float)uct->config.rgb_led_hues, (float)saturation, (float)uct->config.rgb_led_brightness);
+    hsb2rgb_led_open((float)uct->config.rgb_led_hues, (float)saturation, (float)uct->config.rgb_led_brightness);
   }
   else{
-    rgb_led_close();
+    hsb2rgb_led_close();
   }
   
   return ret;  // return 0, succeed.
@@ -217,10 +220,10 @@ int rgb_led_brightness_set(struct mico_prop_t *prop, void *arg, void *val, uint3
   
   // control hardware
   if(uct->config.rgb_led_sw){
-    rgb_led_open((float)uct->config.rgb_led_hues, (float)uct->config.rgb_led_saturation, (float)brightness);
+    hsb2rgb_led_open((float)uct->config.rgb_led_hues, (float)uct->config.rgb_led_saturation, (float)brightness);
   }
   else{
-    rgb_led_close();
+    hsb2rgb_led_close();
   }
   
   return ret;  // return 0, succeed.
@@ -239,24 +242,28 @@ int rgb_led_brightness_get(struct mico_prop_t *prop, void *arg, void *val, uint3
   
   return ret;  // return 0, succeed.
 }
-*/
+
 
 /*
  * MODULE: ADC 
  */
 
 // get adc data function
-int adc_data_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+int light_sensor_data_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
-  uint16_t adc_data = 0;
+  uint16_t light_sensor_data = 0;
   OSStatus err = kUnknownErr;
   
   // get ADC data
-  err = MicoAdcTakeSample(MICO_ADC_1, &adc_data);
+  err = MicoAdcInitialize(MICO_ADC_1, 3);
+  if(kNoErr != err){
+    return -1;
+  }
+  err = MicoAdcTakeSample(MICO_ADC_1, &light_sensor_data);
   if(kNoErr == err){
-    *((uint16_t*)val) = adc_data;
-    *val_len = sizeof(adc_data);
+    *((uint16_t*)val) = light_sensor_data;
+    *val_len = sizeof(light_sensor_data);
     ret = 0;   // get data succeed
   }
   else{
@@ -267,25 +274,25 @@ int adc_data_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_l
 }
 
 // notify check function for adc
-int notify_check_adc_data(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+int notify_check_light_sensor_data(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
-  uint16_t adc_data = 0;
-  uint32_t adc_data_len = 0;
+  uint16_t light_sensor_data = 0;
+  uint32_t light_sensor_data_len = 0;
   
   // get adc data
-  ret = prop->get(prop, arg, &adc_data, &adc_data_len);
+  ret = prop->get(prop, arg, &light_sensor_data, &light_sensor_data_len);
   if(0 != ret){
     return -1;   // get value error
   }
   
   // update check (diff get_data and prop->value)
-  //if(adc_data != *((uint16_t*)(prop->value))){  // changed
-  if( (((int)adc_data - *((int*)(prop->value))) >= 100) || ((*((int*)(prop->value)) - (int)adc_data) >= 10) ){  // abs >=10
-    properties_user_log("adc_data changed: %d -> %d", *((int*)prop->value), (int)adc_data);   
+  //if(light_sensor_data != *((uint16_t*)(prop->value))){  // changed
+  if( (((int)light_sensor_data - *((int*)(prop->value))) >= 50) || ((*((int*)(prop->value)) - (int)light_sensor_data) >= 50) ){  // abs >=10
+    properties_user_log("light_sensor_data changed: %d -> %d", *((int*)prop->value), (int)light_sensor_data);   
     // return new value to update prop value && len
-    *((int*)val) = (int)adc_data;  
-    *val_len = adc_data_len;
+    *((int*)val) = (int)light_sensor_data;  
+    *val_len = light_sensor_data_len;
     ret = 1;  // value changed, need to send notify message
   }
   else{
@@ -318,7 +325,7 @@ int event_status_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
 /*
  * MODULE: UART 
  */
-/*
+
 // get function: recv uart data
 int uart_data_recv(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
@@ -385,7 +392,7 @@ int uart_data_recv_check(struct mico_prop_t *prop, void *arg, void *val, uint32_
   ret = 1;
   
   return ret;
-}*/
+}
 
 /*******************************************************************************
 * service_table: list all serivices && properties for the device
@@ -427,7 +434,7 @@ const struct mico_service_t  service_table[] = {
       [2] = {NULL}                          // end flag
     }
   },
- /* [1] = {
+  [1] = {
     .type = "public.map.service.rgb_led",       // service 2: rgb led (uuid)
     .properties = {
       [0] = {
@@ -500,21 +507,21 @@ const struct mico_service_t  service_table[] = {
       },
       [4] = {NULL}
     }
-  },*/
-  [1] = {
-    .type = "public.map.service.adc",         //  service 3: ADC (uuid)
+  },
+  [2] = {
+    .type = "public.map.service.light_sensor",         //  service 3: light sensor (ADC)
     .properties = {
       [0] = {
         .type = "public.map.property.value",  // adc value uuid
-        .value = &(user_context.status.adc_data),
+        .value = &(user_context.status.light_sensor_data),
         .value_len = &int_len,
         .format = MICO_PROP_TYPE_INT,
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_EV),
-        .get = adc_data_get,
+        .get = light_sensor_data_get,
         .set = NULL,
-        .notify_check = notify_check_adc_data,  // check notify for adc data
+        .notify_check = notify_check_light_sensor_data,  // check notify for adc data
         .arg = &user_context,                   // user context
-        .event = &(user_context.config.adc_event),  // event flag
+        .event = &(user_context.config.light_sensor_event),  // event flag
         .hasMeta = true,
         .maxValue.intValue = 4095,
         .minValue.intValue = 0,
@@ -524,7 +531,7 @@ const struct mico_service_t  service_table[] = {
       },
       [1] = {
         .type = "public.map.property.event",    // adc value event (uuid)
-        .value = &(user_context.config.adc_event),
+        .value = &(user_context.config.light_sensor_event),
         .value_len = &bool_len,
         .format = MICO_PROP_TYPE_BOOL,
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
@@ -540,8 +547,7 @@ const struct mico_service_t  service_table[] = {
       [2] = {NULL}
     }
   },
-  /*
-  [2] = {
+  [3] = {
     .type = "public.map.service.uart",          //  service 3: ADC (uuid)
     .properties = {
       [0] = {
@@ -561,6 +567,6 @@ const struct mico_service_t  service_table[] = {
       },
       [1] = {NULL}
     },
-  },*/
-  [2] = {NULL}
+  },
+  [4] = {NULL}
 };
