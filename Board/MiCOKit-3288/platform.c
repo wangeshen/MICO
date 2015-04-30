@@ -138,7 +138,7 @@ const platform_adc_mapping_t adc_mapping[] =
 {
  // [MICO_ADC_1] = NULL,
   [MICO_ADC_1] = {ADC1, ADC_Channel_4, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_38]},
-  //[MICO_ADC_2] = {ADC1, ADC_Channel_1, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_9]},
+  [MICO_ADC_2] = {ADC1, ADC_Channel_1, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_9]},
 };
 
 

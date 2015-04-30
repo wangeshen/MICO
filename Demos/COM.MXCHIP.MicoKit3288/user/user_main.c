@@ -149,13 +149,13 @@ OSStatus user_main( mico_Context_t * const mico_context )
   MicoGpioInitialize( (mico_gpio_t)DC_MOTOR_PIN, OUTPUT_PUSH_PULL );
   
   // Light sensor (ADC1_4) init
-  err = MicoAdcInitialize(MICO_ADC_1, 3);
-  require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1_4 err = %d.", err) );
+  //err = MicoAdcInitialize(MICO_ADC_1, 3);
+  //require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1_4 err = %d.", err) );
   
   // Light sensor (ADC1_1) init
-//  err = MicoAdcInitialize(MICO_ADC_2, 3);
-//  require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1_1 err = %d.", err) );
-//  
+  //err = MicoAdcInitialize(MICO_ADC_2, 3);
+  //require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1_1 err = %d.", err) );
+  
   // OLED init
   OLED_Init();
   OLED_Clear();
@@ -236,16 +236,20 @@ OSStatus user_main( mico_Context_t * const mico_context )
     //rgb_led_open(blue,green,red);
     
     // Light (ADC1_4) test
+    err = MicoAdcInitialize(MICO_ADC_1, 3);
+    //require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1_4 err = %d.", err) );
     err = MicoAdcTakeSample(MICO_ADC_1, &light_data);
     if(kNoErr == err){
       user_log("Light(ADC1_4): %d", light_data);
     }
     
     // Infrared Reflective (ADC1_1) test
-//    err = MicoAdcTakeSample(MICO_ADC_2, &infared_data);
-//    if(kNoErr == err){
-//      user_log("Infared(ADC1_1): %d", infared_data);
-//    }
+    err = MicoAdcInitialize(MICO_ADC_2, 3);
+    //require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1_1 err = %d.", err) );
+    err = MicoAdcTakeSample(MICO_ADC_2, &infared_data);
+    if(kNoErr == err){
+      user_log("Infared(ADC1_1): %d", infared_data);
+    }
     
   }  // while
   
