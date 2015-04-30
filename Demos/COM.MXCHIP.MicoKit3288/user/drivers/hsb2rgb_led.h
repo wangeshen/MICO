@@ -1,10 +1,10 @@
 /**
 ******************************************************************************
-* @file    rgb_led.h 
+* @file    hsb2rgb_led.h 
 * @author  Eshen Wang
 * @version V1.0.0
 * @date    17-Mar-2015
-* @brief    rgb led controller. 
+* @brief   converts HSB color values to RGB colors to control RGB LED. 
   operation
 ******************************************************************************
 * @attention
@@ -20,25 +20,13 @@
 ******************************************************************************
 */ 
 
-#ifndef __RGB_LED_H_
-#define __RGB_LED_H_
-
-#include "MICOPlatform.h"
-
-//-------------------- P9813 pin defines ---------------------------
-#define P9813_CIN                 MICO_GPIO_31    //CLK
-#define P9813_DIN                 MICO_GPIO_18    //DIN
-
-#define P9813_CIN_Clr()        MicoGpioOutputLow(P9813_CIN)  
-#define P9813_CIN_Set()        MicoGpioOutputHigh(P9813_CIN)
-
-#define P9813_DIN_Clr()        MicoGpioOutputLow(P9813_DIN) 
-#define P9813_DIN_Set()        MicoGpioOutputHigh(P9813_DIN)
-
-//-------------------- user interfaces ---------------------------
-void rgb_led_init(void);
-void rgb_led_open(uint8_t blue, uint8_t green, uint8_t red);
-void rgb_led_close(void);
+#ifndef __HSB2RGB_LED_H_
+#define __HSB2RGB_LED_H_
 
 
-#endif  // __RGB_LED_H_
+void hsb2rgb_led_init(void);
+void hsb2rgb_led_open(float hues, float saturation, float brightness);
+void hsb2rgb_led_close(void);
+
+
+#endif   // __HSB2RGB_LED_H_

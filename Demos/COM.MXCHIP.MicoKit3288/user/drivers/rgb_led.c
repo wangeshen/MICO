@@ -4,7 +4,7 @@
 * @author  Eshen Wang
 * @version V1.0.0
 * @date    17-Mar-2015
-* @brief   converts HSB color values to RGB colors. 
+* @brief  rgb led controller.
 ******************************************************************************
 * @attention
 *
@@ -19,140 +19,76 @@
 ******************************************************************************
 */
 
-#include "MICOAppDefine.h"
-#include "MICODefine.h"
 #include "rgb_led.h"
 
-#define rgb_led_log(M, ...) custom_log("rgb_led", M, ##__VA_ARGS__)
-#define rgb_led_log_trace() custom_log_trace("rgb_led")
+#define rgb_led_log(M, ...) custom_log("RGB_LED", M, ##__VA_ARGS__)
+#define rgb_led_log_trace() custom_log_trace("RGB_LED")
 
-float constrain(float value, float min, float max){
-  if(value >= max)
-    return max;
-  if(value <=min )
-    return min;
-  return value;
-}
-float Percent(float value){
-  return value = (((float)value / 255.0) * 100.0);
-}
-
-void H2R_HSBtoRGB(float hue, float sat, float bright, float *color) {
-  // constrain all input variables to expected range
-  hue = constrain(hue, 0, 360);
-  sat = constrain(sat, 0, 100);
-  bright = constrain(bright, 0, 100);
-  // define maximum value for RGB array elements
-  float max_rgb_val = H2R_MAX_RGB_val;
-  // convert saturation and brightness value to decimals and init r, g, b variables
-  float sat_f = (float)sat / 100.0;
-  float bright_f = (float)bright / 100.0;
-  float r, g, b;
-  // If brightness is 0 then color is black (achromatic)
-  // therefore, R, G and B values will all equal to 0
-  if (bright <= 0) {
-    color[0] = 0;
-    color[1] = 0;
-    color[2] = 0;
-  }
-  // If saturation is 0 then color is gray (achromatic)
-  // therefore, R, G and B values will all equal the current brightness
-  if (sat <= 0) {
-    color[0] = bright_f * max_rgb_val;
-    color[1] = bright_f * max_rgb_val;
-    color[2] = bright_f * max_rgb_val;
-  }
-  // if saturation and brightness are greater than 0 then calculate
-  // R, G and B values based on the current hue and brightness
-  else {
-    if (hue >= 0 && hue < 120) {
-      float hue_primary = 1.0 - ((float)hue / 120.0);
-      float hue_secondary = (float)hue / 120.0;
-      float sat_primary = (1.0 - hue_primary) * (1.0 - sat_f);
-      float sat_secondary = (1.0 - hue_secondary) * (1.0 - sat_f);
-      float sat_tertiary = 1.0 - sat_f;
-      r = (bright_f * max_rgb_val) * (hue_primary + sat_primary);
-      g = (bright_f * max_rgb_val) * (hue_secondary + sat_secondary);
-      b = (bright_f * max_rgb_val) * sat_tertiary;
+/* use gpio */
+static void P9813_write_frame(uint32_t data)
+{ 
+  uint8_t i;        
+  uint32_t f_data = data;
+  //rgb_led_log("frame_data = %x", f_data);
+    
+  P9813_CIN_Clr();
+  P9813_DIN_Clr();
+  
+  for(i=0; i<32; i++){
+    P9813_CIN_Clr();
+    if(f_data & 0x80000000){
+      P9813_DIN_Set();
     }
-    else if (hue >= 120 && hue < 240) {
-      float hue_primary = 1.0 - (((float)hue-120.0) / 120.0);
-      float hue_secondary = ((float)hue-120.0) / 120.0;
-      float sat_primary = (1.0 - hue_primary) * (1.0 - sat_f);
-      float sat_secondary = (1.0 - hue_secondary) * (1.0 - sat_f);
-      float sat_tertiary = 1.0 - sat_f;
-      r = (bright_f * max_rgb_val) * sat_tertiary;
-      g = (bright_f * max_rgb_val) * (hue_primary + sat_primary);
-      b = (bright_f * max_rgb_val) * (hue_secondary + sat_secondary);
+    else{
+      P9813_DIN_Clr();
     }
-    else if (hue >= 240 && hue <= 360) {
-      float hue_primary = 1.0 - (((float)hue-240.0) / 120.0);
-      float hue_secondary = ((float)hue-240.0) / 120.0;
-      float sat_primary = (1.0 - hue_primary) * (1.0 - sat_f);
-      float sat_secondary = (1.0 - hue_secondary) * (1.0 - sat_f);
-      float sat_tertiary = 1.0 - sat_f;
-      r = (bright_f * max_rgb_val) * (hue_secondary + sat_secondary);
-      g = (bright_f * max_rgb_val) * sat_tertiary;
-      b = (bright_f * max_rgb_val) * (hue_primary + sat_primary);
-    }
-    color[0] = r;
-    color[1] = g;
-    color[2] = b;
-  }
-  color[0] = Percent(color[0]);
-  color[1] = Percent(color[1]);
-  color[2] = Percent(color[2]);
+    P9813_CIN_Set();  // raise edge to set data
+    f_data = f_data << 1;
+    //rgb_led_log("frame_data<<1 =%x", f_data);
+  } 
+  
+  P9813_CIN_Clr();
+  P9813_DIN_Clr();      
 }
 
-void OpenLED_RGB(float *color){
-//  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_R, 50, (float)color[0]);
-//  MicoPwmStart( (mico_pwm_t)MICO_PWM_R);
-//  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_G, 50, (float)color[1]);
-//  MicoPwmStart( (mico_pwm_t)MICO_PWM_G);
-//  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_B, 50, (float)color[2]);
-//  MicoPwmStart( (mico_pwm_t)MICO_PWM_B);
+static void P9813_write_start_frame(void)
+{ 
+  uint32_t start_frame = 0x00000000;
+  P9813_write_frame(start_frame);     
 }
 
-// TODO:  NOT WORK CORRECTLY ???
-void CloseLED_RGB(){
-//  MicoPwmStop((mico_pwm_t)MICO_PWM_R);
-//  MicoPwmStop((mico_pwm_t)MICO_PWM_G);
-//  MicoPwmStop((mico_pwm_t)MICO_PWM_B);
-}
-
-//void OpenLED_W(float Size){
-// MicoPwmInitialize( (mico_pwm_t)MICO_PWM_W, 50, 100 - (float)Size);
-// MicoPwmStart( (mico_pwm_t)MICO_PWM_W);
-//}
-//
-
-//void CloseLED_W(){
-// MicoPwmStop((mico_pwm_t)MICO_PWM_W);
-//}
-//
-
-//void OpenLED_C(float Size){
-// MicoPwmInitialize( (mico_pwm_t)MICO_PWM_C, 50, 100 - (float)Size);
-// MicoPwmStart( (mico_pwm_t)MICO_PWM_C);
-//}
-//
-
-//void CloseLED_C(){
-// MicoPwmStop((mico_pwm_t)MICO_PWM_C);
-//}
-
-void rgb_led_open(float hues, float saturation, float brightness)
+static void P9813_write_data(uint8_t blue, uint8_t green, uint8_t red)
 {
-  float color[3] = {0};
-  H2R_HSBtoRGB(hues, saturation, brightness, color);
-  OpenLED_RGB(color);
+  uint8_t check_byte = 0xC0;  // starting flag "11"
+  uint32_t send_data = 0;
+  
+  // calc check data
+  check_byte |= (((~blue) >> 2) & 0x30);  // B7, B6
+  check_byte |= (((~green) >> 4) & 0x0C);  // G7,G6
+  check_byte |= (((~red) >> 6) & 0x03);   // R7,R6
+  
+  // create send data 32bit
+  send_data |= (check_byte << 24) | (blue << 16) | (green << 8) | (red);
+  
+  //send_data = 0xFC0000FF;
+  P9813_write_frame(send_data);
+}
+ 
+/*-------------------------------------------------- USER INTERFACES ------------------------------------------------*/
+
+void rgb_led_init(void)
+{
+  MicoGpioInitialize( (mico_gpio_t)P9813_CIN, OUTPUT_OPEN_DRAIN_NO_PULL );
+  MicoGpioInitialize( (mico_gpio_t)P9813_DIN, OUTPUT_OPEN_DRAIN_NO_PULL );
+}
+
+void rgb_led_open(uint8_t blue, uint8_t green, uint8_t red)
+{
+  P9813_write_start_frame();
+  P9813_write_data(blue, green, red);
 }
 
 void rgb_led_close(void)
 {
-  float color[3] = {0};
-  H2R_HSBtoRGB(0, 0, 0, color);
-  OpenLED_RGB(color);
-  
-  CloseLED_RGB();  // not work ???
+  rgb_led_open(0, 0, 0);
 }

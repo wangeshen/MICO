@@ -27,8 +27,9 @@
 #include "user_properties.h"
 #include "user_params_storage.h"
 #include "drivers/uart.h"
-//#include "drivers/rgb_led.h"
-#include "drivers/p9813.h"
+#include "drivers/hsb2rgb_led.h"
+#include "drivers/rgb_led.h"
+#include "drivers/bme280_user.h"
 #include "drivers/oled.h"
 
 #define user_log(M, ...) custom_log("USER", M, ##__VA_ARGS__)
@@ -88,18 +89,12 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* mico_context,
   return err;
 }
 
-volatile bool dc_motor_runnig = false;
+// key2 && DC Motor test
 USED void PlatformKey2ButtonClickedCallback(void)
 {
   user_log_trace();
   user_log("PlatformKey2ButtonClickedCallback");
   
-  if(dc_motor_runnig){
-    dc_motor_runnig = false;
-  }
-  else{
-    dc_motor_runnig = true;
-  }
   userDCMotor(false);
   return;
 }
@@ -108,7 +103,8 @@ USED void PlatformKey2ButtonLongPressedCallback(void)
 {
   user_log_trace();
   user_log("PlatformKey2ButtonLongPressedCallback");
-   userDCMotor(true);
+  
+  userDCMotor(true);
   return;
 }
 
@@ -123,9 +119,9 @@ OSStatus user_main( mico_Context_t * const mico_context )
   uint32_t bme280_press = 0;
   char temp_hum_str[32];
   
-  uint16_t blue = 0;
-  uint16_t green = 0;
-  uint16_t red = 0;
+  float hue = 0;
+  float sat = 0;
+  float bri = 0;
   int i = 0;
   
   uint16_t light_data = 0;
@@ -159,11 +155,17 @@ OSStatus user_main( mico_Context_t * const mico_context )
   // OLED init
   OLED_Init();
   OLED_Clear();
-  OLED_ShowString(0,0,"   M X C H I P");  
+  OLED_ShowString(3,0,"M X C H I P");
+  OLED_ShowString(4,3,(uint8_t*)DEFAULT_DEVICE_NAME); 
+  
+  /* new rgb led */
+  hsb2rgb_led_init();
+  //hsb2rgb_led_open(240,100,100);
+  rgb_led_open(255,0,0);  // blue
   
   // Environmental Sensor init
-  err = bme280_sensor_init();
-  require_noerr_action( err, exit, user_log("ERROR: bme280_sensor_init err = %d.", err) );
+  //err = bme280_sensor_init();
+  //require_noerr_action( err, exit, user_log("ERROR: bme280_sensor_init err = %d.", err) );
   
     // RGB LED init
 //  if(user_context.config.rgb_led_sw){
@@ -175,9 +177,6 @@ OSStatus user_main( mico_Context_t * const mico_context )
 //    rgb_led_close();
 //  }
   
-  /* new rgb led */
-  //rgb_led_init();
-  //rgb_led_open(0,0,0);
   
   /* start properties notify task */
  // err = mico_start_properties_notify(mico_context, service_table, 
@@ -204,52 +203,54 @@ OSStatus user_main( mico_Context_t * const mico_context )
     /*---------------------- sensor data -------------------*/
     
     // H/T/P
-    err = bme280_data_readout(&bme280_temp, &bme280_press, &bme280_hum);
-    user_log("BME280: nT=%d, nH=%d, nP=%d", bme280_temp, bme280_hum, bme280_press);
-    sprintf(temp_hum_str, "T: %d C   H: %d%%", bme280_temp/100,  bme280_hum/1024);
-    user_log("BME280: %s", temp_hum_str);
+//    err = bme280_data_readout(&bme280_temp, &bme280_press, &bme280_hum);
+//    user_log("BME280: nT=%d, nH=%d, nP=%d", bme280_temp, bme280_hum, bme280_press);
+//    sprintf(temp_hum_str, "T: %d C   H: %d%%", bme280_temp/100,  bme280_hum/1024);
+//    user_log("BME280: %s", temp_hum_str);
     
     // OLED display
-    OLED_ShowString(2,3,(uint8_t*)DEFAULT_DEVICE_NAME); 
-    OLED_ShowString(0,6,(uint8_t*)temp_hum_str);
+    //OLED_ShowString(0,6,(uint8_t*)temp_hum_str);
     
     // RGB LED
     if(0 == i){
-      blue = 0;
-      green = 0;
-      red = 255;
+      hue = 0;
+      sat = 100;
+      bri = 100;
+      //rgb_led_open(255,0,0);  // blue
     }
     else if(1 == i){
-      blue = 0;
-      green = 255;
-      red = 0;
+      hue = 120;
+      sat = 100;
+      bri = 100;
+      //rgb_led_open(0,255,0);  // green
     }
     else if(2 == i){
-      blue = 255;
-      green = 0;
-      red = 0;
+      hue = 240;
+      sat = 100;
+      bri = 100;
+      //rgb_led_open(0,0,255);  // red
     }
     i++;
     if(i >= 3){
       i=0;
     }
-    //rgb_led_open(blue,green,red);
+    hsb2rgb_led_open(hue, sat, bri);
     
     // Light (ADC1_4) test
-    err = MicoAdcInitialize(MICO_ADC_1, 3);
-    //require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1_4 err = %d.", err) );
-    err = MicoAdcTakeSample(MICO_ADC_1, &light_data);
-    if(kNoErr == err){
-      user_log("Light(ADC1_4): %d", light_data);
-    }
-    
-    // Infrared Reflective (ADC1_1) test
-    err = MicoAdcInitialize(MICO_ADC_2, 3);
-    //require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1_1 err = %d.", err) );
-    err = MicoAdcTakeSample(MICO_ADC_2, &infared_data);
-    if(kNoErr == err){
-      user_log("Infared(ADC1_1): %d", infared_data);
-    }
+//    err = MicoAdcInitialize(MICO_ADC_1, 3);
+//    //require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1_4 err = %d.", err) );
+//    err = MicoAdcTakeSample(MICO_ADC_1, &light_data);
+//    if(kNoErr == err){
+//      user_log("Light(ADC1_4): %d", light_data);
+//    }
+//    
+//    // Infrared Reflective (ADC1_1) test
+//    err = MicoAdcInitialize(MICO_ADC_2, 3);
+//    //require_noerr_action( err, exit, user_log("ERROR: MicoAdcInitialize ADC1_1 err = %d.", err) );
+//    err = MicoAdcTakeSample(MICO_ADC_2, &infared_data);
+//    if(kNoErr == err){
+//      user_log("Infared(ADC1_1): %d", infared_data);
+//    }
     
   }  // while
   
