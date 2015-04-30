@@ -100,7 +100,7 @@ int string_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 /*
  * MODULE: RGB LED
  */
-
+/*
 // swtich set function
 int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
 {
@@ -239,6 +239,7 @@ int rgb_led_brightness_get(struct mico_prop_t *prop, void *arg, void *val, uint3
   
   return ret;  // return 0, succeed.
 }
+*/
 
 /*
  * MODULE: ADC 
@@ -280,7 +281,7 @@ int notify_check_adc_data(struct mico_prop_t *prop, void *arg, void *val, uint32
   
   // update check (diff get_data and prop->value)
   //if(adc_data != *((uint16_t*)(prop->value))){  // changed
-  if( (((int)adc_data - *((int*)(prop->value))) >= 10) || ((*((int*)(prop->value)) - (int)adc_data) >= 10) ){  // abs >=10
+  if( (((int)adc_data - *((int*)(prop->value))) >= 100) || ((*((int*)(prop->value)) - (int)adc_data) >= 10) ){  // abs >=10
     properties_user_log("adc_data changed: %d -> %d", *((int*)prop->value), (int)adc_data);   
     // return new value to update prop value && len
     *((int*)val) = (int)adc_data;  
@@ -317,7 +318,7 @@ int event_status_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
 /*
  * MODULE: UART 
  */
-
+/*
 // get function: recv uart data
 int uart_data_recv(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
@@ -384,7 +385,7 @@ int uart_data_recv_check(struct mico_prop_t *prop, void *arg, void *val, uint32_
   ret = 1;
   
   return ret;
-}
+}*/
 
 /*******************************************************************************
 * service_table: list all serivices && properties for the device
@@ -426,7 +427,7 @@ const struct mico_service_t  service_table[] = {
       [2] = {NULL}                          // end flag
     }
   },
-  [1] = {
+ /* [1] = {
     .type = "public.map.service.rgb_led",       // service 2: rgb led (uuid)
     .properties = {
       [0] = {
@@ -499,8 +500,8 @@ const struct mico_service_t  service_table[] = {
       },
       [4] = {NULL}
     }
-  },
-  [2] = {
+  },*/
+  [1] = {
     .type = "public.map.service.adc",         //  service 3: ADC (uuid)
     .properties = {
       [0] = {
@@ -539,7 +540,8 @@ const struct mico_service_t  service_table[] = {
       [2] = {NULL}
     }
   },
-  [3] = {
+  /*
+  [2] = {
     .type = "public.map.service.uart",          //  service 3: ADC (uuid)
     .properties = {
       [0] = {
@@ -559,6 +561,6 @@ const struct mico_service_t  service_table[] = {
       },
       [1] = {NULL}
     },
-  },
-  [4] = {NULL}
+  },*/
+  [2] = {NULL}
 };

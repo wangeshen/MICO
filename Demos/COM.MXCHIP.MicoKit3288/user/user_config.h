@@ -46,7 +46,7 @@
 #define MICO_CONFIG_MODE                   CONFIG_MODE_EASYLINK
 
 /* MICO cloud service type */
-#define MICO_CLOUD_TYPE                    CLOUD_FOGCLOUD
+#define MICO_CLOUD_TYPE                    CLOUD_DISABLED
 
 /*******************************************************************************
  *                             RESOURCES
@@ -56,6 +56,7 @@
 #define MICO_PROPERTIES_NOTIFY_INTERVAL_MS  200
 
 /*User provided configurations*/
-#define CONFIGURATION_VERSION               0x00000005 // if default configuration is changed, update this number
+#define CONFIGURATION_VERSION               0x00000002 // if default configuration is changed, update this number
+   
 
 #endif  // __USER_CONFIG_H_

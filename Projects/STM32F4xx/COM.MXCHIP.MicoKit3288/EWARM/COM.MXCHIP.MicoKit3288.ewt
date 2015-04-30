@@ -225,6 +225,30 @@
       <group>
         <name>drivers</name>
         <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\bme280.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\bme280.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\bme280_support.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\oled.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\oled.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\oledfont.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\p9813.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\p9813.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\rgb_led.c</name>
         </file>
         <file>

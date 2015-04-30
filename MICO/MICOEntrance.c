@@ -76,8 +76,6 @@ void micoNotify_ReadAppInfoHandler(char *str, int len, mico_Context_t * const in
   snprintf( str, len, "%s, build at %s %s", APP_INFO, __TIME__, __DATE__);
 }
 
-
-
 USED void PlatformEasyLinkButtonClickedCallback(void)
 {
   mico_log_trace();
@@ -328,7 +326,7 @@ int application_start(void)
   /* Enter test mode, call a build-in test function amd output on STDIO */
   if(MicoShouldEnterMFGMode()==true){
     mico_log( "Enter MFG mode by MFG button" );
-    mico_mfg_test(context);
+    //mico_mfg_test(context);
   }
   
   /*Read current time from RTC.*/

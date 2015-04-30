@@ -105,19 +105,19 @@ void H2R_HSBtoRGB(float hue, float sat, float bright, float *color) {
 }
 
 void OpenLED_RGB(float *color){
-  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_R, 50, (float)color[0]);
-  MicoPwmStart( (mico_pwm_t)MICO_PWM_R);
-  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_G, 50, (float)color[1]);
-  MicoPwmStart( (mico_pwm_t)MICO_PWM_G);
-  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_B, 50, (float)color[2]);
-  MicoPwmStart( (mico_pwm_t)MICO_PWM_B);
+//  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_R, 50, (float)color[0]);
+//  MicoPwmStart( (mico_pwm_t)MICO_PWM_R);
+//  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_G, 50, (float)color[1]);
+//  MicoPwmStart( (mico_pwm_t)MICO_PWM_G);
+//  MicoPwmInitialize( (mico_pwm_t)MICO_PWM_B, 50, (float)color[2]);
+//  MicoPwmStart( (mico_pwm_t)MICO_PWM_B);
 }
 
 // TODO:  NOT WORK CORRECTLY ???
 void CloseLED_RGB(){
-  MicoPwmStop((mico_pwm_t)MICO_PWM_R);
-  MicoPwmStop((mico_pwm_t)MICO_PWM_G);
-  MicoPwmStop((mico_pwm_t)MICO_PWM_B);
+//  MicoPwmStop((mico_pwm_t)MICO_PWM_R);
+//  MicoPwmStop((mico_pwm_t)MICO_PWM_G);
+//  MicoPwmStop((mico_pwm_t)MICO_PWM_B);
 }
 
 //void OpenLED_W(float Size){
