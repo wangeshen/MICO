@@ -50,8 +50,11 @@ typedef struct _user_config_t {
   int rgb_led_brightness;
   
   // light sensor (ADC1_4)
-  bool light_sensor_event;                             // adc upload event flag
+  bool light_sensor_event;                    // upload event flag
     
+  // infrared_reflective sensor (ADC1_1)
+  bool infrared_reflective_event;             // upload event flag
+  
   // uart
   bool uart_rx_event;                         // recv notify flag
   
@@ -59,8 +62,13 @@ typedef struct _user_config_t {
 
 // user module status
 typedef struct _user_status_t {
+  bool user_config_need_update;               // if set, user context config need to write back to flash.
+  
   //  light sensor (ADC1_4)
   int light_sensor_data;
+  
+  // infrared reflective sensor
+  int infrared_reflective_data;
   
   // uart
   char uart_rx_buf[MAX_USER_UART_BUF_SIZE];   // use a buffer to store data received

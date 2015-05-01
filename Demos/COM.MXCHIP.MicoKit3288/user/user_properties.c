@@ -25,6 +25,8 @@
 #include "JSON-C/json.h"
 #include "drivers/hsb2rgb_led.h"
 #include "drivers/uart.h"
+#include "drivers/light_sensor.h"
+#include "drivers/infrared_reflective.h"
 
 #define properties_user_log(M, ...) custom_log("DEV_PROPERTIES_USER", M, ##__VA_ARGS__)
 #define properties_user_log_trace() custom_log_trace("DEV_PROPERTIES_USER")
@@ -45,7 +47,9 @@ uint32_t float_len = sizeof(float);
  ******************************************************************************/
 user_context_t user_context = {
   .config.light_sensor_event = true,
+  .config.infrared_reflective_event = true,
   .config.uart_rx_event = true,
+  .status.user_config_need_update = false,
 };
 
 /*******************************************************************************
@@ -245,7 +249,7 @@ int rgb_led_brightness_get(struct mico_prop_t *prop, void *arg, void *val, uint3
 
 
 /*
- * MODULE: ADC 
+ * MODULE: light sensor
  */
 
 // get adc data function
@@ -253,27 +257,18 @@ int light_sensor_data_get(struct mico_prop_t *prop, void *arg, void *val, uint32
 {
   int ret = 0;
   uint16_t light_sensor_data = 0;
-  OSStatus err = kUnknownErr;
   
-  // get ADC data
-  err = MicoAdcInitialize(MICO_ADC_1, 3);
-  if(kNoErr != err){
-    return -1;
-  }
-  err = MicoAdcTakeSample(MICO_ADC_1, &light_sensor_data);
-  if(kNoErr == err){
+  // get light sensor data
+  ret = light_sensor_read(&light_sensor_data);
+  if(0 == ret){  // get data succeed
     *((uint16_t*)val) = light_sensor_data;
     *val_len = sizeof(light_sensor_data);
-    ret = 0;   // get data succeed
-  }
-  else{
-    ret = -1;  // get data error
   }
   
   return ret;
 }
 
-// notify check function for adc
+// notify check function for light sensor data
 int notify_check_light_sensor_data(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
@@ -320,6 +315,54 @@ int event_status_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
   *(prop->value_len) = val_len;
   
   return 0;  // get ok
+}
+
+/*
+ * MODULE: infrared reflective sensor
+ */
+
+int infrared_reflective_data_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  int ret = 0;
+  uint16_t infrared_reflective_data = 0;
+  
+  // get infrared sensor data
+  ret = infrared_reflective_read(&infrared_reflective_data);
+  if(0 == ret){  // get data succeed
+    *((uint16_t*)val) = infrared_reflective_data;
+    *val_len = sizeof(infrared_reflective_data);
+  }
+  
+  return ret;
+}
+
+// notify check function for infrared reflective data
+int notify_check_infrared_reflective_data(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  int ret = 0;
+  uint16_t infrared_reflective_data = 0;
+  uint32_t infrared_reflective_data_len = 0;
+  
+  // get adc data
+  ret = prop->get(prop, arg, &infrared_reflective_data, &infrared_reflective_data_len);
+  if(0 != ret){
+    return -1;   // get value error
+  }
+  
+  // update check (diff get_data and prop->value)
+  //if(infrared_reflective_data != *((uint16_t*)(prop->value))){  // changed
+  if( (((int)infrared_reflective_data - *((int*)(prop->value))) >= 50) || ((*((int*)(prop->value)) - (int)infrared_reflective_data) >= 50) ){  // abs >=10
+    properties_user_log("infrared_reflective_data changed: %d -> %d", *((int*)prop->value), (int)infrared_reflective_data);   
+    // return new value to update prop value && len
+    *((int*)val) = (int)infrared_reflective_data;  
+    *val_len = infrared_reflective_data_len;
+    ret = 1;  // value changed, need to send notify message
+  }
+  else{
+    ret = 0;  // not changed, not need to notify
+  }
+  
+  return ret;
 }
 
 /*
@@ -566,7 +609,30 @@ const struct mico_service_t  service_table[] = {
         .unit = "byte"
       },
       [1] = {NULL}
-    },
+    }
   },
-  [4] = {NULL}
+  [4] = {
+    .type = "public.map.service.infrared",    //  service 4: infrared sensor (ADC)
+    .properties = {
+      [0] = {
+        .type = "public.map.property.value",  // adc value uuid
+        .value = &(user_context.status.infrared_reflective_data),
+        .value_len = &int_len,
+        .format = MICO_PROP_TYPE_INT,
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_EV),
+        .get = infrared_reflective_data_get,
+        .set = NULL,
+        .notify_check = notify_check_infrared_reflective_data,  // check notify for adc data
+        .arg = &user_context,                   // user context
+        .event = &(user_context.config.infrared_reflective_event),  // event flag
+        .hasMeta = true,
+        .maxValue.intValue = 4095,
+        .minValue.intValue = 0,
+        .minStep.intValue = 1,
+        .unit = NULL
+      },
+      [1] = {NULL}
+    }
+  },
+  [5] = {NULL}
 };

@@ -135,7 +135,7 @@ OSStatus PropertyNotifyListAdd(int iid, int service_index, int property_index,
 {
   OSStatus err = kNoErr;
   mico_prop_notify_node_t *plist = *p_notify_list;
-  mico_prop_notify_node_t *plist_next = *p_notify_list;
+  //mico_prop_notify_node_t *plist_next = *p_notify_list;
   mico_prop_notify_node_t *notify = NULL;
   
   // create node
@@ -161,14 +161,23 @@ OSStatus PropertyNotifyListAdd(int iid, int service_index, int property_index,
         free(notify);
         return kNoErr;   // Nodify already exist, update index
       }
-      plist_next = plist->next;
-    }while(NULL != plist_next);  // get to end
+      else{
+        if(NULL == plist->next){  // add node to the end.
+          plist->next = notify;
+          properties_log("notify add: iid=%d, s_id=%d, p_id=%d.", 
+                         plist->next->iid, plist->next->s_idx, plist->next->p_idx);
+          return kNoErr;
+        }
+        else {
+          plist = plist->next;
+        }
+      }
+    }while(1);  // get to end
     
-    // add node
-    plist->next = notify;
-    
-    properties_log("notify add: iid=%d, s_id=%d, p_id=%d.", 
-                   plist->next->iid, plist->next->s_idx, plist->next->p_idx);
+//    // add node
+//    plist->next = notify;
+//    properties_log("notify add: iid=%d, s_id=%d, p_id=%d.", 
+//                   plist->next->iid, plist->next->s_idx, plist->next->p_idx);
   }
   
 exit:

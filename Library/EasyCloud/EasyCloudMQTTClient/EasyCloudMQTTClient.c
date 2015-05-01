@@ -39,7 +39,7 @@
  ******************************************************************************/
 
 static mqtt_client_context_t mqttClientContext = {0};
-static mico_mutex_t mqttClientContext_mutex = NULL;
+//static mico_mutex_t mqttClientContext_mutex = NULL;
 
 mico_thread_t mqttClientThreadHandle = NULL;
 
@@ -72,13 +72,13 @@ static OSStatus internal_parse_topic_msg(const unsigned char* recvDataBuffer, in
 void EasyCloudMQTTClientInit(mqtt_client_config_t init)
 {
   mico_mqtt_client_log("mqtt client init");
-  if(mqttClientContext_mutex == NULL)
-    mico_rtos_init_mutex( &mqttClientContext_mutex );
+  //if(mqttClientContext_mutex == NULL)
+  //  mico_rtos_init_mutex( &mqttClientContext_mutex );
   
-  mico_rtos_lock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_lock_mutex( &mqttClientContext_mutex );
   mqttClientContext.client_config_info = init;
   mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_STOPPED;
-  mico_rtos_unlock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_unlock_mutex( &mqttClientContext_mutex );
 }
 
 OSStatus EasyCloudMQTTClientStart(void)
@@ -117,6 +117,8 @@ static void mqttClientThread(void *arg)
   fd_set readfds;
   struct timeval_t t;
   
+  int retry_cnt = 0;
+  
 #ifndef ECS_NO_SOCKET_LOOPBACK
   OSStatus err = kUnknownErr;
   int recv_data_loopBack_fd = -1;
@@ -146,15 +148,16 @@ static void mqttClientThread(void *arg)
   NewNetwork(&n);
   
 MQTTClientRestart:
+  retry_cnt = 0;
   memset(&c, 0, sizeof(c));
   memset(buf, 0, sizeof(buf));
   memset(readbuf, 0, sizeof(readbuf));
   memset(&connectData, 0, sizeof(connectData));
   memcpy(&connectData, &connectDataCopy, sizeof(connectData));
   
-  mico_rtos_lock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_lock_mutex( &mqttClientContext_mutex );
   mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_STARTED;
-  mico_rtos_unlock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_unlock_mutex( &mqttClientContext_mutex );
   
  #ifndef ECS_NO_SOCKET_LOOPBACK   
   /* recv data loopback socket */
@@ -182,10 +185,17 @@ MQTTClientRestart:
     mico_mqtt_client_log("MQTT socket network connect...");
     rc = ConnectNetwork(&n, mqttClientContext.client_config_info.host, 
                         mqttClientContext.client_config_info.port);
-    if (rc >= 0)
+    if (rc >= 0){
+      retry_cnt = 0;
       break;
+    }
  
     mico_mqtt_client_log("MQTT socket network connect failed, rc = %d", rc);
+    retry_cnt++;
+    if(retry_cnt >= 10){
+      retry_cnt = 0;
+      goto MQTT_disconnected;
+    }
     mico_thread_msleep(100);
   }
   mico_mqtt_client_log("MQTT socket network connect OK!");
@@ -210,10 +220,17 @@ MQTTClientRestart:
     
     mico_mqtt_client_log("MQTT client connect...");
     rc = MQTTConnect(&c, &connectData);
-    if(SUCCESS == rc)
+    if(SUCCESS == rc){
+      retry_cnt = 0;
       break;
+    }
     
     mico_mqtt_client_log("MQTT client connect failed, rc = %d\r\nRetry ...", rc);
+    retry_cnt++;
+    if(retry_cnt >= 10){
+      retry_cnt = 0;
+      goto MQTT_disconnected;
+    }
     mico_thread_msleep(100);
   }
   mico_mqtt_client_log("MQTT client connect OK!");
@@ -229,19 +246,26 @@ MQTTClientRestart:
     rc = MQTTSubscribe(&c, mqttClientContext.client_config_info.subtopic, 
                        mqttClientContext.client_config_info.subscribe_qos , 
                        messageArrived);
-    if (SUCCESS == rc)
+    if (SUCCESS == rc){
+      retry_cnt = 0;
       break;
+    }
     
     mico_mqtt_client_log("MQTT client subscribe [%s] failed, rc = %d\r\nRetry ...",
                          mqttClientContext.client_config_info.subtopic, rc);
+    retry_cnt++;
+    if(retry_cnt >= 10){
+      retry_cnt = 0;
+      goto MQTT_disconnected;
+    }
     mico_thread_msleep(100);
   }
   mico_mqtt_client_log("MQTT client subscribed [%s] OK!", mqttClientContext.client_config_info.subtopic);
   
   /* 4. set running state */
-  mico_rtos_lock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_lock_mutex( &mqttClientContext_mutex );
   mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_CONNECTED;
-  mico_rtos_unlock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_unlock_mutex( &mqttClientContext_mutex );
   
   while (1) {
     if ( MQTT_CLIENT_STATUS_STOPPED == EasyCloudMQTTClientState()){
@@ -269,14 +293,16 @@ MQTTClientRestart:
         // parse pubtopic && msg
         err = internal_parse_topic_msg((const unsigned char*)(&recvDataBuffer[0]), recvDataLen, 
                                        &recvPubTopic, &recvPubTopicLen, &level_flag, &recvMsg, &recvMsgLen);
-        //mico_mqtt_client_log("DATA_TO_PUBLISH[%d][%.*s]", recvDataLen, recvDataLen, recvDataBuffer);
+        //mico_mqtt_client_log("DATA_TO_PUBLISH[%d][%.*s]", recvMsgLen, recvMsgLen, recvMsg);
         if(kNoErr == err){
           if(0 == recvPubTopicLen){
             // default topic "device_id/out"
+            mico_mqtt_client_log("Publish to /out.");
             err = internal_EasyCloudMQTTClientPublish((unsigned char*)recvMsg, recvMsgLen);
           }
           else if (recvPubTopicLen > 0){
             if(1 == level_flag){
+              //mico_mqtt_client_log("Publish to sub topic, recvMsgLen=%d.", recvMsgLen);
               // publish to sub-level "device_id/out/<level>"
               memset(finalPubTopic, 0, MAX_SIZE_MQTT_PUBLISH_TOPIC);
               sprintf(finalPubTopic, "%s/%s", 
@@ -287,6 +313,7 @@ MQTTClientRestart:
             }
             else{
               // publish to user-defined topic
+              //mico_mqtt_client_log("Publish to user topic.");
               err = internal_EasyCloudMQTTClientPublishto((const char*)recvPubTopic, 
                                                           (unsigned char*)recvMsg, 
                                                           recvMsgLen);
@@ -331,9 +358,9 @@ MQTTClientRestart:
     MQTTDisconnect(&c);
     n.disconnect(&n);
     
-    mico_rtos_lock_mutex( &mqttClientContext_mutex );
+    //mico_rtos_lock_mutex( &mqttClientContext_mutex );
     mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_DISCONNECTED;
-    mico_rtos_unlock_mutex( &mqttClientContext_mutex );
+    //mico_rtos_unlock_mutex( &mqttClientContext_mutex );
     
     mico_mqtt_client_log("MQTT client disconnected,reconnect ...");
     //mico_thread_sleep(1);
@@ -351,9 +378,9 @@ client_stop:
   MQTTDisconnect(&c);
   n.disconnect(&n);
   
-  mico_rtos_lock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_lock_mutex( &mqttClientContext_mutex );
   mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_STOPPED;
-  mico_rtos_unlock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_unlock_mutex( &mqttClientContext_mutex );
   
   mico_mqtt_client_log("MQTT client stopped.");
 
@@ -629,7 +656,7 @@ OSStatus EasyCloudMQTTClientPublishto(const char* topic,
   if(kNoErr != err){
     return kNoMemoryErr;
   }
-  mico_mqtt_client_log("LOOPBAKC_FORMAT:[%d][%s]", sendBufLen, sendBuf+10);
+  //mico_mqtt_client_log("LOOPBAKC_FORMAT:[%d][%s]", sendBufLen, sendBuf+10);
   
   // send loopback msg
   err = internal_loopbackMsg(sendBuf ,sendBufLen);
@@ -725,9 +752,9 @@ static OSStatus internal_EasyCloudMQTTClientPublishto(const char* topic,
   publishData.payload = (void*)msg;
   publishData.payloadlen = msglen;
   
-  mico_rtos_lock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_lock_mutex( &mqttClientContext_mutex );
   ret = MQTTPublish(&c, topic, &publishData);
-  mico_rtos_unlock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_unlock_mutex( &mqttClientContext_mutex );
   
   if (SUCCESS == ret)
     err = kNoErr;
@@ -741,9 +768,9 @@ OSStatus EasyCloudMQTTClientStop(void)
 {
   OSStatus err = kNoErr;
     
-  mico_rtos_lock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_lock_mutex( &mqttClientContext_mutex );
   mqttClientContext.client_status.state = MQTT_CLIENT_STATUS_STOPPED;
-  mico_rtos_unlock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_unlock_mutex( &mqttClientContext_mutex );
   
 //  MQTTDisconnect(&c);
 //  n.disconnect(&n);
@@ -773,9 +800,9 @@ mqttClientState EasyCloudMQTTClientState(void)
 {
   mqttClientState state = MQTT_CLIENT_STATUS_STOPPED;
   
-  mico_rtos_lock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_lock_mutex( &mqttClientContext_mutex );
   state = mqttClientContext.client_status.state;
-  mico_rtos_unlock_mutex( &mqttClientContext_mutex );
+  //mico_rtos_unlock_mutex( &mqttClientContext_mutex );
   
   return state;
 }

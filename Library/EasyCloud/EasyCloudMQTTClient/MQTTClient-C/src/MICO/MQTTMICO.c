@@ -144,6 +144,9 @@ int MICO_write(Network* n, unsigned char* buffer, int len, int timeout_ms) {
   int rc = 0;
   int readySock;
   
+  int socket_errno = 0;
+  int socket_errno_len = 0;
+  
   //add timeout by wes 20141106
   Timer writeTimer;
   
@@ -157,8 +160,21 @@ int MICO_write(Network* n, unsigned char* buffer, int len, int timeout_ms) {
   timeVal.tv_usec = timeout_ms * 1000;
   do {
     readySock = select(n->my_socket + 1, NULL, &fdset, NULL, &timeVal);
+    MQTTClient_log("readySock=%d", readySock);
   } while((readySock != 1) && (!expired(&writeTimer)));  //add timeout by wes 20141106
   rc = send(n->my_socket, buffer, len, 0);
+  
+  MQTTClient_log("send rc=%d", rc);
+  if(rc < 0){
+    rc = getsockopt(n->my_socket, SOL_SOCKET, SO_ERROR, &socket_errno, &socket_errno_len);
+    if ((rc < 0) || ( 0 != socket_errno)){
+      MQTTClient_log("ERROR: getsockopt rc=%d, socket_errno=%d", rc, socket_errno);
+    }
+    else{
+      MQTTClient_log("ERROR: just send error!");
+    }
+  }
+
   return rc;
 }
 

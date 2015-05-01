@@ -46,22 +46,22 @@ void user_main_thread(void* arg)
   OSStatus err = kUnknownErr;
   mico_Context_t *mico_context = (mico_Context_t *)arg;
   
+#if (MICO_CLOUD_TYPE != CLOUD_DISABLED)
   // wait semaphore for cloud connection
   mico_fogcloud_waitfor_connect(mico_context, MICO_WAIT_FOREVER);  // block to wait fogcloud connect
-  app_log("cloud connected.");
+  app_log("Cloud connected, do user_main function.");
+#endif
   
   // loop in user mian function && must not return
   err = user_main(mico_context);
   UNUSED_PARAMETER(err);
   
-  // never get here only if user work err && exit.
-  app_log("ERROR: user thread exit err=%d.", err);
-  while(1){
-    // endless loop to trigger watchdog to restart.
-  };
+  // never get here only if user work error.
+  app_log("ERROR: user_main thread exit err=%d, system reboot...", err);
+  MicoSystemReboot();
 }
 
-OSStatus startUserThread(mico_Context_t *mico_context)
+OSStatus startUserMainThread(mico_Context_t *mico_context)
 {
   app_log_trace();
   OSStatus err = kNoErr;
@@ -94,26 +94,29 @@ OSStatus MICOStartApplication( mico_Context_t * const mico_context )
     
   require_action(mico_context, exit, err = kParamErr);
   
+  MicoRfLed(false);
+    
   /* Bonjour for service searching */
   if(mico_context->flashContentInRam.micoSystemConfig.bonjourEnable == true) {
     MICOStartBonjourService( Station, mico_context );
   }
-
+  
   /* start cloud service */
 #if (MICO_CLOUD_TYPE == CLOUD_FOGCLOUD)
   err = MicoStartFogCloudService( mico_context );
+  app_log("MICO CloudService: FogCloud.");
   require_noerr_action( err, exit, app_log("ERROR: Unable to start FogCloud service.") );
 #elif (MICO_CLOUD_TYPE == CLOUD_ALINK)
-  app_log("MICO CloudService: Ali.");
+  app_log("MICO CloudService: Alink.");
 #elif (MICO_CLOUD_TYPE == CLOUD_DISABLED)
-  app_log("MICO CloudService disabled.");
+  app_log("MICO CloudService: disabled.");
 #else
   #error "MICO cloud service type is not defined"?
 #endif
   
   /* start user thread */
-  err = startUserThread( mico_context );
-  require_noerr_action( err, exit, app_log("ERROR: start user thread failed!") );
+  err = startUserMainThread( mico_context );
+  require_noerr_action( err, exit, app_log("ERROR: start user_main thread failed!") );
 
 exit:
   return err;

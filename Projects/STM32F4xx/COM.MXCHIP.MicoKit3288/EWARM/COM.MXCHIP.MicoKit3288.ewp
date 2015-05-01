@@ -1985,10 +1985,28 @@
           <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\bme280_user.h</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\DHT11.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\DHT11.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\hsb2rgb_led.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\hsb2rgb_led.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\infrared_reflective.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\infrared_reflective.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\light_sensor.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\light_sensor.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\oled.c</name>

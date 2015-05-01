@@ -318,14 +318,9 @@ typedef enum
 /* I/O connection <-> Peripheral Connections */
 #define MICO_I2C_CP         (MICO_I2C_1)
 
-#define KEY2_BUTTON         MICO_GPIO_34
-#define DC_MOTOR_PIN        MICO_GPIO_30
-#define DHT11_DATA          MICO_GPIO_7
 
 #define RestoreDefault_TimeOut          3000  /**< Restore default and start easylink after 
                                                    press down EasyLink button for 3 seconds. */
-
-#define userKeyLongPress_TimeOut        3000  /**< user key  button long pressed for 3 seconds. */
 
 #ifdef __cplusplus
 } /*extern "C" */

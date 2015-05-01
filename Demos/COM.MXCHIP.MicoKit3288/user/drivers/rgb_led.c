@@ -32,8 +32,8 @@ static void P9813_write_frame(uint32_t data)
   uint32_t f_data = data;
   rgb_led_log("P9813_write_frame = %X", f_data);
     
-  P9813_CIN_Clr();
-  P9813_DIN_Clr();
+  //P9813_CIN_Clr();
+  //P9813_DIN_Clr();
   
   for(i=0; i<32; i++){
     P9813_CIN_Clr();
@@ -49,7 +49,7 @@ static void P9813_write_frame(uint32_t data)
   } 
   
   //P9813_CIN_Clr();
-  //P9813_DIN_Clr();      
+  //P9813_DIN_Clr();
 }
 
 static void P9813_write_start_frame(void)
@@ -88,6 +88,7 @@ void rgb_led_open(uint8_t blue, uint8_t green, uint8_t red)
 {
   P9813_write_start_frame();
   P9813_write_data(blue, green, red);
+  P9813_write_start_frame();
 }
 
 void rgb_led_close(void)

@@ -87,9 +87,6 @@ extern WEAK void PlatformKey2ButtonLongPressedCallback(void);
 static uint32_t _default_start_time = 0;
 static mico_timer_t _button_EL_timer;
 
-static uint32_t _default_key2_start_time = 0;
-static mico_timer_t _button_key2_timer;
-
 const platform_pin_mapping_t gpio_mapping[] =
 {
 #ifdef SDIO_1_BIT
@@ -99,16 +96,16 @@ const platform_pin_mapping_t gpio_mapping[] =
   [WL_GPIO1]                          = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
 #endif
   [MICO_SYS_LED]                      = {GPIOB,  10, RCC_AHB1Periph_GPIOB}, 
-  [MICO_RF_LED]                       = {GPIOB,  10, RCC_AHB1Periph_GPIOB},
+  [MICO_RF_LED]                       = {GPIOB,  10, RCC_AHB1Periph_GPIOB},  // the same with system led
   [BOOT_SEL]                          = {GPIOB,  2,  RCC_AHB1Periph_GPIOB}, 
-  [MFG_SEL]                           = {GPIOB,  12,  RCC_AHB1Periph_GPIOA}, 
-  [EasyLink_BUTTON]                   = {GPIOA,  7, RCC_AHB1Periph_GPIOA}, 
+  [MFG_SEL]                           = {GPIOB,  12, RCC_AHB1Periph_GPIOA}, 
+  [EasyLink_BUTTON]                   = {GPIOA,  0,  RCC_AHB1Periph_GPIOA}, 
   [STDIO_UART_RX]                     = {GPIOA,  3,  RCC_AHB1Periph_GPIOA},  
   [STDIO_UART_TX]                     = {GPIOA,  2,  RCC_AHB1Periph_GPIOA},  
 
   /* GPIOs for external use */
   [MICO_GPIO_2]  = {GPIOA, 11,  RCC_AHB1Periph_GPIOA},
-  //[MICO_GPIO_4]  = {GPIOA,  7,  RCC_AHB1Periph_GPIOA},
+  [MICO_GPIO_4]  = {GPIOA,  7,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_7]  = {GPIOB,  4,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_8]  = {GPIOA,  2,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_9]  = {GPIOA,  1,  RCC_AHB1Periph_GPIOA},
@@ -275,32 +272,6 @@ static void _button_EL_irq_handler( void* arg )
   }
 }
 
-static void _button_key2_irq_handler( void* arg )
-{
-  (void)(arg);
-  int interval = -1;
-  
-  if ( MicoGpioInputGet( (mico_gpio_t)KEY2_BUTTON ) == 0 ) {
-    _default_key2_start_time = mico_get_time()+1;
-    mico_start_timer(&_button_key2_timer);
-  } else {
-    interval = mico_get_time() + 1 - _default_key2_start_time;
-    if ( (_default_key2_start_time != 0) && interval > 50 && interval < userKeyLongPress_TimeOut){
-      /* EasyLink button clicked once */
-      PlatformKey2ButtonClickedCallback();
-    }
-    mico_stop_timer(&_button_key2_timer);
-    _default_key2_start_time = 0;
-  }
-}
-
-static void _button_key2_Timeout_handler( void* arg )
-{
-  (void)(arg);
-  _default_key2_start_time = 0;
-  PlatformKey2ButtonLongPressedCallback();
-}
-
 static void _button_STANDBY_irq_handler( void* arg )
 {
   (void)(arg);
@@ -342,8 +313,8 @@ void init_platform( void )
 {
    MicoGpioInitialize( (mico_gpio_t)MICO_SYS_LED, OUTPUT_PUSH_PULL );
    MicoGpioOutputLow( (mico_gpio_t)MICO_SYS_LED );
-//   MicoGpioInitialize( (mico_gpio_t)MICO_RF_LED, OUTPUT_OPEN_DRAIN_NO_PULL );
-//   MicoGpioOutputHigh( (mico_gpio_t)MICO_RF_LED );
+ //  MicoGpioInitialize( (mico_gpio_t)MICO_RF_LED, OUTPUT_OPEN_DRAIN_NO_PULL );
+ //  MicoGpioOutputHigh( (mico_gpio_t)MICO_RF_LED );
   
    //  Initialise EasyLink buttons
    MicoGpioInitialize( (mico_gpio_t)EasyLink_BUTTON, INPUT_PULL_UP );
@@ -353,17 +324,6 @@ void init_platform( void )
    //  Initialise Standby/wakeup switcher
    MicoGpioInitialize( (mico_gpio_t)Standby_SEL, INPUT_PULL_UP );
    MicoGpioEnableIRQ( (mico_gpio_t)Standby_SEL , IRQ_TRIGGER_FALLING_EDGE, _button_STANDBY_irq_handler, NULL);
-   
-   //  Initialise key2 buttons
-   MicoGpioInitialize( (mico_gpio_t)KEY2_BUTTON, INPUT_PULL_UP );
-   mico_init_timer(&_button_key2_timer, userKeyLongPress_TimeOut, _button_key2_Timeout_handler, NULL);
-   MicoGpioEnableIRQ( (mico_gpio_t)KEY2_BUTTON, IRQ_TRIGGER_BOTH_EDGES, _button_key2_irq_handler, NULL );
-   
-   // Initialise DC Motor pin
-   MicoGpioInitialize( (mico_gpio_t)DC_MOTOR_PIN, OUTPUT_PUSH_PULL );
-   
-   // Initialise DHT11 DATA pin
-   //MicoGpioInitialize( (mico_gpio_t)DHT11_DATA, OUTPUT_PUSH_PULL );
 
    MicoFlashInitialize( MICO_SPI_FLASH );
 }
@@ -430,8 +390,6 @@ void MicoRfLed(bool onoff)
 
 bool MicoShouldEnterMFGMode(void)
 {
-  //return false;
-  
   if(MicoGpioInputGet((mico_gpio_t)BOOT_SEL)==false && MicoGpioInputGet((mico_gpio_t)MFG_SEL)==false)
     return true;
   else
@@ -445,14 +403,3 @@ bool MicoShouldEnterBootloader(void)
   else
     return false;
 }
-
-void userDCMotor(bool onoff)
-{
-  if (onoff) {
-    MicoGpioOutputHigh( (mico_gpio_t)DC_MOTOR_PIN );
-  } 
-  else {
-    MicoGpioOutputLow( (mico_gpio_t)DC_MOTOR_PIN );
-  }
-}
-

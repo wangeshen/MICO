@@ -54,6 +54,7 @@ OSStatus userParams_RestoreDefault(mico_Context_t *mico_context, user_context_t 
   mico_rtos_lock_mutex(&user_context->config_mutex);
   
   /* resotre user params */
+  // user config
   memset(&(user_context->config), 0x0, sizeof(user_context->config));
   
   sprintf(user_context->config.dev_name, DEFAULT_DEVICE_NAME);
@@ -67,7 +68,14 @@ OSStatus userParams_RestoreDefault(mico_Context_t *mico_context, user_context_t 
   user_context->config.rgb_led_brightness = 0;
   
   user_context->config.light_sensor_event = true;
+  user_context->config.infrared_reflective_event = true;
   user_context->config.uart_rx_event = true;
+  
+  // user status
+  user_context->status.user_config_need_update = false;
+  user_context->status.light_sensor_data = 0;
+  user_context->status.infrared_reflective_data = 0;
+  user_context->status.uart_rx_data_len = 0;
   
   /* write flash */
   mico_rtos_lock_mutex(&mico_context->flashContentInRam_mutex);

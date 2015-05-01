@@ -466,7 +466,7 @@ OSStatus EasyCloudDeviceReset(easycloud_service_context_t* const context)
   fd_set readfds;
   
   struct timeval_t t;
-  t.tv_sec = 3;
+  t.tv_sec = 5;
   t.tv_usec = 0;
   
   /* create device reset http request data */
@@ -817,7 +817,7 @@ static OSStatus device_activate_authorize(service_request_type_t request_type,
   fd_set readfds;
   
   struct timeval_t t;
-  t.tv_sec = 3;
+  t.tv_sec = 5;
   t.tv_usec = 0;
   
   /* create activate or authorize http request data */
@@ -1252,7 +1252,7 @@ static OSStatus get_rom_version(char *host, uint16_t port, char *request_url,
   fd_set readfds;
   
   struct timeval_t t;
-  t.tv_sec = 3;
+  t.tv_sec = 5;
   t.tv_usec = 0;
   
   /* create activate or authorize http request data */

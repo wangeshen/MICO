@@ -473,7 +473,7 @@ OSStatus bme280_sensor_init(void)
 {
   OSStatus err = kUnknownErr;
   s32 com_rslt = ERROR;  // result of communication results
-  u8 v_stand_by_time_u8 = BME280_INIT_VALUE;  //  The variable used to assign the standby time
+ // u8 v_stand_by_time_u8 = BME280_INIT_VALUE;  //  The variable used to assign the standby time
   
   // I2C init
   err = MicoI2cInitialize(&user_i2c_device);

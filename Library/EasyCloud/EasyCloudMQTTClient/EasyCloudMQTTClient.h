@@ -38,9 +38,9 @@
 //#define ECS_NO_SOCKET_LOOPBACK                1
 
 //in ms
-#define DEFAULT_MICO_MQTT_YIELD_TMIE          200
+#define DEFAULT_MICO_MQTT_YIELD_TMIE          500
 //in ms
-#define DEFAULT_MICO_MQTT_CMD_TIMEOUT         500
+#define DEFAULT_MICO_MQTT_CMD_TIMEOUT         1000
 //in byte
 #define MAX_SIZE_MQTT_SUBSCRIBE_TOPIC         256
 #define MAX_SIZE_MQTT_PUBLISH_TOPIC           256

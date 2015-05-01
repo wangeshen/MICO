@@ -183,8 +183,8 @@ void MicoFogCloudMainThread(void *arg)
   MVDOTARequestData_t devOTARequestData;
  // MVDActivateRequestData_t devDefaultActivateData;
   
-  fogcloud_log("MicoFogCloud main thread start, wait for wifi...");
   // wait for station on
+  fogcloud_log("MicoFogCloud main thread start, wait for wifi...");
   while(kNoErr != mico_rtos_get_semaphore(&_wifi_station_on_sem, MICO_WAIT_FOREVER));
   
   /* check reset cloud info */
@@ -350,24 +350,29 @@ OSStatus MicoStartFogCloudService(mico_Context_t* const inContext)
   require_noerr_action(err, exit, 
                        fogcloud_log("ERROR: FogCloud interface init failed!") );
   
-  // wifi notify
-  err = mico_rtos_init_semaphore(&_wifi_station_on_sem, 1);
-  require_noerr_action(err, exit, 
-                       fogcloud_log("ERROR: mico_rtos_init_semaphore (_wifi_station_on_sem) failed!") );
-  
+  // add wifi notify && semaphore
+  if(NULL == _wifi_station_on_sem){
+    err = mico_rtos_init_semaphore(&_wifi_station_on_sem, 1);
+    require_noerr_action(err, exit, 
+                         fogcloud_log("ERROR: mico_rtos_init_semaphore (_wifi_station_on_sem) failed!") );
+  }
   err = MICOAddNotification( mico_notify_WIFI_STATUS_CHANGED, (void *)mvdNotify_WifiStatusHandler );
   require_noerr_action(err, exit, 
                        fogcloud_log("ERROR: MICOAddNotification (mico_notify_WIFI_STATUS_CHANGED) failed!") );
   
-  // start MicoFogCloud main thread
+  // init cloud connect semaphore
+  if(NULL == _fogcloud_connect_sem){
+    err = mico_rtos_init_semaphore(&_fogcloud_connect_sem, 1);
+    require_noerr_action(err, exit, 
+                         fogcloud_log("ERROR: mico_rtos_init_semaphore (_fogcloud_connect_sem) failed!") );
+  }
+  
+  // start MicoFogCloud main thread (dev reset && ota check, then start fogcloud service)
   err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "fogcloud_main", 
                                 MicoFogCloudMainThread, STACK_SIZE_FOGCLOUD_MAIN_THREAD, 
                                 inContext );
   
-  if(NULL == _fogcloud_connect_sem){
-    mico_rtos_init_semaphore(&_fogcloud_connect_sem, 1);
-  }
-  // start configServer for fogcloud
+  // start configServer for fogcloud (server for activate/authorize/reset/ota cmd from user APP)
   err = MicoStartFogCloudConfigServer( inContext);
   require_noerr_action(err, exit, 
                        fogcloud_log("ERROR: start FogCloud configServer failed!") );
