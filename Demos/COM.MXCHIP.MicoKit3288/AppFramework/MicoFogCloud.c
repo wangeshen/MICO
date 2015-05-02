@@ -184,7 +184,7 @@ void MicoFogCloudMainThread(void *arg)
  // MVDActivateRequestData_t devDefaultActivateData;
   
   // wait for station on
-  fogcloud_log("MicoFogCloud main thread start, wait for wifi...");
+  fogcloud_log("MicoFogCloud start, wait for Wi-Fi...");
   while(kNoErr != mico_rtos_get_semaphore(&_wifi_station_on_sem, MICO_WAIT_FOREVER));
   
   /* check reset cloud info */
@@ -192,7 +192,7 @@ void MicoFogCloudMainThread(void *arg)
      (inContext->flashContentInRam.appConfig.fogcloudConfig.isActivated)){
        // start a thread to reset device info on EasyCloud
        mico_rtos_init_semaphore(&_reset_cloud_info_sem, 1);
-       mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "MicoFogCloudResetCloudInfo", 
+       mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "MicoFogCloudDevReset", 
                                MicoFogCloudDevCloudInfoResetThread, 0x800, 
                                inContext );
        err = mico_rtos_get_semaphore(&_reset_cloud_info_sem, MICO_WAIT_FOREVER);

@@ -67,14 +67,18 @@ OSStatus userParams_RestoreDefault(mico_Context_t *mico_context, user_context_t 
   user_context->config.rgb_led_saturation = 0;
   user_context->config.rgb_led_brightness = 0;
   
-  user_context->config.light_sensor_event = true;
-  user_context->config.infrared_reflective_event = true;
-  user_context->config.uart_rx_event = true;
+  user_context->config.dc_motor_switch = 0;
+  
+//  user_context->config.light_sensor_event = true;
+//  user_context->config.infrared_reflective_event = true;
+//  user_context->config.uart_rx_event = true;
   
   // user status
   user_context->status.user_config_need_update = false;
   user_context->status.light_sensor_data = 0;
   user_context->status.infrared_reflective_data = 0;
+  user_context->status.temperature = 0;
+  user_context->status.humidity = 0;
   user_context->status.uart_rx_data_len = 0;
   
   /* write flash */
@@ -83,7 +87,7 @@ OSStatus userParams_RestoreDefault(mico_Context_t *mico_context, user_context_t 
   require_noerr(err, exit);
   err = MicoFlashErase(MICO_FLASH_FOR_EX_PARA, paraStartAddress, paraEndAddress);
   require_noerr(err, exit);
-  err = MicoFlashWrite(MICO_FLASH_FOR_EX_PARA, &paraStartAddress, (void *)user_context, sizeof(user_config_t));
+  err = MicoFlashWrite(MICO_FLASH_FOR_EX_PARA, &paraStartAddress, (uint8_t *)&(user_context->config), sizeof(user_config_t));
   require_noerr(err, exit);
   err = MicoFlashFinalize(MICO_FLASH_FOR_EX_PARA);
   require_noerr(err, exit);

@@ -63,7 +63,7 @@ static OSStatus _LocalConfigRespondInComingMessage(int fd, ECS_HTTPHeader_t* inH
 OSStatus MicoStartFogCloudConfigServer ( mico_Context_t * const inContext )
 {
   return mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, 
-                                 "FogCloud_ConfigServer", 
+                                 "fogcloud_configserver", 
                                  fogCloudConfigServer_listener_thread, 
                                  STACK_SIZE_FOGCLOUD_CONFIG_SERVER_THREAD, (void*)inContext );
 }
@@ -104,7 +104,7 @@ void fogCloudConfigServer_listener_thread(void *inContext)
       if (j > 0) {
         inet_ntoa(ip_address, addr.s_ip );
         fogcloud_config_log("fogCloud Config Client %s:%d connected, fd: %d", ip_address, addr.s_port, j);
-        err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "Config Clients", 
+        err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "fogcloud_config_client", 
                                       localConfig_thread, STACK_SIZE_FOGCLOUD_CONFIG_CLIENT_THREAD, &j);
       }
     }

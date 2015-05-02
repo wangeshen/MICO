@@ -34,6 +34,7 @@
 #include "drivers/DHT11.h"
 #include "drivers/light_sensor.h"
 #include "drivers/infrared_reflective.h"
+#include "drivers/dc_motor.h"
 
 #define user_log(M, ...) custom_log("USER", M, ##__VA_ARGS__)
 #define user_log_trace() custom_log_trace("USER")
@@ -99,24 +100,13 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* mico_context,
 
 /*---------------------- user module operation functions ---------------------*/
 
-// DC Motor
-void user_setDCMotor(bool onoff)
-{
-  if (onoff) {
-    MicoGpioOutputHigh( (mico_gpio_t)DC_MOTOR );
-  } 
-  else {
-    MicoGpioOutputLow( (mico_gpio_t)DC_MOTOR );
-  }
-}
-
 // Key1 && DC Motor test
 USED void userKey1ClickedCallback(void)
 {
   user_log_trace();
   user_log("userKey1ClickedCallback");
   
-  user_setDCMotor(false);
+  dc_motor_set(0);
   return;
 }
 
@@ -125,7 +115,7 @@ USED void userKey1LongPressedCallback(void)
   user_log_trace();
   user_log("userKey1LongPressedCallback");
   
-  user_setDCMotor(true);
+  dc_motor_set(1);
   return;
 }
 
@@ -134,7 +124,7 @@ USED void userKey2ClickedCallback(void)
   user_log_trace();
   user_log("userKey2ClickedCallback");
   
-  user_setDCMotor(false);
+  dc_motor_set(0);
   return;
 }
 
@@ -143,7 +133,7 @@ USED void userKey2LongPressedCallback(void)
   user_log_trace();
   user_log("userKey2LongPressedCallback");
   
-  user_setDCMotor(true);
+  dc_motor_set(1);
   return;
 }
 
@@ -230,8 +220,7 @@ OSStatus user_modules_init(void)
   hsb2rgb_led_init();
   
   // init DC Motor(GPIO)
-  err = MicoGpioInitialize( (mico_gpio_t)DC_MOTOR, OUTPUT_PUSH_PULL );
-  require_noerr_action( err, exit, user_log("ERROR: MicoGpioInitialize (DC_MOTOR) err=%d.", err) );
+  dc_motor_init();
   
   // init Light sensor(ADC)
   light_sensor_init();
@@ -239,10 +228,12 @@ OSStatus user_modules_init(void)
   // init infrared sensor(ADC)
   infrared_reflective_init();
   
+  // init T/H/P sensor(bme280)
+  err = bme280_sensor_init();
+  require_noerr_action( err, exit, user_log("ERROR: bme280_sensor_init err=%d.", err) );
+  
   // init DHT11
   DHT11_init();
-  
-  // init T/H/P sensor(bme280)
   
   // init proximity sensor(I2C)
  
@@ -270,16 +261,18 @@ OSStatus user_settings_recovery(mico_Context_t *mico_context, user_context_t *us
   /* set initial state of user modules */ 
   // OLED
   OLED_Clear();
-  OLED_ShowString(10,0,"M X C H I P");
-  OLED_ShowString(8,3,(uint8_t*)DEFAULT_DEVICE_NAME); 
-  OLED_ShowString(6,6,"T: 25 C H: 50 %");
+  OLED_ShowString(20,0,"M X C H I P");
+  OLED_ShowString(20,3,(uint8_t*)DEFAULT_DEVICE_NAME); 
+  OLED_ShowString(8,6,"T: 0C  H: 0%");
   
-  // RGB LED (red)
-  hsb2rgb_led_open(0,100,100);
+  // RGB LED
   //rgb_led_open(0, 0, 255);
-
-  // DC Motor (on)
-  user_setDCMotor(true);
+  hsb2rgb_led_open(user_context->config.rgb_led_hues,
+                   user_context->config.rgb_led_saturation,
+                   user_context->config.rgb_led_brightness);
+  
+  // DC Motor
+  dc_motor_set(user_context->config.dc_motor_switch);
   
 exit:  
   return err;
@@ -305,35 +298,48 @@ OSStatus user_settings_update(mico_Context_t *mico_context, user_context_t *user
   return err;
 }
 
-void user_running(uint8_t * const test_cnt)
+void user_running(user_context_t *user_context)
 {
-  uint8_t dht11_data[5] = {0};
-  uint16_t light_data = 0;
-  uint16_t infrared_data = 0;
+//    OSStatus err = kUnknownErr;
+//  uint8_t dht11_data[5] = {0};
+//  uint16_t light_data = 0;
+//  uint16_t infrared_data = 0;
   
-//  if(0 == *test_cnt){
-//    rgb_led_open(0, 200, 0);
-//    *test_cnt = 1;
-//  }
-//  else if(1 == *test_cnt){
-//    rgb_led_open(255, 0, 0);
-//    *test_cnt = 2;
-//  }
-//  else if(2 == *test_cnt){
-//    rgb_led_open(0, 0, 200);
-//    *test_cnt = 0;
+//  int32_t bme280_temp_data = 0;
+//  uint32_t bme280_hum_data = 0;
+//  uint32_t bme280_pressure_data = 0;
+//  char bme280_temp_hum_str[128] = {0};
+
+  
+//  DHT11_read(dht11_data);
+//  user_log("DHT11 T=%d, H=%d.", dht11_data[2], dht11_data[0]);
+//
+//  light_sensor_read(&light_data);
+//  user_log("Light D=%d.", light_data);
+//  
+//  infrared_reflective_read(&infrared_data);
+//  user_log("Infrared D=%d.", infrared_data);
+  
+//  err = bme280_data_readout(&bme280_temp_data, &bme280_pressure_data, &bme280_hum_data);
+//  if(kNoErr != err){
+//    user_log("ERROR: bme280_data_readout err=%d. ", err);
 //  }
 //  else{
+//    sprintf(bme280_temp_hum_str, "T: %dC  H: %d%%", bme280_temp_data/100,  bme280_hum_data/1024);
+//    // display H/T on OLED
+//    OLED_ShowString(8,6,(uint8_t*)bme280_temp_hum_str);
+//    user_log("bme280 T=%d, H=%d, P=%d.", bme280_temp_data/100, bme280_hum_data/1024, bme280_pressure_data/256);
 //  }
+    
+      
+  // display H/T on OLED
+  char temp_hum_str[128] = {0};
+  sprintf(temp_hum_str, "T: %dC  H: %d%%", 
+          user_context->status.temperature, user_context->status.humidity);
+  user_log("T=%d, H=%d.",  
+           user_context->status.temperature, user_context->status.humidity);
   
-  DHT11_read(dht11_data);
-  user_log("DHT11 T=%d, H=%d.", dht11_data[2], dht11_data[0]);
-  
-  light_sensor_read(&light_data);
-  user_log("Light D=%d.", light_data);
-  
-  infrared_reflective_read(&infrared_data);
-  user_log("Infrared D=%d.", infrared_data);
+  OLED_ShowString(8,6,(uint8_t*)temp_hum_str);
 }
 
 /* user main function, called by AppFramework after FogCloud connected.
@@ -342,17 +348,14 @@ OSStatus user_main( mico_Context_t * const mico_context )
 {
   user_log_trace();
   OSStatus err = kUnknownErr;
-  user_context_t* const p_user_context = &user_context;
-  
-  /*-----------test----------*/
-  uint8_t test_cnt = 0;
+  //user_context_t* p_user_context = &user_context;
   
   /* init user modules (pins && sensor init)*/
   err = user_modules_init();
   require_noerr_action( err, exit, user_log("ERROR: user_modules_init err=%d.", err) );
   
   /* recovery user settings from flash && set initail state of user modules */
-  err = user_settings_recovery(mico_context, p_user_context);
+  err = user_settings_recovery(mico_context, &user_context);
   require_noerr_action( err, exit, user_log("ERROR: user_settings_recovery err=%d.", err) );
   
   /* start properties notify task */
@@ -363,13 +366,13 @@ OSStatus user_main( mico_Context_t * const mico_context )
   
   while(1){
     /* save user settings into flash */
-    err = user_settings_update(mico_context, p_user_context);
+    err = user_settings_update(mico_context, &user_context);
     require_noerr_action( err, exit, user_log("ERROR: user_settings_update err=%d.", err) );
     
     /* user thread running state */
-    //user_running(&test_cnt);
+    user_running(&user_context);
     
-    /* check every 3 seconds */
+    /* check every 1 seconds */
     mico_thread_msleep(1000);
   }
   

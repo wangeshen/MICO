@@ -540,6 +540,51 @@ OSStatus bme280_data_readout(s32 *v_actual_temp_s32, u32 *v_actual_press_u32, u3
         return err;
 }
 
+OSStatus bme280_read_temperature(s32 *v_actual_temp_s32)
+{
+	s32 com_rslt = ERROR;  // result of communication results
+	s32 v_data_uncomp_tem_s32 = BME280_INIT_VALUE;  // uncompensated temperature
+     
+        com_rslt = bme280_read_uncomp_temperature(&v_data_uncomp_tem_s32);
+         if(0 != com_rslt){
+          return kReadErr;
+        }
+        
+        *v_actual_temp_s32 = bme280_compensate_temperature_int32(v_data_uncomp_tem_s32);
+        
+        return kNoErr;
+}
+
+OSStatus bme280_read_humidity(u32 *v_actual_humity_u32)
+{
+  	s32 com_rslt = ERROR;  // result of communication results
+	s32 v_data_uncomp_hum_s32 = BME280_INIT_VALUE;  // uncompensated humidity
+     
+        com_rslt = bme280_read_uncomp_humidity(&v_data_uncomp_hum_s32);
+         if(0 != com_rslt){
+          return kReadErr;
+        }
+        
+        *v_actual_humity_u32 = bme280_compensate_humidity_int32(v_data_uncomp_hum_s32);
+        
+        return kNoErr;
+}
+
+OSStatus bme280_data_pressure(u32 *v_actual_press_u32)
+{
+    	s32 com_rslt = ERROR;  // result of communication results
+	s32 v_data_uncomp_pres_s32 = BME280_INIT_VALUE;  // uncompensated humidity
+     
+        com_rslt = bme280_read_uncomp_pressure(&v_data_uncomp_pres_s32);
+         if(0 != com_rslt){
+          return kReadErr;
+        }
+        
+        *v_actual_press_u32 = bme280_compensate_pressure_int32(v_data_uncomp_pres_s32);
+        
+        return kNoErr;
+}
+
 
 // bme280_sensor_init
 OSStatus bme280_sensor_deinit(void)

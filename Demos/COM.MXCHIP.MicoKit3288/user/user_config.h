@@ -53,18 +53,16 @@
  ******************************************************************************/
 #define STACK_SIZE_USER_MAIN_THREAD         0x800
 #define STACK_SIZE_NOTIFY_THREAD            0x800
-#define MICO_PROPERTIES_NOTIFY_INTERVAL_MS  200
+#define MICO_PROPERTIES_NOTIFY_INTERVAL_MS  500
 
 /*User provided configurations*/
-#define CONFIGURATION_VERSION               0x00000001 // if default configuration is changed, update this number
+#define CONFIGURATION_VERSION               0x00000005 // if default configuration is changed, update this number
    
 /*******************************************************************************
  *                             USER MODULE I/Os
  ******************************************************************************/   
 #define USER_KEY1           MICO_GPIO_4
 #define USER_KEY2           MICO_GPIO_34
-#define DC_MOTOR            MICO_GPIO_30
-#define DHT11_DATA          MICO_GPIO_7
    
 #define userKey1LongPress_TimeOut        3000  /**< user key1 button long pressed for 3 seconds. */
 #define userKey2LongPress_TimeOut        3000  /**< user key2 button long pressed for 3 seconds. */

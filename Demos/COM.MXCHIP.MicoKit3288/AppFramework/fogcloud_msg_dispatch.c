@@ -290,7 +290,7 @@ OSStatus mico_start_properties_notify(mico_Context_t * const inContext, struct m
   g_notify_thread_data.p_service_table = service_table;
   g_notify_thread_data.notify_interval = period_ms;
   
-  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "user_main", 
+  err = mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "prop_notify", 
                                 notify_thread, stack_size, 
                                 (void*)&g_notify_thread_data );
   

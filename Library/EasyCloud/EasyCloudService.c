@@ -181,7 +181,7 @@ OSStatus EasyCloudServiceStart(easycloud_service_context_t *context)
  
   return mico_rtos_create_thread(&easyCloudServiceThreadHandle, 
                                  MICO_APPLICATION_PRIORITY, 
-                                 "EasyCloud service", easyCloudServiceThread, 
+                                 "fogcloud service", easyCloudServiceThread, 
                                  STACK_SIZE_EASYCLOUD_SERVICE_MAIN_THREAD, 
                                  inEasyCloudContext);
 }

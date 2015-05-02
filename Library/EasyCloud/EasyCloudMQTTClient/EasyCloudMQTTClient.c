@@ -85,7 +85,7 @@ OSStatus EasyCloudMQTTClientStart(void)
 {
   return mico_rtos_create_thread(&mqttClientThreadHandle, 
                                  MICO_APPLICATION_PRIORITY, 
-                                 "MQTT Client", mqttClientThread, 
+                                 "mqtt client", mqttClientThread, 
                                  STACK_SIZE_MQTT_CLIENT_THREAD, NULL);
 }
 

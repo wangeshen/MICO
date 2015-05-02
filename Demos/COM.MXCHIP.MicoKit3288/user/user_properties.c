@@ -27,6 +27,8 @@
 #include "drivers/uart.h"
 #include "drivers/light_sensor.h"
 #include "drivers/infrared_reflective.h"
+#include "drivers/dc_motor.h"
+#include "drivers/bme280_user.h"
 
 #define properties_user_log(M, ...) custom_log("DEV_PROPERTIES_USER", M, ##__VA_ARGS__)
 #define properties_user_log_trace() custom_log_trace("DEV_PROPERTIES_USER")
@@ -40,16 +42,14 @@ uint32_t bool_len = sizeof(bool);
 uint32_t int_len = sizeof(int);
 uint32_t float_len = sizeof(float);
 
+bool property_event = true;    // all event value is true.
+
 /*------------------------------------------------------------------------------
  * user context
  * context.config: user property data, stored in flash extra param area
  * context.status: user property status
  *----------------------------------------------------------------------------*/
 user_context_t user_context = {
-  .config.light_sensor_event = true,
-  .config.infrared_reflective_event = true,
-  .config.uart_rx_event = true,
-  
   .status.user_config_need_update = false,
 };
 
@@ -298,25 +298,25 @@ int notify_check_light_sensor_data(struct mico_prop_t *prop, void *arg, void *va
   return ret;
 }
 
-// get function of adc data notify event flag 
-int event_status_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
-{
-  // get event value
-  *(bool*)val = *((bool*)prop->value);
-  *val_len = *(prop->value_len);
-  
-  return 0;  // get ok
-}
-
-// set function of adc data notify event flag 
-int event_status_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
-{
-  // set event value
-  *((bool*)prop->value) = *((bool*)val);
-  *(prop->value_len) = val_len;
-  
-  return 0;  // get ok
-}
+//// get function of adc data notify event flag 
+//int event_status_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+//{
+//  // get event value
+//  *(bool*)val = *((bool*)prop->value);
+//  *val_len = *(prop->value_len);
+//  
+//  return 0;  // get ok
+//}
+//
+//// set function of adc data notify event flag 
+//int event_status_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
+//{
+//  // set event value
+//  *((bool*)prop->value) = *((bool*)val);
+//  *(prop->value_len) = val_len;
+//  
+//  return 0;  // get ok
+//}
 
 /*------------------------------------------------------------------------------
  *                     MODULE: infrared reflective sensor
@@ -441,6 +441,152 @@ int uart_data_recv_check(struct mico_prop_t *prop, void *arg, void *val, uint32_
   return ret;
 }
 
+/*------------------------------------------------------------------------------
+ *                                DC Motor
+ *----------------------------------------------------------------------------*/
+
+// get function: get dc motor switch value 
+int dc_motor_switch_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  *val_len = int_len;
+  
+  if(MicoGpioInputGet( (mico_gpio_t)DC_MOTOR ) == 0){
+    *(int*)val = 0;
+  }
+  else{
+     *(int*)val = 1;
+  }
+  
+  return 0;  // get ok
+}
+
+// set function: set dc motor switch value 
+int dc_motor_switch_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
+{
+  int value = 0;
+  
+  value = *((int*)val);
+  dc_motor_set(value);
+
+  return 0;  // get ok
+}
+
+/*------------------------------------------------------------------------------
+ *                          Temperature && Humidity
+ *----------------------------------------------------------------------------*/
+
+// get function: get temperature value 
+int temperature_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  OSStatus err = kUnknownErr;
+  
+  int32_t bme280_temp_data = 0;
+ // uint32_t bme280_pressure_data = 0;
+//  uint32_t bme280_hum_data = 0;
+  
+  *val_len = int_len;
+  
+  //err = bme280_data_readout(&bme280_temp_data, &bme280_pressure_data, &bme280_hum_data);
+  err = bme280_read_temperature(&bme280_temp_data);
+  if(kNoErr != err){
+    properties_user_log("ERROR: bme280_read_temperature err=%d. ", err);
+    return -1;
+  }
+  else{
+     *(int*)val = bme280_temp_data/100;
+  }
+  
+  return 0;  // get ok
+}
+
+// notify check function for temperature data changes
+int notify_check_temperature(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  int ret = 0;
+  int temperature_data = 0;
+  uint32_t temperature_data_len = 0;
+  
+  // get adc data
+  ret = prop->get(prop, arg, &temperature_data, &temperature_data_len);
+  if(0 != ret){
+    return -1;   // get value error
+  }
+  
+  // update check (diff get_data and prop->value)
+  if(temperature_data != *((int*)(prop->value))){  // changed
+//  if( (((int)temperature_data - *((int*)(prop->value))) >= 5) || 
+//     ((*((int*)(prop->value)) - (int)temperature_data) >= 5) ){  // abs >=5
+    properties_user_log("temperature changed: %d -> %d",
+                        *((int*)prop->value), temperature_data);
+    
+    // return new value to update prop value && len
+    *((int*)val) = temperature_data;  
+    *val_len = temperature_data_len;
+    ret = 1;  // value changed, need to send notify message
+  }
+  else{
+    ret = 0;  // not changed, not need to notify
+  }
+  
+  return ret;
+}
+
+// get function: get humidity value 
+int humidity_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  OSStatus err = kUnknownErr;
+  
+ // int32_t bme280_temp_data = 0;
+ // uint32_t bme280_pressure_data = 0;
+  uint32_t bme280_hum_data = 0;
+  
+  *val_len = int_len;
+  
+  //err = bme280_data_readout(&bme280_temp_data, &bme280_pressure_data, &bme280_hum_data);
+  err = bme280_read_humidity(&bme280_hum_data);
+  if(kNoErr != err){
+    properties_user_log("ERROR: bme280_read_humidity err=%d. ", err);
+    return -1;
+  }
+  else{
+     *(int*)val = (int)bme280_hum_data/1024;
+  }
+  
+  return 0;  // get ok
+}
+
+// notify check function for humidity data changes
+int notify_check_humidity(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
+{
+  int ret = 0;
+  int humidity_data = 0;
+  uint32_t humidity_data_len = 0;
+  
+  // get adc data
+  ret = prop->get(prop, arg, &humidity_data, &humidity_data_len);
+  if(0 != ret){
+    return -1;   // get value error
+  }
+  
+  // update check (diff get_data and prop->value)
+  if(humidity_data != *((int*)(prop->value))){  // changed
+//  if( (((int)humidity_data - *((int*)(prop->value))) >= 50) || 
+//     ((*((int*)(prop->value)) - (int)humidity_data) >= 50) ){  // abs >=50
+    properties_user_log("humidity changed: %d -> %d",
+                        *((int*)prop->value), (int)humidity_data);
+    
+    // return new value to update prop value && len
+    *((int*)val) = (int)humidity_data;  
+    *val_len = humidity_data_len;
+    ret = 1;  // value changed, need to send notify message
+  }
+  else{
+    ret = 0;  // not changed, not need to notify
+  }
+  
+  return ret;
+}
+
 /*******************************************************************************
  * service_table: list all serivices && properties for the device
  ******************************************************************************/
@@ -461,7 +607,6 @@ const struct mico_service_t  service_table[] = {
         .event = NULL,                      // not notifiable
         .hasMeta = false,                   // no max/min/step
         .maxStringLen = MAX_DEVICE_NAME_SIZE,  // max length of device name string
-        .unit = NULL                        // no unit
       },
       [1] = {
         .type = "public.map.property.manufacturer",  // device manufacturer uuid
@@ -476,7 +621,6 @@ const struct mico_service_t  service_table[] = {
         .event = NULL,                      // not notifiable
         .hasMeta = false, 
         .maxStringLen = MAX_DEVICE_MANUFACTURER_SIZE,  // max length of device manufacturer
-        .unit = NULL                        // no unit
       },
       [2] = {NULL}                          // end flag
     }
@@ -495,9 +639,7 @@ const struct mico_service_t  service_table[] = {
         .notify_check = NULL,               // not notifiable
         .arg = &user_context,               // user context
         .event = NULL,
-        .hasMeta = false,    
-        .maxStringLen = 0,
-        .unit = NULL
+        .hasMeta = false,
       },
       [1] = {
         .type = "public.map.property.hues",  // led hues
@@ -513,9 +655,7 @@ const struct mico_service_t  service_table[] = {
         .hasMeta = true,
         .maxValue.intValue = 360,
         .minValue.intValue = 0,
-        .minStep.intValue = 1,
-        .maxStringLen = 0,
-        .unit = "degree"
+        .minStep.intValue = 1
       },
       [2] = {
         .type = "public.map.property.saturation",  // led saturation
@@ -531,9 +671,7 @@ const struct mico_service_t  service_table[] = {
         .hasMeta = true,
         .maxValue.intValue = 100,
         .minValue.intValue = 0,
-        .minStep.intValue = 1,
-        .maxStringLen = 0,
-        .unit = "percentage"
+        .minStep.intValue = 1
       },
       [3] = {
         .type = "public.map.property.brightness",  // led brightness
@@ -549,8 +687,6 @@ const struct mico_service_t  service_table[] = {
         .maxValue.intValue = 100,
         .minValue.intValue = 0,
         .minStep.intValue = 1,
-        .maxStringLen = 0,
-        .unit = "percentage"
       },
       [4] = {NULL}
     }
@@ -559,47 +695,27 @@ const struct mico_service_t  service_table[] = {
     .type = "public.map.service.light_sensor",         //  service 3: light sensor (ADC)
     .properties = {
       [0] = {
-        .type = "public.map.property.value",  // adc value uuid
-        .value = &(user_context.status.light_sensor_data),
+        .type = "public.map.property.value", 
+        .value = &(user_context.status.light_sensor_data),  // light_sensor_data value
         .value_len = &int_len,
         .format = MICO_PROP_TYPE_INT,
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_EV),
         .get = light_sensor_data_get,
         .set = NULL,
         .notify_check = notify_check_light_sensor_data,  // check notify for adc data
-        .arg = &user_context,                   // user context
-        .event = &(user_context.config.light_sensor_event),  // event flag
-        .hasMeta = true,
-        .maxValue.intValue = 4095,
-        .minValue.intValue = 0,
-        .minStep.intValue = 1,
-        .maxStringLen = 0,
-        .unit = NULL
+        .arg = &user_context,                          // user context
+        .event = &(property_event),
+        .hasMeta = false
       },
-      [1] = {
-        .type = "public.map.property.event",    // adc value event (uuid)
-        .value = &(user_context.config.light_sensor_event),
-        .value_len = &bool_len,
-        .format = MICO_PROP_TYPE_BOOL,
-        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
-        .get = event_status_get,
-        .set = event_status_set,
-        .notify_check = NULL,
-        .arg = &user_context,                   // user context
-        .event = NULL,
-        .hasMeta = false,
-        .maxStringLen = 0,
-        .unit = NULL
-      },
-      [2] = {NULL}
+      [1] = {NULL}
     }
   },
   [3] = {
-    .type = "public.map.service.uart",          //  service 3: ADC (uuid)
+    .type = "public.map.service.uart",          //  service 3: uart (uuid)
     .properties = {
       [0] = {
-        .type = "public.map.property.message",  // uart message uuid
-        .value = &(user_context.status.uart_rx_buf),
+        .type = "public.map.property.message",
+        .value = &(user_context.status.uart_rx_buf),   // uart message buffer
         .value_len = &(user_context.status.uart_rx_data_len),
         .format = MICO_PROP_TYPE_STRING,
         .perms = ( MICO_PROP_PERMS_WO | MICO_PROP_PERMS_EV ),
@@ -607,10 +723,9 @@ const struct mico_service_t  service_table[] = {
         .set = uart_data_send,
         .notify_check = uart_data_recv_check,   // check recv data
         .arg = &user_context,
-        .event = &(user_context.config.uart_rx_event),  // event flag
+        .event = &(property_event),
         .hasMeta = false,
-        .maxStringLen = MAX_USER_UART_BUF_SIZE,
-        .unit = "byte"
+        .maxStringLen = MAX_USER_UART_BUF_SIZE
       },
       [1] = {NULL}
     }
@@ -619,26 +734,79 @@ const struct mico_service_t  service_table[] = {
     .type = "public.map.service.infrared",    //  service 4: infrared sensor (ADC)
     .properties = {
       [0] = {
-        .type = "public.map.property.value",  // adc value uuid
-        .value = &(user_context.status.infrared_reflective_data),
+        .type = "public.map.property.value",
+        .value = &(user_context.status.infrared_reflective_data),  // infrared value
         .value_len = &int_len,
         .format = MICO_PROP_TYPE_INT,
         .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_EV),
         .get = infrared_reflective_data_get,
         .set = NULL,
-        .notify_check = notify_check_infrared_reflective_data,  // check notify for adc data
+        .notify_check = notify_check_infrared_reflective_data,  // check notify for infrared data
         .arg = &user_context,                   // user context
-        .event = &(user_context.config.infrared_reflective_event),  // event flag
-        .hasMeta = true,
-        .maxValue.intValue = 4095,
-        .minValue.intValue = 0,
-        .minStep.intValue = 1,
-        .unit = NULL
+        .event = &(property_event),             // event flag
+        .hasMeta = false
       },
       [1] = {NULL}
     }
   },
-  [5] = {NULL}
+  [5] = {
+    .type = "public.map.service.motor",       // service 5: dc motor (uuid)
+    .properties = {
+      [0] = {
+        .type = "public.map.property.value",  // dc motor switch value
+        .value = &(user_context.config.dc_motor_switch),
+        .value_len = &int_len,                // int type len
+        .format = MICO_PROP_TYPE_INT,
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_WO),
+        .get = dc_motor_switch_get,              // get switch status function
+        .set = dc_motor_switch_set,              // set switch status function
+        .notify_check = NULL,                    // not notifiable
+        .arg = &user_context,                    // user context
+        .event = NULL,
+        .hasMeta = false
+      },
+      [1] = {NULL}
+    }
+  },
+  [6] = {
+    .type = "public.map.service.temperature",     // service 6: temperature (uuid)
+    .properties = {
+      [0] = {
+        .type = "public.map.property.value",  // temperature value
+        .value = &(user_context.status.temperature),
+        .value_len = &int_len,                // int type len
+        .format = MICO_PROP_TYPE_INT,
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_EV),
+        .get = temperature_get,              // get temperature function
+        .set = NULL,
+        .notify_check = notify_check_temperature,
+        .arg = &user_context,                // user context
+        .event = &property_event,
+        .hasMeta = false
+      },
+      [1] = {NULL}
+    }
+  },
+  [7] = {
+    .type = "public.map.service.humidity",     // service 7: humidity (uuid)
+    .properties = {
+      [0] = {
+        .type = "public.map.property.value",  // humidity value
+        .value = &(user_context.status.humidity),
+        .value_len = &int_len,                // int type len
+        .format = MICO_PROP_TYPE_INT,
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_EV),
+        .get = humidity_get,              // get humidity function
+        .set = NULL,
+        .notify_check = notify_check_humidity,
+        .arg = &user_context,                // user context
+        .event = &property_event,
+        .hasMeta = false
+      },
+      [1] = {NULL}
+    }
+  },
+  [8] = {NULL}
 };
 
 /************************************ FILE END ********************************/
