@@ -22,7 +22,7 @@
 #include "MICODefine.h"
 #include "properties.h"
 #include "user_properties.h"
-#include "JSON-C/json.h"
+
 #include "drivers/hsb2rgb_led.h"
 #include "drivers/uart.h"
 #include "drivers/light_sensor.h"
@@ -32,28 +32,29 @@
 #define properties_user_log_trace() custom_log_trace("DEV_PROPERTIES_USER")
 
 /*******************************************************************************
-* PROPERTIES
+* VARIABLES
 *******************************************************************************/
 
-// system data type length(fixed)
+// length of system data type (fixed)
 uint32_t bool_len = sizeof(bool);
 uint32_t int_len = sizeof(int);
 uint32_t float_len = sizeof(float);
 
-/*******************************************************************************
+/*------------------------------------------------------------------------------
  * user context
  * context.config: user property data, stored in flash extra param area
  * context.status: user property status
- ******************************************************************************/
+ *----------------------------------------------------------------------------*/
 user_context_t user_context = {
   .config.light_sensor_event = true,
   .config.infrared_reflective_event = true,
   .config.uart_rx_event = true,
+  
   .status.user_config_need_update = false,
 };
 
 /*******************************************************************************
- * DESCRIPTION: get/set/notify_check function defined for each property;
+ * DESCRIPTION: get/set/notify_check function defined for each property.
  * NOTE:        a property must has get/set function to read/write property, and
  *              must has notify_check function, if property need notify.
  *              get: get && return hardware status, reutrn 0 if succeed.
@@ -65,9 +66,9 @@ user_context_t user_context = {
  *              < 0: operation failed.
  ******************************************************************************/
 
-/*
- * MODULE: dev_info 
- */
+/*------------------------------------------------------------------------------
+ *                              MODULE: dev_info 
+ *----------------------------------------------------------------------------*/
 
 // (COMMON FUNCTION) string property read function
 int string_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
@@ -104,9 +105,9 @@ int string_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
   return ret;  // return 0, succeed.
 }
 
-/*
- * MODULE: RGB LED
- */
+/*------------------------------------------------------------------------------
+ *                              MODULE: RGB LED
+ *----------------------------------------------------------------------------*/
 
 // swtich set function
 int rgb_led_sw_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t val_len)
@@ -247,12 +248,11 @@ int rgb_led_brightness_get(struct mico_prop_t *prop, void *arg, void *val, uint3
   return ret;  // return 0, succeed.
 }
 
+/*------------------------------------------------------------------------------
+ *                            MODULE: light sensor
+ *----------------------------------------------------------------------------*/
 
-/*
- * MODULE: light sensor
- */
-
-// get adc data function
+// get function: get light sensor data 
 int light_sensor_data_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
@@ -268,7 +268,7 @@ int light_sensor_data_get(struct mico_prop_t *prop, void *arg, void *val, uint32
   return ret;
 }
 
-// notify check function for light sensor data
+// notify check function: check changes for light sensor data
 int notify_check_light_sensor_data(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
@@ -283,7 +283,8 @@ int notify_check_light_sensor_data(struct mico_prop_t *prop, void *arg, void *va
   
   // update check (diff get_data and prop->value)
   //if(light_sensor_data != *((uint16_t*)(prop->value))){  // changed
-  if( (((int)light_sensor_data - *((int*)(prop->value))) >= 50) || ((*((int*)(prop->value)) - (int)light_sensor_data) >= 50) ){  // abs >=10
+  if( (((int)light_sensor_data - *((int*)(prop->value))) >= 50) || 
+     ((*((int*)(prop->value)) - (int)light_sensor_data) >= 50) ){  // abs >=10
     properties_user_log("light_sensor_data changed: %d -> %d", *((int*)prop->value), (int)light_sensor_data);   
     // return new value to update prop value && len
     *((int*)val) = (int)light_sensor_data;  
@@ -317,10 +318,11 @@ int event_status_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t va
   return 0;  // get ok
 }
 
-/*
- * MODULE: infrared reflective sensor
- */
+/*------------------------------------------------------------------------------
+ *                     MODULE: infrared reflective sensor
+ *----------------------------------------------------------------------------*/
 
+// get function: get infrared reflective data
 int infrared_reflective_data_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
   int ret = 0;
@@ -351,8 +353,10 @@ int notify_check_infrared_reflective_data(struct mico_prop_t *prop, void *arg, v
   
   // update check (diff get_data and prop->value)
   //if(infrared_reflective_data != *((uint16_t*)(prop->value))){  // changed
-  if( (((int)infrared_reflective_data - *((int*)(prop->value))) >= 50) || ((*((int*)(prop->value)) - (int)infrared_reflective_data) >= 50) ){  // abs >=10
-    properties_user_log("infrared_reflective_data changed: %d -> %d", *((int*)prop->value), (int)infrared_reflective_data);   
+  if( (((int)infrared_reflective_data - *((int*)(prop->value))) >= 50) || 
+     ((*((int*)(prop->value)) - (int)infrared_reflective_data) >= 50) ){  // abs >=10
+    properties_user_log("infrared_reflective_data changed: %d -> %d",
+                        *((int*)prop->value), (int)infrared_reflective_data);   
     // return new value to update prop value && len
     *((int*)val) = (int)infrared_reflective_data;  
     *val_len = infrared_reflective_data_len;
@@ -365,9 +369,9 @@ int notify_check_infrared_reflective_data(struct mico_prop_t *prop, void *arg, v
   return ret;
 }
 
-/*
- * MODULE: UART 
- */
+/*------------------------------------------------------------------------------
+ *                                MODULE: UART 
+ *-----------------------------------------------------------------------------*/
 
 // get function: recv uart data
 int uart_data_recv(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
@@ -438,7 +442,7 @@ int uart_data_recv_check(struct mico_prop_t *prop, void *arg, void *val, uint32_
 }
 
 /*******************************************************************************
-* service_table: list all serivices && properties for the device
+ * service_table: list all serivices && properties for the device
  ******************************************************************************/
 const struct mico_service_t  service_table[] = {
   [0] = {
@@ -636,3 +640,5 @@ const struct mico_service_t  service_table[] = {
   },
   [5] = {NULL}
 };
+
+/************************************ FILE END ********************************/
