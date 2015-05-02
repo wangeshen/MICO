@@ -35,6 +35,8 @@
 #include "MicoPlatform.h"
 #include "user_params_storage.h"
 
+#define user_params_storage_log(M, ...) custom_log("USER_PARAMS_STORAGE", M, ##__VA_ARGS__)
+#define user_params_storage_log_trace() custom_log_trace("USER_PARAMS_STORAGE")
 
 OSStatus userParams_RestoreDefault(mico_Context_t *mico_context, user_context_t *user_context)
 { 
@@ -52,6 +54,8 @@ OSStatus userParams_RestoreDefault(mico_Context_t *mico_context, user_context_t 
     mico_rtos_init_mutex(&user_context->config_mutex);
   }
   mico_rtos_lock_mutex(&user_context->config_mutex);
+  
+  user_params_storage_log("userParams_RestoreDefault.");
   
   /* resotre user params */
   // user config
@@ -80,6 +84,8 @@ OSStatus userParams_RestoreDefault(mico_Context_t *mico_context, user_context_t 
   user_context->status.temperature = 0;
   user_context->status.humidity = 0;
   user_context->status.uart_rx_data_len = 0;
+  
+  user_params_storage_log("user_context->config.dev_name = [%s]", user_context->config.dev_name);
   
   /* write flash */
   mico_rtos_lock_mutex(&mico_context->flashContentInRam_mutex);
@@ -122,6 +128,8 @@ OSStatus userParams_Read(mico_Context_t *mico_context, user_context_t *user_cont
   mico_rtos_unlock_mutex(&mico_context->flashContentInRam_mutex);
   
   mico_rtos_unlock_mutex(&user_context->config_mutex);
+  
+  user_params_storage_log("user_context->config.dev_name = [%s]", user_context->config.dev_name);
   
 exit: 
   return err;

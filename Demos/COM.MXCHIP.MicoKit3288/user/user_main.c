@@ -44,7 +44,7 @@
 // device services &&¡¡properties table
 extern struct mico_service_t  service_table[];
 // user params
-extern user_context_t user_context;
+extern user_context_t g_user_context;
 
 // global flag to indacate update user params in flash
 //volatile bool user_params_need_update = false;
@@ -60,7 +60,7 @@ static mico_timer_t _user_key2_timer;
 void userRestoreDefault_callback(mico_Context_t *mico_context)
 {
   user_log("INFO: restore user configuration.");
-  userParams_RestoreDefault(mico_context, &user_context);
+  userParams_RestoreDefault(mico_context, &g_user_context);
 }
 
 /* FogCloud message receive callback: handle cloud messages here
@@ -91,7 +91,7 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* mico_context,
   else
   {
     if(MSG_PROP_WROTE == retCode){
-      user_context.status.user_config_need_update = true;  // user params need update in flash
+      g_user_context.status.user_config_need_update = true;  // user params need update in flash
     }
   }
   
@@ -243,7 +243,7 @@ exit:
 
 OSStatus user_settings_recovery(mico_Context_t *mico_context, user_context_t *user_context)
 {
-  OSStatus err = kUnknownErr;
+  OSStatus err = kNoErr;
   
   /* read user config from flash */
   if(NULL == user_context->config_mutex){
@@ -355,7 +355,7 @@ OSStatus user_main( mico_Context_t * const mico_context )
   require_noerr_action( err, exit, user_log("ERROR: user_modules_init err=%d.", err) );
   
   /* recovery user settings from flash && set initail state of user modules */
-  err = user_settings_recovery(mico_context, &user_context);
+  err = user_settings_recovery(mico_context, &g_user_context);
   require_noerr_action( err, exit, user_log("ERROR: user_settings_recovery err=%d.", err) );
   
   /* start properties notify task */
@@ -366,11 +366,11 @@ OSStatus user_main( mico_Context_t * const mico_context )
   
   while(1){
     /* save user settings into flash */
-    err = user_settings_update(mico_context, &user_context);
+    err = user_settings_update(mico_context, &g_user_context);
     require_noerr_action( err, exit, user_log("ERROR: user_settings_update err=%d.", err) );
     
     /* user thread running state */
-    user_running(&user_context);
+    user_running(&g_user_context);
     
     /* check every 1 seconds */
     mico_thread_msleep(1000);

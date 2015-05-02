@@ -56,7 +56,7 @@
 #define MICO_PROPERTIES_NOTIFY_INTERVAL_MS  500
 
 /*User provided configurations*/
-#define CONFIGURATION_VERSION               0x00000005 // if default configuration is changed, update this number
+#define CONFIGURATION_VERSION               0x00000003 // if default configuration is changed, update this number
    
 /*******************************************************************************
  *                             USER MODULE I/Os
