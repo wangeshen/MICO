@@ -293,6 +293,11 @@ void MicoFogCloudMainThread(void *arg)
   require_noerr_action(err, exit, 
                        fogcloud_log("ERROR: MicoFogCloudCloudInterfaceStart failed!") );
   
+  /* start configServer for fogcloud (server for activate/authorize/reset/ota cmd from user APP) */
+  err = MicoStartFogCloudConfigServer( inContext);
+  require_noerr_action(err, exit, 
+                       fogcloud_log("ERROR: start FogCloud configServer failed!") );
+  
 exit:
   fogcloud_log("[MicoFogCloud]MicoFogCloudMainThread exit err=%d.", err);
   mico_rtos_delete_thread(NULL);
@@ -372,10 +377,10 @@ OSStatus MicoStartFogCloudService(mico_Context_t* const inContext)
                                 MicoFogCloudMainThread, STACK_SIZE_FOGCLOUD_MAIN_THREAD, 
                                 inContext );
   
-  // start configServer for fogcloud (server for activate/authorize/reset/ota cmd from user APP)
-  err = MicoStartFogCloudConfigServer( inContext);
-  require_noerr_action(err, exit, 
-                       fogcloud_log("ERROR: start FogCloud configServer failed!") );
+//  // start configServer for fogcloud (server for activate/authorize/reset/ota cmd from user APP)
+//  err = MicoStartFogCloudConfigServer( inContext);
+//  require_noerr_action(err, exit, 
+//                       fogcloud_log("ERROR: start FogCloud configServer failed!") );
   
 exit:
   return err;
