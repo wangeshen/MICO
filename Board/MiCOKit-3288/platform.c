@@ -258,7 +258,7 @@ static void _button_EL_irq_handler( void* arg )
   (void)(arg);
   int interval = -1;
   
-  if ( MicoGpioInputGet( (mico_gpio_t)EasyLink_BUTTON ) == 0 ) {
+  if ( MicoGpioInputGet( (mico_gpio_t)EasyLink_BUTTON ) == 1 ) {
     _default_start_time = mico_get_time()+1;
     mico_start_timer(&_button_EL_timer);
   } else {
