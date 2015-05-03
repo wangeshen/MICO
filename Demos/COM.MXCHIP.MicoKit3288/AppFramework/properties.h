@@ -30,7 +30,7 @@
  ******************************************************************************/
 
 // max number of services && properties per serivce
-#define MAX_PROPERTY_NUMBER_PER_SERVICE        (10)
+#define MAX_PROPERTY_NUMBER_PER_SERVICE        (5)
 #define MAX_SERVICE_NUMBER                     (10)
 
 // property value access attribute

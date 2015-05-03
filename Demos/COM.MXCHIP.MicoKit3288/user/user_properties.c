@@ -711,7 +711,20 @@ const struct mico_service_t  service_table[] = {
         .event = &(property_event),
         .hasMeta = false
       },
-      [1] = {NULL}
+      [1] = {
+        .type = "public.map.property.reserved",          // this is just a placeholder
+        .value = &(g_user_context.status.light_sensor_data),  // temp use, no use
+        .value_len = &int_len,
+        .format = MICO_PROP_TYPE_INT,
+        .perms = (MICO_PROP_PERMS_RO),
+        .get = light_sensor_data_get,   // temp use, no use
+        .set = NULL,
+        .notify_check = NULL,
+        .arg = &g_user_context,   // no use
+        .event = NULL,
+        .hasMeta = false
+      },
+      [2] = {NULL}
     }
   },
   [3] = {
@@ -735,25 +748,6 @@ const struct mico_service_t  service_table[] = {
     }
   },
   [4] = {
-    .type = "public.map.service.infrared",    //  service 4: infrared sensor (ADC)
-    .properties = {
-      [0] = {
-        .type = "public.map.property.value",
-        .value = &(g_user_context.status.infrared_reflective_data),  // infrared value
-        .value_len = &int_len,
-        .format = MICO_PROP_TYPE_INT,
-        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_EV),
-        .get = infrared_reflective_data_get,
-        .set = NULL,
-        .notify_check = notify_check_infrared_reflective_data,  // check notify for infrared data
-        .arg = &g_user_context,                   // user context
-        .event = &(property_event),             // event flag
-        .hasMeta = false
-      },
-      [1] = {NULL}
-    }
-  },
-  [5] = {
     .type = "public.map.service.motor",       // service 5: dc motor (uuid)
     .properties = {
       [0] = {
@@ -767,6 +761,25 @@ const struct mico_service_t  service_table[] = {
         .notify_check = NULL,                    // not notifiable
         .arg = &g_user_context,                    // user context
         .event = NULL,
+        .hasMeta = false
+      },
+      [1] = {NULL}
+    }
+  },
+  [5] = {
+    .type = "public.map.service.infrared",    //  service 4: infrared sensor (ADC)
+    .properties = {
+      [0] = {
+        .type = "public.map.property.value",
+        .value = &(g_user_context.status.infrared_reflective_data),  // infrared value
+        .value_len = &int_len,
+        .format = MICO_PROP_TYPE_INT,
+        .perms = (MICO_PROP_PERMS_RO | MICO_PROP_PERMS_EV),
+        .get = infrared_reflective_data_get,
+        .set = NULL,
+        .notify_check = notify_check_infrared_reflective_data,  // check notify for infrared data
+        .arg = &g_user_context,                   // user context
+        .event = &(property_event),             // event flag
         .hasMeta = false
       },
       [1] = {NULL}
