@@ -32,9 +32,11 @@
 #define DHT11_DATA_Clr()       MicoGpioOutputLow(DHT11_DATA) 
 #define DHT11_DATA_Set()       MicoGpioOutputHigh(DHT11_DATA)
 
+#define DHT11_In               MicoGpioInputGet(DHT11_DATA)
+
 //------------------------------ user interfaces -------------------------------
 int DHT11_init(void);
-int DHT11_read(uint8_t *data);
+int DHT11_read(uint8_t *data);   // data format data[5]
 
 
 #endif  // __DHT11_H_

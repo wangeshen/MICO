@@ -158,10 +158,10 @@ OSStatus user_settings_recovery(mico_Context_t *mico_context, user_context_t *us
   OLED_ShowString(8,6,"T: 0C  H: 0%");
   
   // RGB LED
-  //rgb_led_open(0, 0, 255);
   hsb2rgb_led_open(user_context->config.rgb_led_hues,
                    user_context->config.rgb_led_saturation,
                    user_context->config.rgb_led_brightness);
+  rgb_led_open(0, 0, 255);  // red for test
   
   // DC Motor
   dc_motor_set(user_context->config.dc_motor_switch);
@@ -193,8 +193,13 @@ OSStatus user_settings_update(mico_Context_t *mico_context, user_context_t *user
 void user_running(user_context_t *user_context)
 {
 //    OSStatus err = kUnknownErr;
-//  uint8_t dht11_data[5] = {0};
-//  uint16_t light_data = 0;
+//  uint8_t dht11_data[4] = {0};
+//  int ret = 0;
+//  int dht11_temp = 0;
+//  int dht11_hum = 0;
+//  char temp_hum_str[64] = {0};
+  
+  //  uint16_t light_data = 0;
 //  uint16_t infrared_data = 0;
   
 //  int32_t bme280_temp_data = 0;
@@ -203,14 +208,25 @@ void user_running(user_context_t *user_context)
 //  char bme280_temp_hum_str[128] = {0};
 
   
-//  DHT11_read(dht11_data);
-//  user_log("DHT11 T=%d, H=%d.", dht11_data[2], dht11_data[0]);
-//
+//  user_log(">>>>>>>>>>>>>DHT11");
+//  ret = DHT11_read(dht11_data);
+//  user_log(">>>>>>>>>>>>>DHT11 ret=%d", ret);
+//  
+//  dht11_hum = dht11_data[0];
+//  dht11_temp = dht11_data[2];
+//    
+//  memset(temp_hum_str, 0, sizeof(temp_hum_str));
+//  sprintf(temp_hum_str, "T: %dC  H: %d%%", dht11_temp, dht11_hum);
+//  user_log("T=%d, H=%d.", dht11_temp, dht11_hum);
+//  OLED_ShowString(8,3,(uint8_t*)temp_hum_str);
+  
+
 //  light_sensor_read(&light_data);
 //  user_log("Light D=%d.", light_data);
 //  
 //  infrared_reflective_read(&infrared_data);
 //  user_log("Infrared D=%d.", infrared_data);
+  
   
 //  err = bme280_data_readout(&bme280_temp_data, &bme280_pressure_data, &bme280_hum_data);
 //  if(kNoErr != err){
@@ -225,13 +241,13 @@ void user_running(user_context_t *user_context)
     
       
   // display H/T on OLED
-  char temp_hum_str[128] = {0};
+  char temp_hum_str[64] = {0};
   sprintf(temp_hum_str, "T: %dC  H: %d%%", 
           user_context->status.temperature, user_context->status.humidity);
   user_log("T=%d, H=%d.",  
            user_context->status.temperature, user_context->status.humidity);
   
-  OLED_ShowString(8,6,(uint8_t*)temp_hum_str);
+  OLED_ShowString(5,6,(uint8_t*)temp_hum_str);
 }
 
 /* user main function, called by AppFramework after FogCloud connected.
