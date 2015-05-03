@@ -35,6 +35,7 @@
 #include "drivers/light_sensor.h"
 #include "drivers/infrared_reflective.h"
 #include "drivers/dc_motor.h"
+#include "drivers/keys.h"
 
 #define user_log(M, ...) custom_log("USER", M, ##__VA_ARGS__)
 #define user_log_trace() custom_log_trace("USER")
@@ -49,10 +50,6 @@ extern user_context_t g_user_context;
 // global flag to indacate update user params in flash
 //volatile bool user_params_need_update = false;
 
-static uint32_t _default_key1_start_time = 0;
-static mico_timer_t _user_key1_timer;
-static uint32_t _default_key2_start_time = 0;
-static mico_timer_t _user_key2_timer;
 
 /* MICO user callback: Restore default configuration provided by user
  * called when Easylink buttion long pressed
@@ -96,111 +93,6 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* mico_context,
   }
   
   return err;
-}
-
-/*---------------------- user module operation functions ---------------------*/
-
-// Key1 && DC Motor test
-USED void userKey1ClickedCallback(void)
-{
-  user_log_trace();
-  user_log("userKey1ClickedCallback");
-  
-  dc_motor_set(0);
-  return;
-}
-
-USED void userKey1LongPressedCallback(void)
-{
-  user_log_trace();
-  user_log("userKey1LongPressedCallback");
-  
-  dc_motor_set(1);
-  return;
-}
-
-USED void userKey2ClickedCallback(void)
-{
-  user_log_trace();
-  user_log("userKey2ClickedCallback");
-  
-  dc_motor_set(0);
-  return;
-}
-
-USED void userKey2LongPressedCallback(void)
-{
-  user_log_trace();
-  user_log("userKey2LongPressedCallback");
-  
-  dc_motor_set(1);
-  return;
-}
-
-static void _user_key1_irq_handler( void* arg )
-{
-  (void)(arg);
-  int interval = -1;
-  
-  if ( MicoGpioInputGet( (mico_gpio_t)USER_KEY1 ) == 0 ) {
-    _default_key1_start_time = mico_get_time()+1;
-    mico_start_timer(&_user_key1_timer);
-  } else {
-    interval = mico_get_time() + 1 - _default_key1_start_time;
-    if ( (_default_key1_start_time != 0) && interval > 50 && interval < userKey1LongPress_TimeOut){
-      /* button clicked once */
-      userKey1ClickedCallback();
-    }
-    mico_stop_timer(&_user_key1_timer);
-    _default_key1_start_time = 0;
-  }
-}
-
-static void _user_key1_Timeout_handler( void* arg )
-{
-  (void)(arg);
-  _default_key1_start_time = 0;
-  userKey1LongPressedCallback();
-}
-
-static void _user_key2_irq_handler( void* arg )
-{
-  (void)(arg);
-  int interval = -1;
-  
-  if ( MicoGpioInputGet( (mico_gpio_t)USER_KEY2 ) == 0 ) {
-    _default_key2_start_time = mico_get_time()+1;
-    mico_start_timer(&_user_key2_timer);
-  } else {
-    interval = mico_get_time() + 1 - _default_key2_start_time;
-    if ( (_default_key2_start_time != 0) && interval > 50 && interval < userKey2LongPress_TimeOut){
-      /* button clicked once */
-      userKey2ClickedCallback();
-    }
-    mico_stop_timer(&_user_key2_timer);
-    _default_key2_start_time = 0;
-  }
-}
-
-static void _user_key2_Timeout_handler( void* arg )
-{
-  (void)(arg);
-  _default_key2_start_time = 0;
-  userKey2LongPressedCallback();
-}
-
-void user_key1_init()
-{
-   MicoGpioInitialize( (mico_gpio_t)USER_KEY1, INPUT_PULL_UP );
-   mico_init_timer(&_user_key1_timer, userKey1LongPress_TimeOut, _user_key1_Timeout_handler, NULL);
-   MicoGpioEnableIRQ( (mico_gpio_t)USER_KEY1, IRQ_TRIGGER_BOTH_EDGES, _user_key1_irq_handler, NULL );
-}
-
-void user_key2_init()
-{
-   MicoGpioInitialize( (mico_gpio_t)USER_KEY2, INPUT_PULL_UP );
-   mico_init_timer(&_user_key2_timer, userKey2LongPress_TimeOut, _user_key2_Timeout_handler, NULL);
-   MicoGpioEnableIRQ( (mico_gpio_t)USER_KEY2, IRQ_TRIGGER_BOTH_EDGES, _user_key2_irq_handler, NULL );
 }
 
 /*---------------------------- user function ---------------------------------*/

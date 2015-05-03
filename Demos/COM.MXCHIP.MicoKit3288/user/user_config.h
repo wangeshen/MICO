@@ -57,14 +57,6 @@
 
 /*User provided configurations*/
 #define CONFIGURATION_VERSION               0x00000003 // if default configuration is changed, update this number
-   
-/*******************************************************************************
- *                             USER MODULE I/Os
- ******************************************************************************/   
-#define USER_KEY1           MICO_GPIO_4
-#define USER_KEY2           MICO_GPIO_34
-   
-#define userKey1LongPress_TimeOut        3000  /**< user key1 button long pressed for 3 seconds. */
-#define userKey2LongPress_TimeOut        3000  /**< user key2 button long pressed for 3 seconds. */
+
    
 #endif  // __USER_CONFIG_H_
