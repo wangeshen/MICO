@@ -95,16 +95,17 @@ const platform_pin_mapping_t gpio_mapping[] =
 #else
   [WL_GPIO1]                          = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
 #endif
-  [MICO_SYS_LED]                      = {GPIOB,  10, RCC_AHB1Periph_GPIOB}, 
-  [MICO_RF_LED]                       = {GPIOB,  10, RCC_AHB1Periph_GPIOB},  // the same with system led
+  [MICO_SYS_LED]                      = {GPIOB,  12, RCC_AHB1Periph_GPIOB}, 
+  [MICO_RF_LED]                       = {GPIOB,  12, RCC_AHB1Periph_GPIOB},  // the same with system led
   [BOOT_SEL]                          = {GPIOB,  2,  RCC_AHB1Periph_GPIOB}, 
-  [MFG_SEL]                           = {GPIOB,  12, RCC_AHB1Periph_GPIOA}, 
+  [MFG_SEL]                           = {GPIOB,  13, RCC_AHB1Periph_GPIOB}, 
   [EasyLink_BUTTON]                   = {GPIOA,  0,  RCC_AHB1Periph_GPIOA}, 
   [STDIO_UART_RX]                     = {GPIOA,  3,  RCC_AHB1Periph_GPIOA},  
   [STDIO_UART_TX]                     = {GPIOA,  2,  RCC_AHB1Periph_GPIOA},  
+  [WL_REG]                            = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},  
 
   /* GPIOs for external use */
-  [MICO_GPIO_2]  = {GPIOA, 11,  RCC_AHB1Periph_GPIOA},
+  [MICO_GPIO_6]  = {GPIOA, 11,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_4]  = {GPIOA,  7,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_7]  = {GPIOB,  4,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_8]  = {GPIOA,  2,  RCC_AHB1Periph_GPIOA},
@@ -114,11 +115,11 @@ const platform_pin_mapping_t gpio_mapping[] =
   //[MICO_GPIO_17] = {GPIOB, 10,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_18] = {GPIOB,  9,  RCC_AHB1Periph_GPIOB},
   //[MICO_GPIO_19] = {GPIOB, 12,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_27] = {GPIOA, 12,  RCC_AHB1Periph_GPIOA},  
+  [MICO_GPIO_27] = {GPIOA, 12,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_29] = {GPIOA, 10,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_30] = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_31] = {GPIOB,  8,  RCC_AHB1Periph_GPIOB},
-  //[MICO_GPIO_33] = {GPIOB, 13,  RCC_AHB1Periph_GPIOB},
+  //[MICO_GPIO_33] = {GPIOB, 13,  RCC_AHB1Periph_GPIOB},  // MFG_SEL
   [MICO_GPIO_34] = {GPIOA,  5,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_35] = {GPIOA, 10,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_36] = {GPIOB,  1,  RCC_AHB1Periph_GPIOB},

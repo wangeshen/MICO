@@ -27,7 +27,7 @@
 #include "MICOPlatform.h"
 
 //--------------------------------  pin defines --------------------------------
-#define DC_MOTOR            MICO_GPIO_30  // PB4
+#define DC_MOTOR            MICO_GPIO_7  // PB4
 
 //------------------------------ user interfaces -------------------------------
 int dc_motor_init(void);
