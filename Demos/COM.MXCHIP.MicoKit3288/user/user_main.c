@@ -158,10 +158,10 @@ OSStatus user_settings_recovery(mico_Context_t *mico_context, user_context_t *us
   OLED_ShowString(8,6,"T: 0C  H: 0%");
   
   // RGB LED
-  hsb2rgb_led_open(user_context->config.rgb_led_hues,
-                   user_context->config.rgb_led_saturation,
-                   user_context->config.rgb_led_brightness);
-  rgb_led_open(0, 0, 255);  // red for test
+  //hsb2rgb_led_open(user_context->config.rgb_led_hues,
+  //                 user_context->config.rgb_led_saturation,
+  //                 user_context->config.rgb_led_brightness);
+  hsb2rgb_led_open(0, 100, 100);  // red for test
   
   // DC Motor
   dc_motor_set(user_context->config.dc_motor_switch);

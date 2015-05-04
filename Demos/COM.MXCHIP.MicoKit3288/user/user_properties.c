@@ -490,6 +490,12 @@ int temperature_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *va
   
   *val_len = int_len;
   
+   err = bme280_sensor_init();
+   if(kNoErr != err){
+     properties_user_log("ERROR: bme280_sensor_init err=%d. ", err);
+     return -1;
+   }
+  
   //err = bme280_data_readout(&bme280_temp_data, &bme280_pressure_data, &bme280_hum_data);
   err = bme280_read_temperature(&bme280_temp_data);
   if(kNoErr != err){

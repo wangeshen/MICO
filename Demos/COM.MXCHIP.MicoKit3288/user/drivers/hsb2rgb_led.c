@@ -36,9 +36,10 @@ static float constrain(float value, float min, float max){
     return min;
   return value;
 }
-float Percent(float value){
-  return value = (((float)value / 255.0) * 100.0);
-}
+
+//float Percent(float value){
+//  return value = (((float)value / 255.0) * 100.0);
+//}
 
 static void H2R_HSBtoRGB(float hue, float sat, float bright, float *color) {
   // constrain all input variables to expected range
@@ -102,9 +103,9 @@ static void H2R_HSBtoRGB(float hue, float sat, float bright, float *color) {
     color[1] = g;
     color[2] = b;
   }
-//  color[0] = Percent(color[0]);
-//  color[1] = Percent(color[1]);
-//  color[2] = Percent(color[2]);
+  //  color[0] = Percent(color[0]);
+  //  color[1] = Percent(color[1]);
+  //  color[2] = Percent(color[2]);
 }
 
 /*----------------------------------------------------- INTERNAL FUNCTION  ---------------------------------------*/
@@ -116,15 +117,17 @@ static void OpenLED_RGB(float *color)
   uint8_t green = (uint8_t)(color[1]);
   uint8_t red = (uint8_t)(color[0]);
   
-  hsb2rgb_led_log("OpenLED_RGB: color[0]=%f, color[1]=%f, color[2]=%f.", color[0], color[1], color[2]);
-  hsb2rgb_led_log("OpenLED_RGB: blue=%d, green=%d, red=%d.", blue, green, red);
+  //hsb2rgb_led_log("OpenLED_RGB: color[0]=%f, color[1]=%f, color[2]=%f.", color[0], color[1], color[2]);
+  hsb2rgb_led_log("OpenLED_RGB: red=%d, green=%d, blue=%d.", red, green, blue);
   
-  rgb_led_open(blue, green, red);     // red
+  rgb_led_init();
+  rgb_led_open(red, green, blue);
 }
 
 static void CloseLED_RGB()
 {
-	rgb_led_close();
+  rgb_led_init();
+  rgb_led_close();
 }
 
 
@@ -132,17 +135,17 @@ static void CloseLED_RGB()
 
 void hsb2rgb_led_init(void)
 {
-	rgb_led_init();
+  rgb_led_init();
 }
 
 void hsb2rgb_led_open(float hues, float saturation, float brightness)
 {
-	float color[3] = {0};
-	H2R_HSBtoRGB(hues, saturation, brightness, color);
-	OpenLED_RGB(color);
+  float color[3] = {0};
+  H2R_HSBtoRGB(hues, saturation, brightness, color);
+  OpenLED_RGB(color);
 }
 
 void hsb2rgb_led_close(void)
 {
-	CloseLED_RGB();
+  CloseLED_RGB();
 }

@@ -37,7 +37,7 @@
 
 //-------------------- user interfaces ---------------------------
 void rgb_led_init(void);
-void rgb_led_open(uint8_t blue, uint8_t green, uint8_t red);
+void rgb_led_open(uint8_t red, uint8_t green, uint8_t blue);
 void rgb_led_close(void);
 
 

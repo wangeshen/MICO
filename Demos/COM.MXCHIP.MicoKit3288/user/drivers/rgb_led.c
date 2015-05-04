@@ -84,14 +84,15 @@ void rgb_led_init(void)
   MicoGpioInitialize( (mico_gpio_t)P9813_DIN, OUTPUT_OPEN_DRAIN_NO_PULL );
 }
 
-void rgb_led_open(uint8_t blue, uint8_t green, uint8_t red)
+void rgb_led_open(uint8_t red, uint8_t green, uint8_t blue)
 {
   P9813_write_start_frame();
   P9813_write_data(blue, green, red);
-  P9813_write_start_frame();
+  P9813_write_start_frame();  // fix led bink bug
 }
 
 void rgb_led_close(void)
 {
+  rgb_led_init();
   rgb_led_open(0, 0, 0);
 }

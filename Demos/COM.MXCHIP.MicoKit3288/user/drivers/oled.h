@@ -51,10 +51,10 @@
 //----------------- OLED PIN ----------------  					   
 
 #define OLED_CS_Clr()      MicoGpioOutputLow(USER_SPI_CS)  //CS
-#define OLED_CS_Set()     MicoGpioOutputHigh(USER_SPI_CS)
+#define OLED_CS_Set()      MicoGpioOutputHigh(USER_SPI_CS)
 
 #define OLED_DC_Clr()      MicoGpioOutputLow(USER_SPI_DC)  //DC
-#define OLED_DC_Set()     MicoGpioOutputHigh(USER_SPI_DC)
+#define OLED_DC_Set()      MicoGpioOutputHigh(USER_SPI_DC)
 
 #define OLED_RST_Clr()
 #define OLED_RST_Set()
