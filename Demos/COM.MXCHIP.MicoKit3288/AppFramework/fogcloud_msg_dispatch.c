@@ -262,10 +262,16 @@ void notify_thread(void* arg)
   p_notify_thread_data = (mico_notify_thread_data_t*)arg;
   require_action(p_notify_thread_data, exit, err = kParamErr);
   
+   // wait semaphore for cloud connection
+  mico_fogcloud_waitfor_connect(p_notify_thread_data->context, MICO_WAIT_FOREVER);  // block to wait fogcloud connect
+  msg_dispatch_log("Cloud connected, do notify task.");
+  
   while(1){
-    err = _properties_notify(p_notify_thread_data->context, p_notify_thread_data->p_service_table);
-    if(kNoErr != err){
-      msg_dispatch_log("ERROR: properties notify failed! err = %d", err);
+    if(p_notify_thread_data->context->appStatus.fogcloudStatus.isCloudConnected){
+      err = _properties_notify(p_notify_thread_data->context, p_notify_thread_data->p_service_table);
+      if(kNoErr != err){
+        msg_dispatch_log("ERROR: properties notify failed! err = %d", err);
+      }
     }
     
     mico_thread_msleep(p_notify_thread_data->notify_interval);
