@@ -749,9 +749,8 @@ ReStartMQTTClient:
         _mqttClient_state = MQTT_CLIENT_STATUS_STOPPED;
         easycloud_service_log("MQTT client stopped! try restarting it...");
         easyCloudContext->service_status.state = EASYCLOUD_DISCONNECTED;
-        easyCloudContext->service_config_info.statusNotify(easyCloudContext->service_config_info.context,
-                                                          easyCloudContext->service_status);
-        //mico_thread_sleep(1);
+        //easyCloudContext->service_config_info.statusNotify(easyCloudContext->service_config_info.context,
+        //                                                  easyCloudContext->service_status);
         goto ReStartMQTTClient;
       }
       break;
@@ -760,8 +759,8 @@ ReStartMQTTClient:
         _mqttClient_state = MQTT_CLIENT_STATUS_STARTED;
         easycloud_service_log("MQTT client connecting...");
         easyCloudContext->service_status.state = EASYCLOUD_DISCONNECTED;
-        easyCloudContext->service_config_info.statusNotify(easyCloudContext->service_config_info.context,
-                                                          easyCloudContext->service_status);
+        //easyCloudContext->service_config_info.statusNotify(easyCloudContext->service_config_info.context,
+        //                                                  easyCloudContext->service_status);
       }
       break;
     case MQTT_CLIENT_STATUS_CONNECTED:
