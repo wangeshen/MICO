@@ -101,18 +101,16 @@ OSStatus user_modules_init(void)
 {
   OSStatus err = kUnknownErr;
   
-  // init user key1 && key2
-  user_key1_init();
-  user_key2_init();
-  
-  // init OLED
-  OLED_Init();
+  // init DC Motor(GPIO)
+  dc_motor_init();
+  dc_motor_set(0);   // off
   
   // init RGB LED(P9813)
   hsb2rgb_led_init();
+  hsb2rgb_led_open(0, 0, 0);  // off
   
-  // init DC Motor(GPIO)
-  dc_motor_init();
+  // init OLED
+  OLED_Init();
   
   // init Light sensor(ADC)
   light_sensor_init();
@@ -128,6 +126,10 @@ OSStatus user_modules_init(void)
   DHT11_init();
   
   // init proximity sensor(I2C)
+  
+  // init user key1 && key2
+  user_key1_init();
+  user_key2_init();
  
 exit:
   return err;
@@ -158,7 +160,6 @@ OSStatus user_settings_recovery(mico_Context_t *mico_context, user_context_t *us
   OLED_ShowString(8,6,"T: 0C  H: 0%");
   
   // RGB LED
-  //hsb2rgb_led_open(0, 0, 0);  // off
   hsb2rgb_led_open(user_context->config.rgb_led_hues,
                    user_context->config.rgb_led_saturation,
                    user_context->config.rgb_led_brightness);
@@ -256,7 +257,6 @@ OSStatus user_main( mico_Context_t * const mico_context )
 {
   user_log_trace();
   OSStatus err = kUnknownErr;
-  //user_context_t* p_user_context = &user_context;
   
   /* init user modules (pins && sensor init)*/
   err = user_modules_init();
@@ -280,8 +280,8 @@ OSStatus user_main( mico_Context_t * const mico_context )
     /* user thread running state */
     user_running(&g_user_context);
     
-    /* check every 1 seconds */
-    mico_thread_msleep(1000);
+    /* check every 3 seconds */
+    mico_thread_msleep(3000);
   }
   
 exit:
