@@ -73,8 +73,6 @@ extern WEAK void PlatformStandbyButtonClickedCallback(void);
 extern WEAK void PlatformEasyLinkButtonLongPressedCallback(void);
 extern WEAK void bootloader_start(void);
 
-extern WEAK void PlatformKey2ButtonClickedCallback(void);
-extern WEAK void PlatformKey2ButtonLongPressedCallback(void);
 
 /******************************************************
 *               Variables Definitions
@@ -95,36 +93,50 @@ const platform_pin_mapping_t gpio_mapping[] =
 #else
   [WL_GPIO1]                          = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
 #endif
+  [WL_REG]                            = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},  
+  [STDIO_UART_RX]                     = {GPIOA,  3,  RCC_AHB1Periph_GPIOA},  
+  [STDIO_UART_TX]                     = {GPIOA,  2,  RCC_AHB1Periph_GPIOA},  
+  
   [MICO_SYS_LED]                      = {GPIOB,  12, RCC_AHB1Periph_GPIOB}, 
   [MICO_RF_LED]                       = {GPIOB,  12, RCC_AHB1Periph_GPIOB},  // the same with system led
   [BOOT_SEL]                          = {GPIOB,  2,  RCC_AHB1Periph_GPIOB}, 
   [MFG_SEL]                           = {GPIOB,  13, RCC_AHB1Periph_GPIOB}, 
   [EasyLink_BUTTON]                   = {GPIOA,  0,  RCC_AHB1Periph_GPIOA}, 
-  [STDIO_UART_RX]                     = {GPIOA,  3,  RCC_AHB1Periph_GPIOA},  
-  [STDIO_UART_TX]                     = {GPIOA,  2,  RCC_AHB1Periph_GPIOA},  
-  [WL_REG]                            = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},  
 
   /* GPIOs for external use */
+  //[MICO_GPIO_1]  = {NULL, 0,  0},  // GND
+  [MICO_GPIO_2]  = {GPIOA, 13,  RCC_AHB1Periph_GPIOA},
+  [MICO_GPIO_3]  = {GPIOA, 14,  RCC_AHB1Periph_GPIOA},
+  [MICO_GPIO_4]  = {GPIOA, 15, RCC_AHB1Periph_GPIOA},
+  [MICO_GPIO_5]  = {GPIOB,  3,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_6]  = {GPIOA, 11,  RCC_AHB1Periph_GPIOA},
-  [MICO_GPIO_4]  = {GPIOA,  7,  RCC_AHB1Periph_GPIOA},
   [MICO_GPIO_7]  = {GPIOB,  4,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_8]  = {GPIOA,  2,  RCC_AHB1Periph_GPIOA},
-  [MICO_GPIO_9]  = {GPIOA,  1,  RCC_AHB1Periph_GPIOA},
-  [MICO_GPIO_12] = {GPIOA,  3,  RCC_AHB1Periph_GPIOA},
-  [MICO_GPIO_16] = {GPIOC, 13,  RCC_AHB1Periph_GPIOC},
-  //[MICO_GPIO_17] = {GPIOB, 10,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_18] = {GPIOB,  9,  RCC_AHB1Periph_GPIOB},
-  //[MICO_GPIO_19] = {GPIOB, 12,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_27] = {GPIOA, 12,  RCC_AHB1Periph_GPIOA},
-  [MICO_GPIO_29] = {GPIOA, 10,  RCC_AHB1Periph_GPIOA},
-  [MICO_GPIO_30] = {GPIOB,  6,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_31] = {GPIOB,  8,  RCC_AHB1Periph_GPIOB},
-  //[MICO_GPIO_33] = {GPIOB, 13,  RCC_AHB1Periph_GPIOB},  // MFG_SEL
-  [MICO_GPIO_34] = {GPIOA,  5,  RCC_AHB1Periph_GPIOA},
-  [MICO_GPIO_35] = {GPIOA, 10,  RCC_AHB1Periph_GPIOA},
-  [MICO_GPIO_36] = {GPIOB,  1,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_37] = {GPIOB,  0,  RCC_AHB1Periph_GPIOB},
-  [MICO_GPIO_38] = {GPIOA,  4,  RCC_AHB1Periph_GPIOA},
+  //[MICO_GPIO_8]  = {NULL, 0,  0},  // BOOT
+  [MICO_GPIO_9]  = {GPIOA,  4,  RCC_AHB1Periph_GPIOA},
+  [MICO_GPIO_10] = {GPIOB,  8,  RCC_AHB1Periph_GPIOB},
+  [MICO_GPIO_11] = {GPIOB,  9,  RCC_AHB1Periph_GPIOB},
+  //[MICO_GPIO_12] = {NULL, 0,  0},  // VDD
+  //[MICO_GPIO_13] = {NULL, 0,  0},  // VABT
+  [MICO_GPIO_14]  = {GPIOC, 13,  RCC_AHB1Periph_GPIOC},
+  //[MICO_GPIO_15] = {NULL, 0,  0},  // OSC32IN
+  //[MICO_GPIO_16] = {NULL, 0,  0},  // OSC32OUT
+  //[MICO_GPIO_17] = {NULL, 0,  0},  // OSCIN
+  //[MICO_GPIO_18] = {NULL, 0,  0},  // OSCOUT
+  //[MICO_GPIO_19] = {NULL, 0,  0},  // nRESET
+  //[MICO_GPIO_20] = {NULL, 0,  0},  // GND
+  //[MICO_GPIO_21] = {GPIOA, 2,  RCC_AHB1Periph_GPIOA},  // STDIO_UART_TX
+  //[MICO_GPIO_22] = {GPIOA, 3,  RCC_AHB1Periph_GPIOA},  // STDIO_UART_RX
+  //[MICO_GPIO_23] = {GPIOA, 0,  RCC_AHB1Periph_GPIOA},  // EasyLink_BUTTON
+  [MICO_GPIO_24] = {GPIOA, 1,  RCC_AHB1Periph_GPIOA},
+  [MICO_GPIO_25] = {GPIOB, 0,  RCC_AHB1Periph_GPIOB},
+  [MICO_GPIO_26] = {GPIOB, 1,  RCC_AHB1Periph_GPIOB},
+  [MICO_GPIO_27] = {GPIOA, 12, RCC_AHB1Periph_GPIOA},  // MICO_SYS_LED, MICO_RF_LED
+  [MICO_GPIO_28] = {GPIOA, 10,  RCC_AHB1Periph_GPIOA},
+  [MICO_GPIO_29] = {GPIOA,  5,  RCC_AHB1Periph_GPIOA},
+  //[MICO_GPIO_30] = {GPIOB,  2, RCC_AHB1Periph_GPIOB},  // BOOT_SEL
+  [MICO_GPIO_31] = {GPIOA,  7,  RCC_AHB1Periph_GPIOA},
+  //[MICO_GPIO_32] = {GPIOB, 12, RCC_AHB1Periph_GPIOB},  // MICO_SYS_LED, MICO_RF_LED
+  //[MICO_GPIO_33] = {GPIOB, 13, RCC_AHB1Periph_GPIOB}   // MFG_SEL
 };
 
 /*
@@ -135,8 +147,8 @@ const platform_pin_mapping_t gpio_mapping[] =
 const platform_adc_mapping_t adc_mapping[] =
 {
  // [MICO_ADC_1] = NULL,
-  [MICO_ADC_1] = {ADC1, ADC_Channel_4, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_38]},
-  [MICO_ADC_2] = {ADC1, ADC_Channel_1, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_9]},
+  [MICO_ADC_1] = {ADC1, ADC_Channel_4, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_9]},
+  [MICO_ADC_2] = {ADC1, ADC_Channel_1, RCC_APB2Periph_ADC1, 1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_24]},
 };
 
 
@@ -148,9 +160,6 @@ const platform_pwm_mapping_t pwm_mappings[] =
   [MICO_PWM_WLAN_POWERSAVE_CLOCK] = {TIM1, 1, RCC_APB2Periph_TIM1, GPIO_AF_TIM1, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_WLAN_POWERSAVE_CLOCK] }, /* or TIM2/Ch2                       */
 #endif
   [MICO_PWM_1] = NULL,
-  //[MICO_PWM_G]  = {TIM2, 2, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_9]},    /* or TIM10/Ch1                       */
-  //[MICO_PWM_B]  = {TIM2, 1, RCC_APB1Periph_TIM2, GPIO_AF_TIM2, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_34]}, /* or TIM1/Ch2N                       */
-  //[MICO_PWM_R]  = {TIM3, 2, RCC_APB1Periph_TIM3, GPIO_AF_TIM3, (platform_pin_mapping_t*)&gpio_mapping[MICO_GPIO_4]},    
   /* TODO: fill in the other options here ... */
 };
 
@@ -203,30 +212,30 @@ const platform_uart_mapping_t uart_mapping[] =
     .rx_dma_peripheral_clock_func = RCC_AHB1PeriphClockCmd,
     .rx_dma_irq                   = DMA1_Stream5_IRQn,
   },
-  [MICO_UART_2] =
-  {
-    .usart                        = USART2,
-    .gpio_af                      = GPIO_AF_USART6,
-    .pin_tx                       = &gpio_mapping[MICO_GPIO_1],
-    .pin_rx                       = &gpio_mapping[MICO_GPIO_0],
-    .pin_cts                      = NULL,
-    .pin_rts                      = NULL,
-    .usart_peripheral_clock       = RCC_APB2Periph_USART6,
-    .usart_peripheral_clock_func  = RCC_APB2PeriphClockCmd,
-    .usart_irq                    = USART6_IRQn,
-    .tx_dma                       = DMA2,
-    .tx_dma_stream                = DMA2_Stream6,
-    .tx_dma_channel               = DMA_Channel_5,
-    .tx_dma_peripheral_clock      = RCC_AHB1Periph_DMA2,
-    .tx_dma_peripheral_clock_func = RCC_AHB1PeriphClockCmd,
-    .tx_dma_irq                   = DMA2_Stream6_IRQn,
-    .rx_dma                       = DMA2,
-    .rx_dma_stream                = DMA2_Stream1,
-    .rx_dma_channel               = DMA_Channel_5,
-    .rx_dma_peripheral_clock      = RCC_AHB1Periph_DMA2,
-    .rx_dma_peripheral_clock_func = RCC_AHB1PeriphClockCmd,
-    .rx_dma_irq                   = DMA2_Stream1_IRQn,
-  },
+//  [MICO_UART_2] =
+//  {
+//    .usart                        = USART2,
+//    .gpio_af                      = GPIO_AF_USART6,
+//    .pin_tx                       = &gpio_mapping[MICO_GPIO_1],
+//    .pin_rx                       = &gpio_mapping[MICO_GPIO_0],
+//    .pin_cts                      = NULL,
+//    .pin_rts                      = NULL,
+//    .usart_peripheral_clock       = RCC_APB2Periph_USART6,
+//    .usart_peripheral_clock_func  = RCC_APB2PeriphClockCmd,
+//    .usart_irq                    = USART6_IRQn,
+//    .tx_dma                       = DMA2,
+//    .tx_dma_stream                = DMA2_Stream6,
+//    .tx_dma_channel               = DMA_Channel_5,
+//    .tx_dma_peripheral_clock      = RCC_AHB1Periph_DMA2,
+//    .tx_dma_peripheral_clock_func = RCC_AHB1PeriphClockCmd,
+//    .tx_dma_irq                   = DMA2_Stream6_IRQn,
+//    .rx_dma                       = DMA2,
+//    .rx_dma_stream                = DMA2_Stream1,
+//    .rx_dma_channel               = DMA_Channel_5,
+//    .rx_dma_peripheral_clock      = RCC_AHB1Periph_DMA2,
+//    .rx_dma_peripheral_clock_func = RCC_AHB1PeriphClockCmd,
+//    .rx_dma_irq                   = DMA2_Stream1_IRQn,
+//  },
 };
 
 const platform_i2c_mapping_t i2c_mapping[] =
@@ -235,8 +244,8 @@ const platform_i2c_mapping_t i2c_mapping[] =
    [MICO_I2C_1] =
    {
      .i2c = I2C1,
-     .pin_scl                 = &gpio_mapping[MICO_GPIO_31],
-     .pin_sda                 = &gpio_mapping[MICO_GPIO_18],
+     .pin_scl                 = &gpio_mapping[MICO_GPIO_10],
+     .pin_sda                 = &gpio_mapping[MICO_GPIO_11],
      .peripheral_clock_reg    = RCC_APB1Periph_I2C1,
      .tx_dma                  = DMA1,
      .tx_dma_peripheral_clock = RCC_AHB1Periph_DMA1,
@@ -273,11 +282,11 @@ static void _button_EL_irq_handler( void* arg )
   }
 }
 
-static void _button_STANDBY_irq_handler( void* arg )
-{
-  (void)(arg);
-  PlatformStandbyButtonClickedCallback();
-}
+//static void _button_STANDBY_irq_handler( void* arg )
+//{
+//  (void)(arg);
+//  PlatformStandbyButtonClickedCallback();
+//}
 
 static void _button_EL_Timeout_handler( void* arg )
 {
@@ -323,8 +332,8 @@ void init_platform( void )
    MicoGpioEnableIRQ( (mico_gpio_t)EasyLink_BUTTON, IRQ_TRIGGER_BOTH_EDGES, _button_EL_irq_handler, NULL );
   
    //  Initialise Standby/wakeup switcher
-   MicoGpioInitialize( (mico_gpio_t)Standby_SEL, INPUT_PULL_UP );
-   MicoGpioEnableIRQ( (mico_gpio_t)Standby_SEL , IRQ_TRIGGER_FALLING_EDGE, _button_STANDBY_irq_handler, NULL);
+//   MicoGpioInitialize( (mico_gpio_t)Standby_SEL, INPUT_PULL_UP );
+//   MicoGpioEnableIRQ( (mico_gpio_t)Standby_SEL , IRQ_TRIGGER_FALLING_EDGE, _button_STANDBY_irq_handler, NULL);
 
    MicoFlashInitialize( MICO_SPI_FLASH );
 }

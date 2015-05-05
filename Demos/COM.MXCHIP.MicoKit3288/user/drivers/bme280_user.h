@@ -23,10 +23,12 @@
 #ifndef __BME280_USER_H_
 #define __BME280_USER_H_
 
-#include "MICODefine.h"
+#include "MICO.h"
 
 #define s32 int32_t
 #define u32 uint32_t
+
+#define BME280_I2C_DEVICE    MICO_I2C_1
 
 OSStatus bme280_sensor_init(void);
 OSStatus bme280_data_readout(s32 *v_actual_temp_s32, u32 *v_actual_press_u32, u32 *v_actual_humity_u32);

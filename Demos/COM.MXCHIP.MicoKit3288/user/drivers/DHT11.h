@@ -23,20 +23,19 @@
 #ifndef __DHT11_H_
 #define __DHT11_H_
 
-
+#include "MICO.h"
 #include "MICOPlatform.h"
 
 //--------------------------------  pin defines --------------------------------
-#define DHT11_DATA             MICO_GPIO_7  // PB4
+#define DHT11_DATA             MICO_GPIO_6  // PA11
 
 #define DHT11_DATA_Clr()       MicoGpioOutputLow(DHT11_DATA) 
 #define DHT11_DATA_Set()       MicoGpioOutputHigh(DHT11_DATA)
 
-#define DHT11_In               MicoGpioInputGet(DHT11_DATA)
+#define DHT11_DATA_IN          MicoGpioInputGet(DHT11_DATA)
 
 //------------------------------ user interfaces -------------------------------
-int DHT11_init(void);
-int DHT11_read(uint8_t *data);   // data format data[5]
-
+OSStatus DHT11_init(void);
+OSStatus DHT11_read(int8_t *temp, uint8_t *hum);
 
 #endif  // __DHT11_H_

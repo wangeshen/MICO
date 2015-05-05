@@ -27,7 +27,8 @@
 #include "MICOPlatform.h"
 
 //--------------------------------  pin defines --------------------------------
-#define INFARAED_REFLECTIVE_ADC       MICO_ADC_2  // ADC1_1 (PA1)
+#define INFARAED_REFLECTIVE_ADC                 MICO_ADC_2  // ADC1_1 (PA1)
+#define INFARAED_REFLECTIVE_ADC_SAMPLE_CYCLE    3
 
 //------------------------------ user interfaces -------------------------------
 int infrared_reflective_init(void);

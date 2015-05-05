@@ -33,7 +33,7 @@ int infrared_reflective_init(void)
 {
   OSStatus err = kUnknownErr;
   
-  err = MicoAdcInitialize(MICO_ADC_2, 3);
+  err = MicoAdcInitialize(INFARAED_REFLECTIVE_ADC, INFARAED_REFLECTIVE_ADC_SAMPLE_CYCLE);
   if(kNoErr != err){
     return -1;
   }
@@ -47,12 +47,12 @@ int infrared_reflective_read(uint16_t *data)
   OSStatus err = kUnknownErr;
   
   // init ADC
-  err = MicoAdcInitialize(MICO_ADC_2, 3);
+  err = MicoAdcInitialize(INFARAED_REFLECTIVE_ADC, INFARAED_REFLECTIVE_ADC_SAMPLE_CYCLE);
   if(kNoErr != err){
     return -1;
   }
   // get ADC data
-  err = MicoAdcTakeSample(MICO_ADC_2, data);
+  err = MicoAdcTakeSample(INFARAED_REFLECTIVE_ADC, data);
   if(kNoErr == err){
     ret = 0;   // get data succeed
   }

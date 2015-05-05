@@ -108,25 +108,21 @@ typedef enum
 
   WL_GPIO0 = 0,
   WL_GPIO1,
+  WL_REG,
+  STDIO_UART_RX,  
+  STDIO_UART_TX, 
   
-WL_REG,
   MICO_SYS_LED,
   MICO_RF_LED,
   BOOT_SEL,
   MFG_SEL,
-  Standby_SEL,
   EasyLink_BUTTON,
-  STDIO_UART_RX,  
-  STDIO_UART_TX,  
+ 
   MICO_COMMON_GPIO_MAX,
 } mico_common_gpio_t;
 
-#define MICO_GPIO_WLAN_POWERSAVE_CLOCK MICO_GPIO_UNUSED
-//#define WL_REG MICO_GPIO_2
-#define WL_RESET MICO_GPIO_UNUSED
-//#define MICO_SYS_LED   MICO_GPIO_UNUSED
-//#define MICO_RF_LED    MICO_GPIO_UNUSED
-#define Standby_SEL      MICO_GPIO_UNUSED
+#define MICO_GPIO_WLAN_POWERSAVE_CLOCK    MICO_GPIO_UNUSED
+#define WL_RESET                          MICO_GPIO_UNUSED
 
 /* How the wlan's powersave clock is connected */
 typedef enum

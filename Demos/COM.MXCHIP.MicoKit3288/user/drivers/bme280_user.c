@@ -25,6 +25,7 @@
 /* Includes*/
 /*---------------------------------------------------------------------------*/
 #include "bme280.h"
+#include "bme280_user.h"
 #include "MICO.h"
 
 #define BME280_API                      // use bme280 api
@@ -40,7 +41,7 @@
 
 /* I2C device */
 mico_i2c_device_t user_i2c_device = {
-  MICO_I2C_1, 0x76, I2C_ADDRESS_WIDTH_7BIT, I2C_STANDARD_SPEED_MODE
+  BME280_I2C_DEVICE, 0x76, I2C_ADDRESS_WIDTH_7BIT, I2C_STANDARD_SPEED_MODE
 };
 
 /*----------------------------------------------------------------------------*

@@ -43,10 +43,10 @@
 #define u32    uint32_t
 
 // SPI pin
-#define USER_SPI_SCK      MICO_GPIO_37
-#define USER_SPI_DIN      MICO_GPIO_35
+#define USER_SPI_SCK      MICO_GPIO_25
+#define USER_SPI_DIN      MICO_GPIO_28
 #define USER_SPI_DC       MICO_GPIO_27
-#define USER_SPI_CS       MICO_GPIO_16
+#define USER_SPI_CS       MICO_GPIO_14
 
 //----------------- OLED PIN ----------------  					   
 

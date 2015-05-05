@@ -33,7 +33,7 @@ int light_sensor_init(void)
 {
   OSStatus err = kUnknownErr;
   
-  err = MicoAdcInitialize(MICO_ADC_1, 3);
+  err = MicoAdcInitialize(LIGHT_SENSOR_ADC, LIGHT_SENSOR_ADC_SAMPLE_CYCLE);
   if(kNoErr != err){
     return -1;
   }
@@ -47,12 +47,12 @@ int light_sensor_read(uint16_t *data)
   OSStatus err = kUnknownErr;
   
   // init ADC
-  err = MicoAdcInitialize(MICO_ADC_1, 3);
+  err = MicoAdcInitialize(LIGHT_SENSOR_ADC, LIGHT_SENSOR_ADC_SAMPLE_CYCLE);
   if(kNoErr != err){
     return -1;
   }
   // get ADC data
-  err = MicoAdcTakeSample(MICO_ADC_1, data);
+  err = MicoAdcTakeSample(LIGHT_SENSOR_ADC, data);
   if(kNoErr == err){
     ret = 0;   // get data succeed
   }

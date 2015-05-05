@@ -27,7 +27,8 @@
 #include "MICOPlatform.h"
 
 //--------------------------------  pin defines --------------------------------
-#define LIGHT_SENSOR_ADC       MICO_ADC_1  // ADC1_4 (PA4)
+#define LIGHT_SENSOR_ADC                 MICO_ADC_1  // ADC1_4 (PA4)
+#define LIGHT_SENSOR_ADC_SAMPLE_CYCLE    3
 
 //------------------------------ user interfaces -------------------------------
 int light_sensor_init(void);
