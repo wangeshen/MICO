@@ -34,26 +34,23 @@
 #define config_delegate_log_trace() custom_log_trace("Config Delegate")
 
 static mico_timer_t _Led_EL_timer;
-static mico_timer_t _Led_RF_timer;
-
-static void _led_RF_Timeout_handler( void* arg )
-{
-  (void)(arg);
-  MicoGpioOutputTrigger((mico_gpio_t)MICO_RF_LED);
-}
+//static mico_timer_t _Led_RF_timer;
+//
+//static void _led_RF_Timeout_handler( void* arg )
+//{
+//  (void)(arg);
+//  MicoGpioOutputTrigger((mico_gpio_t)MICO_RF_LED);
+//}
 
 void set_RF_LED_cloud_connected( mico_Context_t * const inContext )
 {
   config_delegate_log_trace();
   (void)(inContext); 
   /*Led trigger*/
-  if(mico_is_timer_running(&_Led_RF_timer)){
-    mico_stop_timer(&_Led_RF_timer);
-  }
-  
-  mico_deinit_timer( &_Led_RF_timer );
-  mico_init_timer(&_Led_RF_timer, RF_LED_TRIGGER_INTERVAL_AFTER_CLOUD_CONNECTED, _led_RF_Timeout_handler, NULL);
-  mico_start_timer(&_Led_RF_timer);
+  // TODO: timer cause hardfault
+//  mico_init_timer(&_Led_RF_timer, RF_LED_TRIGGER_INTERVAL_AFTER_CLOUD_CONNECTED, _led_RF_Timeout_handler, NULL);
+//  mico_start_timer(&_Led_RF_timer);
+   MicoGpioOutputTrigger((mico_gpio_t)MICO_SYS_LED);
   
   return;
 }
@@ -61,15 +58,15 @@ void set_RF_LED_cloud_connected( mico_Context_t * const inContext )
 void set_RF_LED_cloud_disconnected( mico_Context_t * const inContext )
 {
   config_delegate_log_trace();
-  
-  mico_stop_timer(&_Led_RF_timer);
-  mico_deinit_timer( &_Led_RF_timer );
+  // TODO: timer cause hardfault
+//  mico_stop_timer(&_Led_RF_timer);
+//  mico_deinit_timer( &_Led_RF_timer );
   
   if(inContext->appStatus.isWifiConnected){
-    MicoRfLed(true);
+    MicoSysLed(true);
   }
   else{
-    MicoRfLed(false);
+    MicoSysLed(false);
   }
   
   return;

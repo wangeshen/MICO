@@ -93,13 +93,13 @@ OSStatus MICOStartApplication( mico_Context_t * const mico_context )
   OSStatus err = kNoErr;
     
   require_action(mico_context, exit, err = kParamErr);
-  
-  MicoRfLed(false);
     
   /* Bonjour for service searching */
-  if(mico_context->flashContentInRam.micoSystemConfig.bonjourEnable == true) {
-    MICOStartBonjourService( Station, mico_context );
-  }
+//  if(mico_context->flashContentInRam.micoSystemConfig.bonjourEnable == true) {
+//    MICOStartBonjourService( Station, mico_context );
+//  }
+  
+  MicoRfLed(false);
   
   /* start cloud service */
 #if (MICO_CLOUD_TYPE == CLOUD_FOGCLOUD)

@@ -62,6 +62,8 @@ static mico_semaphore_t _reset_cloud_info_sem = NULL;
 mico_semaphore_t _fogcloud_connect_sem = NULL;
 
 extern OSStatus MicoStartFogCloudConfigServer ( mico_Context_t * const inContext );
+extern void  set_RF_LED_cloud_connected     ( mico_Context_t * const inContext );
+extern void  set_RF_LED_cloud_disconnected  ( mico_Context_t * const inContext );
 
 // override by user in user_main.c
 WEAK OSStatus user_fogcloud_msg_handler(mico_Context_t* context, 
@@ -297,6 +299,16 @@ void MicoFogCloudMainThread(void *arg)
   err = MicoStartFogCloudConfigServer( inContext);
   require_noerr_action(err, exit, 
                        fogcloud_log("ERROR: start FogCloud configServer failed!") );
+  
+  while(1){
+    mico_thread_sleep(1);
+    if(inContext->appStatus.fogcloudStatus.isCloudConnected){
+      set_RF_LED_cloud_connected(inContext);
+    }
+    else{
+      set_RF_LED_cloud_disconnected(inContext);
+    }
+  }
   
 exit:
   fogcloud_log("[MicoFogCloud]MicoFogCloudMainThread exit err=%d.", err);

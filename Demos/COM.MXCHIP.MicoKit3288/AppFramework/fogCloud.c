@@ -34,8 +34,8 @@
 static easycloud_service_context_t easyCloudContext;
 extern mico_semaphore_t _fogcloud_connect_sem;
 
-extern void  set_RF_LED_cloud_connected     ( mico_Context_t * const inContext );
-extern void  set_RF_LED_cloud_disconnected  ( mico_Context_t * const inContext );
+//extern void  set_RF_LED_cloud_connected     ( mico_Context_t * const inContext );
+//extern void  set_RF_LED_cloud_disconnected  ( mico_Context_t * const inContext );
 
 WEAK OSStatus MicoFogCloudCloudMsgProcess(mico_Context_t* context, 
                                      const char* topic, const unsigned int topicLen,
@@ -73,12 +73,12 @@ void cloudServiceStatusChangedHandler(void* context, easycloud_service_status_t 
     if(NULL != _fogcloud_connect_sem){
       mico_rtos_set_semaphore(&_fogcloud_connect_sem);
     }
-    set_RF_LED_cloud_connected(inContext);
+    //set_RF_LED_cloud_connected(inContext);
   }
   else{
     cloud_if_log("cloud service disconnected!");
     inContext->appStatus.fogcloudStatus.isCloudConnected = false;
-    set_RF_LED_cloud_disconnected(inContext);
+    //set_RF_LED_cloud_disconnected(inContext);
   }
 }
 

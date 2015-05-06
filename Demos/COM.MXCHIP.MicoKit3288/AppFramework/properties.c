@@ -41,7 +41,7 @@ typedef struct _mico_prop_notify_node_t{
 } mico_prop_notify_node_t;
 
 // notify list
-bool notify_list_inited = false;
+volatile bool notify_list_inited = false;
 mico_prop_notify_node_t *g_notify_list = NULL;
 
 /*******************************************************************************
