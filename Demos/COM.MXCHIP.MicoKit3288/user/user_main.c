@@ -93,6 +93,50 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* mico_context,
 
 /*---------------------------- user function ---------------------------------*/
 
+static bool rgb_led_test_flag = false;
+static int rgb_led_test_color_value = 0;
+// Key1 callback: do RGB_LED test
+void user_key1_clicked_callback(void)
+{
+  user_log_trace();
+  
+  user_log("user_key1_clicked_callback");
+  rgb_led_test_flag = false;
+  
+  return;
+}
+
+void user_key1_long_pressed_callback(void)
+{
+  user_log_trace();
+  
+  user_log("user_key1_long_pressed_callback");
+  rgb_led_test_flag = true;
+  
+  return;
+}
+
+// Key2 callback: do DC Motor test
+void user_key2_clicked_callback(void)
+{
+  user_log_trace();
+  
+  user_log("user_key2_clicked_callback");
+  dc_motor_set(0);  // dc motor test
+  
+  return;
+}
+
+void user_key2_long_pressed_callback(void)
+{
+  user_log_trace();
+  
+  user_log("user_key2_long_pressed_callback");
+  dc_motor_set(1);   // dc motor test
+  
+  return;
+}
+
 OSStatus user_modules_init(void)
 {
   OSStatus err = kUnknownErr;
@@ -205,6 +249,20 @@ void user_display(user_context_t *user_context)
   //OLED_ShowString(0,6,(uint8_t*)temp_hum_str);
 }
 
+void user_test(user_context_t *user_context)
+{
+  if(rgb_led_test_flag){
+    hsb2rgb_led_open(rgb_led_test_color_value,100,50);
+    rgb_led_test_color_value += 120;
+    if(rgb_led_test_color_value >= 360){
+      rgb_led_test_color_value = 0;
+    }
+  }
+  else{
+    //hsb2rgb_led_open(0,0,0);
+  }
+}
+
 /* user main function, called by AppFramework after FogCloud connected.
  */
 OSStatus user_main( mico_Context_t * const mico_context )
@@ -231,6 +289,7 @@ OSStatus user_main( mico_Context_t * const mico_context )
   while(1){
     /* user thread running state */
     user_display(&g_user_context);
+    user_test(&g_user_context);
     
     /* check every 1 seconds */
     mico_thread_msleep(1000);
