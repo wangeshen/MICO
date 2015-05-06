@@ -93,7 +93,7 @@ OSStatus user_fogcloud_msg_handler(mico_Context_t* mico_context,
 
 /*---------------------------- user function ---------------------------------*/
 
-static bool rgb_led_test_flag = false;
+static volatile bool rgb_led_test_flag = false;
 static int rgb_led_test_color_value = 0;
 // Key1 callback: do RGB_LED test
 void user_key1_clicked_callback(void)
