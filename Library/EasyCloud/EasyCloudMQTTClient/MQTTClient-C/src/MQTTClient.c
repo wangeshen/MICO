@@ -507,8 +507,10 @@ int MQTTPublish(Client* c, const char* topicName, MQTTMessage* message)
     InitTimer(&timer);
     countdown_ms(&timer, c->command_timeout_ms);
     
-    if (!c->isconnected)
+    if (!c->isconnected){
+         rc = SOCKET_ERR;   // MQTT connect error
         goto exit;
+    }
 
     if (message->qos == QOS1 || message->qos == QOS2)
         message->id = getNextPacketId(c);
@@ -517,8 +519,10 @@ int MQTTPublish(Client* c, const char* topicName, MQTTMessage* message)
               topic, (unsigned char*)message->payload, message->payloadlen);
     if (len <= 0)
         goto exit;
-    if ((rc = sendPacket(c, len, &timer)) != SUCCESS) // send the subscribe packet
+    if ((rc = sendPacket(c, len, &timer)) != SUCCESS){ // send the subscribe packet
+        rc = SOCKET_ERR;   // MQTT connect error
         goto exit; // there was a problem
+    }
     
     if (message->qos == QOS1)
     {
@@ -529,8 +533,9 @@ int MQTTPublish(Client* c, const char* topicName, MQTTMessage* message)
             if (MQTTDeserialize_ack(&type, &dup, &mypacketid, c->readbuf, c->readbuf_size) != 1)
                 rc = FAILURE;
         }
-        else
-            rc = FAILURE;
+        else{
+            rc = SOCKET_ERR;  // MQTT connect error
+        }
     }
     else if (message->qos == QOS2)
     {
@@ -541,8 +546,9 @@ int MQTTPublish(Client* c, const char* topicName, MQTTMessage* message)
             if (MQTTDeserialize_ack(&type, &dup, &mypacketid, c->readbuf, c->readbuf_size) != 1)
                 rc = FAILURE;
         }
-        else
-            rc = FAILURE;
+        else{
+            rc = SOCKET_ERR;  // MQTT connect error
+        }
     }
     
 exit:

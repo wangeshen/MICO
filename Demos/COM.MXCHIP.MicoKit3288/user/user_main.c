@@ -29,7 +29,6 @@
 #include "drivers/uart.h"
 #include "drivers/hsb2rgb_led.h"
 #include "drivers/rgb_led.h"
-#include "drivers/bme280_user.h"
 #include "drivers/oled.h"
 #include "drivers/DHT11.h"
 #include "drivers/light_sensor.h"
@@ -119,18 +118,13 @@ OSStatus user_modules_init(void)
   // init infrared sensor(ADC)
   infrared_reflective_init();
   
-  // init T/H/P sensor(bme280)
-  err = bme280_sensor_init();
-  require_noerr_action( err, exit, user_log("ERROR: bme280_sensor_init err=%d.", err) );
-  
-  // init DHT11
-  DHT11_init();
-  
-  // init proximity sensor(I2C)
+  //DHT11_Init();
   
   // init user key1 && key2
   user_key1_init();
   user_key2_init();
+  
+  err = kNoErr;
  
 exit:
   return err;
@@ -187,26 +181,28 @@ OSStatus user_settings_update(mico_Context_t *mico_context, user_context_t *user
 }
 
 // test function for main loop 
-volatile bool user_running_flag = false;
-void user_running(user_context_t *user_context)
+volatile bool running_status_flag = false;
+void user_display(user_context_t *user_context)
 {
   // display H/T on OLED
   char temp_hum_str[16] = {0};
   int run_flag_display = 0;
   
-  if(user_running_flag){
+  if(running_status_flag){
     run_flag_display = 1;
-    user_running_flag = false;
+    running_status_flag = false;
   }
   else{
     run_flag_display = 0;
-    user_running_flag = true;
+    running_status_flag = true;
   }
-    
+  
+  // temperature/humidity display on OLED
+  memset(temp_hum_str, 0, sizeof(temp_hum_str));
+  user_log("DHT11: T=%d, H=%d.",
+           user_context->status.temperature, user_context->status.humidity);
   sprintf(temp_hum_str, "%d T: %dC  H: %d%%",  run_flag_display, 
           user_context->status.temperature, user_context->status.humidity);
-  user_log("T=%d, H=%d.",  
-           user_context->status.temperature, user_context->status.humidity);
   
   OLED_ShowString(0,6,(uint8_t*)temp_hum_str);
 }
@@ -240,7 +236,7 @@ OSStatus user_main( mico_Context_t * const mico_context )
     //require_noerr_action( err, exit, user_log("ERROR: user_settings_update err=%d.", err) );
     
     /* user thread running state */
-    user_running(&g_user_context);
+    user_display(&g_user_context);
     
     /* check every 1 seconds */
     mico_thread_msleep(1000);

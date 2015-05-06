@@ -324,6 +324,10 @@ MQTTClientRestart:
          
         if(kNoErr != err){
           mico_mqtt_client_log("ERROR: Publish data failed, err=%d.", err);
+          if(kConnectionErr == err){
+            mico_mqtt_client_log("ERROR: MQTT client connection error, err=%d.", err);
+            goto MQTT_disconnected;
+          }
         }
         
         // free buffer
@@ -745,7 +749,7 @@ static OSStatus internal_EasyCloudMQTTClientPublishto(const char* topic,
     return kParamErr;
   
   if(0 == c.isconnected)
-    return kStateErr;
+    return kConnectionErr;
     
   //upload data qos1: at most once.
   publishData.qos = QOS0;
@@ -756,10 +760,15 @@ static OSStatus internal_EasyCloudMQTTClientPublishto(const char* topic,
   ret = MQTTPublish(&c, topic, &publishData);
   //mico_rtos_unlock_mutex( &mqttClientContext_mutex );
   
-  if (SUCCESS == ret)
+  if (SUCCESS == ret){
     err = kNoErr;
-  else
+  }
+  else if(SOCKET_ERR == ret){
+    err = kConnectionErr;
+  }
+  else{
     err = kUnknownErr;
+  }
   
   return err;
 }

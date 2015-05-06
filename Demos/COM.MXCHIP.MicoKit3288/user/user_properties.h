@@ -66,7 +66,8 @@ typedef struct _user_status_t {
   
   // temperature && humidity
   int temperature;
-  int humidity;
+  int humidity_saved;   // save humidity value when get temperature, because we can not read DHT11 within 1 second.
+  int humidity;         // real humidity prop value.
   
   // uart
   char uart_rx_buf[MAX_USER_UART_BUF_SIZE];   // use a buffer to store data received

@@ -25,34 +25,23 @@
 
 #include "MICO.h"
 
-//---------------------------------- PIN DEFINES -------------------------------
-
-// data pin
+//--------------------------------  pin defines --------------------------------
 #define DHT11_DATA             MICO_GPIO_6  // PA11
 
-// Set GPIO Direction
-#define DHT11_IO_IN()          MicoGpioInitialize( (mico_gpio_t)DHT11_DATA, INPUT_PULL_UP );										 
-#define DHT11_IO_OUT()         MicoGpioInitialize( (mico_gpio_t)DHT11_DATA, OUTPUT_PUSH_PULL );
-	
-// Set Data output state
 #define DHT11_DATA_Clr()       MicoGpioOutputLow(DHT11_DATA) 
 #define DHT11_DATA_Set()       MicoGpioOutputHigh(DHT11_DATA)
 
-// get DATA input state
-#define	DHT11_DQ_IN            MicoGpioInputGet(DHT11_DATA)
+#define DHT11_DATA_IN          MicoGpioInputGet(DHT11_DATA)
 
-//-------------------------------- USER INTERFACES -----------------------------
+#define DHT11_DATA_BITS        40         // 5 BYTES DATA
+#define DHT11_DATA_RESPONSE_START_TIME  160        // 80+80us
+#define DHT11_DATA_RESPONSE_BIT0_TIME   78         // 50+28us
+#define DHT11_DATA_RESPONSE_BIT1_TIME  120         // 50+70us
 
-uint8_t DHT11_Init(void); //Init DHT11
-uint8_t DHT11_Read_Data(uint8_t *temperature,uint8_t *humidity); //Read DHT11 Value
-uint8_t DHT11_Read_Byte(void);//Read One Byte
-uint8_t DHT11_Read_Bit(void);//Read One Bit
-uint8_t DHT11_Check(void);//Chack DHT11
-void DHT11_Rst(void);//Reset DHT11  
+#define SYSTEM_CORE_CLOCK      168000000
 
-// delay func
-//void Delay_Init(uint8_t SYSCLK);
-void Delay_ms(uint16_t nms);
-void Delay_us(uint32_t nus);
+//------------------------------ user interfaces -------------------------------
+OSStatus DHT11_init(void);
+OSStatus DHT11_read(int8_t *temp, uint8_t *hum);
 
 #endif  // __DHT11_H_

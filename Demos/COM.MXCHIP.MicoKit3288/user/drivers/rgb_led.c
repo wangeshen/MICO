@@ -80,8 +80,8 @@ static void P9813_write_data(uint8_t blue, uint8_t green, uint8_t red)
 
 void rgb_led_init(void)
 {
-  MicoGpioInitialize( (mico_gpio_t)P9813_CIN, OUTPUT_OPEN_DRAIN_NO_PULL );
-  MicoGpioInitialize( (mico_gpio_t)P9813_DIN, OUTPUT_OPEN_DRAIN_NO_PULL );
+  MicoGpioInitialize( (mico_gpio_t)P9813_CIN, OUTPUT_PUSH_PULL );
+  MicoGpioInitialize( (mico_gpio_t)P9813_DIN, OUTPUT_PUSH_PULL );
 }
 
 void rgb_led_open(uint8_t red, uint8_t green, uint8_t blue)

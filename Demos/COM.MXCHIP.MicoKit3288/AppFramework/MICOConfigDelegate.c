@@ -47,8 +47,14 @@ void set_RF_LED_cloud_connected( mico_Context_t * const inContext )
   config_delegate_log_trace();
   (void)(inContext); 
   /*Led trigger*/
+  if(mico_is_timer_running(&_Led_RF_timer)){
+    mico_stop_timer(&_Led_RF_timer);
+  }
+  
+  mico_deinit_timer( &_Led_RF_timer );
   mico_init_timer(&_Led_RF_timer, RF_LED_TRIGGER_INTERVAL_AFTER_CLOUD_CONNECTED, _led_RF_Timeout_handler, NULL);
   mico_start_timer(&_Led_RF_timer);
+  
   return;
 }
  

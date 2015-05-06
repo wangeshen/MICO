@@ -53,10 +53,10 @@
  ******************************************************************************/
 #define STACK_SIZE_USER_MAIN_THREAD         0x800
 #define STACK_SIZE_NOTIFY_THREAD            0x800
-#define MICO_PROPERTIES_NOTIFY_INTERVAL_MS  500
+#define MICO_PROPERTIES_NOTIFY_INTERVAL_MS  1000
 
 /*User provided configurations*/
-#define CONFIGURATION_VERSION               0x00000005 // if default configuration is changed, update this number
+#define CONFIGURATION_VERSION               0x00000002 // if default configuration is changed, update this number
 
    
 #endif  // __USER_CONFIG_H_

@@ -28,7 +28,7 @@
 #include "drivers/light_sensor.h"
 #include "drivers/infrared_reflective.h"
 #include "drivers/dc_motor.h"
-#include "drivers/bme280_user.h"
+#include "drivers/DHT11.h"
 
 #define properties_user_log(M, ...) custom_log("DEV_PROPERTIES_USER", M, ##__VA_ARGS__)
 #define properties_user_log_trace() custom_log_trace("DEV_PROPERTIES_USER")
@@ -482,28 +482,24 @@ int dc_motor_switch_set(struct mico_prop_t *prop, void *arg, void *val, uint32_t
 // get function: get temperature value 
 int temperature_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
-  OSStatus err = kUnknownErr;
+  uint8_t ret = 0;
   
-  int32_t bme280_temp_data = 0;
- // uint32_t bme280_pressure_data = 0;
-//  uint32_t bme280_hum_data = 0;
+  uint8_t temp_data = 0;
+  uint8_t hum_data = 0;
+  
+  user_context_t *uct = (user_context_t*)arg;
   
   *val_len = int_len;
   
-   err = bme280_sensor_init();
-   if(kNoErr != err){
-     properties_user_log("ERROR: bme280_sensor_init err=%d. ", err);
-     return -1;
-   }
-  
-  //err = bme280_data_readout(&bme280_temp_data, &bme280_pressure_data, &bme280_hum_data);
-  err = bme280_read_temperature(&bme280_temp_data);
-  if(kNoErr != err){
-    properties_user_log("ERROR: bme280_read_temperature err=%d. ", err);
+  ret = DHT11_Read_Data(&temp_data, &hum_data);
+  if((0 != ret) || (0 == temp_data)){
+    properties_user_log("ERROR: DHT11_Read_Data error.");
     return -1;
   }
   else{
-     *(int*)val = bme280_temp_data/100;
+     *((int*)val) = (int)temp_data;
+     //NOTE: we also save humidity value here, because we could not read humidity after temperature within 1s.
+     uct->status.humidity_saved = hum_data;
   }
   
   return 0;  // get ok
@@ -530,7 +526,7 @@ int notify_check_temperature(struct mico_prop_t *prop, void *arg, void *val, uin
                         *((int*)prop->value), temperature_data);
     
     // return new value to update prop value && len
-    *((int*)val) = temperature_data;  
+    *((int*)val) = temperature_data;
     *val_len = temperature_data_len;
     ret = 1;  // value changed, need to send notify message
   }
@@ -544,23 +540,29 @@ int notify_check_temperature(struct mico_prop_t *prop, void *arg, void *val, uin
 // get function: get humidity value 
 int humidity_get(struct mico_prop_t *prop, void *arg, void *val, uint32_t *val_len)
 {
-  OSStatus err = kUnknownErr;
+//  uint8_t ret = 0;
+//  uint8_t temp_data = 0;
+//  uint8_t hum_data = 0;
   
- // int32_t bme280_temp_data = 0;
- // uint32_t bme280_pressure_data = 0;
-  uint32_t bme280_hum_data = 0;
+  user_context_t *uct = (user_context_t*)arg;
   
   *val_len = int_len;
   
-  //err = bme280_data_readout(&bme280_temp_data, &bme280_pressure_data, &bme280_hum_data);
-  err = bme280_read_humidity(&bme280_hum_data);
-  if(kNoErr != err){
-    properties_user_log("ERROR: bme280_read_humidity err=%d. ", err);
+ /* NOTE: here because DHT11 sample rate < 1HZ, so we could not read humidity after read tepmerature within 1s,
+    so we just use the humidity value saved when got temperatue, see function: temperature_get
+
+  ret = DHT11_Read_Data(&temp_data, &hum_data);
+  if(0 != ret){
+    properties_user_log("ERROR: DHT11_Read_Data error!");
     return -1;
   }
   else{
-     *(int*)val = (int)bme280_hum_data/1024;
+     *((int*)val) = (int)hum_data;
   }
+  
+  */
+  
+   *((int*)val) = uct->status.humidity_saved;
   
   return 0;  // get ok
 }
