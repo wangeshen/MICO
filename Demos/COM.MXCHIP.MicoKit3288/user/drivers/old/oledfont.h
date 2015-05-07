@@ -1,11 +1,29 @@
-#ifndef __OLEDFONT_H
-#define __OLEDFONT_H 	   
-//常用ASCII表
-//偏移量32
-//ASCII字符集
-//偏移量32
-//大小:12*6
-/************************************6*8的点阵************************************/
+/**
+******************************************************************************
+* @file    oled_font.h 
+* @author  Eshen Wang
+* @version V1.0.0
+* @date    17-Mar-2015
+* @brief     OLED font. 
+  operation
+******************************************************************************
+* @attention
+*
+* THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+* WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+* TIME. AS A RESULT, MXCHIP Inc. SHALL NOT BE HELD LIABLE FOR ANY
+* DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+* FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+* CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+*
+* <h2><center>&copy; COPYRIGHT 2014 MXCHIP Inc.</center></h2>
+******************************************************************************
+*/ 
+
+#ifndef __OLED_FONT_H_
+#define __OLED_FONT_H_	   
+
+
 const unsigned char F6x8[][6] =		
 {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// sp
@@ -101,6 +119,7 @@ const unsigned char F6x8[][6] =
 0x00, 0x44, 0x64, 0x54, 0x4C, 0x44,// z
 0x14, 0x14, 0x14, 0x14, 0x14, 0x14,// horiz lines
 };
+
 /****************************************8*16的点阵************************************/
 const unsigned char F8X16[]=	  
 {
@@ -200,6 +219,7 @@ const unsigned char F8X16[]=
   0x00,0x02,0x02,0x7C,0x80,0x00,0x00,0x00,0x00,0x40,0x40,0x3F,0x00,0x00,0x00,0x00,//} 93
   0x00,0x06,0x01,0x01,0x02,0x02,0x04,0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,//~ 94
 };
+
 char Hzk[][32]={
 
 {0x00,0x00,0xF0,0x10,0x10,0x10,0x10,0xFF,0x10,0x10,0x10,0x10,0xF0,0x00,0x00,0x00},
@@ -226,5 +246,3 @@ char Hzk[][32]={
 };
 
 #endif
-
-

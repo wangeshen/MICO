@@ -131,10 +131,10 @@ const platform_pin_mapping_t gpio_mapping[] =
   [MICO_GPIO_25] = {GPIOB, 0,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_26] = {GPIOB, 1,  RCC_AHB1Periph_GPIOB},
   [MICO_GPIO_27] = {GPIOA, 12, RCC_AHB1Periph_GPIOA},  // MICO_SYS_LED, MICO_RF_LED
-  [MICO_GPIO_28] = {GPIOA, 10,  RCC_AHB1Periph_GPIOA},
-  [MICO_GPIO_29] = {GPIOA,  5,  RCC_AHB1Periph_GPIOA},
+  [MICO_GPIO_28] = {GPIOA, 10, RCC_AHB1Periph_GPIOA},
+  [MICO_GPIO_29] = {GPIOA,  5, RCC_AHB1Periph_GPIOA},
   //[MICO_GPIO_30] = {GPIOB,  2, RCC_AHB1Periph_GPIOB},  // BOOT_SEL
-  [MICO_GPIO_31] = {GPIOA,  7,  RCC_AHB1Periph_GPIOA},
+  [MICO_GPIO_31] = {GPIOA,  7, RCC_AHB1Periph_GPIOA},
   //[MICO_GPIO_32] = {GPIOB, 12, RCC_AHB1Periph_GPIOB},  // MICO_SYS_LED, MICO_RF_LED
   //[MICO_GPIO_33] = {GPIOB, 13, RCC_AHB1Periph_GPIOB}   // MFG_SEL
 };
@@ -165,23 +165,23 @@ const platform_pwm_mapping_t pwm_mappings[] =
 
 const platform_spi_mapping_t spi_mapping[] =
 {
-  [MICO_SPI_1]  = NULL,
-  // [MICO_SPI_1]  =
-  // {
-  //   .spi_regs              = SPI1,
-  //   .gpio_af               = GPIO_AF_SPI1,
-  //   .peripheral_clock_reg  = RCC_APB2Periph_SPI1,
-  //   .peripheral_clock_func = RCC_APB2PeriphClockCmd,
-  //   .pin_mosi              = &gpio_mapping[MICO_GPIO_8],
-  //   .pin_miso              = &gpio_mapping[MICO_GPIO_7],
-  //   .pin_clock             = &gpio_mapping[MICO_GPIO_6],
-  //   .tx_dma_stream         = DMA2_Stream5,
-  //   .rx_dma_stream         = DMA2_Stream0,
-  //   .tx_dma_channel        = DMA_Channel_3,
-  //   .rx_dma_channel        = DMA_Channel_3,
-  //   .tx_dma_stream_number  = 5,
-  //   .rx_dma_stream_number  = 0
-  // }
+  //[MICO_SPI_1]  = NULL,
+   [MICO_SPI_1]  =
+   {
+     .spi_regs              = SPI5,
+     .gpio_af               = GPIO_AF_SPI5,
+     .peripheral_clock_reg  = RCC_APB2Periph_SPI5,
+     .peripheral_clock_func = RCC_APB2PeriphClockCmd,
+     .pin_mosi              = &gpio_mapping[MICO_GPIO_28],
+     .pin_miso              = &gpio_mapping[MICO_GPIO_27],
+     .pin_clock             = &gpio_mapping[MICO_GPIO_25],
+     .tx_dma_stream         = DMA2_Stream5,
+     .rx_dma_stream         = DMA2_Stream3,
+     .tx_dma_channel        = DMA_Channel_5,
+     .rx_dma_channel        = DMA_Channel_2,
+     .tx_dma_stream_number  = 5,
+     .rx_dma_stream_number  = 3
+   }
 };
 
 const platform_uart_mapping_t uart_mapping[] =

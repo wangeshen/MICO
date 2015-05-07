@@ -1,346 +1,389 @@
 /**
-******************************************************************************
-* @file    oled.c
-* @author  Eshen Wang
-* @version V1.0.0
-* @date    17-Mar-2015
-* @brief     OLED controller. 
-operation
-******************************************************************************
-* @attention
-*
-* THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-* WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-* TIME. AS A RESULT, MXCHIP Inc. SHALL NOT BE HELD LIABLE FOR ANY
-* DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-* FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-* CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-*
-* <h2><center>&copy; COPYRIGHT 2014 MXCHIP Inc.</center></h2>
-******************************************************************************
-*/ 
+  ******************************************************************************
+  * @file    Hal_OLED.c
+  * @author  jason
+	* @Tel     18938045680
+	* @QQ      570526723 
+  * @version V2.0
+  * @date    12/05/2014
+  * @brief   1，专业嵌入式智能设备方案定制
+						 2，专业开发工具供应商：http://wenjieteam.taobao.com/
+  ******************************************************************************
+  * @copy
+  *
+  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+  * TIME. AS A RESULT, jason SHALL NOT BE HELD LIABLE FOR ANY
+  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+  *
+  * <h2><center>&copy; COPYRIGHT 2014 jason</center></h2>
+  */ 
+#include "OLED.h"
 
-#include "oled.h"
-#include "stdlib.h"
-#include "oledfont.h"  	 
-//#include "delay.h"
-#include "MICO.h"
+uint8_t OLED_GRAM[128][8];
 
-//OLED的显存
-//存放格式如下.
-//[0]0 1 2 3 ... 127	
-//[1]0 1 2 3 ... 127	
-//[2]0 1 2 3 ... 127	
-//[3]0 1 2 3 ... 127	
-//[4]0 1 2 3 ... 127	
-//[5]0 1 2 3 ... 127	
-//[6]0 1 2 3 ... 127	
-//[7]0 1 2 3 ... 127 			   
-
-#if OLED_MODE==1
-//向SSD1106写入一个字节。
-//dat:要写入的数据/命令
-//cmd:数据/命令标志 0,表示命令;1,表示数据;
-void OLED_WR_Byte(u8 dat,u8 cmd)
+/*********************************************************************
+  * @brief  Initializes the OLED GPIOx peripheral.
+  * @param  None
+  * @retval Success : ReceiveData
+	*         Failure : 0    
+	* @date   20141204
+***********************************************************************/
+uint8_t SPIx_WriteByte(uint8_t Data)
 {
-  DATAOUT(dat);	    
-  if(cmd)
-    OLED_DC_Set();
-  else 
-    OLED_DC_Clr();		   
-  OLED_CS_Clr();
-  OLED_WR_Clr();	 
-  OLED_WR_Set();
-  OLED_CS_Set();	  
-  OLED_DC_Set();	 
-} 	    	    
-#else
-//向SSD1106写入一个字节。
-//dat:要写入的数据/命令
-//cmd:数据/命令标志 0,表示命令;1,表示数据;
-void OLED_WR_Byte(u8 dat,u8 cmd)
-{	
-  u8 i;			  
-  if(cmd)
-    OLED_DC_Set();
-  else 
-    OLED_DC_Clr();		  
-  OLED_CS_Clr();
-  for(i=0;i<8;i++)
-  {			  
-    OLED_SCLK_Clr();
-    if(dat&0x80)
-      OLED_SDIN_Set();
-    else 
-      OLED_SDIN_Clr();
-    OLED_SCLK_Set();
-    dat<<=1;   
-  }				 		  
-  OLED_CS_Set();
-  OLED_DC_Set();   	  
-} 
-#endif
-void OLED_Set_Pos(unsigned char x, unsigned char y) 
-{ 
-  OLED_WR_Byte(0xb0+y,OLED_CMD);
-  OLED_WR_Byte(((x&0xf0)>>4)|0x10,OLED_CMD);
-  OLED_WR_Byte((x&0x0f)|0x01,OLED_CMD); 
-}   	  
-//开启OLED显示    
-void OLED_Display_On(void)
-{
-  OLED_WR_Byte(0X8D,OLED_CMD);  //SET DCDC命令
-  OLED_WR_Byte(0X14,OLED_CMD);  //DCDC ON
-  OLED_WR_Byte(0XAF,OLED_CMD);  //DISPLAY ON
+	uint8_t Retry = 0;
+	while(SPI_I2S_GetFlagStatus(OLED_SPIx, SPI_I2S_FLAG_TXE) == RESET) 
+	{
+		if(++ Retry > 200)
+			return 0;
+	}			  
+	SPI_I2S_SendData(OLED_SPIx, Data); 
+	Retry=0;
+
+	while(SPI_I2S_GetFlagStatus(OLED_SPIx, SPI_I2S_FLAG_RXNE) == RESET) 
+	{
+		if(++ Retry > 200)
+			return 0;
+	}	  						    
+	return SPI_I2S_ReceiveData(OLED_SPIx); 
 }
-//关闭OLED显示     
-void OLED_Display_Off(void)
+/*********************************************************************
+  * @brief  Initializes the OLED GPIOx peripheral.
+	* @param  uint8_t Data :  Data
+	*         uint8_t Cmd  :  Command
+  * @retval None   
+	* @date   20141204
+***********************************************************************/
+void OLED_WriteByte(uint8_t Data, uint8_t Cmd)
 {
-  OLED_WR_Byte(0X8D,OLED_CMD);  //SET DCDC命令
-  OLED_WR_Byte(0X10,OLED_CMD);  //DCDC OFF
-  OLED_WR_Byte(0XAE,OLED_CMD);  //DISPLAY OFF
-}		   			 
-//清屏函数,清完屏,整个屏幕是黑色的!和没点亮一样!!!	  
-void OLED_Clear(void)  
-{  
-  u8 i,n;		    
-  for(i=0;i<8;i++)  
-  {  
-    OLED_WR_Byte (0xb0+i,OLED_CMD);    //设置页地址（0~7）
-    OLED_WR_Byte (0x00,OLED_CMD);      //设置显示位置—列低地址
-    OLED_WR_Byte (0x10,OLED_CMD);      //设置显示位置—列高地址   
-    for(n=0;n<128;n++)OLED_WR_Byte(0,OLED_DATA); 
-  } //更新显示
+	OLED_CS_RESET();
+	if(Cmd)
+	{
+		OLED_DC_SET();
+	}
+	else
+	{
+		OLED_DC_RESET();
+	}
+		
+	SPIx_WriteByte(Data);
+	OLED_DC_SET();
+	OLED_CS_SET();
+}
+
+/*********************************************************************
+  * @brief  Initializes the OLED GPIOx peripheral.
+  * @param  None
+  * @retval None
+	* @date   20141204
+***********************************************************************/
+void OLED_GPIO_Init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	
+	
+	RCC_APB2PeriphClockCmd(OLED_SPIx_MISO_CLK | OLED_SPIx_SCK_CLK | OLED_SPIx_MOSI_CLK, ENABLE); 	
+ 
+/**************Enables the High Speed APB2 (CS DC RES) peripheral clock********/	
+	RCC_APB2PeriphClockCmd(OLED_CS_CLK | OLED_DC_CLK | OLED_RES_CLK, ENABLE); 
+	 
+	GPIO_InitStructure.GPIO_Pin = OLED_CS_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT; 
+        GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+        GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(OLED_CS_PORT, &GPIO_InitStructure);
+	
+	OLED_CS_SET();
+	GPIO_InitStructure.GPIO_Pin = OLED_DC_PIN;
+	GPIO_Init(OLED_DC_PORT, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = OLED_RES_PIN;
+	GPIO_Init(OLED_RES_PORT, &GPIO_InitStructure);
+	
+	OLED_DC_RESET();
+	OLED_RES_RESET();
 }
 
 
-//在指定位置显示一个字符,包括部分字符
-//x:0~127
-//y:0~63
-//mode:0,反白显示;1,正常显示				 
-//size:选择字体 16/12 
-void OLED_ShowChar(u8 x,u8 y,u8 chr)
-{      	
-  unsigned char c=0,i=0;	
-  c=chr-' ';//得到偏移后的值			
-  if(x>Max_Column-1){x=0;y=y+2;}
-  if(SIZE ==16)
-  {
-    OLED_Set_Pos(x,y);	
-    for(i=0;i<8;i++)
-      OLED_WR_Byte(F8X16[c*16+i],OLED_DATA);
-    OLED_Set_Pos(x,y+1);
-    for(i=0;i<8;i++)
-      OLED_WR_Byte(F8X16[c*16+i+8],OLED_DATA);
-  }
-  else {	
-    OLED_Set_Pos(x,y+1);
-    for(i=0;i<6;i++)
-      OLED_WR_Byte(F6x8[c][i],OLED_DATA);
-    
-  }
-}
-//m^n函数
-u32 oled_pow(u8 m,u8 n)
+/*********************************************************************
+  * @brief  Initializes the OLED SPI peripheral.
+  * @param  None
+  * @retval None
+	* @date   20141204
+***********************************************************************/
+
+void OLED_SPI_Init(void)
 {
-  u32 result=1;	 
-  while(n--)result*=m;    
-  return result;
-}				  
-//显示2个数字
-//x,y :起点坐标	 
-//len :数字的位数
-//size:字体大小
-//mode:模式	0,填充模式;1,叠加模式
-//num:数值(0~4294967295);	 		  
-void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size)
-{         	
-  u8 t,temp;
-  u8 enshow=0;						   
-  for(t=0;t<len;t++)
-  {
-    temp=(num/oled_pow(10,len-t-1))%10;
-    if(enshow==0&&t<(len-1))
-    {
-      if(temp==0)
-      {
-        OLED_ShowChar(x+(size/2)*t,y,' ');
-        continue;
-      }else enshow=1; 
-      
-    }
-    OLED_ShowChar(x+(size/2)*t,y,temp+'0'); 
-  }
-} 
-//显示一个字符号串
-void OLED_ShowString(u8 x,u8 y,u8 *chr)
-{
-  unsigned char j=0;
-  while (chr[j]!='\0')
-  {		OLED_ShowChar(x,y,chr[j]);
-  x+=8;
-  if(x>120){x=0;y+=2;}
-  j++;
-  }
+	SPI_InitTypeDef  SPI_InitStructure;
+	GPIO_InitTypeDef GPIO_InitStructure;
+	
+	OLED_SPIx_CLK_Cmd(OLED_SPIx_CLK, ENABLE); 
+	GPIO_InitStructure.GPIO_Pin = OLED_SPIx_MOSI_PIN;
+	//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; 
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT; 
+        GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+        GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+        
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(OLED_SPIx_MOSI_PORT, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin = OLED_SPIx_MISO_PIN;
+	GPIO_Init(OLED_SPIx_MISO_PORT, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = OLED_SPIx_SCK_PIN;
+	GPIO_Init(OLED_SPIx_SCK_PORT, &GPIO_InitStructure);
+	
+	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex; 
+	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;		
+	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;		
+	SPI_InitStructure.SPI_CPOL = SPI_CPOL_High;		
+	SPI_InitStructure.SPI_CPHA = SPI_CPHA_2Edge;	
+	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;		
+	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;		
+	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;	
+	SPI_InitStructure.SPI_CRCPolynomial = 7;	
+	SPI_Init(OLED_SPIx, &SPI_InitStructure); 
+	
+	SPI_Cmd(OLED_SPIx, ENABLE); 
+	
 }
-//显示汉字
-void OLED_ShowCHinese(u8 x,u8 y,u8 no)
-{      			    
-  u8 t,adder=0;
-  OLED_Set_Pos(x,y);	
-  for(t=0;t<16;t++)
-  {
-    OLED_WR_Byte(Hzk[2*no][t],OLED_DATA);
-    adder+=1;
-  }	
-  OLED_Set_Pos(x,y+1);	
-  for(t=0;t<16;t++)
-  {	
-    OLED_WR_Byte(Hzk[2*no+1][t],OLED_DATA);
-    adder+=1;
-  }					
-}
-/***********功能描述：显示显示BMP图片128×64起始点坐标(x,y),x的范围0～127，y为页的范围0～7*****************/
-void OLED_DrawBMP(unsigned char x0, unsigned char y0,unsigned char x1, unsigned char y1,unsigned char BMP[])
-{ 	
-  unsigned int j=0;
-  unsigned char x,y;
-  
-  if(y1%8==0) y=y1/8;      
-  else y=y1/8+1;
-  for(y=y0;y<y1;y++)
-  {
-    OLED_Set_Pos(x0,y);
-    for(x=x0;x<x1;x++)
-    {      
-      OLED_WR_Byte(BMP[j++],OLED_DATA);	    	
-    }
-  }
-} 
 
 
-//初始化SSD1306					    
+/*********************************************************************
+  * @brief  Initializes the OLED.
+  * @param  None
+  * @retval None
+	* @date   20141204
+***********************************************************************/
 void OLED_Init(void)
-{ 	
-  
-  /*	 
-  GPIO_InitTypeDef  GPIO_InitStructure;
-  
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOG, ENABLE);	 //使能PC,D,G端口时钟
-  
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_3|GPIO_Pin_8;	 //PD3,PD6推挽输出  
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;//速度50MHz
-  GPIO_Init(GPIOD, &GPIO_InitStructure);	  //初始化GPIOD3,6
-  GPIO_SetBits(GPIOD,GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_3|GPIO_Pin_8);	//PD3,PD6 输出高
-  
-#if OLED_MODE==1
-  
-  GPIO_InitStructure.GPIO_Pin =0xFF; //PC0~7 OUT推挽输出
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
-  GPIO_SetBits(GPIOC,0xFF); //PC0~7输出高
-  
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15;				 //PG13,14,15 OUT推挽输出
-  GPIO_Init(GPIOG, &GPIO_InitStructure);
-  GPIO_SetBits(GPIOG,GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15);						 //PG13,14,15 OUT  输出高
-  
-#else
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1;				 //PC0,1 OUT推挽输出
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
-  GPIO_SetBits(GPIOC,GPIO_Pin_0|GPIO_Pin_1);						 //PC0,1 OUT  输出高
-  
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;				 //PG15 OUT推挽输出	  RST
-  GPIO_Init(GPIOG, &GPIO_InitStructure);
-  GPIO_SetBits(GPIOG,GPIO_Pin_15);						 //PG15 OUT  输出高
-  
-  
-#endif
-  */
-  MicoGpioInitialize( (mico_gpio_t)USER_SPI_SCK, OUTPUT_PUSH_PULL );
-  MicoGpioInitialize( (mico_gpio_t)USER_SPI_DIN, OUTPUT_PUSH_PULL );
-  MicoGpioInitialize( (mico_gpio_t)USER_SPI_DC, OUTPUT_PUSH_PULL );
-  MicoGpioInitialize( (mico_gpio_t)USER_SPI_CS, OUTPUT_PUSH_PULL );
-  
-  
-  OLED_RST_Set();
-  delay_ms(100);
-  OLED_RST_Clr();
-  delay_ms(100);
-  OLED_RST_Set(); 
-  
-  OLED_WR_Byte(0xAE,OLED_CMD);//--turn off oled panel
-  OLED_WR_Byte(0x00,OLED_CMD);//---set low column address
-  OLED_WR_Byte(0x10,OLED_CMD);//---set high column address
-  OLED_WR_Byte(0x40,OLED_CMD);//--set start line address  Set Mapping RAM Display Start Line (0x00~0x3F)
-  OLED_WR_Byte(0x81,OLED_CMD);//--set contrast control register
-  OLED_WR_Byte(0xCF,OLED_CMD); // Set SEG Output Current Brightness
-  OLED_WR_Byte(0xA1,OLED_CMD);//--Set SEG/Column Mapping     0xa0左右反置 0xa1正常
-  OLED_WR_Byte(0xC8,OLED_CMD);//Set COM/Row Scan Direction   0xc0上下反置 0xc8正常
-  OLED_WR_Byte(0xA6,OLED_CMD);//--set normal display
-  OLED_WR_Byte(0xA8,OLED_CMD);//--set multiplex ratio(1 to 64)
-  OLED_WR_Byte(0x3f,OLED_CMD);//--1/64 duty
-  OLED_WR_Byte(0xD3,OLED_CMD);//-set display offset	Shift Mapping RAM Counter (0x00~0x3F)
-  OLED_WR_Byte(0x00,OLED_CMD);//-not offset
-  OLED_WR_Byte(0xd5,OLED_CMD);//--set display clock divide ratio/oscillator frequency
-  OLED_WR_Byte(0x80,OLED_CMD);//--set divide ratio, Set Clock as 100 Frames/Sec
-  OLED_WR_Byte(0xD9,OLED_CMD);//--set pre-charge period
-  OLED_WR_Byte(0xF1,OLED_CMD);//Set Pre-Charge as 15 Clocks & Discharge as 1 Clock
-  OLED_WR_Byte(0xDA,OLED_CMD);//--set com pins hardware configuration
-  OLED_WR_Byte(0x12,OLED_CMD);
-  OLED_WR_Byte(0xDB,OLED_CMD);//--set vcomh
-  OLED_WR_Byte(0x40,OLED_CMD);//Set VCOM Deselect Level
-  OLED_WR_Byte(0x20,OLED_CMD);//-Set Page Addressing Mode (0x00/0x01/0x02)
-  OLED_WR_Byte(0x02,OLED_CMD);//
-  OLED_WR_Byte(0x8D,OLED_CMD);//--set Charge Pump enable/disable
-  OLED_WR_Byte(0x14,OLED_CMD);//--set(0x10) disable
-  OLED_WR_Byte(0xA4,OLED_CMD);// Disable Entire Display On (0xa4/0xa5)
-  OLED_WR_Byte(0xA6,OLED_CMD);// Disable Inverse Display On (0xa6/a7) 
-  OLED_WR_Byte(0xAF,OLED_CMD);//--turn on oled panel
-  
-  OLED_WR_Byte(0xAF,OLED_CMD); /*display ON*/ 
-  OLED_Clear();
-  OLED_Set_Pos(0,0); 	
-}  
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-void delay_init()	 
 {
+	OLED_GPIO_Init();
+	OLED_SPI_Init();
+	
+	OLED_RES_SET();
+
+	OLED_WriteByte(0xAE, OLED_CMD);//--turn off oled panel
+	OLED_WriteByte(0x00, OLED_CMD);//---set low column address
+	OLED_WriteByte(0x10, OLED_CMD);//---set high column address
+	OLED_WriteByte(0x40, OLED_CMD);//--set start line address  Set Mapping RAM Display Start Line (0x00~0x3F)
+	OLED_WriteByte(0x81, OLED_CMD);//--set contrast control register
+	OLED_WriteByte(0xCF, OLED_CMD); // Set SEG Output Current Brightness
+	OLED_WriteByte(0xA1, OLED_CMD);//--Set SEG/Column Mapping     
+	OLED_WriteByte(0xC0, OLED_CMD);//Set COM/Row Scan Direction   
+	OLED_WriteByte(0xA6, OLED_CMD);//--set normal display
+	OLED_WriteByte(0xA8, OLED_CMD);//--set multiplex ratio(1 to 64)
+	OLED_WriteByte(0x3f, OLED_CMD);//--1/64 duty
+	OLED_WriteByte(0xD3, OLED_CMD);//-set display offset	Shift Mapping RAM Counter (0x00~0x3F)
+	OLED_WriteByte(0x00, OLED_CMD);//-not offset
+	OLED_WriteByte(0xd5, OLED_CMD);//--set display clock divide ratio/oscillator frequency
+	OLED_WriteByte(0x80, OLED_CMD);//--set divide ratio, Set Clock as 100 Frames/Sec
+	OLED_WriteByte(0xD9, OLED_CMD);//--set pre-charge period
+	OLED_WriteByte(0xF1, OLED_CMD);//Set Pre-Charge as 15 Clocks & Discharge as 1 Clock
+	OLED_WriteByte(0xDA, OLED_CMD);//--set com pins hardware configuration
+	OLED_WriteByte(0x12, OLED_CMD);
+	OLED_WriteByte(0xDB, OLED_CMD);//--set vcomh
+	OLED_WriteByte(0x40, OLED_CMD);//Set VCOM Deselect Level
+	OLED_WriteByte(0x20, OLED_CMD);//-Set Page Addressing Mode (0x00/0x01/0x02)
+	OLED_WriteByte(0x02, OLED_CMD);//
+	OLED_WriteByte(0x8D, OLED_CMD);//--set Charge Pump enable/disable
+	OLED_WriteByte(0x14, OLED_CMD);//--set(0x10) disable
+	OLED_WriteByte(0xA4, OLED_CMD);// Disable Entire Display On (0xa4/0xa5)
+	OLED_WriteByte(0xA6, OLED_CMD);// Disable Inverse Display On (0xa6/a7) 
+	OLED_WriteByte(0xAF, OLED_CMD);//--turn on oled panel
+	LCD_Clear(0x00);
+
 }
 
-void delay_ms(u16 nms)
+
+
+/********************************************************************
+  * @brief  Enables the Display         
+  * @param  None         
+  * @retval  None
+	* @date   20141204
+********************************************************************/ 
+void OLED_DisplayOn(void)
 {
-  mico_thread_msleep(nms);
+	OLED_WriteByte(0X8D, OLED_CMD);  
+	OLED_WriteByte(0X14, OLED_CMD);  
+	OLED_WriteByte(0XAF, OLED_CMD);  
 }
 
-void delay_us(u32 nus)
-{}
+/********************************************************************
+  * @brief  Disables the Display        
+  * @param  None        
+  * @retval  None
+	* @date   20141204
+********************************************************************/
+void OLED_DisplayOff(void)
+{
+	OLED_WriteByte(0X8D, OLED_CMD);  
+	OLED_WriteByte(0X10, OLED_CMD);  
+	OLED_WriteByte(0XAE, OLED_CMD);  
+}
+
+/*********************************************************************
+  * @brief  OLED Refresh Gram
+  * @param  None
+  * @retval None
+	* @date   20141204
+***********************************************************************/
+void OLED_Refresh_Gram(void)
+{
+	uint8_t i, n;
+	for(i = 0; i < 8; i ++)  
+	{  
+		OLED_WriteByte(0xb0 + i, OLED_CMD);  
+		OLED_WriteByte(0x00, OLED_CMD);      
+		OLED_WriteByte(0x10, OLED_CMD);         
+		for(n = 0; n < 128; n ++)
+		{
+			OLED_WriteByte(OLED_GRAM[n][i], OLED_DAT); 
+		}
+	}   
+}
+
+/*********************************************************************
+  * @brief  OLED Clear Screen.
+  * @param  None
+  * @retval None
+	* @date   20141204
+***********************************************************************/
+void LCD_Clear(uint8_t Color)
+{
+	uint8_t i, n;
+	
+	for(i = 0; i < 8; i ++)
+	{
+		for(n = 0; n < 128; n ++)
+		{
+			OLED_GRAM[n][i] = Color;
+		}
+	}
+	OLED_Refresh_Gram();
+}
+/*********************************************************************
+  * @brief  OLED Draw Point.
+  * @param  X:
+  *   This parameter can be one of the following values:
+  *     @arg X: where x can be 0..127
+  * @param  Y: 
+  *   This parameter can be one of the following values:
+	* @param  uint8_t Fill : 
+  *     @arg where Fill can be 0 or 1
+  * @retval None
+	* @date   20141204
+***********************************************************************/
+void OLED_DrawPoint(uint8_t Xpos,uint8_t Ypos,uint8_t Fill)
+{
+	uint8_t Pos, Bx, Temp = 0;
+	
+	if(Xpos > 127 || Ypos > 63)
+		return;
+	Pos = 7 - Ypos / 8;
+	Bx = Ypos % 8;
+	Temp = 1 << (7 - Bx);
+	if(Fill)
+	{
+		OLED_GRAM[Xpos][Pos] |= Temp;
+	}
+	else 
+	{
+		OLED_GRAM[Xpos][Pos] &= ~Temp;	 
+	}
+//	OLED_Refresh_Gram();
+}
 
 
+/**********************************************************************
+  * @brief  Displays one character   
+  *         
+  * @param  X:
+  *   This parameter can be one of the following values:
+  *     @arg X: where x can be 0..127
+  * @param  Y: 
+  *   This parameter can be one of the following values:
+  *     @arg Y: where y can be 0..63
+  * @param  Chr: character ascii code,must be between 0x20 and 0x7e.
+  * @param  Size: specifies the size of the font(12 or 16)
+  * @param Mode: whether reverses the character
+  *   This paramter can be one of following value;
+  *   @arg Mode: where Mode can be 0 or 1
+  * @retval None
+  * @date   20141204
+**********************************************************************/
 
+void OLED_ShowChar(uint8_t X, uint8_t Y, uint8_t Chr, uint8_t Size, uint8_t Mode)
+{      	
+	uint8_t Temp, t, t1;
+	uint8_t y0 = Y;
+	
+	Chr = Chr - ' ';				   
+    for(t = 0; t < Size; t ++)
+    {   
+			if(Size == 12)
+			{
+				Temp = OLED_Asc2_1206[Chr][t];  
+			}
+			else 
+			{
+				Temp = OLED_Asc2_1608[Chr][t];
+			}
+			for(t1 = 0; t1 < 8; t1 ++)
+			{
+				if(Temp & 0x80)
+					OLED_DrawPoint(X, Y, Mode);
+				else 
+					OLED_DrawPoint(X, Y, !Mode);
+					Temp <<= 1;
+					Y ++;
+					if((Y - y0) == Size)
+					{
+						Y = y0;
+						X ++;
+						break;
+					}
+			}  	 
+    } 
+		
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/**********************************************************************
+  * @brief  Displays character string  
+  *         
+  * @param  X:
+  *   This parameter can be one of the following values:
+  *     @arg X: where x can be 0..127
+  * @param  Y: 
+  *   This parameter can be one of the following values:
+  *     @arg Y: where y can be 0..63
+  * @param  *Str: .character string
+  * @retval None
+  * @date   20141204
+**********************************************************************/
+void OLED_ShowString(uint8_t X, uint8_t Y, const uint8_t *Str)
+{
+#define MAX_CHAR_POSX 122
+#define MAX_CHAR_POSY 58
+	
+    while(*Str != '\0')
+    {       
+        if(X > MAX_CHAR_POSX)
+		{
+			X = 0;
+			Y += 16;
+		}
+        if(Y > MAX_CHAR_POSY)
+		{
+			Y = X = 0;
+			LCD_Clear(0x00);
+		}
+        OLED_ShowChar(X, Y, *Str, 16, 1);	 
+        X += 8;
+        Str ++;
+    } 
+		OLED_Refresh_Gram();
+}

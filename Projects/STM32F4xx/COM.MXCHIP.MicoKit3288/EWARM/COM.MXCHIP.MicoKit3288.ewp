@@ -1973,6 +1973,12 @@
       <group>
         <name>drivers</name>
         <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\AsciiLib.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\AsciiLib.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\bme280.c</name>
         </file>
         <file>
@@ -2021,13 +2027,10 @@
           <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\light_sensor.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\oled.c</name>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\OLED.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\oled.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\oledfont.h</name>
+          <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\OLED.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\..\Demos\COM.MXCHIP.MicoKit3288\user\drivers\rgb_led.c</name>
